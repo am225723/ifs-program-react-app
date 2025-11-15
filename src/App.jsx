@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import Curriculum from './pages/Curriculum';
 import CheatSheet from './pages/CheatSheet';
 import Wounds from './pages/Wounds';
 import Qualities from './pages/Qualities';
@@ -24,6 +25,7 @@ function App() {
           <Route path="/exercises" element={<Exercises />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/resources" element={<Resources />} />
+          <Route path="/curriculum" element={<Curriculum />} />
           <Route path="/journal" element={<Journal />} />
         </Routes>
       </div>
