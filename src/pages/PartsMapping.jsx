@@ -1,435 +1,840 @@
-import { useState } from 'react';
-import { partsCategories, sixFs, unburdeningSteps } from '../data/ifsData';
-import { Map, Plus, Trash2, Edit2, Save, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { 
+  Brain, 
+  Heart, 
+  Shield, 
+  AlertTriangle, 
+  Zap, 
+  Cloud, 
+  Star, 
+  Plus, 
+  X, 
+  Edit3, 
+  Save, 
+  ArrowRight,
+  MessageCircle,
+  User,
+  Lightbulb,
+  Sparkles,
+  Eye,
+  Hand
+} from 'lucide-react';
 
 const PartsMapping = () => {
-  const [activeSection, setActiveSection] = useState('overview');
-  const [myParts, setMyParts] = useState([]);
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [newPart, setNewPart] = useState({
-    name: '',
-    category: 'Managers',
-    description: '',
-    triggers: '',
-    intention: ''
-  });
+  const [parts, setParts] = useState([]);
+  const [selectedPart, setSelectedPart] = useState(null);
+  const [showAddPart, setShowAddPart] = useState(false);
+  const [editingPart, setEditingPart] = useState(null);
+  const [step, setStep] = useState(1);
+  const [currentPartType, setCurrentPartType] = useState('');
+  const [savedParts, setSavedParts] = useState([]);
 
-  const handleAddPart = () => {
-    if (newPart.name.trim()) {
-      setMyParts([...myParts, { ...newPart, id: Date.now() }]);
-      setNewPart({ name: '', category: 'Managers', description: '', triggers: '', intention: '' });
-      setIsAdding(false);
+  const partTypes = [
+    {
+      type: 'manager',
+      title: 'Manager Parts',
+      description: 'Parts that try to keep you safe and in control',
+      color: 'from-blue-400 to-blue-600',
+      icon: Shield,
+      examples: ['Perfectionist', 'Planner', 'Caretaker', 'Achiever', 'Critic'],
+      questions: [
+        'What parts try to keep you organized and on track?',
+        'Which parts are focused on preventing problems?',
+        'What parts help you maintain control in situations?'
+      ]
+    },
+    {
+      type: 'firefighter',
+      title: 'Firefighter Parts',
+      description: 'Parts that react when emotions become overwhelming',
+      color: 'from-red-400 to-red-600',
+      icon: AlertTriangle,
+      examples: ['Impulsive', 'Angry', 'Distractor', 'Numb', 'Rebellious'],
+      questions: [
+        'What parts emerge when you\'re feeling overwhelmed?',
+        'Which parts try to distract you from painful feelings?',
+        'What parts act quickly without thinking?'
+      ]
+    },
+    {
+      type: 'exile',
+      title: 'Exile Parts',
+      description: 'Young parts holding pain, fear, or shame',
+      color: 'from-purple-400 to-purple-600',
+      icon: Heart,
+      examples: ['Abandoned Child', 'Scared Child', 'Ashamed Child', 'Lonely Child', 'Hurt Child'],
+      questions: [
+        'What young parts feel vulnerable or scared?',
+        'Which parts hold memories of being hurt or abandoned?',
+        'What parts feel they need to be hidden away?'
+      ]
+    }
+  ];
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem('mappedParts') || '[]');
+    setSavedParts(saved);
+  }, []);
+
+  const handleAddPart = (partData) => {
+    const newPart = {
+      id: Date.now(),
+      type: currentPartType,
+      ...partData,
+      createdAt: new Date().toISOString()
+    };
+    
+    setParts([...parts, newPart]);
+    setShowAddPart(false);
+    setCurrentPartType('');
+  };
+
+  const handleSavePart = (updatedPart) => {
+    const updatedParts = parts.map(p => 
+      p.id === updatedPart.id ? updatedPart : p
+    );
+    setParts(updatedParts);
+    setEditingPart(null);
+  };
+
+  const handleDeletePart = (partId) => {
+    setParts(parts.filter(p => p.id !== partId));
+    if (selectedPart?.id === partId) {
+      setSelectedPart(null);
     }
   };
 
-  const handleDeletePart = (id) => {
-    setMyParts(myParts.filter(part => part.id !== id));
+  const handleSaveToStorage = () => {
+    localStorage.setItem('mappedParts', JSON.stringify(parts));
+    setSavedParts(parts);
+    alert('Parts map saved successfully!');
   };
 
-  const handleEditPart = (part) => {
-    setEditingId(part.id);
-    setNewPart(part);
+  const getPartsByType = (type) => {
+    return parts.filter(part => part.type === type);
   };
 
-  const handleSaveEdit = () => {
-    setMyParts(myParts.map(part => part.id === editingId ? { ...newPart, id: editingId } : part));
-    setNewPart({ name: '', category: 'Managers', description: '', triggers: '', intention: '' });
-    setEditingId(null);
+  const getTotalParts = () => {
+    return savedParts.length + parts.length;
   };
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      'Self': 'from-yellow-200 to-yellow-400',
-      'Managers': 'from-blue-200 to-blue-400',
-      'Firefighters': 'from-red-200 to-red-400',
-      'Exiles': 'from-purple-200 to-purple-400'
-    };
-    return colors[category] || 'from-gray-200 to-gray-400';
-  };
+  if (step === 1) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="w-24 h-24 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Brain className="w-12 h-12 text-white" />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Parts Mapping Journey
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Discover and understand your internal family of parts through this interactive mapping experience
+            </p>
+          </div>
 
-  return (
-    <div className="min-h-screen py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-xl">
-              <Map className="w-12 h-12 text-white" />
+          {/* Introduction */}
+          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">What is Parts Mapping?</h2>
+            <div className="prose prose-lg text-gray-600">
+              <p className="mb-4">
+                Parts Mapping is the process of identifying, understanding, and getting to know the different parts 
+                of your internal system. In Internal Family Systems (IFS), we recognize that your psyche is made up 
+                of multiple parts, each with its own feelings, thoughts, and roles.
+              </p>
+              <p className="mb-4">
+                Just like a family has different members with different personalities and roles, your inner world 
+                has various parts that work to protect you, help you function, and carry your experiences. 
+                The goal isn't to eliminate these parts, but to understand and appreciate them.
+              </p>
+              <p>
+                Through this guided process, you'll learn to identify your parts, understand their intentions, 
+                and develop a compassionate relationship with each one.
+              </p>
             </div>
           </div>
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Parts Mapping
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Identify and understand your internal parts through interactive mapping and the 6 F's approach
-          </p>
-        </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {['overview', '6fs', 'unburdening', 'myparts'].map((section) => (
-            <button
-              key={section}
-              onClick={() => setActiveSection(section)}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
-                activeSection === section
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
-                  : 'bg-white text-gray-700 hover:bg-purple-50 shadow-md'
-              }`}
-            >
-              {section === 'overview' && 'Parts Overview'}
-              {section === '6fs' && '6 F\'s Approach'}
-              {section === 'unburdening' && 'Unburdening Process'}
-              {section === 'myparts' && 'My Parts Map'}
-            </button>
-          ))}
-        </div>
+          {/* Part Types Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {partTypes.map((partType, index) => {
+              const Icon = partType.icon;
+              return (
+                <div
+                  key={partType.type}
+                  className={`bg-gradient-to-br ${partType.color} rounded-2xl p-6 text-white transform hover:scale-105 transition-all duration-300 cursor-pointer`}
+                >
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center mb-4">
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{partType.title}</h3>
+                  <p className="text-white/90 mb-4">{partType.description}</p>
+                  <div className="space-y-2">
+                    <div className="text-sm font-semibold text-white/80">Examples:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {partType.examples.slice(0, 3).map((example, i) => (
+                        <span key={i} className="text-xs bg-white/20 backdrop-blur px-2 py-1 rounded-full">
+                          {example}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-        {/* Overview Section */}
-        {activeSection === 'overview' && (
-          <div className="space-y-8">
-            <div className="card bg-gradient-to-br from-purple-50 to-pink-50">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Understanding Parts Mapping</h2>
-              <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                Parts mapping is a gentle way to notice and work with different aspects of your inner world. 
-                Each step helps you connect with your parts in a safe, compassionate, and structured way.
-              </p>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                The process involves identifying your parts, understanding their roles, and building a 
-                relationship with them from your Self-energy.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {partsCategories.map((category, index) => (
-                <div key={index} className={`card ${category.color}`}>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-3">{category.name}</h3>
-                  <p className="text-gray-700 text-lg">{category.description}</p>
+          {/* Stats */}
+          {getTotalParts() > 0 && (
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Your Previous Mapping</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">{getTotalParts()}</div>
+                  <div className="text-sm text-gray-600">Total Parts</div>
                 </div>
-              ))}
-            </div>
-
-            <div className="card bg-gradient-to-br from-blue-600 to-purple-600 text-white">
-              <h3 className="text-2xl font-bold mb-4">The Parts Mapping Process</h3>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-white bg-opacity-30 backdrop-blur-lg rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    1
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {getPartsByType('manager').length}
                   </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Identify (Find)</h4>
-                    <p className="text-blue-100">
-                      The first step is to notice and name the part that is showing up. Recognize how it makes 
-                      itself known in your inner world—through thoughts, feelings, sensations, or patterns of behavior.
-                    </p>
-                  </div>
+                  <div className="text-sm text-gray-600">Managers</div>
                 </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-white bg-opacity-30 backdrop-blur-lg rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    2
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600">
+                    {getPartsByType('firefighter').length}
                   </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Explore (Focus)</h4>
-                    <p className="text-blue-100">
-                      Once a part is identified, gently turn your attention toward it. Allow space for it to be 
-                      seen without judgment, and begin forming a clearer sense of its voice and experience.
-                    </p>
-                  </div>
+                  <div className="text-sm text-gray-600">Firefighters</div>
                 </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-white bg-opacity-30 backdrop-blur-lg rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    3
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {getPartsByType('exile').length}
                   </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Understand (Flesh Out)</h4>
-                    <p className="text-blue-100">
-                      This step deepens your awareness of the part's story. Discover its history, the role it 
-                      played in your life, and the burdens it carried to protect you.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-white bg-opacity-30 backdrop-blur-lg rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    4
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Relating (Feel Toward + Befriend)</h4>
-                    <p className="text-blue-100">
-                      Here, you begin shifting your relationship with the part. Cultivate warmth, kindness, and 
-                      respect. Offer curiosity and compassion so the part feels supported by your Self.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-white bg-opacity-30 backdrop-blur-lg rounded-full flex items-center justify-center flex-shrink-0 font-bold">
-                    5
-                  </div>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Unburden (Fear/Unburden)</h4>
-                    <p className="text-blue-100">
-                      The final step is helping the part release the fears, or burdens it carried. By gently 
-                      supporting this process, you invite healing, relief, and freedom.
-                    </p>
-                  </div>
+                  <div className="text-sm text-gray-600">Exiles</div>
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Start Button */}
+          <div className="text-center">
+            <button
+              onClick={() => setStep(2)}
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold text-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+            >
+              Begin Mapping
+              <ArrowRight className="ml-2 w-6 h-6" />
+            </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 2) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => setStep(1)}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              ← Back to Introduction
+            </button>
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-600">Step 2 of 3</span>
+              <button
+                onClick={handleSaveToStorage}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors"
+              >
+                Save Map
+              </button>
+            </div>
+          </div>
+
+          {/* Part Type Selection */}
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Which Type of Part Would You Like to Map?
+            </h2>
+            <p className="text-xl text-gray-600">
+              Choose a category to start identifying your parts
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {partTypes.map((partType) => {
+              const Icon = partType.icon;
+              const typeParts = getPartsByType(partType.type);
+              const isSelected = currentPartType === partType.type;
+              
+              return (
+                <div
+                  key={partType.type}
+                  onClick={() => setCurrentPartType(partType.type)}
+                  className={`relative bg-white rounded-2xl shadow-lg p-8 cursor-pointer transition-all duration-300 ${
+                    isSelected ? 'ring-4 ring-purple-600 shadow-xl' : 'hover:shadow-xl'
+                  }`}
+                >
+                  {isSelected && (
+                    <div className="absolute top-4 right-4 w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                    </div>
+                  )}
+                  
+                  <div className={`w-16 h-16 bg-gradient-to-r ${partType.color} rounded-xl flex items-center justify-center mb-6`}>
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3">{partType.title}</h3>
+                  <p className="text-gray-600 mb-4">{partType.description}</p>
+                  
+                  {typeParts.length > 0 && (
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm font-medium text-gray-700 mb-1">
+                        Mapped: {typeParts.length} parts
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {typeParts.slice(0, 3).map((part, i) => (
+                          <span key={i} className="text-xs bg-gray-200 px-2 py-1 rounded">
+                            {part.name}
+                          </span>
+                        ))}
+                        {typeParts.length > 3 && (
+                          <span className="text-xs text-gray-500">+{typeParts.length - 3} more</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <div className="text-sm font-semibold text-gray-700">Guiding Questions:</div>
+                    {partType.questions.map((question, i) => (
+                      <div key={i} className="text-sm text-gray-600 flex items-start">
+                        <span className="text-purple-600 mr-2">•</span>
+                        {question}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="text-center space-y-4">
+            {currentPartType && (
+              <button
+                onClick={() => setShowAddPart(true)}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+              >
+                <Plus className="mr-2 w-5 h-5" />
+                Add {partTypes.find(pt => pt.type === currentPartType)?.title.slice(0, -6)} Part
+              </button>
+            )}
+            
+            {parts.length > 0 && (
+              <button
+                onClick={() => setStep(3)}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors ml-4"
+              >
+                Review Parts Map
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </button>
+            )}
+          </div>
+
+          {/* Parts List */}
+          {parts.length > 0 && (
+            <div className="mt-12">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Your Mapped Parts</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {parts.map((part) => (
+                  <div
+                    key={part.id}
+                    onClick={() => setSelectedPart(part)}
+                    className="bg-white rounded-xl shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow border border-gray-100"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <h4 className="font-bold text-gray-900">{part.name}</h4>
+                      <div className={`w-3 h-3 rounded-full ${
+                        part.type === 'manager' ? 'bg-blue-500' :
+                        part.type === 'firefighter' ? 'bg-red-500' :
+                        'bg-purple-500'
+                      }`}></div>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">{part.role}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded capitalize">
+                        {part.type}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingPart(part);
+                        }}
+                        className="text-purple-600 hover:text-purple-700"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Add Part Modal */}
+        {showAddPart && (
+          <AddPartModal
+            partType={partTypes.find(pt => pt.type === currentPartType)}
+            onSave={handleAddPart}
+            onClose={() => setShowAddPart(false)}
+          />
         )}
 
-        {/* 6 F's Section */}
-        {activeSection === '6fs' && (
-          <div className="space-y-8">
-            <div className="card bg-gradient-to-br from-purple-50 to-pink-50">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">The 6 F's Approach</h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                The 6 F's Approach entails finding a part within, focusing on it, fleshing out its details and 
-                emotions, feeling and accepting its impact, befriending it to understand its intentions, and 
-                addressing its fears about role changes, facilitating a deep engagement with your inner self.
-              </p>
-            </div>
+        {/* Edit Part Modal */}
+        {editingPart && (
+          <EditPartModal
+            part={editingPart}
+            partType={partTypes.find(pt => pt.type === editingPart.type)}
+            onSave={handleSavePart}
+            onClose={() => setEditingPart(null)}
+            onDelete={() => {
+              handleDeletePart(editingPart.id);
+              setEditingPart(null);
+            }}
+          />
+        )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sixFs.map((step, index) => {
-                const colors = [
-                  'from-red-400 to-red-600',
-                  'from-orange-400 to-orange-600',
-                  'from-yellow-400 to-yellow-600',
-                  'from-green-400 to-green-600',
-                  'from-blue-400 to-blue-600',
-                  'from-purple-400 to-purple-600'
-                ];
+        {/* Part Detail Modal */}
+        {selectedPart && !editingPart && (
+          <PartDetailModal
+            part={selectedPart}
+            partType={partTypes.find(pt => pt.type === selectedPart.type)}
+            onClose={() => setSelectedPart(null)}
+            onEdit={() => {
+              setEditingPart(selectedPart);
+              setSelectedPart(null);
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  if (step === 3) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => setStep(2)}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              ← Back to Mapping
+            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setStep(2)}
+                className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+              >
+                Add More Parts
+              </button>
+              <button
+                onClick={handleSaveToStorage}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors"
+              >
+                Save Complete Map
+              </button>
+            </div>
+          </div>
+
+          {/* Map Overview */}
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Your Internal Family Map
+            </h2>
+            <p className="text-xl text-gray-600">
+              A visual representation of your internal system
+            </p>
+          </div>
+
+          {/* Parts Visualization */}
+          <div className="bg-white rounded-3xl shadow-xl p-12 mb-8">
+            <div className="relative min-h-[500px]">
+              {/* Self at center */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="text-center">
+                    <Star className="w-12 h-12 text-white mx-auto mb-1" />
+                    <span className="text-white font-bold">SELF</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Parts around Self */}
+              {parts.map((part, index) => {
+                const angle = (index / parts.length) * 2 * Math.PI;
+                const x = Math.cos(angle) * 200;
+                const y = Math.sin(angle) * 200;
+                
+                const colorClass = part.type === 'manager' ? 'from-blue-400 to-blue-600' :
+                                 part.type === 'firefighter' ? 'from-red-400 to-red-600' :
+                                 'from-purple-400 to-purple-600';
+                
                 return (
-                  <div key={index} className={`part-card bg-gradient-to-br ${colors[index]} text-white`}>
-                    <div className="text-4xl font-bold mb-4">{index + 1}</div>
-                    <h3 className="text-2xl font-bold mb-3">{step.title}</h3>
-                    <p className="text-white text-opacity-95">{step.description}</p>
+                  <div
+                    key={part.id}
+                    className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                    style={{
+                      left: `calc(50% + ${x}px)`,
+                      top: `calc(50% + ${y}px)`
+                    }}
+                  >
+                    <div className={`bg-gradient-to-r ${colorClass} rounded-full w-24 h-24 flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform`}
+                         onClick={() => setSelectedPart(part)}>
+                      <div className="text-center text-white">
+                        <div className="text-xs font-bold truncate max-w-[80px]">{part.name}</div>
+                      </div>
+                    </div>
+                    {/* Connection line to Self */}
+                    <svg
+                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                      style={{ width: '400px', height: '400px', marginLeft: '-200px', marginTop: '-200px' }}
+                    >
+                      <line
+                        x1="200"
+                        y1="200"
+                        x2={200 + x}
+                        y2={200 + y}
+                        stroke="#e5e7eb"
+                        strokeWidth="2"
+                        strokeDasharray="5,5"
+                      />
+                    </svg>
                   </div>
                 );
               })}
             </div>
           </div>
-        )}
 
-        {/* Unburdening Section */}
-        {activeSection === 'unburdening' && (
-          <div className="space-y-8">
-            <div className="card bg-gradient-to-br from-pink-50 to-red-50">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">The Unburdening Process</h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Unburdening is the process of helping a part release the painful emotions and limiting beliefs 
-                it has been carrying. This is a gentle, compassionate process that happens when the part feels 
-                safe and ready.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {unburdeningSteps.map((step, index) => (
-                <div key={index} className="card hover:shadow-xl transition-shadow duration-300">
-                  <div className="flex items-start space-x-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-2xl flex-shrink-0 shadow-lg">
-                      {step.step}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-800 mb-2">{step.title}</h3>
-                      <p className="text-gray-700 text-lg leading-relaxed">{step.description}</p>
-                    </div>
+          {/* Parts Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            {partTypes.map((partType) => {
+              const Icon = partType.icon;
+              const typeParts = getPartsByType(partType.type);
+              
+              return (
+                <div key={partType.type} className="bg-white rounded-2xl shadow-lg p-8">
+                  <div className={`w-16 h-16 bg-gradient-to-r ${partType.color} rounded-xl flex items-center justify-center mb-6`}>
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{partType.title}</h3>
+                  <div className="text-3xl font-bold text-purple-600 mb-4">{typeParts.length}</div>
+                  
+                  <div className="space-y-3">
+                    {typeParts.map((part) => (
+                      <div
+                        key={part.id}
+                        onClick={() => setSelectedPart(part)}
+                        className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                      >
+                        <h4 className="font-semibold text-gray-900">{part.name}</h4>
+                        <p className="text-sm text-gray-600">{part.role}</p>
+                      </div>
+                    ))}
+                    {typeParts.length === 0 && (
+                      <p className="text-gray-500 italic">No parts mapped yet</p>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <div className="card bg-gradient-to-br from-purple-600 to-pink-600 text-white">
-              <h3 className="text-2xl font-bold mb-4">Important Notes on Unburdening</h3>
-              <ul className="space-y-3 text-purple-100">
-                <li className="flex items-start">
-                  <span className="mr-3 text-xl">•</span>
-                  <span>Never force unburdening. The part must feel safe and ready.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="mr-3 text-xl">•</span>
-                  <span>Protectors may need permission before you work with Exiles.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="mr-3 text-xl">•</span>
-                  <span>The process should feel gentle and natural, not forced or rushed.</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="mr-3 text-xl">•</span>
-                  <span>Trust your Self-energy to guide the process with compassion.</span>
-                </li>
-              </ul>
-            </div>
+              );
+            })}
           </div>
-        )}
 
-        {/* My Parts Map Section */}
-        {activeSection === 'myparts' && (
-          <div className="space-y-8">
-            <div className="card bg-gradient-to-br from-purple-50 to-pink-50">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">My Parts Map</h2>
-              <p className="text-lg text-gray-700 leading-relaxed">
-                Create your personal parts map by identifying and documenting the different parts of your internal 
-                system. This helps you understand their roles, triggers, and protective intentions.
-              </p>
-            </div>
-
-            {/* Add Part Button */}
-            {!isAdding && !editingId && (
-              <button
-                onClick={() => setIsAdding(true)}
-                className="btn-primary w-full md:w-auto flex items-center justify-center space-x-2"
+          {/* Next Steps */}
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white text-center">
+            <h3 className="text-2xl font-bold mb-4">What's Next?</h3>
+            <p className="mb-6">Now that you've mapped your parts, you can begin building relationships with each one through our guided exercises and meditations.</p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="/exercises"
+                className="bg-white text-purple-700 px-6 py-3 rounded-xl font-semibold hover:bg-purple-50 transition-colors"
               >
-                <Plus className="w-5 h-5" />
-                <span>Add a New Part</span>
-              </button>
-            )}
-
-            {/* Add/Edit Part Form */}
-            {(isAdding || editingId) && (
-              <div className="card bg-gradient-to-br from-blue-50 to-purple-50">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">
-                  {editingId ? 'Edit Part' : 'Add New Part'}
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Part Name</label>
-                    <input
-                      type="text"
-                      value={newPart.name}
-                      onChange={(e) => setNewPart({ ...newPart, name: e.target.value })}
-                      placeholder="e.g., Inner Critic, Anxious Part, Perfectionist"
-                      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
-                    <select
-                      value={newPart.category}
-                      onChange={(e) => setNewPart({ ...newPart, category: e.target.value })}
-                      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:outline-none"
-                    >
-                      <option value="Managers">Manager</option>
-                      <option value="Firefighters">Firefighter</option>
-                      <option value="Exiles">Exile</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                    <textarea
-                      value={newPart.description}
-                      onChange={(e) => setNewPart({ ...newPart, description: e.target.value })}
-                      placeholder="How does this part show up? What does it do?"
-                      rows="3"
-                      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Triggers</label>
-                    <textarea
-                      value={newPart.triggers}
-                      onChange={(e) => setNewPart({ ...newPart, triggers: e.target.value })}
-                      placeholder="What situations activate this part?"
-                      rows="2"
-                      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Protective Intention</label>
-                    <textarea
-                      value={newPart.intention}
-                      onChange={(e) => setNewPart({ ...newPart, intention: e.target.value })}
-                      placeholder="What is this part trying to protect you from?"
-                      rows="2"
-                      className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-purple-500 focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={editingId ? handleSaveEdit : handleAddPart}
-                      className="btn-primary flex items-center space-x-2"
-                    >
-                      <Save className="w-5 h-5" />
-                      <span>{editingId ? 'Save Changes' : 'Add Part'}</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsAdding(false);
-                        setEditingId(null);
-                        setNewPart({ name: '', category: 'Managers', description: '', triggers: '', intention: '' });
-                      }}
-                      className="btn-secondary flex items-center space-x-2"
-                    >
-                      <X className="w-5 h-5" />
-                      <span>Cancel</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Parts List */}
-            {myParts.length === 0 ? (
-              <div className="card text-center py-12">
-                <Map className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-xl text-gray-600">No parts mapped yet. Start by adding your first part!</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {myParts.map((part) => (
-                  <div
-                    key={part.id}
-                    className={`card bg-gradient-to-br ${getCategoryColor(part.category)}`}
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-2xl font-bold text-gray-800">{part.name}</h3>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleEditPart(part)}
-                          className="p-2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-lg transition-all"
-                        >
-                          <Edit2 className="w-5 h-5 text-gray-700" />
-                        </button>
-                        <button
-                          onClick={() => handleDeletePart(part.id)}
-                          className="p-2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-lg transition-all"
-                        >
-                          <Trash2 className="w-5 h-5 text-red-600" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div>
-                        <span className="inline-block px-3 py-1 bg-white bg-opacity-50 rounded-full text-sm font-semibold text-gray-700">
-                          {part.category}
-                        </span>
-                      </div>
-                      {part.description && (
-                        <div>
-                          <p className="text-sm font-semibold text-gray-700 mb-1">Description:</p>
-                          <p className="text-gray-700">{part.description}</p>
-                        </div>
-                      )}
-                      {part.triggers && (
-                        <div>
-                          <p className="text-sm font-semibold text-gray-700 mb-1">Triggers:</p>
-                          <p className="text-gray-700">{part.triggers}</p>
-                        </div>
-                      )}
-                      {part.intention && (
-                        <div>
-                          <p className="text-sm font-semibold text-gray-700 mb-1">Protective Intention:</p>
-                          <p className="text-gray-700">{part.intention}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                Try Parts Exercises
+              </a>
+              <a
+                href="/curriculum"
+                className="bg-purple-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-800 transition-colors"
+              >
+                Continue Learning
+              </a>
+            </div>
           </div>
+        </div>
+
+        {/* Part Detail Modal */}
+        {selectedPart && (
+          <PartDetailModal
+            part={selectedPart}
+            partType={partTypes.find(pt => pt.type === selectedPart.type)}
+            onClose={() => setSelectedPart(null)}
+            onEdit={() => {
+              setEditingPart(selectedPart);
+              setSelectedPart(null);
+            }}
+          />
         )}
+      </div>
+    );
+  }
+};
+
+// Modal Components
+const AddPartModal = ({ partType, onSave, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    role: '',
+    feelings: '',
+    positive_intention: '',
+    when_appears: '',
+    what_it_does: ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name.trim()) return;
+    onSave(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-bold text-gray-900">Add {partType.title.slice(0, -6)} Part</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Part Name</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="e.g., The Critic, The Protector, The Scared Child"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Role or Function</label>
+            <textarea
+              value={formData.role}
+              onChange={(e) => setFormData({...formData, role: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              rows={3}
+              placeholder="What does this part do for you?"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">When does this part appear?</label>
+            <textarea
+              value={formData.when_appears}
+              onChange={(e) => setFormData({...formData, when_appears: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              rows={3}
+              placeholder="In what situations do you notice this part showing up?"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">What does it do?</label>
+            <textarea
+              value={formData.what_it_does}
+              onChange={(e) => setFormData({...formData, what_it_does: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              rows={3}
+              placeholder="How does this part behave or what actions does it take?"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Positive Intention</label>
+            <textarea
+              value={formData.positive_intention}
+              onChange={(e) => setFormData({...formData, positive_intention: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              rows={3}
+              placeholder="What positive role is this part trying to play?"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+            >
+              Save Part
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const EditPartModal = ({ part, partType, onSave, onClose, onDelete }) => {
+  const [formData, setFormData] = useState(part);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-bold text-gray-900">Edit {part.name}</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Part Name</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Role or Function</label>
+            <textarea
+              value={formData.role}
+              onChange={(e) => setFormData({...formData, role: e.target.value})}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              rows={3}
+              required
+            />
+          </div>
+
+          <div className="flex justify-between">
+            <button
+              type="button"
+              onClick={onDelete}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+            >
+              Delete Part
+            </button>
+            <div className="space-x-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const PartDetailModal = ({ part, partType, onClose, onEdit }) => {
+  const Icon = partType.icon;
+  
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className={`w-16 h-16 bg-gradient-to-r ${partType.color} rounded-xl flex items-center justify-center`}>
+              <Icon className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">{part.name}</h3>
+              <span className="text-sm text-gray-600 capitalize">{part.type} Part</span>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Role</h4>
+            <p className="text-gray-700">{part.role}</p>
+          </div>
+
+          {part.when_appears && (
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">When It Appears</h4>
+              <p className="text-gray-700">{part.when_appears}</p>
+            </div>
+          )}
+
+          {part.what_it_does && (
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">What It Does</h4>
+              <p className="text-gray-700">{part.what_it_does}</p>
+            </div>
+          )}
+
+          {part.positive_intention && (
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Positive Intention</h4>
+              <p className="text-gray-700">{part.positive_intention}</p>
+            </div>
+          )}
+
+          <div className="pt-6 border-t border-gray-200 flex justify-end space-x-4">
+            <button
+              onClick={onEdit}
+              className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+            >
+              Edit Part
+            </button>
+            <button
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
