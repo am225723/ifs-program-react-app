@@ -35,7 +35,14 @@ export const DataProvider = ({ children }) => {
       
     } catch (error) {
       console.error('Error initializing user:', error);
-      setError(error.message);
+      // Fallback to local-only mode if Supabase fails
+      let existingUserId = localStorage.getItem('ifs-user-id');
+      if (!existingUserId) {
+        existingUserId = 'local_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('ifs-user-id', existingUserId);
+      }
+      setUserId(existingUserId);
+      setError(null); // Don't show error to user, just fall back to local mode
     } finally {
       setLoading(false);
     }

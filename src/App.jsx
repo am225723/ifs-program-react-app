@@ -80,7 +80,10 @@ function App() {
             <Route path="/qualities" element={<Qualities />} />
             <Route path="/parts-mapping" element={<PartsMapping />} />
             <Route path="/exercises" element={<Exercises />} />
-            <Route path="/assessment" />
+            <Route path="/assessment" element={<Assessment />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </div>
       </Router>
