@@ -25,6 +25,7 @@ import {
   Moon,
   Sun
 } from 'lucide-react';
+import { useData } from '../contexts/DataContext';
 
 const Journal = () => {
   const [entries, setEntries] = useState([]);

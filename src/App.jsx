@@ -12,6 +12,7 @@ import Resources from './pages/Resources';
 import Journal from './pages/Journal';
 import AdminDashboard from './pages/AdminDashboard';
 import PINEntry from './components/PINEntry';
+import { DataProvider } from './contexts/DataContext';
 import LearningModule from './components/LearningModuleEnhanced';
 
 function App() {
@@ -51,47 +52,39 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route 
-              path="/curriculum" 
-              element={
-                selectedModule ? (
-                  <LearningModule 
-                    module={selectedModule}
-                    onComplete={handleModuleComplete}
-                    onBack={handleBackToCurriculum}
-                    userProgress={userProgress}
-                  />
-                ) : (
-                  <CurriculumSystem 
-                    onModuleSelect={handleModuleSelect}
-                    userProgress={userProgress}
-                  />
-                )
-              } 
-            />
-          <Route path="/cheat-sheet" element={<CheatSheet />} />
-          <Route path="/wounds" element={<Wounds />} />
-          <Route path="/qualities" element={<Qualities />} />
-          <Route path="/parts-mapping" element={<PartsMapping />} />
-          <Route path="/exercises" element={<Exercises />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/journal" element={<Journal />} />
-          <Route 
-            path="/admin" 
-            element={
-              isAuthenticated ? 
-              <AdminDashboard /> : 
-              <PINEntry onSubmit={handlePINSubmit} />
-            } 
-          />
-        </Routes>
-      </div>
-    </Router>
+    <DataProvider>
+      <Router>
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route 
+                path="/curriculum" 
+                element={
+                  selectedModule ? (
+                    <LearningModule 
+                      module={selectedModule}
+                      onComplete={handleModuleComplete}
+                      onBack={handleBackToCurriculum}
+                      userProgress={userProgress}
+                    />
+                  ) : (
+                    <CurriculumSystem 
+                      onModuleSelect={handleModuleSelect}
+                      userProgress={userProgress}
+                    />
+                  )
+                } 
+              />
+            <Route path="/cheat-sheet" element={<CheatSheet />} />
+            <Route path="/wounds" element={<Wounds />} />
+            <Route path="/qualities" element={<Qualities />} />
+            <Route path="/parts-mapping" element={<PartsMapping />} />
+            <Route path="/exercises" element={<Exercises />} />
+            <Route path="/assessment" />
+          </Routes>
+        </div>
+      </Router>
+    </DataProvider>
   );
 }
 
