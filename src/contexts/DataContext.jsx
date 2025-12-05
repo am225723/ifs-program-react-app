@@ -411,7 +411,7 @@ export const DataProvider = ({ children }) => {
                 progress.synced = true;
               }
             });
-          } (e) {
+          } catch (e) {
             console.warn('Error parsing local exercise progress:', e);
             data = [];
           }
