@@ -1,363 +1,769 @@
-import { useState } from 'react';
-import { Play, Pause, RotateCcw, Heart, Brain, Sparkles } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { 
+  Play, 
+  Pause, 
+  RotateCcw, 
+  Volume2, 
+  VolumeX, 
+  Heart, 
+  Brain, 
+  Shield, 
+  Sparkles, 
+  Clock, 
+  Headphones, 
+  Wind, 
+  Moon, 
+  Sun,
+  Zap,
+  Target,
+  Eye,
+  Hand
+} from 'lucide-react';
 
 const Exercises = () => {
-  const [activeExercise, setActiveExercise] = useState(null);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [selectedExercise, setSelectedExercise] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timer, setTimer] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  const [breathingPhase, setBreathingPhase] = useState('inhale');
+  const [breathingCount, setBreathingCount] = useState(0);
+  const [showTranscript, setShowTranscript] = useState(false);
+  const audioRef = useRef(null);
+  const intervalRef = useRef(null);
 
-  const exercises = [
+  const exerciseCategories = [
     {
-      id: 1,
-      title: "Meet Your Parts",
-      icon: Heart,
-      duration: "10 minutes",
-      color: "from-pink-400 to-red-400",
-      description: "A gentle introduction to identifying and connecting with your internal parts.",
-      steps: [
-        {
-          title: "Find a Comfortable Space",
-          content: "Sit or lie down in a quiet, comfortable place where you won't be disturbed. Close your eyes or soften your gaze.",
-          duration: 60
-        },
-        {
-          title: "Take Three Deep Breaths",
-          content: "Breathe in slowly through your nose, hold for a moment, and exhale through your mouth. Feel your body settling.",
-          duration: 90
-        },
-        {
-          title: "Notice What's Present",
-          content: "Without judgment, notice what thoughts, feelings, or sensations are present right now. Just observe.",
-          duration: 120
-        },
-        {
-          title: "Ask: 'Who's Here?'",
-          content: "Gently ask yourself: 'What part of me is showing up right now?' Notice what comes to mind—a feeling, an image, a voice, or a sensation.",
-          duration: 180
-        },
-        {
-          title: "Get Curious",
-          content: "If a part shows up, get curious about it. How does it feel? Where do you notice it in your body? What does it want you to know?",
-          duration: 180
-        },
-        {
-          title: "Thank the Part",
-          content: "Thank the part for showing up and for all the ways it has tried to protect you. Let it know you're here to listen.",
-          duration: 120
-        },
-        {
-          title: "Return Gently",
-          content: "When you're ready, take a few deep breaths and slowly return your awareness to the room. Open your eyes.",
-          duration: 60
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: "Self-Energy Check-In",
-      icon: Sparkles,
-      duration: "5 minutes",
-      color: "from-yellow-400 to-orange-400",
-      description: "Assess your connection to Self-energy using the 8 C's.",
-      steps: [
-        {
-          title: "Center Yourself",
-          content: "Take a moment to pause and breathe. Notice your current state without judgment.",
-          duration: 60
-        },
-        {
-          title: "Check for Calmness",
-          content: "Do you feel calm in your body? Or is there tension, anxiety, or restlessness? Just notice.",
-          duration: 60
-        },
-        {
-          title: "Check for Curiosity",
-          content: "Are you curious about what's happening inside you? Or do you feel defensive, shut down, or judgmental?",
-          duration: 60
-        },
-        {
-          title: "Check for Compassion",
-          content: "Can you feel compassion for yourself and your parts? Or is there criticism or harshness?",
-          duration: 60
-        },
-        {
-          title: "Check for Clarity",
-          content: "Do you have clarity about what's happening? Or is there confusion or overwhelm?",
-          duration: 60
-        },
-        {
-          title: "Notice What's Blocking Self",
-          content: "If you're not feeling the C's, what part has taken over? Can you acknowledge it with kindness?",
-          duration: 90
-        },
-        {
-          title: "Invite Self Back",
-          content: "Gently ask any protective parts if they'd be willing to step back a little, so you can lead from Self.",
-          duration: 90
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: "Dialogue with a Part",
+      id: 'connection',
+      title: 'Self-Connection',
+      description: 'Exercises to strengthen your Self energy',
+      color: 'from-purple-400 to-purple-600',
       icon: Brain,
-      duration: "15 minutes",
-      color: "from-blue-400 to-purple-400",
-      description: "Have a compassionate conversation with one of your parts.",
-      steps: [
+      exercises: [
         {
-          title: "Identify the Part",
-          content: "Think of a part that's been active recently—maybe anxiety, perfectionism, or self-criticism. Notice where you feel it in your body.",
-          duration: 120
+          id: 'meeting-self',
+          title: 'Meeting Your Self',
+          duration: '15 min',
+          type: 'meditation',
+          difficulty: 'Beginner',
+          description: 'A guided meditation to connect with your core Self energy',
+          transcript: `Welcome to this meditation to meet your Self... Begin by finding a comfortable position... Notice your breath...`,
+          audioUrl: '/audio/meeting-self.mp3',
+          benefits: ['Deeper Self-awareness', 'Increased clarity', 'Emotional balance']
         },
         {
-          title: "Ask Permission",
-          content: "Ask the part: 'Would you be willing to talk with me?' Wait for a sense of yes or no.",
-          duration: 90
+          id: 'self-qualities',
+          title: 'Cultivating Self Qualities',
+          duration: '20 min',
+          type: 'practice',
+          difficulty: 'Intermediate',
+          description: 'Practice embodying the 8 C\'s of Self: curiosity, calmness, compassion, confidence, courage, creativity, clarity, and connectedness',
+          transcript: `Today we\'ll explore the qualities of your Self... Each quality is already within you...`,
+          audioUrl: '/audio/self-qualities.mp3',
+          benefits: ['Self-leadership', 'Emotional regulation', 'Inner wisdom']
+        }
+      ]
+    },
+    {
+      id: 'inner-child',
+      title: 'Inner Child Work',
+      description: 'Connect with and heal your inner child',
+      color: 'from-pink-400 to-pink-600',
+      icon: Heart,
+      exercises: [
+        {
+          id: 'meeting-inner-child',
+          title: 'Meeting Your Inner Child',
+          duration: '18 min',
+          type: 'meditation',
+          difficulty: 'Beginner',
+          description: 'Safely meet and connect with your inner child part',
+          transcript: `Create a safe space in your mind... Call forth your inner child... Notice how they appear...`,
+          audioUrl: '/audio/meeting-inner-child.mp3',
+          benefits: ['Inner connection', 'Emotional healing', 'Self-compassion']
         },
         {
-          title: "Get to Know It",
-          content: "Ask: 'How old do you feel?' 'What do you want me to know?' 'What are you afraid will happen if you stop doing your job?'",
-          duration: 180
+          id: 'reparenting',
+          title: 'Reparenting Meditation',
+          duration: '25 min',
+          type: 'practice',
+          difficulty: 'Intermediate',
+          description: 'Learn to parent your inner child with love and care',
+          transcript: `Imagine holding your inner child... What do they need to hear from you?... Offer the love they missed...`,
+          audioUrl: '/audio/reparenting.mp3',
+          benefits: ['Healing neglect wounds', 'Self-nurturing', 'Emotional security']
         },
         {
-          title: "Listen Without Judgment",
-          content: "Just listen. Don't try to fix, change, or convince the part of anything. Let it share its story.",
-          duration: 180
+          id: 'child-play',
+          title: 'Inner Child Play',
+          duration: '12 min',
+          type: 'interactive',
+          difficulty: 'Beginner',
+          description: 'A playful exercise to reconnect with your inner child\'s joy',
+          transcript: `Remember what brought you joy as a child... Let yourself play freely...`,
+          audioUrl: '/audio/child-play.mp3',
+          benefits: ['Joy and creativity', 'Stress relief', 'Authentic expression']
+        }
+      ]
+    },
+    {
+      id: 'parts-work',
+      title: 'Parts Work',
+      description: 'Work directly with your internal parts',
+      color: 'from-blue-400 to-blue-600',
+      icon: Shield,
+      exercises: [
+        {
+          id: 'unblending',
+          title: 'Unblending Practice',
+          duration: '15 min',
+          type: 'technique',
+          difficulty: 'Intermediate',
+          description: 'Learn to separate from parts when you\'re blended',
+          transcript: `Notice which part is present... Ask it to give you some space... Feel the difference...`,
+          audioUrl: '/audio/unblending.mp3',
+          benefits: ['Clear perspective', 'Self leadership', 'Emotional freedom']
         },
         {
-          title: "Acknowledge Its Efforts",
-          content: "Thank the part for working so hard to protect you. Let it know you see how much it's been carrying.",
-          duration: 120
+          id: 'parts-council',
+          title: 'Parts Council Meditation',
+          duration: '30 min',
+          type: 'meditation',
+          difficulty: 'Advanced',
+          description: 'Facilitate a meeting between your parts from Self energy',
+          transcript: `Gather your parts in a council... Each part gets to speak... You listen with compassion...`,
+          audioUrl: '/audio/parts-council.mp3',
+          benefits: ['Internal harmony', 'Conflict resolution', 'System integration']
         },
         {
-          title: "Ask What It Needs",
-          content: "Ask: 'What do you need from me?' or 'How can I help you feel safe?' Listen for the answer.",
-          duration: 120
+          id: 'firefighter-work',
+          title: 'Working with Firefighters',
+          duration: '20 min',
+          type: 'technique',
+          difficulty: 'Intermediate',
+          description: 'Learn to work with parts that act impulsively',
+          transcript: `Acknowledge your firefighter parts... Thank them for protecting you... Find what they need...`,
+          audioUrl: '/audio/firefighter-work.mp3',
+          benefits: ['Impulse control', 'Understanding triggers', 'Self-protection']
+        }
+      ]
+    },
+    {
+      id: 'breathing',
+      title: 'Breathing Exercises',
+      description: 'Regulate your nervous system through breath',
+      color: 'from-green-400 to-green-600',
+      icon: Wind,
+      exercises: [
+        {
+          id: 'box-breathing',
+          title: 'Box Breathing',
+          duration: '10 min',
+          type: 'breathing',
+          difficulty: 'Beginner',
+          description: 'Calm your nervous system with this simple 4-4-4-4 breathing pattern',
+          transcript: `Inhale for 4... Hold for 4... Exhale for 4... Hold for 4... Repeat...`,
+          audioUrl: '/audio/box-breathing.mp3',
+          benefits: ['Stress reduction', 'Focus', 'Anxiety relief']
         },
         {
-          title: "Offer Reassurance",
-          content: "Let the part know you're here now, and you can handle things from your Self. It doesn't have to work so hard anymore.",
-          duration: 120
-        },
-        {
-          title: "Close with Gratitude",
-          content: "Thank the part again. Let it know you'll check in with it regularly. Slowly return to the present moment.",
-          duration: 90
+          id: '4-7-8-breathing',
+          title: '4-7-8 Breathing',
+          duration: '12 min',
+          type: 'breathing',
+          difficulty: 'Intermediate',
+          description: 'Powerful breathing technique for deep relaxation',
+          transcript: `Inhale for 4... Hold for 7... Exhale for 8... Feel the relaxation...`,
+          audioUrl: '/audio/4-7-8-breathing.mp3',
+          benefits: ['Deep relaxation', 'Sleep preparation', 'Tension release']
         }
       ]
     }
   ];
 
-  const startExercise = (exercise) => {
-    setActiveExercise(exercise);
-    setCurrentStep(0);
+  const breathingExercises = [
+    {
+      id: 'box-breathing',
+      name: 'Box Breathing',
+      inhale: 4,
+      hold1: 4,
+      exhale: 4,
+      hold2: 4,
+      cycles: 10
+    },
+    {
+      id: '4-7-8',
+      name: '4-7-8 Breathing',
+      inhale: 4,
+      hold1: 7,
+      exhale: 8,
+      hold2: 0,
+      cycles: 8
+    }
+  ];
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  const handleExerciseSelect = (exercise) => {
+    setSelectedExercise(exercise);
     setIsPlaying(false);
-    setTimer(0);
+    setCurrentTime(0);
+    setShowTranscript(false);
+    
+    // Simulate audio duration
+    const durationMinutes = parseInt(exercise.duration);
+    setDuration(durationMinutes * 60);
   };
 
-  const nextStep = () => {
-    if (currentStep < activeExercise.steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-      setTimer(0);
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+    
+    if (!isPlaying) {
+      // Start playing
+      intervalRef.current = setInterval(() => {
+        setCurrentTime(prev => {
+          if (prev >= duration - 1) {
+            setIsPlaying(false);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 1000);
     } else {
-      setActiveExercise(null);
-      setCurrentStep(0);
-      setTimer(0);
-      setIsPlaying(false);
+      // Pause
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     }
   };
 
-  const previousStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      setTimer(0);
-    }
-  };
-
-  const resetExercise = () => {
-    setCurrentStep(0);
-    setTimer(0);
+  const handleReset = () => {
     setIsPlaying(false);
+    setCurrentTime(0);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
   };
 
-  return (
-    <div className="min-h-screen py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center shadow-xl">
-              <Play className="w-12 h-12 text-white" />
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const startBreathingExercise = (exercise) => {
+    setSelectedExercise({
+      ...exercise,
+      isBreathing: true
+    });
+    setIsPlaying(true);
+    setBreathingPhase('inhale');
+    setBreathingCount(0);
+    
+    let currentPhase = 'inhale';
+    let currentCount = 0;
+    let cycleCount = 0;
+    
+    const breathingInterval = setInterval(() => {
+      currentCount++;
+      
+      if (currentPhase === 'inhale' && currentCount >= exercise.inhale) {
+        currentPhase = exercise.hold1 > 0 ? 'hold1' : 'exhale';
+        currentCount = 0;
+        setBreathingPhase(currentPhase === 'hold1' ? 'hold' : 'exhale');
+      } else if (currentPhase === 'hold1' && currentCount >= exercise.hold1) {
+        currentPhase = 'exhale';
+        currentCount = 0;
+        setBreathingPhase('exhale');
+      } else if (currentPhase === 'exhale' && currentCount >= exercise.exhale) {
+        if (exercise.hold2 > 0) {
+          currentPhase = 'hold2';
+          currentCount = 0;
+          setBreathingPhase('hold');
+        } else {
+          currentPhase = 'inhale';
+          currentCount = 0;
+          setBreathingPhase('inhale');
+          cycleCount++;
+          setBreathingCount(cycleCount);
+        }
+      } else if (currentPhase === 'hold2' && currentCount >= exercise.hold2) {
+        currentPhase = 'inhale';
+        currentCount = 0;
+        setBreathingPhase('inhale');
+        cycleCount++;
+        setBreathingCount(cycleCount);
+      }
+      
+      setCurrentTime(prev => prev + 1);
+      
+      if (cycleCount >= exercise.cycles) {
+        clearInterval(breathingInterval);
+        setIsPlaying(false);
+      }
+    }, 1000);
+  };
+
+  if (selectedExercise && selectedExercise.isBreathing) {
+    const phaseConfig = {
+      inhale: { text: 'Inhale', color: 'from-blue-400 to-blue-600', duration: selectedExercise.inhale },
+      hold: { text: 'Hold', color: 'from-purple-400 to-purple-600', duration: selectedExercise.hold1 || selectedExercise.hold2 },
+      exhale: { text: 'Exhale', color: 'from-green-400 to-green-600', duration: selectedExercise.exhale }
+    };
+    
+    const currentPhaseConfig = phaseConfig[breathingPhase];
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <button
+            onClick={() => setSelectedExercise(null)}
+            className="mb-6 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            ← Back to Exercises
+          </button>
+
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">{selectedExercise.name}</h1>
+            <p className="text-xl text-gray-600 mb-12">Follow the breathing pattern</p>
+
+            {/* Breathing Circle */}
+            <div className="relative w-80 h-80 mx-auto mb-12">
+              <div className={`absolute inset-0 bg-gradient-to-r ${currentPhaseConfig.color} rounded-full transition-all duration-1000 ${
+                breathingPhase === 'inhale' ? 'scale-100' : 'scale-75'
+              }`}></div>
+              
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className={`text-6xl font-bold text-white mb-2 ${
+                    breathingPhase === 'inhale' ? 'scale-110' : 'scale-100'
+                  } transition-transform duration-1000`}>
+                    {currentPhaseConfig.text}
+                  </div>
+                  <div className="text-2xl text-white/90">
+                    {breathingPhase === 'inhale' && selectedExercise.inhale - (currentTime % selectedExercise.inhale)}
+                    {breathingPhase === 'hold' && (
+                      breathingCount < selectedExercise.cycles - 1 
+                        ? selectedExercise.hold1 - (currentTime % selectedExercise.hold1)
+                        : selectedExercise.hold2 - (currentTime % selectedExercise.hold2)
+                    )}
+                    {breathingPhase === 'exhale' && selectedExercise.exhale - (currentTime % selectedExercise.exhale)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress */}
+            <div className="mb-8">
+              <div className="text-lg text-gray-600 mb-2">
+                Cycle {breathingCount + 1} of {selectedExercise.cycles}
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3 max-w-md mx-auto">
+                <div 
+                  className="bg-gradient-to-r from-green-400 to-blue-400 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${((breathingCount + 1) / selectedExercise.cycles) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Controls */}
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => {
+                  setIsPlaying(!isPlaying);
+                }}
+                className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+              >
+                {isPlaying ? 'Pause' : 'Resume'}
+              </button>
+              <button
+                onClick={() => setSelectedExercise(null)}
+                className="bg-gray-200 text-gray-700 px-8 py-4 rounded-2xl font-bold text-xl hover:bg-gray-300 transition-colors"
+              >
+                Stop
+              </button>
             </div>
           </div>
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
-            Guided Exercises
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Practice connecting with your parts through guided meditations and exercises
-          </p>
         </div>
+      </div>
+    );
+  }
 
-        {!activeExercise ? (
-          <>
-            {/* Introduction */}
-            <div className="card mb-12 bg-gradient-to-br from-green-50 to-teal-50">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">How to Use These Exercises</h2>
-              <div className="space-y-3 text-gray-700">
-                <p className="text-lg">
-                  These guided exercises help you practice the core skills of IFS therapy: identifying parts, 
-                  connecting with Self-energy, and building compassionate relationships with your internal system.
-                </p>
-                <p className="text-lg">
-                  Find a quiet space where you won't be interrupted. You can read through each step at your own 
-                  pace, or use the timer feature to guide you through the exercise.
-                </p>
-                <p className="text-lg font-semibold">
-                  Remember: There's no "right" way to do these exercises. Trust your process and be gentle with yourself.
-                </p>
-              </div>
+  if (selectedExercise) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={() => setSelectedExercise(null)}
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              ← Back to Exercises
+            </button>
+            <div className="flex items-center space-x-4">
+              <span className={`px-4 py-2 rounded-full text-sm font-medium ${
+                selectedExercise.difficulty === 'Beginner' ? 'bg-green-100 text-green-700' :
+                selectedExercise.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
+                'bg-red-100 text-red-700'
+              }`}>
+                {selectedExercise.difficulty}
+              </span>
+              <span className="text-gray-600 flex items-center">
+                <Clock className="w-4 h-4 mr-1" />
+                {selectedExercise.duration}
+              </span>
             </div>
+          </div>
 
-            {/* Exercise Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {exercises.map((exercise) => {
-                const Icon = exercise.icon;
-                return (
-                  <div
-                    key={exercise.id}
-                    className="card hover:scale-105 transform transition-all duration-300 cursor-pointer"
-                    onClick={() => startExercise(exercise)}
-                  >
-                    <div className={`w-16 h-16 bg-gradient-to-br ${exercise.color} rounded-xl flex items-center justify-center mb-4`}>
-                      <Icon className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">{exercise.title}</h3>
-                    <p className="text-gray-600 mb-4">{exercise.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-purple-600">{exercise.duration}</span>
-                      <span className="text-sm font-semibold text-gray-600">{exercise.steps.length} steps</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-3xl shadow-xl p-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-4">{selectedExercise.title}</h1>
+                <p className="text-xl text-gray-600 mb-8">{selectedExercise.description}</p>
+
+                {/* Audio Player */}
+                <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-8 mb-8">
+                  <div className="flex items-center justify-center mb-8">
+                    <div className="relative">
+                      <div className="w-32 h-32 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
+                        {isPlaying ? (
+                          <Pause className="w-16 h-16 text-white" />
+                        ) : (
+                          <Play className="w-16 h-16 text-white ml-2" />
+                        )}
+                      </div>
+                      {isPlaying && (
+                        <div className="absolute inset-0 rounded-full border-4 border-purple-300 animate-ping"></div>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <div className="max-w-4xl mx-auto">
-            {/* Exercise Header */}
-            <div className="card mb-8 bg-gradient-to-br from-purple-50 to-pink-50">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-3xl font-bold text-gray-800">{activeExercise.title}</h2>
-                <button
-                  onClick={() => setActiveExercise(null)}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-semibold transition-colors"
-                >
-                  Exit
-                </button>
-              </div>
-              <div className="flex items-center space-x-4 text-gray-600">
-                <span>Step {currentStep + 1} of {activeExercise.steps.length}</span>
-                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${((currentStep + 1) / activeExercise.steps.length) * 100}%` }}
-                  />
+
+                  {/* Progress Bar */}
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                      <span>{formatTime(currentTime)}</span>
+                      <span>{formatTime(duration)}</span>
+                    </div>
+                    <div className="w-full bg-white/50 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(currentTime / duration) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Controls */}
+                  <div className="flex items-center justify-center space-x-4">
+                    <button
+                      onClick={handleReset}
+                      className="p-3 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
+                    >
+                      <RotateCcw className="w-5 h-5 text-gray-700" />
+                    </button>
+                    <button
+                      onClick={togglePlayPause}
+                      className="p-4 bg-white rounded-full hover:bg-white/90 transition-colors shadow-lg"
+                    >
+                      {isPlaying ? (
+                        <Pause className="w-6 h-6 text-gray-700" />
+                      ) : (
+                        <Play className="w-6 h-6 text-gray-700 ml-1" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => setIsMuted(!isMuted)}
+                      className="p-3 bg-white/50 rounded-full hover:bg-white/70 transition-colors"
+                    >
+                      {isMuted ? (
+                        <VolumeX className="w-5 h-5 text-gray-700" />
+                      ) : (
+                        <Volume2 className="w-5 h-5 text-gray-700" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Current Step */}
-            <div className="card mb-8 bg-gradient-to-br from-white to-purple-50">
-              <h3 className="text-3xl font-bold text-gray-800 mb-6">
-                {activeExercise.steps[currentStep].title}
-              </h3>
-              <p className="text-xl text-gray-700 leading-relaxed mb-8">
-                {activeExercise.steps[currentStep].content}
-              </p>
-              
-              {/* Timer Display */}
-              <div className="text-center mb-8">
-                <div className="inline-block px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white">
-                  <span className="text-4xl font-bold">
-                    {Math.floor(activeExercise.steps[currentStep].duration / 60)}:
-                    {(activeExercise.steps[currentStep].duration % 60).toString().padStart(2, '0')}
-                  </span>
-                  <p className="text-sm mt-1">Suggested duration</p>
-                </div>
-              </div>
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-center space-x-4">
-                <button
-                  onClick={previousStep}
-                  disabled={currentStep === 0}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                    currentStep === 0
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-purple-600 border-2 border-purple-600 hover:bg-purple-50'
-                  }`}
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={resetExercise}
-                  className="px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-all flex items-center space-x-2"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                  <span>Reset</span>
-                </button>
-                <button
-                  onClick={nextStep}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg"
-                >
-                  {currentStep === activeExercise.steps.length - 1 ? 'Complete' : 'Next'}
-                </button>
-              </div>
-            </div>
-
-            {/* All Steps Preview */}
-            <div className="card">
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">Exercise Steps</h3>
-              <div className="space-y-3">
-                {activeExercise.steps.map((step, index) => (
-                  <div
-                    key={index}
-                    className={`p-4 rounded-lg cursor-pointer transition-all ${
-                      index === currentStep
-                        ? 'bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-400'
-                        : index < currentStep
-                        ? 'bg-green-50 border-2 border-green-300'
-                        : 'bg-gray-50 border-2 border-gray-200'
-                    }`}
-                    onClick={() => {
-                      setCurrentStep(index);
-                      setTimer(0);
-                    }}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        index === currentStep
-                          ? 'bg-purple-600 text-white'
-                          : index < currentStep
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-300 text-gray-600'
-                      }`}>
-                        {index + 1}
+                {/* Benefits */}
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Benefits</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {selectedExercise.benefits?.map((benefit, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-gray-700">{benefit}</span>
                       </div>
-                      <span className={`font-semibold ${
-                        index === currentStep ? 'text-purple-800' : 'text-gray-700'
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              {/* Instructions */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                  <Headphones className="w-5 h-5 mr-2 text-purple-600" />
+                  Instructions
+                </h3>
+                <ul className="space-y-3 text-gray-600">
+                  <li className="flex items-start">
+                    <span className="text-purple-600 mr-2">•</span>
+                    Find a quiet, comfortable space
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-purple-600 mr-2">•</span>
+                    Use headphones for best experience
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-purple-600 mr-2">•</span>
+                    Close your eyes when ready
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-purple-600 mr-2">•</span>
+                    Follow the guidance at your own pace
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-purple-600 mr-2">•</span>
+                    Be gentle with yourself throughout
+                  </li>
+                </ul>
+              </div>
+
+              {/* Transcript Toggle */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <button
+                  onClick={() => setShowTranscript(!showTranscript)}
+                  className="w-full flex items-center justify-between text-left"
+                >
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                    <Eye className="w-5 h-5 mr-2 text-purple-600" />
+                    Transcript
+                  </h3>
+                  <span className="text-purple-600">
+                    {showTranscript ? 'Hide' : 'Show'}
+                  </span>
+                </button>
+                
+                {showTranscript && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg max-h-64 overflow-y-auto">
+                    <p className="text-gray-700 text-sm leading-relaxed">
+                      {selectedExercise.transcript}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Related Exercises */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Related Exercises</h3>
+                <div className="space-y-3">
+                  {exerciseCategories
+                    .flatMap(cat => cat.exercises)
+                    .filter(ex => ex.id !== selectedExercise.id)
+                    .slice(0, 3)
+                    .map(exercise => (
+                      <button
+                        key={exercise.id}
+                        onClick={() => handleExerciseSelect(exercise)}
+                        className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="font-medium text-gray-900">{exercise.title}</div>
+                        <div className="text-sm text-gray-600">{exercise.duration}</div>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Guided Healing Exercises
+            </h1>
+            <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+              Transformative practices to strengthen your Self, heal your inner child, and harmonize your parts
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Start */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <button
+            onClick={() => handleExerciseSelect(exerciseCategories[0].exercises[0])}
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 group"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Brain className="w-6 h-6 text-purple-600" />
+              </div>
+              <Play className="w-5 h-5 text-purple-600" />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2">Quick Self-Connection</h3>
+            <p className="text-sm text-gray-600">5-minute practice to center yourself</p>
+          </button>
+
+          <button
+            onClick={() => startBreathingExercise(breathingExercises[0])}
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 group"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Wind className="w-6 h-6 text-green-600" />
+              </div>
+              <Play className="w-5 h-5 text-green-600" />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2">Box Breathing</h3>
+            <p className="text-sm text-gray-600">Calm your nervous system instantly</p>
+          </button>
+
+          <button
+            onClick={() => handleExerciseSelect(exerciseCategories[1].exercises[0])}
+            className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 group"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Heart className="w-6 h-6 text-pink-600" />
+              </div>
+              <Play className="w-5 h-5 text-pink-600" />
+            </div>
+            <h3 className="font-bold text-gray-900 mb-2">Inner Child Check-in</h3>
+            <p className="text-sm text-gray-600">Quick connection with your inner child</p>
+          </button>
+        </div>
+      </div>
+
+      {/* Exercise Categories */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {exerciseCategories.map((category) => {
+          const Icon = category.icon;
+          return (
+            <div key={category.id} className="mb-12">
+              <div className="flex items-center mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-r ${category.color} rounded-xl flex items-center justify-center mr-4`}>
+                  <Icon className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">{category.title}</h2>
+                  <p className="text-gray-600">{category.description}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {category.exercises.map((exercise) => (
+                  <div
+                    key={exercise.id}
+                    onClick={() => handleExerciseSelect(exercise)}
+                    className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        exercise.difficulty === 'Beginner' ? 'bg-green-100 text-green-700' :
+                        exercise.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
                       }`}>
-                        {step.title}
+                        {exercise.difficulty}
                       </span>
+                      <div className="flex items-center text-gray-500">
+                        <Clock className="w-4 h-4 mr-1" />
+                        <span className="text-sm">{exercise.duration}</span>
+                      </div>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                      {exercise.title}
+                    </h3>
+                    
+                    <p className="text-gray-600 mb-4 leading-relaxed">
+                      {exercise.description}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <span className={`text-xs font-medium px-2 py-1 rounded ${
+                        exercise.type === 'meditation' ? 'bg-purple-100 text-purple-700' :
+                        exercise.type === 'practice' ? 'bg-blue-100 text-blue-700' :
+                        exercise.type === 'technique' ? 'bg-green-100 text-green-700' :
+                        'bg-orange-100 text-orange-700'
+                      }`}>
+                        {exercise.type}
+                      </span>
+                      <div className="flex items-center text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-sm font-medium">Start</span>
+                        <Play className="w-4 h-4 ml-1" />
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+          );
+        })}
+      </div>
+
+      {/* Tips Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-3xl p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Tips for Effective Practice</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex items-start space-x-3">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <Target className="w-4 h-4 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-1">Be Consistent</h3>
+                <p className="text-gray-600 text-sm">Regular practice builds deeper connections and lasting change</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <Heart className="w-4 h-4 text-pink-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-1">Be Gentle</h3>
+                <p className="text-gray-600 text-sm">Approach yourself with compassion, especially when working with wounded parts</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <Shield className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-1">Create Safety</h3>
+                <p className="text-gray-600 text-sm">Ensure you feel safe and supported before deep inner work</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start space-x-3">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                <Hand className="w-4 h-4 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-1">Stay Present</h3>
+                <p className="text-gray-600 text-sm">Return to the present moment if you feel overwhelmed</p>
+              </div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
