@@ -11,7 +11,7 @@ export const clientAuth = {
   async authenticateWithPIN(pin) {
     try {
       const { data, error } = await supabase
-        .from('clients')
+        .from('IFS_clients')
         .select('*')
         .eq('pin', pin)
         .eq('status', 'active')
@@ -28,7 +28,7 @@ export const clientAuth = {
 
       // Update last active
       await supabase
-        .from('clients')
+        .from('IFS_clients')
         .update({ last_active: new Date().toISOString() })
         .eq('id', data.id);
 
@@ -79,7 +79,7 @@ export const clientAuth = {
       const pin = Math.floor(100000 + Math.random() * 900000).toString();
 
       const { data, error } = await supabase
-        .from('clients')
+        .from('IFS_clients')
         .insert({
           pin,
           name: clientData.name,
@@ -114,7 +114,7 @@ export const assessmentManager = {
       const rankedWounds = rankWounds(assessmentData);
 
       const { data, error } = await supabase
-        .from('assessment_results')
+        .from('IFS_assessment_results')
         .insert({
           client_id: clientId,
           abandonment_score: assessmentData.abandonment_score,
@@ -146,7 +146,7 @@ export const assessmentManager = {
   async getLatestAssessment(clientId) {
     try {
       const { data, error } = await supabase
-        .from('assessment_results')
+        .from('IFS_assessment_results')
         .select('*')
         .eq('client_id', clientId)
         .order('assessment_date', { ascending: false })
@@ -168,7 +168,7 @@ export const assessmentManager = {
   async getAllAssessments(clientId) {
     try {
       const { data, error } = await supabase
-        .from('assessment_results')
+        .from('IFS_assessment_results')
         .select('*')
         .eq('client_id', clientId)
         .order('assessment_date', { ascending: false });
@@ -201,7 +201,7 @@ export const curriculumManager = {
       // Save each module to database
       const modulePromises = personalizedCurriculum.modules.map((module, index) => {
         return supabase
-          .from('personalized_curriculum')
+          .from('IFS_personalized_curriculum')
           .upsert({
             client_id: clientId,
             assessment_id: assessmentResults.id,
@@ -236,7 +236,7 @@ export const curriculumManager = {
   async getPersonalizedCurriculum(clientId) {
     try {
       const { data, error } = await supabase
-        .from('personalized_curriculum')
+        .from('IFS_personalized_curriculum')
         .select('*')
         .eq('client_id', clientId)
         .order('module_order', { ascending: true });
@@ -256,7 +256,7 @@ export const curriculumManager = {
   async getModule(clientId, moduleId) {
     try {
       const { data, error } = await supabase
-        .from('personalized_curriculum')
+        .from('IFS_personalized_curriculum')
         .select('*')
         .eq('client_id', clientId)
         .eq('module_id', moduleId)
@@ -282,7 +282,7 @@ export const progressTracker = {
   async saveModuleProgress(clientId, moduleId, progressData) {
     try {
       const { data, error } = await supabase
-        .from('client_progress')
+        .from('IFS_client_progress')
         .upsert({
           client_id: clientId,
           module_id: moduleId,
@@ -320,7 +320,7 @@ export const progressTracker = {
   async getModuleProgress(clientId, moduleId) {
     try {
       const { data, error } = await supabase
-        .from('client_progress')
+        .from('IFS_client_progress')
         .select('*')
         .eq('client_id', clientId)
         .eq('module_id', moduleId);
@@ -340,7 +340,7 @@ export const progressTracker = {
   async getAllProgress(clientId) {
     try {
       const { data, error } = await supabase
-        .from('client_progress')
+        .from('IFS_client_progress')
         .select('*')
         .eq('client_id', clientId)
         .order('last_accessed', { ascending: false });
@@ -361,7 +361,7 @@ export const progressTracker = {
     try {
       // Get all progress
       const { data: progressData, error: progressError } = await supabase
-        .from('client_progress')
+        .from('IFS_client_progress')
         .select('module_id, completed')
         .eq('client_id', clientId);
 
@@ -369,7 +369,7 @@ export const progressTracker = {
 
       // Get all modules
       const { data: modulesData, error: modulesError } = await supabase
-        .from('personalized_curriculum')
+        .from('IFS_personalized_curriculum')
         .select('module_id')
         .eq('client_id', clientId);
 
@@ -409,7 +409,7 @@ export const partsManager = {
   async savePart(clientId, partData) {
     try {
       const { data, error } = await supabase
-        .from('parts')
+        .from('IFS_parts')
         .upsert({
           client_id: clientId,
           part_name: partData.name,
@@ -450,7 +450,7 @@ export const partsManager = {
   async getAllParts(clientId) {
     try {
       const { data, error } = await supabase
-        .from('parts')
+        .from('IFS_parts')
         .select('*')
         .eq('client_id', clientId)
         .eq('is_active', true)
@@ -471,7 +471,7 @@ export const partsManager = {
   async updateUnburdeningStatus(clientId, partName, status, notes) {
     try {
       const { data, error } = await supabase
-        .from('parts')
+        .from('IFS_parts')
         .update({
           unburdening_status: status,
           unburdening_date: status === 'completed' ? new Date().toISOString() : null,
@@ -502,7 +502,7 @@ export const journalManager = {
   async saveEntry(clientId, entryData) {
     try {
       const { data, error } = await supabase
-        .from('journal_entries')
+        .from('IFS_journal_entries')
         .insert({
           client_id: clientId,
           title: entryData.title,
@@ -537,7 +537,7 @@ export const journalManager = {
   async getAllEntries(clientId) {
     try {
       const { data, error } = await supabase
-        .from('journal_entries')
+        .from('IFS_journal_entries')
         .select('*')
         .eq('client_id', clientId)
         .order('created_at', { ascending: false });
@@ -557,7 +557,7 @@ export const journalManager = {
   async getEntriesByWound(clientId, woundType) {
     try {
       const { data, error } = await supabase
-        .from('journal_entries')
+        .from('IFS_journal_entries')
         .select('*')
         .eq('client_id', clientId)
         .eq('related_wound', woundType)
@@ -583,7 +583,7 @@ export const milestonesManager = {
   async recordMilestone(clientId, milestoneData) {
     try {
       const { data, error } = await supabase
-        .from('milestones')
+        .from('IFS_milestones')
         .insert({
           client_id: clientId,
           milestone_type: milestoneData.type,
@@ -614,7 +614,7 @@ export const milestonesManager = {
   async getAllMilestones(clientId) {
     try {
       const { data, error } = await supabase
-        .from('milestones')
+        .from('IFS_milestones')
         .select('*')
         .eq('client_id', clientId)
         .order('achieved_at', { ascending: false });

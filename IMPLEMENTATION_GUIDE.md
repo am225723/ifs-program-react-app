@@ -1,87 +1,94 @@
 # IFS Personalized Curriculum - Implementation Guide
 
 ## Table of Contents
-1. [Overview](#overview)
-2. [Quick Start](#quick-start)
-3. [Database Setup](#database-setup)
-4. [Integration Steps](#integration-steps)
-5. [Testing](#testing)
-6. [Admin Operations](#admin-operations)
-7. [Troubleshooting](#troubleshooting)
 
----
+1.  [Overview](#overview)
+2.  [Quick Start](#quick-start)
+3.  [Database Setup](#database-setup)
+4.  [Integration Steps](#integration-steps)
+5.  [Testing](#testing)
+6.  [Admin Operations](#admin-operations)
+7.  [Troubleshooting](#troubleshooting)
+
+* * *
 
 ## Overview
 
 This implementation guide will walk you through setting up the personalized IFS curriculum system. The system includes:
 
-- **PIN-based client authentication**
-- **Child wound assessment integration**
-- **Dynamic curriculum personalization**
-- **Progress tracking and analytics**
-- **Supabase backend integration**
+-   **PIN-based client authentication**
+-   **Child wound assessment integration**
+-   **Dynamic curriculum personalization**
+-   **Progress tracking and analytics**
+-   **Supabase backend integration**
 
 **Estimated Setup Time:** 2-3 hours
 
----
+* * *
 
 ## Quick Start
 
 ### Prerequisites
-- Supabase account (free tier works)
-- Node.js 18+ installed
-- Git repository access
-- Basic understanding of React
+
+-   Supabase account (free tier works)
+-   Node.js 18+ installed
+-   Git repository access
+-   Basic understanding of React
 
 ### Installation Steps
 
-1. **Clone and Install Dependencies**
+1.  **Clone and Install Dependencies**
+
 ```bash
 cd /workspace/ifs-program-react-app
 npm install @supabase/supabase-js
 ```
 
-2. **Set Up Supabase**
-- Create a new Supabase project at https://supabase.com
-- Note your project URL and anon key
-- Run the database schema (see Database Setup section)
+2.  **Set Up Supabase**
 
-3. **Configure Environment**
-Update `src/lib/supabase.js` with your Supabase credentials:
+-   Create a new Supabase project at [https://supabase.com](https://supabase.com)
+-   Note your project URL and anon key
+-   Run the database schema (see Database Setup section)
+
+3.  **Configure Environment** Update `src/lib/supabase.js` with your Supabase credentials:
+
 ```javascript
 const supabaseUrl = 'YOUR_SUPABASE_URL';
 const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
 ```
 
-4. **Test the System**
+4.  **Test the System**
+
 ```bash
 npm run dev
 ```
 
----
+* * *
 
 ## Database Setup
 
 ### Step 1: Access Supabase SQL Editor
 
-1. Log into your Supabase dashboard
-2. Navigate to **SQL Editor** in the left sidebar
-3. Click **New Query**
+1.  Log into your Supabase dashboard
+2.  Navigate to **SQL Editor** in the left sidebar
+3.  Click **New Query**
 
 ### Step 2: Run Schema Script
 
 Copy the entire contents of `supabase_schema.sql` and paste into the SQL editor, then click **Run**.
 
 This will create:
-- 10 tables for data management
-- Indexes for performance
-- Views for common queries
-- Row Level Security policies
-- Triggers for automatic updates
+
+-   10 tables for data management
+-   Indexes for performance
+-   Views for common queries
+-   Row Level Security policies
+-   Triggers for automatic updates
 
 ### Step 3: Verify Installation
 
 Run this query to verify tables were created:
+
 ```sql
 SELECT table_name 
 FROM information_schema.tables 
@@ -90,16 +97,17 @@ ORDER BY table_name;
 ```
 
 You should see:
-- clients
-- assessment_results
-- personalized_curriculum
-- client_progress
-- journal_entries
-- parts
-- exercise_progress
-- therapist_notes
-- milestones
-- content_library
+
+-   clients
+-   assessment\_results
+-   personalized\_curriculum
+-   client\_progress
+-   journal\_entries
+-   parts
+-   exercise\_progress
+-   therapist\_notes
+-   milestones
+-   content\_library
 
 ### Step 4: Create First Test Client
 
@@ -108,7 +116,7 @@ INSERT INTO clients (pin, name, email, status)
 VALUES ('123456', 'Test Client', 'test@example.com', 'active');
 ```
 
----
+* * *
 
 ## Integration Steps
 
@@ -310,44 +318,44 @@ const handleActivityComplete = async (activityId, responses) => {
 };
 ```
 
----
+* * *
 
 ## Testing
 
 ### Test 1: Client Authentication
 
-1. Navigate to the app homepage
-2. Enter PIN: `123456`
-3. Verify successful login
-4. Check that client name appears in header
+1.  Navigate to the app homepage
+2.  Enter PIN: `123456`
+3.  Verify successful login
+4.  Check that client name appears in header
 
 **Expected Result:** Login successful, redirected to home page
 
 ### Test 2: Assessment Flow
 
-1. Click "Take IFS Assessment"
-2. Complete all 4 wound sections
-3. Submit assessment
-4. Verify results are displayed
+1.  Click "Take IFS Assessment"
+2.  Complete all 4 wound sections
+3.  Submit assessment
+4.  Verify results are displayed
 
 **Expected Result:** Assessment results saved, personalized curriculum generated
 
 ### Test 3: Personalized Curriculum
 
-1. Navigate to Curriculum page
-2. Verify modules are customized for primary wound
-3. Check module titles reflect wound type
-4. Verify activities are wound-specific
+1.  Navigate to Curriculum page
+2.  Verify modules are customized for primary wound
+3.  Check module titles reflect wound type
+4.  Verify activities are wound-specific
 
 **Expected Result:** All modules show personalized content
 
 ### Test 4: Progress Tracking
 
-1. Start a module
-2. Complete an activity
-3. Check progress is saved
-4. Refresh page
-5. Verify progress persists
+1.  Start a module
+2.  Complete an activity
+3.  Check progress is saved
+4.  Refresh page
+5.  Verify progress persists
 
 **Expected Result:** Progress saved and restored correctly
 
@@ -374,13 +382,14 @@ FROM client_progress
 WHERE client_id = 'YOUR_CLIENT_ID';
 ```
 
----
+* * *
 
 ## Admin Operations
 
 ### Creating New Clients
 
 **Option 1: Via SQL**
+
 ```sql
 INSERT INTO clients (pin, name, email, phone, therapist_notes, status)
 VALUES (
@@ -394,6 +403,7 @@ VALUES (
 ```
 
 **Option 2: Via Admin Dashboard** (to be implemented)
+
 ```javascript
 import { clientAuth } from './lib/supabasePersonalization';
 
@@ -452,7 +462,7 @@ DELETE FROM journal_entries WHERE client_id = 'YOUR_CLIENT_ID';
 DELETE FROM parts WHERE client_id = 'YOUR_CLIENT_ID';
 ```
 
----
+* * *
 
 ## Troubleshooting
 
@@ -461,26 +471,30 @@ DELETE FROM parts WHERE client_id = 'YOUR_CLIENT_ID';
 **Symptoms:** Cannot log in with correct PIN
 
 **Solutions:**
-1. Verify PIN in database:
+
+1.  Verify PIN in database:
+
 ```sql
 SELECT pin, name, status FROM clients WHERE pin = 'YOUR_PIN';
 ```
 
-2. Check client status is 'active'
-3. Clear browser cache and localStorage
-4. Check Supabase connection in browser console
+2.  Check client status is 'active'
+3.  Clear browser cache and localStorage
+4.  Check Supabase connection in browser console
 
 ### Issue: Assessment Not Saving
 
 **Symptoms:** Assessment completes but no personalized curriculum
 
 **Solutions:**
-1. Check browser console for errors
-2. Verify Supabase credentials in `supabase.js`
-3. Check RLS policies are enabled
-4. Verify client_id is being passed correctly
+
+1.  Check browser console for errors
+2.  Verify Supabase credentials in `supabase.js`
+3.  Check RLS policies are enabled
+4.  Verify client\_id is being passed correctly
 
 **Debug Query:**
+
 ```sql
 SELECT * FROM assessment_results 
 WHERE client_id = 'YOUR_CLIENT_ID'
@@ -493,26 +507,31 @@ LIMIT 1;
 **Symptoms:** Modules show generic content
 
 **Solutions:**
-1. Verify assessment was saved
-2. Check curriculum generation ran:
+
+1.  Verify assessment was saved
+2.  Check curriculum generation ran:
+
 ```sql
 SELECT COUNT(*) FROM personalized_curriculum 
 WHERE client_id = 'YOUR_CLIENT_ID';
 ```
-3. Check customized_content field is populated
-4. Verify curriculumPersonalizer.js is imported correctly
+
+3.  Check customized\_content field is populated
+4.  Verify curriculumPersonalizer.js is imported correctly
 
 ### Issue: Progress Not Saving
 
 **Symptoms:** Progress resets on page refresh
 
 **Solutions:**
-1. Check client_id is available in component
-2. Verify progressTracker functions are called
-3. Check browser console for Supabase errors
-4. Verify RLS policies allow inserts
+
+1.  Check client\_id is available in component
+2.  Verify progressTracker functions are called
+3.  Check browser console for Supabase errors
+4.  Verify RLS policies allow inserts
 
 **Debug:**
+
 ```javascript
 console.log('Saving progress:', {
   clientId,
@@ -526,12 +545,14 @@ console.log('Saving progress:', {
 **Symptoms:** "Failed to fetch" or CORS errors
 
 **Solutions:**
-1. Verify Supabase URL and key are correct
-2. Check Supabase project is not paused
-3. Verify RLS policies are configured
-4. Check network tab for actual error
+
+1.  Verify Supabase URL and key are correct
+2.  Check Supabase project is not paused
+3.  Verify RLS policies are configured
+4.  Check network tab for actual error
 
 **Test Connection:**
+
 ```javascript
 import { supabase } from './lib/supabase';
 
@@ -544,11 +565,11 @@ const testConnection = async () => {
 };
 ```
 
----
+* * *
 
 ## Performance Optimization
 
-### 1. Enable Caching
+### 1\. Enable Caching
 
 Cache personalized curriculum in localStorage:
 
@@ -580,7 +601,7 @@ const loadPersonalizedCurriculum = async () => {
 };
 ```
 
-### 2. Lazy Load Modules
+### 2\. Lazy Load Modules
 
 Only load module content when accessed:
 
@@ -595,7 +616,7 @@ const loadModule = async (moduleId) => {
 };
 ```
 
-### 3. Batch Progress Updates
+### 3\. Batch Progress Updates
 
 Save progress in batches rather than after each action:
 
@@ -614,18 +635,18 @@ useEffect(() => {
 }, [pendingUpdates]);
 ```
 
----
+* * *
 
 ## Security Best Practices
 
-### 1. PIN Security
+### 1\. PIN Security
 
-- PINs are stored in plain text for therapist access
-- Consider hashing if higher security needed
-- Implement rate limiting on login attempts
-- Log failed login attempts
+-   PINs are stored in plain text for therapist access
+-   Consider hashing if higher security needed
+-   Implement rate limiting on login attempts
+-   Log failed login attempts
 
-### 2. Row Level Security
+### 2\. Row Level Security
 
 All tables have RLS enabled. Clients can only access their own data:
 
@@ -637,65 +658,72 @@ FOR SELECT
 USING (auth.uid()::text = client_id::text);
 ```
 
-### 3. Data Privacy
+### 3\. Data Privacy
 
-- Journal entries are private by default
-- Therapist notes not visible to clients
-- Implement data export for GDPR compliance
+-   Journal entries are private by default
+-   Therapist notes not visible to clients
+-   Implement data export for GDPR compliance
 
-### 4. Session Management
+### 4\. Session Management
 
-- Sessions stored in localStorage
-- Implement session timeout
-- Clear sensitive data on logout
+-   Sessions stored in localStorage
+-   Implement session timeout
+-   Clear sensitive data on logout
 
----
+* * *
 
 ## Next Steps
 
 ### Phase 1: Enhanced Content (Week 1-2)
-- [ ] Research and add comprehensive IFS materials
-- [ ] Integrate latest therapeutic research
-- [ ] Add video/audio resources
-- [ ] Create printable worksheets
+
+-   [ ]  Research and add comprehensive IFS materials
+-   [ ]  Integrate latest therapeutic research
+-   [ ]  Add video/audio resources
+-   [ ]  Create printable worksheets
 
 ### Phase 2: Admin Dashboard (Week 3-4)
-- [ ] Build therapist admin interface
-- [ ] Client management system
-- [ ] Progress monitoring dashboard
-- [ ] Reporting and analytics
+
+-   [ ]  Build therapist admin interface
+-   [ ]  Client management system
+-   [ ]  Progress monitoring dashboard
+-   [ ]  Reporting and analytics
 
 ### Phase 3: Advanced Features (Week 5-6)
-- [ ] Email notifications
-- [ ] Progress reminders
-- [ ] Milestone celebrations
-- [ ] Community features (optional)
+
+-   [ ]  Email notifications
+-   [ ]  Progress reminders
+-   [ ]  Milestone celebrations
+-   [ ]  Community features (optional)
 
 ### Phase 4: Mobile Optimization (Week 7-8)
-- [ ] Responsive design improvements
-- [ ] Touch-friendly interactions
-- [ ] Offline mode support
-- [ ] Progressive Web App features
 
----
+-   [ ]  Responsive design improvements
+-   [ ]  Touch-friendly interactions
+-   [ ]  Offline mode support
+-   [ ]  Progressive Web App features
+
+* * *
 
 ## Support & Resources
 
 ### Documentation
-- [Personalization Framework](./PERSONALIZATION_FRAMEWORK.md)
-- [Database Schema](./supabase_schema.sql)
-- [Supabase Documentation](https://supabase.com/docs)
+
+-   [Personalization Framework](./PERSONALIZATION_FRAMEWORK.md)
+-   [Database Schema](./supabase_schema.sql)
+-   [Supabase Documentation](https://supabase.com/docs)
 
 ### Getting Help
-- Check browser console for errors
-- Review Supabase logs in dashboard
-- Test queries in SQL Editor
-- Verify RLS policies
+
+-   Check browser console for errors
+-   Review Supabase logs in dashboard
+-   Test queries in SQL Editor
+-   Verify RLS policies
 
 ### Contact
+
 For implementation support or questions about the personalization system, refer to the framework documentation or create an issue in the repository.
 
----
+* * *
 
 **Last Updated:** December 2025  
 **Version:** 1.0  

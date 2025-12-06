@@ -16,7 +16,7 @@ export const supabaseHelpers = {
   // Module Progress Functions
   async saveModuleProgress(userId, moduleId, progress) {
     const { data, error } = await supabase
-      .from('module_progress')
+      .from('IFS_module_progress')
       .upsert({
         user_id: userId,
         module_id: moduleId,
@@ -36,7 +36,7 @@ export const supabaseHelpers = {
 
   async getModuleProgress(userId, moduleId) {
     const { data, error } = await supabase
-      .from('module_progress')
+      .from('IFS_module_progress')
       .select('*')
       .eq('user_id', userId)
       .eq('module_id', moduleId)
@@ -48,7 +48,7 @@ export const supabaseHelpers = {
 
   async getAllModuleProgress(userId) {
     const { data, error } = await supabase
-      .from('module_progress')
+      .from('IFS_module_progress')
       .select('*')
       .eq('user_id', 'anonymous');
     
@@ -59,7 +59,7 @@ export const supabaseHelpers = {
   // Interactive Data Functions
   async saveInteractiveData(userId, moduleId, data) {
     const { error } = await supabase
-      .from('interactive_data')
+      .from('IFS_interactive_data')
       .upsert({
         user_id: userId,
         module_id: moduleId,
@@ -75,7 +75,7 @@ export const supabaseHelpers = {
 
   async getInteractiveData(userId, moduleId) {
     const { data, error } = await supabase
-      .from('interactive_data')
+      .from('IFS_interactive_data')
       .select('data')
       .eq('user_id', userId)
       .eq('module_id', moduleId)
@@ -88,7 +88,7 @@ export const supabaseHelpers = {
   // Assessment Results Functions
   async saveAssessment(userId, assessmentData) {
     const { data, error } = await supabase
-      .from('assessment_results')
+      .from('IFS_assessment_results')
       .upsert({
         user_id: userId,
         ...assessmentData,
@@ -101,7 +101,7 @@ export const supabaseHelpers = {
 
   async getAssessment(userId) {
     const { data, error } = await supabase
-      .from('assessment_results')
+      .from('IFS_assessment_results')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
@@ -115,7 +115,7 @@ export const supabaseHelpers = {
   // Journal Functions
   async saveJournalEntry(userId, entry) {
     const { data, error } = await supabase
-      .from('journal_entries')
+      .from('IFS_journal_entries')
       .insert({
         user_id: userId,
         title: entry.title,
@@ -131,7 +131,7 @@ export const supabaseHelpers = {
 
   async getJournalEntries(userId) {
     const { data, error } = await supabase
-      .from('journal_entries')
+      .from('IFS_journal_entries')
       .select('*')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
@@ -143,7 +143,7 @@ export const supabaseHelpers = {
   // Parts Mapping Functions
   async savePart(userId, partData) {
     const { data, error } = await supabase
-      .from('parts')
+      .from('IFS_parts')
       .upsert({
         user_id: userId,
         id: partData.id,
@@ -163,7 +163,7 @@ export const supabaseHelpers = {
 
   async getParts(userId) {
     const { data, error } = await supabase
-      .from('parts')
+      .from('IFS_parts')
       .select('*')
       .eq('user_id', userId)
       .order('updated_at', { ascending: false });
@@ -175,7 +175,7 @@ export const supabaseHelpers = {
   // Exercise Progress Functions
   async saveExerciseProgress(userId, exerciseId, progress) {
     const { data, error } = await supabase
-      .from('exercise_progress')
+      .from('IFS_exercise_progress')
       .upsert({
         user_id: userId,
         exercise_id: exerciseId,
@@ -193,7 +193,7 @@ export const supabaseHelpers = {
 
   async getExerciseProgress(userId) {
     const { data, error } = await supabase
-      .from('exercise_progress')
+      .from('IFS_exercise_progress')
       .select('*')
       .eq('user_id', userId);
     
@@ -204,7 +204,7 @@ export const supabaseHelpers = {
   // User Functions
   async getUserData(userId) {
     const { data, error } = await supabase
-      .from('users')
+      .from('IFS_users')
       .select('*')
       .eq('id', userId)
       .single();
@@ -215,7 +215,7 @@ export const supabaseHelpers = {
 
   async saveUserData(userId, userData) {
     const { data, error } = await supabase
-      .from('users')
+      .from('IFS_users')
       .upsert({
         id: userId,
         ...userData,

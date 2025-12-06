@@ -1,14 +1,15 @@
 -- =====================================================
 -- IFS Personalized Curriculum Database Schema
+-- All tables prefixed with IFS_ for namespace clarity
 -- =====================================================
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- =====================================================
--- 1. CLIENTS TABLE
+-- 1. IFS_CLIENTS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS clients (
+CREATE TABLE IF NOT EXISTS IFS_clients (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   pin VARCHAR(6) UNIQUE NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -22,15 +23,15 @@ CREATE TABLE IF NOT EXISTS clients (
 );
 
 -- Index for faster PIN lookups
-CREATE INDEX idx_clients_pin ON clients(pin);
-CREATE INDEX idx_clients_status ON clients(status);
+CREATE INDEX idx_IFS_clients_pin ON IFS_clients(pin);
+CREATE INDEX idx_IFS_clients_status ON IFS_clients(status);
 
 -- =====================================================
--- 2. ASSESSMENT RESULTS TABLE
+-- 2. IFS_ASSESSMENT_RESULTS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS assessment_results (
+CREATE TABLE IF NOT EXISTS IFS_assessment_results (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES IFS_clients(id) ON DELETE CASCADE,
   
   -- Wound scores (0-24 each)
   abandonment_score INTEGER CHECK (abandonment_score >= 0 AND abandonment_score <= 24),
@@ -60,17 +61,17 @@ CREATE TABLE IF NOT EXISTS assessment_results (
 );
 
 -- Indexes
-CREATE INDEX idx_assessment_client ON assessment_results(client_id);
-CREATE INDEX idx_assessment_primary_wound ON assessment_results(primary_wound);
-CREATE INDEX idx_assessment_date ON assessment_results(assessment_date DESC);
+CREATE INDEX idx_IFS_assessment_client ON IFS_assessment_results(client_id);
+CREATE INDEX idx_IFS_assessment_primary_wound ON IFS_assessment_results(primary_wound);
+CREATE INDEX idx_IFS_assessment_date ON IFS_assessment_results(assessment_date DESC);
 
 -- =====================================================
--- 3. PERSONALIZED CURRICULUM TABLE
+-- 3. IFS_PERSONALIZED_CURRICULUM TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS personalized_curriculum (
+CREATE TABLE IF NOT EXISTS IFS_personalized_curriculum (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
-  assessment_id UUID REFERENCES assessment_results(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES IFS_clients(id) ON DELETE CASCADE,
+  assessment_id UUID REFERENCES IFS_assessment_results(id) ON DELETE CASCADE,
   
   -- Module information
   module_id VARCHAR(100) NOT NULL,
@@ -100,16 +101,16 @@ CREATE TABLE IF NOT EXISTS personalized_curriculum (
 );
 
 -- Indexes
-CREATE INDEX idx_curriculum_client ON personalized_curriculum(client_id);
-CREATE INDEX idx_curriculum_module ON personalized_curriculum(module_id);
-CREATE INDEX idx_curriculum_order ON personalized_curriculum(client_id, module_order);
+CREATE INDEX idx_IFS_curriculum_client ON IFS_personalized_curriculum(client_id);
+CREATE INDEX idx_IFS_curriculum_module ON IFS_personalized_curriculum(module_id);
+CREATE INDEX idx_IFS_curriculum_order ON IFS_personalized_curriculum(client_id, module_order);
 
 -- =====================================================
--- 4. CLIENT PROGRESS TABLE
+-- 4. IFS_CLIENT_PROGRESS TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS client_progress (
+CREATE TABLE IF NOT EXISTS IFS_client_progress (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES IFS_clients(id) ON DELETE CASCADE,
   module_id VARCHAR(100) NOT NULL,
   
   -- Progress tracking
@@ -141,17 +142,17 @@ CREATE TABLE IF NOT EXISTS client_progress (
 );
 
 -- Indexes
-CREATE INDEX idx_progress_client ON client_progress(client_id);
-CREATE INDEX idx_progress_module ON client_progress(client_id, module_id);
-CREATE INDEX idx_progress_completed ON client_progress(completed);
-CREATE INDEX idx_progress_activity ON client_progress(activity_id);
+CREATE INDEX idx_IFS_progress_client ON IFS_client_progress(client_id);
+CREATE INDEX idx_IFS_progress_module ON IFS_client_progress(client_id, module_id);
+CREATE INDEX idx_IFS_progress_completed ON IFS_client_progress(completed);
+CREATE INDEX idx_IFS_progress_activity ON IFS_client_progress(activity_id);
 
 -- =====================================================
--- 5. JOURNAL ENTRIES TABLE (Enhanced)
+-- 5. IFS_JOURNAL_ENTRIES TABLE (Enhanced)
 -- =====================================================
-CREATE TABLE IF NOT EXISTS journal_entries (
+CREATE TABLE IF NOT EXISTS IFS_journal_entries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES IFS_clients(id) ON DELETE CASCADE,
   
   -- Entry content
   title VARCHAR(255),
@@ -183,17 +184,17 @@ CREATE TABLE IF NOT EXISTS journal_entries (
 );
 
 -- Indexes
-CREATE INDEX idx_journal_client ON journal_entries(client_id);
-CREATE INDEX idx_journal_date ON journal_entries(created_at DESC);
-CREATE INDEX idx_journal_wound ON journal_entries(related_wound);
-CREATE INDEX idx_journal_breakthrough ON journal_entries(is_breakthrough);
+CREATE INDEX idx_IFS_journal_client ON IFS_journal_entries(client_id);
+CREATE INDEX idx_IFS_journal_date ON IFS_journal_entries(created_at DESC);
+CREATE INDEX idx_IFS_journal_wound ON IFS_journal_entries(related_wound);
+CREATE INDEX idx_IFS_journal_breakthrough ON IFS_journal_entries(is_breakthrough);
 
 -- =====================================================
--- 6. PARTS MAPPING TABLE (Enhanced)
+-- 6. IFS_PARTS TABLE (Enhanced)
 -- =====================================================
-CREATE TABLE IF NOT EXISTS parts (
+CREATE TABLE IF NOT EXISTS IFS_parts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES IFS_clients(id) ON DELETE CASCADE,
   
   -- Part identification
   part_name VARCHAR(255) NOT NULL,
@@ -235,17 +236,17 @@ CREATE TABLE IF NOT EXISTS parts (
 );
 
 -- Indexes
-CREATE INDEX idx_parts_client ON parts(client_id);
-CREATE INDEX idx_parts_type ON parts(part_type);
-CREATE INDEX idx_parts_wound ON parts(related_wound);
-CREATE INDEX idx_parts_unburdening ON parts(unburdening_status);
+CREATE INDEX idx_IFS_parts_client ON IFS_parts(client_id);
+CREATE INDEX idx_IFS_parts_type ON IFS_parts(part_type);
+CREATE INDEX idx_IFS_parts_wound ON IFS_parts(related_wound);
+CREATE INDEX idx_IFS_parts_unburdening ON IFS_parts(unburdening_status);
 
 -- =====================================================
--- 7. EXERCISE PROGRESS TABLE (Enhanced)
+-- 7. IFS_EXERCISE_PROGRESS TABLE (Enhanced)
 -- =====================================================
-CREATE TABLE IF NOT EXISTS exercise_progress (
+CREATE TABLE IF NOT EXISTS IFS_exercise_progress (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES IFS_clients(id) ON DELETE CASCADE,
   
   -- Exercise identification
   exercise_id VARCHAR(100) NOT NULL,
@@ -283,16 +284,16 @@ CREATE TABLE IF NOT EXISTS exercise_progress (
 );
 
 -- Indexes
-CREATE INDEX idx_exercise_client ON exercise_progress(client_id);
-CREATE INDEX idx_exercise_completed ON exercise_progress(completed);
-CREATE INDEX idx_exercise_type ON exercise_progress(exercise_type);
+CREATE INDEX idx_IFS_exercise_client ON IFS_exercise_progress(client_id);
+CREATE INDEX idx_IFS_exercise_completed ON IFS_exercise_progress(completed);
+CREATE INDEX idx_IFS_exercise_type ON IFS_exercise_progress(exercise_type);
 
 -- =====================================================
--- 8. THERAPIST NOTES TABLE
+-- 8. IFS_THERAPIST_NOTES TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS therapist_notes (
+CREATE TABLE IF NOT EXISTS IFS_therapist_notes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES IFS_clients(id) ON DELETE CASCADE,
   
   -- Note content
   note_type VARCHAR(50), -- session_note, observation, recommendation, milestone
@@ -317,16 +318,16 @@ CREATE TABLE IF NOT EXISTS therapist_notes (
 );
 
 -- Indexes
-CREATE INDEX idx_therapist_notes_client ON therapist_notes(client_id);
-CREATE INDEX idx_therapist_notes_type ON therapist_notes(note_type);
-CREATE INDEX idx_therapist_notes_follow_up ON therapist_notes(requires_follow_up, follow_up_completed);
+CREATE INDEX idx_IFS_therapist_notes_client ON IFS_therapist_notes(client_id);
+CREATE INDEX idx_IFS_therapist_notes_type ON IFS_therapist_notes(note_type);
+CREATE INDEX idx_IFS_therapist_notes_follow_up ON IFS_therapist_notes(requires_follow_up, follow_up_completed);
 
 -- =====================================================
--- 9. MILESTONES TABLE
+-- 9. IFS_MILESTONES TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS milestones (
+CREATE TABLE IF NOT EXISTS IFS_milestones (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  client_id UUID REFERENCES IFS_clients(id) ON DELETE CASCADE,
   
   -- Milestone details
   milestone_type VARCHAR(50), -- module_completion, breakthrough, unburdening, integration
@@ -350,14 +351,14 @@ CREATE TABLE IF NOT EXISTS milestones (
 );
 
 -- Indexes
-CREATE INDEX idx_milestones_client ON milestones(client_id);
-CREATE INDEX idx_milestones_type ON milestones(milestone_type);
-CREATE INDEX idx_milestones_date ON milestones(achieved_at DESC);
+CREATE INDEX idx_IFS_milestones_client ON IFS_milestones(client_id);
+CREATE INDEX idx_IFS_milestones_type ON IFS_milestones(milestone_type);
+CREATE INDEX idx_IFS_milestones_date ON IFS_milestones(achieved_at DESC);
 
 -- =====================================================
--- 10. CONTENT LIBRARY TABLE
+-- 10. IFS_CONTENT_LIBRARY TABLE
 -- =====================================================
-CREATE TABLE IF NOT EXISTS content_library (
+CREATE TABLE IF NOT EXISTS IFS_content_library (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   
   -- Content identification
@@ -392,10 +393,10 @@ CREATE TABLE IF NOT EXISTS content_library (
 );
 
 -- Indexes
-CREATE INDEX idx_content_type ON content_library(content_type);
-CREATE INDEX idx_content_wounds ON content_library USING GIN(wound_types);
-CREATE INDEX idx_content_modules ON content_library USING GIN(module_ids);
-CREATE INDEX idx_content_active ON content_library(is_active);
+CREATE INDEX idx_IFS_content_type ON IFS_content_library(content_type);
+CREATE INDEX idx_IFS_content_wounds ON IFS_content_library USING GIN(wound_types);
+CREATE INDEX idx_IFS_content_modules ON IFS_content_library USING GIN(module_ids);
+CREATE INDEX idx_IFS_content_active ON IFS_content_library(is_active);
 
 -- =====================================================
 -- FUNCTIONS AND TRIGGERS
@@ -411,35 +412,35 @@ END;
 $$ language 'plpgsql';
 
 -- Apply updated_at trigger to relevant tables
-CREATE TRIGGER update_clients_updated_at BEFORE UPDATE ON clients
+CREATE TRIGGER update_IFS_clients_updated_at BEFORE UPDATE ON IFS_clients
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_personalized_curriculum_updated_at BEFORE UPDATE ON personalized_curriculum
+CREATE TRIGGER update_IFS_personalized_curriculum_updated_at BEFORE UPDATE ON IFS_personalized_curriculum
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_client_progress_updated_at BEFORE UPDATE ON client_progress
+CREATE TRIGGER update_IFS_client_progress_updated_at BEFORE UPDATE ON IFS_client_progress
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_journal_entries_updated_at BEFORE UPDATE ON journal_entries
+CREATE TRIGGER update_IFS_journal_entries_updated_at BEFORE UPDATE ON IFS_journal_entries
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_parts_updated_at BEFORE UPDATE ON parts
+CREATE TRIGGER update_IFS_parts_updated_at BEFORE UPDATE ON IFS_parts
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_exercise_progress_updated_at BEFORE UPDATE ON exercise_progress
+CREATE TRIGGER update_IFS_exercise_progress_updated_at BEFORE UPDATE ON IFS_exercise_progress
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_therapist_notes_updated_at BEFORE UPDATE ON therapist_notes
+CREATE TRIGGER update_IFS_therapist_notes_updated_at BEFORE UPDATE ON IFS_therapist_notes
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_content_library_updated_at BEFORE UPDATE ON content_library
+CREATE TRIGGER update_IFS_content_library_updated_at BEFORE UPDATE ON IFS_content_library
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Function to update client last_active
 CREATE OR REPLACE FUNCTION update_client_last_active()
 RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE clients 
+    UPDATE IFS_clients 
     SET last_active = NOW() 
     WHERE id = NEW.client_id;
     RETURN NEW;
@@ -447,10 +448,10 @@ END;
 $$ language 'plpgsql';
 
 -- Apply last_active trigger
-CREATE TRIGGER update_last_active_on_progress AFTER INSERT OR UPDATE ON client_progress
+CREATE TRIGGER update_last_active_on_progress AFTER INSERT OR UPDATE ON IFS_client_progress
     FOR EACH ROW EXECUTE FUNCTION update_client_last_active();
 
-CREATE TRIGGER update_last_active_on_journal AFTER INSERT ON journal_entries
+CREATE TRIGGER update_last_active_on_journal AFTER INSERT ON IFS_journal_entries
     FOR EACH ROW EXECUTE FUNCTION update_client_last_active();
 
 -- =====================================================
@@ -458,7 +459,7 @@ CREATE TRIGGER update_last_active_on_journal AFTER INSERT ON journal_entries
 -- =====================================================
 
 -- Client dashboard view
-CREATE OR REPLACE VIEW client_dashboard AS
+CREATE OR REPLACE VIEW IFS_client_dashboard AS
 SELECT 
     c.id as client_id,
     c.name,
@@ -473,16 +474,16 @@ SELECT
     COUNT(DISTINCT je.id) as journal_entries_count,
     COUNT(DISTINCT p.id) as parts_identified,
     MAX(cp.last_accessed) as last_module_access
-FROM clients c
-LEFT JOIN assessment_results ar ON c.id = ar.client_id
-LEFT JOIN client_progress cp ON c.id = cp.client_id
-LEFT JOIN journal_entries je ON c.id = je.client_id
-LEFT JOIN parts p ON c.id = p.client_id
+FROM IFS_clients c
+LEFT JOIN IFS_assessment_results ar ON c.id = ar.client_id
+LEFT JOIN IFS_client_progress cp ON c.id = cp.client_id
+LEFT JOIN IFS_journal_entries je ON c.id = je.client_id
+LEFT JOIN IFS_parts p ON c.id = p.client_id
 GROUP BY c.id, c.name, c.pin, c.status, c.last_active, 
          ar.primary_wound, ar.secondary_wound, ar.assessment_date;
 
 -- Module progress view
-CREATE OR REPLACE VIEW module_progress_summary AS
+CREATE OR REPLACE VIEW IFS_module_progress_summary AS
 SELECT 
     cp.client_id,
     cp.module_id,
@@ -494,8 +495,8 @@ SELECT
     MIN(cp.started_at) as module_started,
     MAX(cp.completed_at) as last_activity_completed,
     SUM(cp.time_spent_minutes) as total_time_spent
-FROM client_progress cp
-JOIN personalized_curriculum pc ON cp.client_id = pc.client_id AND cp.module_id = pc.module_id
+FROM IFS_client_progress cp
+JOIN IFS_personalized_curriculum pc ON cp.client_id = pc.client_id AND cp.module_id = pc.module_id
 GROUP BY cp.client_id, cp.module_id, pc.module_title, pc.primary_wound_focus;
 
 -- =====================================================
@@ -503,7 +504,7 @@ GROUP BY cp.client_id, cp.module_id, pc.module_title, pc.primary_wound_focus;
 -- =====================================================
 
 -- Insert sample client
-INSERT INTO clients (pin, name, email, status) VALUES
+INSERT INTO IFS_clients (pin, name, email, status) VALUES
 ('123456', 'Test Client', 'test@example.com', 'active');
 
 -- =====================================================
@@ -511,47 +512,47 @@ INSERT INTO clients (pin, name, email, status) VALUES
 -- =====================================================
 
 -- Enable RLS on all tables
-ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
-ALTER TABLE assessment_results ENABLE ROW LEVEL SECURITY;
-ALTER TABLE personalized_curriculum ENABLE ROW LEVEL SECURITY;
-ALTER TABLE client_progress ENABLE ROW LEVEL SECURITY;
-ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
-ALTER TABLE parts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE exercise_progress ENABLE ROW LEVEL SECURITY;
-ALTER TABLE therapist_notes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE milestones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_assessment_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_personalized_curriculum ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_client_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_journal_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_parts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_exercise_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_therapist_notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IFS_milestones ENABLE ROW LEVEL SECURITY;
 
 -- Policies for clients (clients can only see their own data)
-CREATE POLICY "Clients can view own data" ON clients
+CREATE POLICY "Clients can view own data" ON IFS_clients
     FOR SELECT USING (auth.uid()::text = id::text);
 
-CREATE POLICY "Clients can update own data" ON clients
+CREATE POLICY "Clients can update own data" ON IFS_clients
     FOR UPDATE USING (auth.uid()::text = id::text);
 
 -- Similar policies for other tables
-CREATE POLICY "Clients can view own assessment" ON assessment_results
+CREATE POLICY "Clients can view own assessment" ON IFS_assessment_results
     FOR SELECT USING (auth.uid()::text = client_id::text);
 
-CREATE POLICY "Clients can view own curriculum" ON personalized_curriculum
+CREATE POLICY "Clients can view own curriculum" ON IFS_personalized_curriculum
     FOR SELECT USING (auth.uid()::text = client_id::text);
 
-CREATE POLICY "Clients can manage own progress" ON client_progress
+CREATE POLICY "Clients can manage own progress" ON IFS_client_progress
     FOR ALL USING (auth.uid()::text = client_id::text);
 
-CREATE POLICY "Clients can manage own journal" ON journal_entries
+CREATE POLICY "Clients can manage own journal" ON IFS_journal_entries
     FOR ALL USING (auth.uid()::text = client_id::text);
 
-CREATE POLICY "Clients can manage own parts" ON parts
+CREATE POLICY "Clients can manage own parts" ON IFS_parts
     FOR ALL USING (auth.uid()::text = client_id::text);
 
-CREATE POLICY "Clients can manage own exercise progress" ON exercise_progress
+CREATE POLICY "Clients can manage own exercise progress" ON IFS_exercise_progress
     FOR ALL USING (auth.uid()::text = client_id::text);
 
-CREATE POLICY "Clients can view own milestones" ON milestones
+CREATE POLICY "Clients can view own milestones" ON IFS_milestones
     FOR SELECT USING (auth.uid()::text = client_id::text);
 
 -- Content library is public (read-only for clients)
-CREATE POLICY "Anyone can view active content" ON content_library
+CREATE POLICY "Anyone can view active content" ON IFS_content_library
     FOR SELECT USING (is_active = true);
 
 -- =====================================================
