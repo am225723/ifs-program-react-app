@@ -951,4 +951,45 @@ const Home = () => {
   );
 };
 
+import { assessmentManager, curriculumManager } from '../lib/supabasePersonalization';
+import { curriculumModules } from '../data/curriculumData';
+
+// In the calculateResults function:
+const calculateResults = async () => {
+  const results = woundSections.map(section => ({
+    ...section,
+    score: calculateSectionScore(section),
+    maxScore: 24
+  }));
+
+  results.sort((a, b) => b.score - a.score);
+  setAssessmentResults(results);
+
+  // Save to Supabase
+  if (clientId) {
+    const assessmentData = {
+      abandonment_score: results.find(r => r.id === 'abandonment')?.score || 0,
+      shame_score: results.find(r => r.id === 'shame')?.score || 0,
+      neglect_score: results.find(r => r.id === 'neglect')?.score || 0,
+      betrayal_score: results.find(r => r.id === 'betrayal')?.score || 0,
+      responses: answers,
+      protector_types: [] // Extract from answers
+    };
+
+    const saveResult = await assessmentManager.saveAssessmentResults(
+      clientId,
+      assessmentData
+    );
+
+    if (saveResult.success) {
+      // Generate personalized curriculum
+      await curriculumManager.generateAndSaveCurriculum(
+        clientId,
+        saveResult.assessment,
+        curriculumModules
+      );
+    }
+  }
+};
+
 export default Home;
