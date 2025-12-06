@@ -2,6 +2,75 @@
  * Curriculum Personalization Engine
  * Generates customized curriculum based on child wound assessment results
  */
+import { useEffect, useState } from 'react';
+import { curriculumManager } from '../lib/supabasePersonalization';
+
+const CurriculumSystem = ({ clientId }) => {
+  const [personalizedModules, setPersonalizedModules] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPersonalizedCurriculum();
+  }, [clientId]);
+
+  const loadPersonalizedCurriculum = async () => {
+    if (!clientId) return;
+
+    const result = await curriculumManager.getPersonalizedCurriculum(clientId);
+    if (result.success) {
+      setPersonalizedModules(result.modules);
+    }
+    setLoading(false);
+  };
+
+  if (loading) {
+    return <div>Loading your personalized curriculum...</div>;
+  }
+
+  return (
+    <div>
+      {/* Render personalized modules */}
+      {personalizedModules.map(module => (
+        <ModuleCard key={module.id} module={module.customized_content} />
+      ))}
+    </div>
+  );
+};
+
+import { useEffect, useState } from 'react';
+import { curriculumManager } from '../lib/supabasePersonalization';
+
+const CurriculumSystem = ({ clientId }) => {
+  const [personalizedModules, setPersonalizedModules] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPersonalizedCurriculum();
+  }, [clientId]);
+
+  const loadPersonalizedCurriculum = async () => {
+    if (!clientId) return;
+
+    const result = await curriculumManager.getPersonalizedCurriculum(clientId);
+    if (result.success) {
+      setPersonalizedModules(result.modules);
+    }
+    setLoading(false);
+  };
+
+  if (loading) {
+    return <div>Loading your personalized curriculum...</div>;
+  }
+
+  return (
+    <div>
+      {/* Render personalized modules */}
+      {personalizedModules.map(module => (
+        <ModuleCard key={module.id} module={module.customized_content} />
+      ))}
+    </div>
+  );
+};
 
 // Wound type constants
 export const WOUND_TYPES = {
