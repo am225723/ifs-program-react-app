@@ -48,6 +48,30 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
   const isLastStep = currentStepIndex === steps.length - 1;
   const isFirstStep = currentStepIndex === 0;
 
+  import { progressTracker } from '../lib/supabasePersonalization';
+
+// When activity is completed:
+const handleActivityComplete = async (activityId, responses) => {
+  const progressData = {
+    activityId,
+    activityType: 'reflection',
+    currentStep: currentStep,
+    totalSteps: module.steps.length,
+    completedSteps: [...completedSteps, currentStep],
+    completed: true,
+    responses,
+    notes: userNotes,
+    insights: userInsights,
+    timeSpent: calculateTimeSpent()
+  };
+
+  await progressTracker.saveModuleProgress(
+    clientId,
+    module.id,
+    progressData
+  );
+};
+
   // Load saved progress from Supabase
   useEffect(() => {
     const loadProgress = async () => {
