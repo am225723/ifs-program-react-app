@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://froxodstewdswllgokmu.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyb3hvZHN0ZXdkc3dsbGdva211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzNjgyODUsImV4cCI6MjA3Njk0NDI4NV0.PUr1-cq71PZUFsudz7lzSs3IWMzSxomNqBwlxkCG02s';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyb3hvZHN0ZXdkc3dsbGdva211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzNjgyODUsImV4cCI6MjA3Njk0NDI4NX0.PUr1-cq71PZUFsudz7lzSs3IWMzSxomNqBwlxkCG02s';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -16,9 +16,9 @@ export const supabaseHelpers = {
   // Module Progress Functions
   async saveModuleProgress(userId, moduleId, progress) {
     const { data, error } = await supabase
-      .from('IFS_module_progress')
+      .from('IFS_client_progress')
       .upsert({
-        user_id: userId,
+        client_id: userId,
         module_id: moduleId,
         current_step: progress.currentStep || 0,
         responses: progress.responses || {},
@@ -27,7 +27,7 @@ export const supabaseHelpers = {
         is_completed: progress.isCompleted || false,
         updated_at: new Date().toISOString()
       }, {
-        onConflict: 'user_id,module_id'
+        onConflict: 'client_id,module_id'
       });
     
     if (error) console.error('Error saving module progress:', error);
@@ -36,9 +36,9 @@ export const supabaseHelpers = {
 
   async getModuleProgress(userId, moduleId) {
     const { data, error } = await supabase
-      .from('IFS_module_progress')
+      .from('IFS_client_progress')
       .select('*')
-      .eq('user_id', userId)
+      .eq('client_id', userId)
       .eq('module_id', moduleId)
       .single();
     
@@ -48,9 +48,9 @@ export const supabaseHelpers = {
 
   async getAllModuleProgress(userId) {
     const { data, error } = await supabase
-      .from('IFS_module_progress')
+      .from('IFS_client_progress')
       .select('*')
-      .eq('user_id', 'anonymous');
+      .eq('client_id', 'anonymous');
     
     if (error) console.error('Error fetching all progress:', error);
     return data || [];
@@ -61,12 +61,12 @@ export const supabaseHelpers = {
     const { error } = await supabase
       .from('IFS_interactive_data')
       .upsert({
-        user_id: userId,
+        client_id: userId,
         module_id: moduleId,
         data: data,
         updated_at: new Date().toISOString()
       }, {
-        onConflict: 'user_id,module_id'
+        onConflict: 'client_id,module_id'
       });
     
     if (error) console.error('Error saving interactive data:', error);
@@ -77,7 +77,7 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_interactive_data')
       .select('data')
-      .eq('user_id', userId)
+      .eq('client_id', userId)
       .eq('module_id', moduleId)
       .single();
     
@@ -90,7 +90,7 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_assessment_results')
       .upsert({
-        user_id: userId,
+        client_id: userId,
         ...assessmentData,
         created_at: new Date().toISOString()
       });
@@ -103,7 +103,7 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_assessment_results')
       .select('*')
-      .eq('user_id', userId)
+      .eq('client_id', userId)
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
@@ -117,7 +117,7 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_journal_entries')
       .insert({
-        user_id: userId,
+        client_id: userId,
         title: entry.title,
         content: entry.content,
         mood: entry.mood,
@@ -133,7 +133,7 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_journal_entries')
       .select('*')
-      .eq('user_id', userId)
+      .eq('client_id', userId)
       .order('created_at', { ascending: false });
     
     if (error) console.error('Error fetching journal entries:', error);
@@ -145,7 +145,7 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_parts')
       .upsert({
-        user_id: userId,
+        client_id: userId,
         id: partData.id,
         name: partData.name,
         role: partData.role,
@@ -154,7 +154,7 @@ export const supabaseHelpers = {
         positive_intentions: partData.positiveIntentions,
         updated_at: new Date().toISOString()
       }, {
-        onConflict: 'user_id,id'
+        onConflict: 'client_id,id'
       });
     
     if (error) console.error('Error saving part:', error);
@@ -165,7 +165,7 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_parts')
       .select('*')
-      .eq('user_id', userId)
+      .eq('client_id', userId)
       .order('updated_at', { ascending: false });
     
     if (error) console.error('Error fetching parts:', error);
@@ -177,14 +177,14 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_exercise_progress')
       .upsert({
-        user_id: userId,
+        client_id: userId,
         exercise_id: exerciseId,
         completed: progress.completed,
         notes: progress.notes,
         completion_time: progress.completionTime,
         updated_at: new Date().toISOString()
       }, {
-        onConflict: 'user_id,exercise_id'
+        onConflict: 'client_id,exercise_id'
       });
     
     if (error) console.error('Error saving exercise progress:', error);
@@ -195,27 +195,27 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('IFS_exercise_progress')
       .select('*')
-      .eq('user_id', userId);
+      .eq('client_id', userId);
     
     if (error) console.error('Error fetching exercise progress:', error);
     return data || [];
   },
 
-  // User Functions
-  async getUserData(userId) {
+  // Client Functions
+  async getClientData(userId) {
     const { data, error } = await supabase
-      .from('IFS_users')
+      .from('IFS_clients')
       .select('*')
       .eq('id', userId)
       .single();
     
-    if (error && error.code !== 'PGRST116') console.error('Error fetching user data:', error);
+    if (error && error.code !== 'PGRST116') console.error('Error fetching client data:', error);
     return data;
   },
 
-  async saveUserData(userId, userData) {
+  async saveClientData(userId, userData) {
     const { data, error } = await supabase
-      .from('IFS_users')
+      .from('IFS_clients')
       .upsert({
         id: userId,
         ...userData,
@@ -224,7 +224,7 @@ export const supabaseHelpers = {
         onConflict: 'id'
       });
     
-    if (error) console.error('Error saving user data:', error);
+    if (error) console.error('Error saving client data:', error);
     return data;
   },
 
