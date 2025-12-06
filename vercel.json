@@ -48,7 +48,5 @@
         }
       ]
     }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false
+  ]
 }
