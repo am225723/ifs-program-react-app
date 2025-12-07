@@ -14,30 +14,36 @@ export const clientAuth = {
         .from('ifs_clients')
         .select('*')
         .eq('pin', pin)
-        .eq('status', 'active')
-        .single();
+        .eq('status', 'active');
 
       if (error) {
         console.error('PIN authentication error:', error);
         return { success: false, error: 'Invalid PIN' };
       }
 
-      if (!data) {
+      if (!data || data.length === 0) {
         return { success: false, error: 'Invalid PIN' };
       }
+
+      // Handle multiple results - take the most recently created/updated
+      const client = data.length === 1 ? data[0] : data.reduce((mostRecent, current) => {
+        return new Date(current.created_at || current.updated_at) > new Date(mostRecent.created_at || mostRecent.updated_at) 
+          ? current 
+          : mostRecent;
+      });
 
       // Update last active
       await supabase
         .from('ifs_clients')
         .update({ last_active: new Date().toISOString() })
-        .eq('id', data.id);
+        .eq('id', client.id);
 
       // Store client session
-      localStorage.setItem('client_id', data.id);
+      localStorage.setItem('client_id', client.id);
       localStorage.setItem('client_pin', pin);
-      localStorage.setItem('client_name', data.name);
+      localStorage.setItem('client_name', client.name);
 
-      return { success: true, client: data };
+      return { success: true, client };
     } catch (error) {
       console.error('Authentication error:', error);
       return { success: false, error: 'Authentication failed' };
@@ -76,7 +82,23 @@ export const clientAuth = {
   async createClient(clientData) {
     try {
       // Generate unique 6-digit PIN
-      const pin = Math.floor(100000 + Math.random() * 900000).toString();
+      let pin;
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      do {
+        pin = Math.floor(100000 + Math.random() * 900000).toString();
+        const { data: existingPin } = await supabase
+          .from('ifs_clients')
+          .select('id')
+          .eq('pin', pin)
+          .single();
+        
+        if (!existingPin || attempts >= maxAttempts) {
+          break; // Found unique PIN or max attempts reached
+        }
+        attempts++;
+      } while (true);
 
       const { data, error } = await supabase
         .from('ifs_clients')
@@ -96,6 +118,108 @@ export const clientAuth = {
       return { success: true, client: data, pin };
     } catch (error) {
       console.error('Error creating client:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Check for duplicate PINs (admin function)
+   */
+  async findDuplicatePINs() {
+    try {
+      const { data, error } = await supabase
+        .from('ifs_clients')
+        .select('pin, id, name, status, created_at')
+        .eq('status', 'active');
+
+      if (error) throw error;
+
+      // Find PINs that appear more than once
+      const pinCounts = {};
+      const duplicates = [];
+
+      data.forEach(client => {
+        pinCounts[client.pin] = (pinCounts[client.pin] || 0) + 1;
+      });
+
+      Object.entries(pinCounts).forEach(([pin, count]) => {
+        if (count > 1) {
+          const duplicateClients = data.filter(client => client.pin === pin);
+          duplicates.push({
+            pin,
+            count,
+            clients: duplicateClients
+          });
+        }
+      });
+
+      return { success: true, duplicates };
+    } catch (error) {
+      console.error('Error finding duplicate PINs:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Fix duplicate PINs by reassigning new PINs (admin function)
+   */
+  async fixDuplicatePINs() {
+    try {
+      const { success, duplicates } = await this.findDuplicatePINs();
+      
+      if (!success) {
+        return { success: false, error: 'Could not find duplicates' };
+      }
+
+      const fixedClients = [];
+
+      for (const duplicate of duplicates) {
+        // Keep the oldest client with this PIN, reassign others
+        const clientsToKeep = duplicate.clients.sort((a, b) => 
+          new Date(a.created_at) - new Date(b.created_at)
+        ).slice(1); // Keep the oldest, reassign the rest
+
+        for (const client of clientsToKeep) {
+          // Generate new unique PIN
+          let newPin;
+          let attempts = 0;
+          
+          do {
+            newPin = Math.floor(100000 + Math.random() * 900000).toString();
+            const { data: existingPin } = await supabase
+              .from('ifs_clients')
+              .select('id')
+              .eq('pin', newPin)
+              .single();
+            
+            if (!existingPin || attempts >= 10) {
+              break;
+            }
+            attempts++;
+          } while (true);
+
+          // Update the client with new PIN
+          const { data: updatedClient, error: updateError } = await supabase
+            .from('ifs_clients')
+            .update({ pin: newPin })
+            .eq('id', client.id)
+            .select()
+            .single();
+
+          if (!updateError) {
+            fixedClients.push({
+              id: client.id,
+              name: client.name,
+              oldPin: client.pin,
+              newPin
+            });
+          }
+        }
+      }
+
+      return { success: true, fixedClients };
+    } catch (error) {
+      console.error('Error fixing duplicate PINs:', error);
       return { success: false, error: error.message };
     }
   }
