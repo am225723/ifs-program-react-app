@@ -34,8 +34,15 @@ const ClientPINLogin = ({ onLogin }) => {
         setPin('');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error('Login error:', err);
+      console.error('💥 Login error:', err);
+      
+      // Show more detailed error in development, generic message in production
+      const errorMessage = process.env.NODE_ENV === 'development' 
+        ? `Login error: ${err.message}` 
+        : 'An error occurred. Please try again.';
+      
+      setError(errorMessage);
+      setPin('');
     } finally {
       setLoading(false);
     }

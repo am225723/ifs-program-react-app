@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import ClientPINLogin from './components/ClientPINLogin';
+import PINAuthDiagnostic from './components/PINAuthDiagnostic';
+import TestClientCreator from './components/TestClientCreator';
 import Home from './pages/Home';
 import CurriculumSystem from './components/CurriculumSystem';
 import CheatSheet from './pages/CheatSheet';
@@ -80,6 +82,8 @@ function App() {
             <Route path="/resources" element={<Resources />} />
             <Route path="/journal" element={<Journal />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
+            <Route path="/test-client" element={<TestClientCreator />} />
             {/* ... other routes */}
           </Routes>
         </div>

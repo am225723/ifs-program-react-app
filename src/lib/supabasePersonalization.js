@@ -10,43 +10,80 @@ export const clientAuth = {
    */
   async authenticateWithPIN(pin) {
     try {
+      console.log('🔍 Starting PIN authentication for:', pin);
+      
+      // Validate PIN format
+      if (!pin || pin.length !== 6 || !/^\d{6}$/.test(pin)) {
+        console.log('❌ Invalid PIN format:', pin);
+        return { success: false, error: 'Invalid PIN format. Please enter 6 digits.' };
+      }
+
+      console.log('🔍 Querying ifs_clients table...');
       const { data, error } = await supabase
         .from('ifs_clients')
         .select('*')
         .eq('pin', pin)
         .eq('status', 'active');
 
+      console.log('📊 Database response:', { data, error });
+
       if (error) {
-        console.error('PIN authentication error:', error);
-        return { success: false, error: 'Invalid PIN' };
+        console.error('❌ Database error:', error);
+        return { 
+          success: false, 
+          error: `Database error: ${error.message}`,
+          details: error
+        };
       }
 
       if (!data || data.length === 0) {
-        return { success: false, error: 'Invalid PIN' };
+        console.log('❌ No client found with PIN:', pin);
+        return { 
+          success: false, 
+          error: 'Invalid PIN. No active client found with this PIN.' 
+        };
       }
 
+      console.log('✅ Found clients:', data.length);
+      
       // Handle multiple results - take the most recently created/updated
       const client = data.length === 1 ? data[0] : data.reduce((mostRecent, current) => {
-        return new Date(current.created_at || current.updated_at) > new Date(mostRecent.created_at || mostRecent.updated_at) 
-          ? current 
-          : mostRecent;
+        const mostRecentDate = new Date(mostRecent.created_at || mostRecent.updated_at);
+        const currentDate = new Date(current.created_at || current.updated_at);
+        return currentDate > mostRecentDate ? current : mostRecent;
       });
 
+      console.log('✅ Selected client:', { id: client.id, name: client.name, pin: client.pin });
+
       // Update last active
-      await supabase
+      console.log('🔄 Updating last active timestamp...');
+      const { error: updateError } = await supabase
         .from('ifs_clients')
         .update({ last_active: new Date().toISOString() })
         .eq('id', client.id);
 
+      if (updateError) {
+        console.warn('⚠️ Failed to update last_active:', updateError);
+        // Don't fail authentication for this
+      } else {
+        console.log('✅ Updated last_active timestamp');
+      }
+
       // Store client session
+      console.log('💾 Storing client session...');
       localStorage.setItem('client_id', client.id);
       localStorage.setItem('client_pin', pin);
       localStorage.setItem('client_name', client.name);
 
+      console.log('✅ Authentication successful!');
       return { success: true, client };
     } catch (error) {
-      console.error('Authentication error:', error);
-      return { success: false, error: 'Authentication failed' };
+      console.error('💥 Unexpected authentication error:', error);
+      return { 
+        success: false, 
+        error: `Authentication failed: ${error.message}`,
+        details: error
+      };
     }
   },
 
@@ -81,6 +118,8 @@ export const clientAuth = {
    */
   async createClient(clientData) {
     try {
+      console.log('🏗️ Creating new client:', clientData);
+      
       // Generate unique 6-digit PIN
       let pin;
       let attempts = 0;
@@ -88,18 +127,28 @@ export const clientAuth = {
 
       do {
         pin = Math.floor(100000 + Math.random() * 900000).toString();
-        const { data: existingPin } = await supabase
+        console.log(`🎲 Generated PIN attempt ${attempts + 1}: ${pin}`);
+        
+        const { data: existingPin, error: checkError } = await supabase
           .from('ifs_clients')
           .select('id')
           .eq('pin', pin)
           .single();
         
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error('❌ Error checking PIN uniqueness:', checkError);
+          break;
+        }
+        
         if (!existingPin || attempts >= maxAttempts) {
+          console.log(`✅ Found unique PIN: ${pin}`);
           break; // Found unique PIN or max attempts reached
         }
+        console.log(`🔄 PIN ${pin} already exists, trying again...`);
         attempts++;
       } while (true);
 
+      console.log('💾 Inserting new client into database...');
       const { data, error } = await supabase
         .from('ifs_clients')
         .insert({
@@ -113,12 +162,16 @@ export const clientAuth = {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error inserting client:', error);
+        throw error;
+      }
 
+      console.log('✅ Client created successfully:', { id: data.id, name: data.name, pin });
       return { success: true, client: data, pin };
     } catch (error) {
-      console.error('Error creating client:', error);
-      return { success: false, error: error.message };
+      console.error('💥 Error creating client:', error);
+      return { success: false, error: error.message, details: error };
     }
   },
 
