@@ -23,12 +23,26 @@ function App() {
   const [currentClient, setCurrentClient] = useState(null);
 
   useEffect(() => {
-    // Check for existing session
-    const client = clientAuth.getCurrentClient();
-    if (client) {
-      setIsAuthenticated(true);
-      setCurrentClient(client);
-    }
+    // Check for existing session and handle token authentication
+    const initializeAuth = async () => {
+      // First check for token in URL
+      const tokenResult = await clientAuth.handleTokenFromURL();
+      
+      if (tokenResult && tokenResult.success) {
+        setIsAuthenticated(true);
+        setCurrentClient(tokenResult.client);
+        return;
+      }
+
+      // Check for existing session
+      const client = clientAuth.getCurrentClientValidated();
+      if (client) {
+        setIsAuthenticated(true);
+        setCurrentClient(client);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const handleLogin = async (pin) => {
