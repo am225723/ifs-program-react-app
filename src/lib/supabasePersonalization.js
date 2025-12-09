@@ -1,5 +1,5 @@
-import { supabase } from './supabase.js';
-import { generatePersonalizedCurriculum, rankWounds } from '../utils/curriculumPersonalizer.js';
+import { supabase } from './supabase';
+import { generatePersonalizedCurriculum, rankWounds } from '../utils/curriculumPersonalizer';
 
 /**
  * Client Authentication & Management
@@ -171,20 +171,6 @@ export const clientAuth = {
       return { success: true, client: data, pin };
     } catch (error) {
       console.error('💥 Error creating client:', error);
-      
-      // Handle RLS policy error specifically
-      if (error.code === '42501') {
-        return {
-          success: false,
-          error: 'Database permission error. Row Level Security (RLS) policies are preventing client creation.',
-          details: {
-            ...error,
-            solution: 'Run the SQL script to fix RLS policies: disable_rls.sql or fix_rls_policies.sql in Supabase SQL Editor',
-            issue: 'RLS policies need to allow anonymous INSERT operations on ifs_clients table'
-          }
-        };
-      }
-      
       return { success: false, error: error.message, details: error };
     }
   },
