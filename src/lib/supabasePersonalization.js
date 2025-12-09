@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { generatePersonalizedCurriculum, rankWounds } from '../utils/curriculumPersonalizer';
+import { tokenAuth } from './tokenAuth.js';
 
 /**
  * Client Authentication & Management
@@ -111,6 +112,112 @@ export const clientAuth = {
     localStorage.removeItem('client_id');
     localStorage.removeItem('client_pin');
     localStorage.removeItem('client_name');
+  },
+
+  /**
+   * Authenticate with token parameter
+   * @param {string} token - Token from URL parameter
+   * @param {string} module - Module slug for validation
+   * @returns {Promise<Object>} Authentication result
+   */
+  async authenticateWithToken(token, module = 'ifs-program') {
+    try {
+      console.log('🔐 Starting token authentication...');
+
+      // Validate token with external API
+      const validation = await tokenAuth.validateToken(token, module);
+      
+      if (!validation.success || !validation.valid) {
+        console.log('❌ Token validation failed:', validation);
+        return {
+          success: false,
+          error: validation.error || 'Invalid or expired token'
+        };
+      }
+
+      // Create client data from token validation
+      const clientData = tokenAuth.createClientFromToken(validation);
+      
+      if (!clientData) {
+        return {
+          success: false,
+          error: 'Failed to create client from token validation'
+        };
+      }
+
+      // Store the client
+      this.storeClient(clientData);
+      
+      // Clean token from URL for security
+      tokenAuth.cleanTokenFromURL();
+
+      console.log('✅ Token authentication successful:', { name: clientData.name });
+      return {
+        success: true,
+        client: clientData
+      };
+
+    } catch (error) {
+      console.error('❌ Token authentication error:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  },
+
+  /**
+   * Check for and handle token authentication from URL
+   * @returns {Promise<Object|null>} Authentication result if token found, null otherwise
+   */
+  async handleTokenFromURL() {
+    const token = tokenAuth.extractTokenFromURL();
+    
+    if (!token) {
+      console.log('🔍 No token found in URL');
+      return null;
+    }
+
+    console.log('🔍 Found token in URL, attempting authentication...');
+    return await this.authenticateWithToken(token);
+  },
+
+  /**
+   * Check if current session is valid (handles token expiration)
+   * @param {Object} client - Current client
+   * @returns {boolean} True if session is valid
+   */
+  isSessionValid(client) {
+    if (!client) {
+      return false;
+    }
+
+    // Check token expiration
+    if (client.token_auth && tokenAuth.isTokenExpired(client)) {
+      console.log('⏰ Token session expired');
+      return false;
+    }
+
+    return true;
+  },
+
+  /**
+   * Get current client with session validation
+   * @returns {Object|null} Current client if session is valid
+   */
+  getCurrentClientValidated() {
+    const client = this.getCurrentClient();
+    
+    if (client && this.isSessionValid(client)) {
+      return client;
+    }
+
+    // Clear invalid session
+    if (client) {
+      this.logout();
+    }
+
+    return null;
   },
 
   /**

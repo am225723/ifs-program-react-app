@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Lock, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { Lock, User, ArrowRight, AlertCircle, Key } from 'lucide-react';
+import TokenLogin from './TokenLogin';
 
 const ClientPINLogin = ({ onLogin }) => {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [useTokenLogin, setUseTokenLogin] = useState(false);
 
   const handlePinChange = (e) => {
     const value = e.target.value.replace(/\D/g, ''); // Only allow digits
@@ -53,6 +55,17 @@ const ClientPINLogin = ({ onLogin }) => {
     document.getElementById('pin-input').focus();
   };
 
+  // If token login is selected, show token login component
+  if (useTokenLogin) {
+    return (
+      <TokenLogin 
+        onLogin={onLogin} 
+        onSwitchToPIN={() => setUseTokenLogin(false)}
+      />
+    );
+  }
+
+  // Show PIN login interface
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-700 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black bg-opacity-20"></div>
@@ -161,6 +174,17 @@ const ClientPINLogin = ({ onLogin }) => {
               Forgot your PIN? Contact support
             </button>
           </div>
+        </div>
+
+        {/* Token Login Switch */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => setUseTokenLogin(true)}
+            className="inline-flex items-center space-x-2 text-white/80 hover:text-white font-medium transition-colors duration-200"
+          >
+            <Key className="w-4 h-4" />
+            <span>Login with Token Instead</span>
+          </button>
         </div>
 
         {/* Additional Info */}
