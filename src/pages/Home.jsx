@@ -199,7 +199,7 @@ const Home = () => {
     }
   };
 
-  const calculateResults = () => {
+  const calculateResults = async () => {
     const results = woundSections.map(section => ({
       ...section,
       score: calculateSectionScore(section),
@@ -208,6 +208,33 @@ const Home = () => {
 
     results.sort((a, b) => b.score - a.score);
     setAssessmentResults(results);
+
+    // Generate AI-powered personalized curriculum
+    try {
+      console.log('🧠 Generating personalized curriculum based on assessment...');
+      const personalizedCurriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(results);
+      
+      // Save personalized curriculum to localStorage for immediate use
+      localStorage.setItem('personalizedCurriculum', JSON.stringify(personalizedCurriculum));
+      
+      // Save assessment results to Supabase if client is authenticated
+      const currentClient = clientAuth.getCurrentClient();
+      if (currentClient) {
+        await clientAuth.saveAssessment(currentClient.id, {
+          abandonment_score: results.find(r => r.id === 'abandonment')?.score || 0,
+          shame_score: results.find(r => r.id === 'shame')?.score || 0,
+          neglect_score: results.find(r => r.id === 'neglect')?.score || 0,
+          betrayal_score: results.find(r => r.id === 'betrayal')?.score || 0,
+          responses: answers,
+          primary_wound: results[0]?.id || null,
+          personalized_curriculum: personalizedCurriculum
+        });
+      }
+      
+      console.log('✅ Personalized curriculum generated successfully');
+    } catch (error) {
+      console.error('❌ Error generating personalized curriculum:', error);
+    }
   };
 
   const getHighestScoringSection = () => {
@@ -617,9 +644,21 @@ const Home = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/curriculum"
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center"
+              onClick={() => {
+                // Ensure personalized curriculum is loaded when navigating
+                const personalizedCurriculum = localStorage.getItem('personalizedCurriculum');
+                if (!personalizedCurriculum && assessmentResults) {
+                  // Generate curriculum if not already done
+                  const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
+                  localStorage.setItem('personalizedCurriculum', JSON.stringify(curriculum));
+                }
+              }}
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              Start Healing Journey
+              <div className="flex items-center justify-center">
+                <Play className="w-5 h-5 mr-2" />
+                Start Your Personalized Journey
+              </div>
             </Link>
             <button
               onClick={resetAssessment}
@@ -951,45 +990,7 @@ const Home = () => {
   );
 };
 
-import { assessmentManager, curriculumManager } from '../lib/supabasePersonalization';
-import { curriculumModules } from '../data/curriculumData';
-
-// In the calculateResults function:
-const calculateResults = async () => {
-  const results = woundSections.map(section => ({
-    ...section,
-    score: calculateSectionScore(section),
-    maxScore: 24
-  }));
-
-  results.sort((a, b) => b.score - a.score);
-  setAssessmentResults(results);
-
-  // Save to Supabase
-  if (clientId) {
-    const assessmentData = {
-      abandonment_score: results.find(r => r.id === 'abandonment')?.score || 0,
-      shame_score: results.find(r => r.id === 'shame')?.score || 0,
-      neglect_score: results.find(r => r.id === 'neglect')?.score || 0,
-      betrayal_score: results.find(r => r.id === 'betrayal')?.score || 0,
-      responses: answers,
-      protector_types: [] // Extract from answers
-    };
-
-    const saveResult = await assessmentManager.saveAssessmentResults(
-      clientId,
-      assessmentData
-    );
-
-    if (saveResult.success) {
-      // Generate personalized curriculum
-      await curriculumManager.generateAndSaveCurriculum(
-        clientId,
-        saveResult.assessment,
-        curriculumModules
-      );
-    }
-  }
-};
+import { clientAuth } from '../lib/supabasePersonalization';
+import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
 
 export default Home;

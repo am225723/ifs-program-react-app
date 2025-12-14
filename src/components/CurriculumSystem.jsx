@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   BookOpen, 
   Lock, 
@@ -14,7 +15,9 @@ import {
   Zap,
   ChevronRight,
   Star,
-  TrendingUp
+  TrendingUp,
+  Brain,
+  Sparkles
 } from 'lucide-react';
 import { 
   curriculumModules, 
@@ -24,16 +27,32 @@ import {
   getInnerChildModules,
   getTotalEstimatedTime
 } from '../data/curriculumData';
+import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
 
-const CurriculumSystem = ({ onModuleSelect, userProgress = {} }) => {
+const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   const [completedModules, setCompletedModules] = useState([]);
   const [currentModule, setCurrentModule] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState(new Set(['all']));
+  const [personalizedCurriculum, setPersonalizedCurriculum] = useState(null);
+  const [isPersonalized, setIsPersonalized] = useState(false);
 
-  // Load user progress
+  // Load user progress and personalized curriculum
   useEffect(() => {
     if (userProgress.completedModules) {
       setCompletedModules(userProgress.completedModules);
+    }
+
+    // Load personalized curriculum
+    const savedCurriculum = localStorage.getItem('personalizedCurriculum');
+    if (savedCurriculum) {
+      try {
+        const curriculum = JSON.parse(savedCurriculum);
+        setPersonalizedCurriculum(curriculum);
+        setIsPersonalized(true);
+        console.log('✅ Loaded personalized curriculum:', curriculum.primaryWound);
+      } catch (error) {
+        console.error('❌ Error loading personalized curriculum:', error);
+      }
     }
   }, [userProgress]);
 
@@ -135,10 +154,15 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {} }) => {
     }
   };
 
+  // Use personalized modules if available, otherwise use default modules
+  const activeModules = isPersonalized && personalizedCurriculum?.personalizedModules 
+    ? personalizedCurriculum.personalizedModules 
+    : curriculumModules;
+
   // Group modules by category
   const modulesByCategory = categories.map(category => ({
     ...category,
-    modules: curriculumModules.filter(m => m.category === category.id)
+    modules: activeModules.filter(m => m.category === category.id)
   }));
 
   // Calculate progress statistics
@@ -164,21 +188,61 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {} }) => {
                 Inner Child Healing Journey
               </h1>
               <p className="text-gray-600 mt-2">
-                A comprehensive IFS curriculum for healing your Inner Child wounds
+                {isPersonalized ? (
+                  <>
+                    <span className="flex items-center">
+                      <Sparkles className="w-4 h-4 mr-1 text-purple-600" />
+                      Personalized curriculum for your {personalizedCurriculum?.primaryWound ? aiCurriculumPersonalizer.woundProfiles[personalizedCurriculum.primaryWound]?.name : 'specific wound pattern'}
+                    </span>
+                  </>
+                ) : (
+                  'A comprehensive IFS curriculum for healing your Inner Child wounds'
+                )}
               </p>
             </div>
             {nextModule && (
-              <button
+              <Link
+                to={`/curriculum/module/${nextModule.id}`}
                 onClick={() => handleModuleSelect(nextModule)}
-                className="btn-primary flex items-center space-x-2 shadow-lg"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
               >
                 <Play className="w-5 h-5" />
                 <span>Continue Learning</span>
-              </button>
+              </Link>
             )}
           </div>
         </div>
       </div>
+
+      {/* Personalization Banner */}
+      {isPersonalized && personalizedCurriculum && (
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                  <Brain className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">AI-Personalized Curriculum</h3>
+                  <p className="text-sm text-gray-600">
+                    Based on your assessment: {personalizedCurriculum.primaryWound && aiCurriculumPersonalizer.woundProfiles[personalizedCurriculum.primaryWound]?.name}
+                    {personalizedCurriculum.secondaryWound && ` + ${aiCurriculumPersonalizer.woundProfiles[personalizedCurriculum.secondaryWound]?.name}`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-4 text-sm">
+                <div className="text-gray-600">
+                  <span className="font-medium">Intensity:</span> {personalizedCurriculum.intensity}
+                </div>
+                <div className="text-gray-600">
+                  <span className="font-medium">Timeline:</span> {personalizedCurriculum.timeline?.totalWeeks} weeks
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Progress Overview */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -349,7 +413,8 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {} }) => {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-3 flex-1">
                                 {getStatusIcon(status)}
-                                <button
+                                <Link
+                                  to={`/curriculum/module/${module.id}`}
                                   onClick={() => handleModuleSelect(module)}
                                   disabled={status === 'locked'}
                                   className={`text-left flex-1 ${
@@ -360,6 +425,18 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {} }) => {
                                 >
                                   <h4 className="font-semibold text-gray-900">{module.title}</h4>
                                   <p className="text-sm text-gray-600 mt-1">{module.description}</p>
+                                  
+                                  {/* Show personalized content if available */}
+                                  {module.personalizedContent && (
+                                    <div className="mt-2 p-2 bg-purple-50 rounded text-xs text-purple-700">
+                                      <div className="flex items-center space-x-1 mb-1">
+                                        <Sparkles className="w-3 h-3" />
+                                        <span className="font-medium">Personalized for you:</span>
+                                      </div>
+                                      <p>{module.personalizedContent.message || 'Tailored to your specific wound pattern'}</p>
+                                    </div>
+                                  )}
+                                  
                                   <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
                                     <span className="flex items-center space-x-1">
                                       <Clock className="w-3 h-3" />
@@ -371,6 +448,12 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {} }) => {
                                         <span>Inner Child</span>
                                       </span>
                                     )}
+                                    {module.personalizedContent && (
+                                      <span className="flex items-center space-x-1">
+                                        <Brain className="w-3 h-3" />
+                                        <span>AI-Personalized</span>
+                                      </span>
+                                    )}
                                     {module.prerequisites && module.prerequisites.length > 0 && (
                                       <span className="flex items-center space-x-1">
                                         <Lock className="w-3 h-3" />
@@ -378,15 +461,16 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {} }) => {
                                       </span>
                                     )}
                                   </div>
-                                </button>
+                                </Link>
                               </div>
                               {status === 'available' && (
-                                <button
+                                <Link
+                                  to={`/curriculum/module/${module.id}`}
                                   onClick={() => handleModuleSelect(module)}
                                   className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
                                 >
                                   Start
-                                </button>
+                                </Link>
                               )}
                               {status === 'completed' && (
                                 <div className="flex items-center space-x-2 text-green-600">
