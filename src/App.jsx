@@ -5,6 +5,7 @@ import PINAuthDiagnostic from './components/PINAuthDiagnostic';
 import TestClientCreator from './components/TestClientCreator';
 import Home from './pages/Home';
 import CurriculumSystem from './components/CurriculumSystem';
+import LearningModuleRenderer from './components/LearningModuleRenderer';
 import CheatSheet from './pages/CheatSheet';
 import Wounds from './pages/Wounds';
 import Qualities from './pages/Qualities';
@@ -91,7 +92,8 @@ function App() {
               
               <Routes>
                 <Route path="/" element={<Home clientId={currentClient?.id} />} />
-                <Route path="/curriculum" element={<CurriculumSystem clientId={currentClient?.id} />} />
+                <Route path="/curriculum" element={<CurriculumSystem clientId={currentClient?.id} userProgress={{}} />} />
+                <Route path="/curriculum/module/:moduleId" element={<LearningModuleRenderer userProgress={{}} />} />
                 <Route path="/cheat-sheet" element={<CheatSheet />} />
                 <Route path="/wounds" element={<Wounds />} />
                 <Route path="/qualities" element={<Qualities />} />
