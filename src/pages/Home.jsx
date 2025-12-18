@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Heart, 
   Brain, 
@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 
 const Home = () => {
+  const navigate = useNavigate();
   const [showAssessment, setShowAssessment] = useState(false);
   const [currentSection, setCurrentSection] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -643,28 +644,36 @@ const Home = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/curriculum"
               onClick={(e) => {
                 e.preventDefault();
                 // Generate and store personalized curriculum
                 const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
                 localStorage.setItem("personalizedCurriculum", JSON.stringify(curriculum));
                 
-                // Show personalization summary in an alert (temporary solution)
+                console.log("Curriculum data:", curriculum);
+                console.log("Wound analysis:", curriculum.woundAnalysis);
+                
+                // Extract focus information
                 const primaryWound = curriculum.woundAnalysis?.primaryWound || "Unknown";
-                const secondaryWound = curriculum.woundAnalysis?.secondaryWound || "Unknown";
+                const secondaryWound = curriculum.woundAnalysis?.secondaryWound || "None";
                 const timeline = curriculum.personalizationSettings?.timeline || "8 weeks";
+                const woundScores = curriculum.woundAnalysis?.wounds?.map(w => 
+                  `${w.type}: ${w.score}/24 (${w.intensity})`
+                ).join("\n") || "No wound scores available";
                 
-                alert("🌟 Your Personalized Healing Journey 🌟\n\n" +
-                      "Primary Focus: " + primaryWound + "\n" +
-                      "Secondary Focus: " + secondaryWound + "\n" +
+                // Show detailed personalization alert
+                alert("🌟 YOUR PERSONALIZED HEALING JOURNEY 🌟\n\n" +
+                      "PRIMARY FOCUS: " + primaryWound.toUpperCase() + "\n" +
+                      "Secondary Focus: " + secondaryWound.toUpperCase() + "\n" +
                       "Recommended Timeline: " + timeline + "\n\n" +
-                      "Your curriculum has been personalized based on your assessment results. " +
-                      "Each module is adapted to address your specific wound patterns and healing needs.\n\n" +
-                      "Click OK to begin your journey!");
+                      "Your Wound Profile:\n" + woundScores + "\n\n" +
+                      "✅ Your curriculum has been personalized based on your assessment\n" +
+                      "✅ Each module is adapted to your specific wound patterns\n" +
+                      "✅ Healing goals are targeted to your needs\n\n" +
+                      "Click OK to begin your personalized healing journey!");
                 
-                // Navigate to curriculum
-                window.location.href = "/curriculum";
+                // Navigate to curriculum using React Router
+                navigate("/curriculum");
               }}
               className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:scale-105"
             >
