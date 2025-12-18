@@ -644,27 +644,14 @@ const Home = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/curriculum"
-              onClick={(e) => {
-                e.preventDefault();
-                // Generate and store personalized curriculum
-                const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
-                localStorage.setItem("personalizedCurriculum", JSON.stringify(curriculum));
-                
-                // Show personalization summary in an alert (temporary solution)
-                const primaryWound = curriculum.woundAnalysis?.primaryWound || "Unknown";
-                const secondaryWound = curriculum.woundAnalysis?.secondaryWound || "Unknown";
-                const timeline = curriculum.personalizationSettings?.timeline || "8 weeks";
-                
-                alert("🌟 Your Personalized Healing Journey 🌟\n\n" +
-                      "Primary Focus: " + primaryWound + "\n" +
-                      "Secondary Focus: " + secondaryWound + "\n" +
-                      "Recommended Timeline: " + timeline + "\n\n" +
-                      "Your curriculum has been personalized based on your assessment results. " +
-                      "Each module is adapted to address your specific wound patterns and healing needs.\n\n" +
-                      "Click OK to begin your journey!");
-                
-                // Navigate to curriculum
-                window.location.href = "/curriculum";
+              onClick={() => {
+                // Ensure personalized curriculum is loaded when navigating
+                const personalizedCurriculum = localStorage.getItem('personalizedCurriculum');
+                if (!personalizedCurriculum && assessmentResults) {
+                  // Generate curriculum if not already done
+                  const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
+                  localStorage.setItem('personalizedCurriculum', JSON.stringify(curriculum));
+                }
               }}
               className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:scale-105"
             >
