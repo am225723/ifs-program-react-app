@@ -15,6 +15,7 @@ import Assessment from './pages/Assessment';
 import Resources from './pages/Resources';
 import Journal from './pages/Journal';
 import AdminDashboard from './pages/AdminDashboard';
+import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
 import { clientAuth } from './lib/supabasePersonalization';
@@ -71,6 +72,8 @@ function App() {
               <Route path="/" element={<ClientPINLogin onLogin={handleLogin} />} />
               <Route path="/test-client" element={<TestClientCreator />} />
               <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
+              <Route path="/auth-debug" element={<AuthDebug />} />
+                <Route path="/auth-debug" element={<AuthDebug />} />
               <Route path="*" element={<ClientPINLogin onLogin={handleLogin} />} />
             </Routes>
           ) : (
@@ -105,7 +108,8 @@ function App() {
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
-                {/* ... other routes */}
+                <Route path="/auth-debug" element={<AuthDebug />} />
+                <Route path="*" element={<Home clientId={currentClient?.id} />} />
               </Routes>
             </>
           )}
