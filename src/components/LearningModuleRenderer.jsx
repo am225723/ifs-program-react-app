@@ -12,7 +12,9 @@ import {
   Sparkles,
   BookOpen,
   Users,
-  Target
+  Target,
+  ArrowRight,
+  Award
 } from 'lucide-react';
 
 const LearningModuleRenderer = ({ userProgress = {} }) => {
@@ -41,6 +43,8 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
       if (personalizedCurriculum) {
         const curriculum = JSON.parse(personalizedCurriculum);
         targetModule = curriculum.personalizedModules?.find(m => m.id === moduleId);
+      }
+      
       // If not found in personalized curriculum, load from default modules
       if (!targetModule) {
         const { curriculumModules } = await import("../data/curriculumData.js");
@@ -51,8 +55,6 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
       if (targetModule && !targetModule.steps && personalizedCurriculum) {
         targetModule.steps = generateDefaultStepsForPersonalizedModule(targetModule);
         targetModule.estimatedTime = targetModule.estimatedTime || `${targetModule.estimatedMinutes || 30} minutes`;
-      }
-        targetModule = curriculumModules.find(m => m.id === moduleId);
       }
 
       if (targetModule) {
@@ -102,7 +104,7 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
   };
 
   const getTotalSteps = () => {
-    return module?.content?.length || 5; // Default to 5 steps
+    return module?.steps?.length || module?.content?.length || 5; // Default to 5 steps
   };
 
   const completeModule = () => {
@@ -300,9 +302,16 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
 
 // Helper function to render module content based on step
 const renderModuleContent = (module, step, personalizedContent) => {
-  // This would normally load dynamic content based on the module and step
-  // For now, we'll create placeholder content
+  // Use actual module steps if available, otherwise create default content
+  const moduleSteps = module?.steps || [];
   
+  // If we have actual steps from the curriculum, use them
+  if (moduleSteps.length > 0 && step < moduleSteps.length) {
+    const currentStep = moduleSteps[step];
+    return renderActualStep(currentStep, personalizedContent);
+  }
+  
+  // Fallback to default content structure
   const contentSteps = [
     {
       title: "Introduction",
@@ -425,6 +434,182 @@ const renderModuleContent = (module, step, personalizedContent) => {
       {currentContent.content}
     </div>
   );
+};
+
+// New function to render actual module steps from curriculum data
+const renderActualStep = (step, personalizedContent) => {
+  if (!step) return <div>No content available for this step</div>;
+  
+  const stepType = step.type || 'learn';
+  const stepData = step.data || {};
+  
+  switch (stepType) {
+    case 'learn':
+      return (
+        <div className="space-y-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">{stepData.title || 'Learning Content'}</h3>
+          
+          {stepData.content && (
+            <div className="space-y-4">
+              {stepData.content.map((paragraph, index) => (
+                <p key={index} className="text-gray-700 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          )}
+          
+          {stepData.bullets && (
+            <div className="bg-purple-50 rounded-lg p-4">
+              <h4 className="font-semibold text-purple-900 mb-2">Key Points</h4>
+              <ul className="space-y-2 text-purple-800">
+                {stepData.bullets.map((bullet, index) => (
+                  <li key={index} className="flex items-start space-x-2">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {stepData.keyTakeaways && (
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-2">Key Takeaways</h4>
+              <ul className="space-y-2 text-blue-800">
+                {stepData.keyTakeaways.map((takeaway, index) => (
+                  <li key={index} className="flex items-start space-x-2">
+                    <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-blue-600" />
+                    <span>{takeaway}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {stepData.reflectionPrompts && (
+            <div className="bg-yellow-50 rounded-lg p-4">
+              <h4 className="font-semibold text-yellow-900 mb-2">Reflection Questions</h4>
+              <ul className="space-y-2 text-yellow-800">
+                {stepData.reflectionPrompts.map((prompt, index) => (
+                  <li key={index} className="flex items-start space-x-2">
+                    <span className="font-medium text-yellow-700">{index + 1}.</span>
+                    <span>{prompt}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+      
+    case 'activity':
+      return (
+        <div className="space-y-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">{stepData.title || 'Activity'}</h3>
+          
+          {stepData.description && (
+            <p className="text-gray-700 leading-relaxed mb-4">
+              {stepData.description}
+            </p>
+          )}
+          
+          {stepData.prompt && (
+            <div className="bg-green-50 rounded-lg p-6">
+              <h4 className="font-semibold text-green-900 mb-3">Activity Instructions</h4>
+              <p className="text-green-800 leading-relaxed">
+                {stepData.prompt}
+              </p>
+            </div>
+          )}
+          
+          {stepData.questions && (
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900">Reflection Questions</h4>
+              {stepData.questions.map((question, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-gray-800">
+                    <span className="font-medium text-purple-600">Question {index + 1}:</span> {question}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {stepData.guidedSteps && (
+            <div className="bg-purple-50 rounded-lg p-6">
+              <h4 className="font-semibold text-purple-900 mb-3">Guided Steps</h4>
+              <ol className="space-y-3 text-purple-800">
+                {stepData.guidedSteps.map((guidedStep, index) => (
+                  <li key={index} className="flex items-start space-x-2">
+                    <span className="font-bold text-purple-600">{index + 1}.</span>
+                    <span>{guidedStep}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+        </div>
+      );
+      
+    case 'result':
+      return (
+        <div className="space-y-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">{stepData.title || 'Module Complete'}</h3>
+          
+          {stepData.description && (
+            <p className="text-gray-700 leading-relaxed mb-4">
+              {stepData.description}
+            </p>
+          )}
+          
+          {stepData.completionMessage && (
+            <div className="bg-green-50 rounded-lg p-6">
+              <h4 className="font-semibold text-green-900 mb-3">Congratulations!</h4>
+              <p className="text-green-800 leading-relaxed">
+                {stepData.completionMessage}
+              </p>
+            </div>
+          )}
+          
+          {stepData.nextSteps && (
+            <div className="bg-blue-50 rounded-lg p-6">
+              <h4 className="font-semibold text-blue-900 mb-3">Next Steps</h4>
+              <ul className="space-y-2 text-blue-800">
+                {stepData.nextSteps.map((nextStep, index) => (
+                  <li key={index} className="flex items-start space-x-2">
+                    <ArrowRight className="w-4 h-4 mt-0.5 flex-shrink-0 text-blue-600" />
+                    <span>{nextStep}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
+          {stepData.achievement && (
+            <div className="bg-purple-50 rounded-lg p-6">
+              <h4 className="font-semibold text-purple-900 mb-3">Achievement Unlocked</h4>
+              <div className="flex items-center space-x-3">
+                <Award className="w-8 h-8 text-purple-600" />
+                <span className="text-purple-800 font-medium">{stepData.achievement}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+      
+    default:
+      return (
+        <div className="space-y-6">
+          <h3 className="text-2xl font-bold text-gray-900 mb-4">Module Content</h3>
+          <div className="bg-gray-50 rounded-lg p-6">
+            <p className="text-gray-700">
+              Content for this step is being prepared. This module is part of your personalized healing journey.
+            </p>
+          </div>
+        </div>
+      );
+  }
 };
 
 export default LearningModuleRenderer;
