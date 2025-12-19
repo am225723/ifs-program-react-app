@@ -155,9 +155,9 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   };
 
   // Use personalized modules if available, otherwise use default modules
-  const activeModules = isPersonalized && personalizedCurriculum?.personalizedModules 
-    ? personalizedCurriculum.personalizedModules 
-    : curriculumModules;
+  // ALWAYS use default curriculum modules for display
+  // Personalization is applied through the personalizedContent field
+  const activeModules = curriculumModules;
 
   // Group modules by category
   const modulesByCategory = categories.map(category => ({

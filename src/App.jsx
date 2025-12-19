@@ -73,7 +73,6 @@ function App() {
               <Route path="/test-client" element={<TestClientCreator />} />
               <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
               <Route path="/auth-debug" element={<AuthDebug />} />
-                <Route path="/auth-debug" element={<AuthDebug />} />
               <Route path="*" element={<ClientPINLogin onLogin={handleLogin} />} />
             </Routes>
           ) : (
