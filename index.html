@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ifs-app</title>
+    <script>
+      // Handle SPA redirect query param so deep links work on static hosts
+      (function applyRedirectParam() {
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect');
+        if (redirect) {
+          const target = decodeURIComponent(redirect);
+          window.history.replaceState(null, '', target);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
