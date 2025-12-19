@@ -648,6 +648,7 @@ const Home = () => {
                 e.preventDefault();
                 // Generate and store personalized curriculum
                 const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
+                localStorage.setItem("assessmentResults", JSON.stringify(assessmentResults));
                 localStorage.setItem("personalizedCurriculum", JSON.stringify(curriculum));
                 
                 console.log("Curriculum data:", curriculum);
@@ -673,7 +674,14 @@ const Home = () => {
                       "Click OK to begin your personalized healing journey!");
                 
                 // Navigate to curriculum using React Router
-                navigate("/curriculum");
+                // Navigate to curriculum using React Router
+                try {
+                  navigate("/curriculum");
+                } catch (error) {
+                  console.error("Navigation error:", error);
+                  // Fallback to window.location if navigate fails
+                  window.location.href = "/curriculum";
+                }
               }}
               className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:scale-105"
             >
