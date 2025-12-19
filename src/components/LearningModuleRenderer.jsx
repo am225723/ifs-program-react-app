@@ -22,7 +22,53 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Helper function to generate default steps for personalized modules\n  const generateDefaultStepsForPersonalizedModule = (module) => {\n    const baseSteps = [];\n    \n    // Add introduction step\n    baseSteps.push({\n      type: "learn",\n      data: {\n        title: module.title || "Welcome to Your Personalized Module",\n        content: module.description || "This module has been personalized based on your assessment results.",\n        keyPoints: module.personalizedContent?.healingGoals || ["Begin your healing journey"]\n      }\n    });\n    \n    // Add wound-specific content if available\n    if (module.personalizedContent?.woundFocus) {\n      baseSteps.push({\n        type: "learn",\n        data: {\n          title: `Focus: ${module.personalizedContent.woundFocus}`,\n          content: `This module is specifically designed to address ${module.personalizedContent.woundFocus} patterns.`,\n          keyPoints: module.personalizedContent.healingGoals || []\n        }\n      });\n    }\n    \n    // Add activity step\n    baseSteps.push({\n      type: "activity",\n      data: {\n        title: "Personalized Reflection Activity",\n        instruction: "Take a moment to reflect on your personal healing journey.",\n        prompts: module.personalizedContent?.activities || ["What are you noticing in your body right now?"]\n      }\n    });\n    \n    // Add completion step\n    baseSteps.push({\n      type: "result",\n      data: {\n        title: "Module Complete",\n        completionMessage: `Congratulations! You have completed the personalized module for ${module.personalizedContent?.woundFocus || "your healing journey"}.`\n      }\n    });\n    \n    return baseSteps;\n  };
+  // Helper function to generate default steps for personalized modules
+  const generateDefaultStepsForPersonalizedModule = (module) => {
+    const baseSteps = [];
+
+    // Add introduction step
+    baseSteps.push({
+      type: "learn",
+      data: {
+        title: module.title || "Welcome to Your Personalized Module",
+        content: module.description || "This module has been personalized based on your assessment results.",
+        keyPoints: module.personalizedContent?.healingGoals || ["Begin your healing journey"]
+      }
+    });
+
+    // Add wound-specific content if available
+    if (module.personalizedContent?.woundFocus) {
+      baseSteps.push({
+        type: "learn",
+        data: {
+          title: `Focus: ${module.personalizedContent.woundFocus}`,
+          content: `This module is specifically designed to address ${module.personalizedContent.woundFocus} patterns.`,
+          keyPoints: module.personalizedContent.healingGoals || []
+        }
+      });
+    }
+
+    // Add activity step
+    baseSteps.push({
+      type: "activity",
+      data: {
+        title: "Personalized Reflection Activity",
+        instruction: "Take a moment to reflect on your personal healing journey.",
+        prompts: module.personalizedContent?.activities || ["What are you noticing in your body right now?"]
+      }
+    });
+
+    // Add completion step
+    baseSteps.push({
+      type: "result",
+      data: {
+        title: "Module Complete",
+        completionMessage: `Congratulations! You have completed the personalized module for ${module.personalizedContent?.woundFocus || "your healing journey"}.`
+      }
+    });
+
+    return baseSteps;
+  };
   const [isCompleted, setIsCompleted] = useState(false);
   const [progress, setProgress] = useState({});
 
@@ -41,17 +87,17 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
       if (personalizedCurriculum) {
         const curriculum = JSON.parse(personalizedCurriculum);
         targetModule = curriculum.personalizedModules?.find(m => m.id === moduleId);
+
+        // If found in personalized curriculum but missing steps, add them
+        if (targetModule && !targetModule.steps) {
+          targetModule.steps = generateDefaultStepsForPersonalizedModule(targetModule);
+          targetModule.estimatedTime = targetModule.estimatedTime || `${targetModule.estimatedMinutes || 30} minutes`;
+        }
+      }
+
       // If not found in personalized curriculum, load from default modules
       if (!targetModule) {
         const { curriculumModules } = await import("../data/curriculumData.js");
-        targetModule = curriculumModules.find(m => m.id === moduleId);
-      }
-
-      // If found in personalized curriculum but missing steps, add them
-      if (targetModule && !targetModule.steps && personalizedCurriculum) {
-        targetModule.steps = generateDefaultStepsForPersonalizedModule(targetModule);
-        targetModule.estimatedTime = targetModule.estimatedTime || `${targetModule.estimatedMinutes || 30} minutes`;
-      }
         targetModule = curriculumModules.find(m => m.id === moduleId);
       }
 
