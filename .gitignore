@@ -89,6 +89,11 @@ public
 .out
 .storybook-out
 
+# Allow SPA fallback files in public/ for static hosting
+!/public/
+!/public/_redirects
+!/public/404.html
+
 # Temporary folders
 tmp/
 temp/
