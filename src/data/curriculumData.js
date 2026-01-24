@@ -1003,6 +1003,215 @@ export const curriculumModules = [
         }
       }
     ]
+  },
+  {
+    id: 'module-5-bonus-exercises',
+    order: 5,
+    title: 'Module 5: Advanced Healing Exercises & Daily Practices',
+    description: 'Collection of powerful therapeutic exercises, guided meditations, and daily practices to deepen your Inner Child healing journey',
+    category: 'exercises',
+    estimatedMinutes: 90,
+    prerequisites: ['module-2-inner-child-wounds'],
+    innerChildFocus: true,
+    steps: [
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-letter-to-inner-child',
+          title: 'Letter Writing Exercise: Messages to Your Inner Child',
+          description: 'Write a compassionate letter from your Adult Self to your wounded Inner Child',
+          type: 'journaling',
+          prompt: 'This powerful exercise involves writing a heartfelt letter from your wise, compassionate Adult Self to your Inner Child. Choose a specific age or wounded part that needs your attention. Write with unconditional love and understanding.',
+          questions: [
+            'Choose an age or specific Inner Child part you want to address. What wound does this part carry? (abandonment, shame, neglect, betrayal)',
+            'Begin your letter: "Dear [name/age], I am writing to you because..." What do you want your Inner Child to know?',
+            'Acknowledge their pain: "I know you went through..." Describe what happened to them with compassion.',
+            'Validate their feelings: "It makes complete sense that you felt..." What emotions did they experience?',
+            'Offer reassurance: "What happened was not your fault because..." Why wasn\'t it their fault?',
+            'Express what you wish someone had told them: "I wish someone had said to you..." What did they need to hear?',
+            'Make a commitment: "From now on, I promise to..." How will you care for this part going forward?',
+            'End with words of love and acceptance. What closing message does your Inner Child most need?'
+          ],
+          interactiveElements: [
+            'text-editor',
+            'emotion-spectrum',
+            'commitment-tracker'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-inner-child-visualization',
+          title: 'Safe Place Visualization for Your Inner Child',
+          description: 'Create a mental sanctuary where your Inner Child feels completely safe and loved',
+          type: 'meditation',
+          prompt: 'This guided visualization helps you create an internal safe space where you can meet and nurture your Inner Child. This becomes a refuge you can return to anytime your Inner Child needs comfort.',
+          guidedSteps: [
+            'Close your eyes and take three deep breaths. Allow your body to relax completely.',
+            'Imagine yourself walking into a beautiful, peaceful place. This could be a forest, beach, meadow, or cozy room - wherever feels safest.',
+            'Notice every detail of this safe space: the colors, sounds, smells, temperature, and textures around you.',
+            'In this space, see your Inner Child approaching you. Notice their age, what they\'re wearing, and how they\'re feeling.',
+            'Kneel or sit down to be at their eye level. Let them know they are completely safe with you.',
+            'Ask your Inner Child: "What do you need right now?" Listen with your whole heart.',
+            'Offer them whatever they need: a hug, words of comfort, play, or simply your calm presence.',
+            'Tell your Inner Child: "I will never leave you. I am here now, and I will always protect you."',
+            'Stay with them for as long as feels right. Let them know they can come here anytime they need you.',
+            'When ready, give them a parting gift or symbol of your love that they can keep.',
+            'Slowly return to present awareness, knowing you can visit this safe place anytime.'
+          ],
+          questions: [
+            'Describe your safe place in detail. What makes it feel secure and nurturing?',
+            'What age was your Inner Child when you met them? What emotions did they show?',
+            'What did your Inner Child say they needed most? How did it feel to offer this?',
+            'What gift or symbol did you give them? What does it represent?',
+            'How do you feel now compared to before the visualization?'
+          ],
+          interactiveElements: [
+            'guided-meditation',
+            'safe-place-visualizer',
+            'emotion-tracker'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-reparenting-dialogue',
+          title: 'Reparenting Dialogue Exercise',
+          description: 'Practice giving your Inner Child the responses they needed but never received',
+          type: 'parts_work',
+          prompt: 'In this exercise, you\'ll have a written dialogue between your Inner Child and your Wise Adult Self. The goal is to give your Inner Child the loving, validating responses they needed in childhood but may not have received.',
+          questions: [
+            'Think of a painful childhood memory. Inner Child, describe what happened and how you felt:',
+            'Adult Self response: Validate their experience. What do you say to show you understand?',
+            'Inner Child: Express your deepest fear or belief that came from this experience:',
+            'Adult Self: Challenge this belief gently. What is the truth you want them to know?',
+            'Inner Child: What did you need from the adults in your life that you didn\'t get?',
+            'Adult Self: Commit to providing this now. How will you meet this need?',
+            'Inner Child: What would help you feel safe enough to trust again?',
+            'Adult Self: Make a specific promise. What can your Inner Child count on from you?',
+            'Inner Child: Share one thing you\'re afraid to ask for or say out loud:',
+            'Adult Self: Respond with unconditional love and acceptance. What is your message?'
+          ],
+          interactiveElements: [
+            'dialogue-writer',
+            'belief-challenger',
+            'promise-tracker'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-body-connection',
+          title: 'Body-Based Inner Child Connection',
+          description: 'Use somatic awareness to connect with and heal your Inner Child',
+          type: 'somatic',
+          prompt: 'Our bodies hold the memories and emotions of childhood experiences. This exercise helps you use body awareness to connect with your Inner Child and release stored tension or pain.',
+          guidedSteps: [
+            'Sit or lie in a comfortable position. Close your eyes and take several slow breaths.',
+            'Scan your body slowly from head to toe. Notice any areas of tension, tightness, pain, or discomfort.',
+            'Choose one area that calls your attention. Place your hand gently on this area.',
+            'Ask this part of your body: "What are you holding? What emotion lives here?"',
+            'Listen for images, memories, or sensations that arise. Don\'t force anything.',
+            'If a childhood memory or age comes up, invite that Inner Child to speak through this body part.',
+            'Breathe compassion into this area. Imagine your breath bringing warmth and healing.',
+            'Tell this body part and the Inner Child within it: "I hear you. I\'m here. It\'s safe to let go now."',
+            'Continue breathing and offering compassion until you feel a shift or release.',
+            'Thank your body and your Inner Child for communicating with you.',
+            'Gently move this body part, shake it out, or stretch to complete the release.'
+          ],
+          questions: [
+            'Which body area held the most tension or emotion? What did you discover there?',
+            'What age or memory came up during the exercise? What emotions were stored?',
+            'What message did your Inner Child communicate through your body?',
+            'Did you experience any release or shift? Describe what happened.',
+            'How does this body area feel now compared to before the exercise?',
+            'What ongoing body awareness practice might help you stay connected to your Inner Child?'
+          ],
+          interactiveElements: [
+            'body-scan-mapper',
+            'emotion-spectrum',
+            'somatic-release-tracker'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-daily-inner-child-checkin',
+          title: 'Daily Inner Child Check-In Practice',
+          description: 'Establish a daily practice of connecting with and caring for your Inner Child',
+          type: 'daily_practice',
+          prompt: 'Consistent daily connection with your Inner Child is one of the most powerful healing practices. Use this template to establish a morning and evening check-in ritual.',
+          questions: [
+            'MORNING CHECK-IN: Good morning, Inner Child. How are you feeling as we start this day?',
+            'What do you need from me today to feel safe and cared for?',
+            'Is there anything you\'re worried or scared about today? Let me address those fears.',
+            'What would make today fun or joyful for you? How can we include some play?',
+            'I want you to know that today I will... (make a specific commitment)',
+            'EVENING CHECK-IN: How did you experience today, dear one? What was hard and what was good?',
+            'Did I keep my promise to you? If not, what happened and how can I do better?',
+            'What emotions came up today that we should acknowledge together?',
+            'What are you grateful for from today, no matter how small?',
+            'As we go to sleep, I want you to know... (offer comfort and safety for the night)'
+          ],
+          interactiveElements: [
+            'daily-journal',
+            'commitment-tracker',
+            'gratitude-logger'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-trigger-response-plan',
+          title: 'Trigger Response & Self-Soothing Plan',
+          description: 'Create a personalized plan for responding to Inner Child triggers with compassion',
+          type: 'planning',
+          prompt: 'When your Inner Child gets triggered, having a pre-made plan helps you respond with compassion rather than react automatically. Create your personalized trigger response protocol.',
+          questions: [
+            'What are your top 3 Inner Child triggers? (situations, words, people, or events that activate old wounds)',
+            'For each trigger, what wound gets activated? (abandonment, shame, neglect, betrayal)',
+            'What are your physical warning signs that your Inner Child has been triggered? (racing heart, tension, shallow breathing)',
+            'What are your emotional warning signs? (sudden fear, anger, sadness, shame)',
+            'What are your behavioral warning signs? (withdrawing, people-pleasing, overreacting, numbing)',
+            'Create a PAUSE protocol: When triggered, I will STOP and say to myself...',
+            'BREATHE: Describe your grounding breath technique (e.g., 4-7-8 breathing, box breathing)',
+            'ACKNOWLEDGE: What will you say to your Inner Child? "I see you are feeling... because..."',
+            'SOOTHE: What physical comfort can you offer? (hand on heart, hug yourself, touch temple)',
+            'SPEAK TRUTH: What corrective message does your Inner Child need to hear?',
+            'TAKE ACTION: What healthy action can you take instead of reacting from the wound?',
+            'List 5 emergency self-soothing techniques you can use anywhere (e.g., cold water, grounding, music)'
+          ],
+          interactiveElements: [
+            'trigger-mapper',
+            'soothing-toolkit',
+            'emergency-plan-creator'
+          ]
+        }
+      },
+      {
+        type: 'result',
+        data: {
+          id: 'result-exercises-complete',
+          title: 'Advanced Exercises Mastered',
+          description: 'You now have a complete toolkit of healing exercises and daily practices',
+          completionMessage: 'Wonderful work! You now have a powerful collection of exercises and practices to support your ongoing Inner Child healing journey. These tools - letter writing, visualization, dialogue, body work, daily check-ins, and trigger response planning - give you everything you need to continue deepening your relationship with your Inner Child.',
+          nextSteps: [
+            'Choose 1-2 exercises that resonated most and commit to practicing them regularly',
+            'Establish your daily morning and evening Inner Child check-in routine',
+            'Keep your trigger response plan somewhere accessible for when you need it',
+            'Consider creating a physical "Inner Child care kit" with comforting items',
+            'Return to these exercises whenever you need deeper connection or healing',
+            'Share these practices with others who might benefit from Inner Child work'
+          ],
+          achievement: 'Healing Practices Master – Daily Warrior'
+        }
+      }
+    ]
   }
 ];
 

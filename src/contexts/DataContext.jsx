@@ -371,6 +371,73 @@ export const DataProvider = ({ children }) => {
     }
   }, []);
 
+  // Module answers functions (for saving question responses)
+  const saveModuleAnswers = useCallback(async (moduleId, stepId, answers) => {
+    if (!userId) return null;
+    
+    try {
+      const data = await supabaseHelpers.saveModuleAnswers(userId, moduleId, stepId, {
+        ...answers,
+        savedAt: new Date().toISOString()
+      });
+      
+      // Backup to localStorage
+      const key = `module-answers-${moduleId}-${stepId}`;
+      localStorage.setItem(key, JSON.stringify(answers));
+      
+      return data;
+    } catch (error) {
+      console.error('Error saving module answers:', error);
+      // Fallback to localStorage
+      const key = `module-answers-${moduleId}-${stepId}`;
+      localStorage.setItem(key, JSON.stringify(answers));
+      return null;
+    }
+  }, [userId]);
+
+  const getModuleAnswers = useCallback(async (moduleId, stepId) => {
+    if (!userId) return {};
+    
+    try {
+      let data = await supabaseHelpers.getModuleAnswers(userId, moduleId, stepId);
+      
+      // Fallback to localStorage
+      if (!data || Object.keys(data).length === 0) {
+        const key = `module-answers-${moduleId}-${stepId}`;
+        const localData = localStorage.getItem(key);
+        if (localData) {
+          try {
+            data = JSON.parse(localData);
+            // Sync to Supabase in background
+            supabaseHelpers.saveModuleAnswers(userId, moduleId, stepId, data);
+          } catch (e) {
+            console.warn('Error parsing local module answers:', e);
+            data = {};
+          }
+        }
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error getting module answers:', error);
+      const key = `module-answers-${moduleId}-${stepId}`;
+      const localData = localStorage.getItem(key);
+      return localData ? JSON.parse(localData) : {};
+    }
+  }, [userId]);
+
+  const getAllModuleAnswers = useCallback(async (moduleId) => {
+    if (!userId) return [];
+    
+    try {
+      const data = await supabaseHelpers.getAllModuleAnswers(userId, moduleId);
+      return data || [];
+    } catch (error) {
+      console.error('Error getting all module answers:', error);
+      return [];
+    }
+  }, [userId]);
+
   // Exercise progress functions
   const saveExerciseProgress = useCallback(async (exerciseId, progress) => {
     if (!userId) return null;
@@ -484,6 +551,11 @@ export const DataProvider = ({ children }) => {
     // Exercise progress
     saveExerciseProgress,
     getExerciseProgress,
+    
+    // Module answers
+    saveModuleAnswers,
+    getModuleAnswers,
+    getAllModuleAnswers,
     
     // Utility
     clearAllData,

@@ -228,6 +228,53 @@ export const supabaseHelpers = {
     return data;
   },
 
+  // Alias for saveClientData to maintain backward compatibility
+  async saveUserData(userId, userData) {
+    return this.saveClientData(userId, userData);
+  },
+
+  // Save module question answers
+  async saveModuleAnswers(userId, moduleId, stepId, answers) {
+    const { data, error } = await supabase
+      .from('ifs_module_answers')
+      .upsert({
+        client_id: userId,
+        module_id: moduleId,
+        step_id: stepId,
+        answers: answers,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'client_id,module_id,step_id'
+      });
+    
+    if (error) console.error('Error saving module answers:', error);
+    return data;
+  },
+
+  async getModuleAnswers(userId, moduleId, stepId) {
+    const { data, error } = await supabase
+      .from('ifs_module_answers')
+      .select('*')
+      .eq('client_id', userId)
+      .eq('module_id', moduleId)
+      .eq('step_id', stepId)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') console.error('Error fetching module answers:', error);
+    return data?.answers || {};
+  },
+
+  async getAllModuleAnswers(userId, moduleId) {
+    const { data, error } = await supabase
+      .from('ifs_module_answers')
+      .select('*')
+      .eq('client_id', userId)
+      .eq('module_id', moduleId);
+    
+    if (error) console.error('Error fetching all module answers:', error);
+    return data || [];
+  },
+
   // Generate a simple user ID for anonymous users
   generateUserId() {
     return 'anon_' + Math.random().toString(36).substr(2, 9);
