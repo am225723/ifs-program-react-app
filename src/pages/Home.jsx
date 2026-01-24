@@ -29,10 +29,14 @@ import {
   Eye,
   Info
 } from 'lucide-react';
+import PersonalizationModal from '../components/PersonalizationModal';
+import aiCurriculumPersonalizer from '../lib/aiCurriculumPersonalizer';
 
 const Home = () => {
   const navigate = useNavigate();
   const [showAssessment, setShowAssessment] = useState(false);
+  const [showPersonalizationModal, setShowPersonalizationModal] = useState(false);
+  const [generatedCurriculum, setGeneratedCurriculum] = useState(null);
   const [currentSection, setCurrentSection] = useState(0);
   const [answers, setAnswers] = useState({});
   const [assessmentResults, setAssessmentResults] = useState(null);
@@ -643,45 +647,13 @@ const Home = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              onClick={(e) => {
-                e.preventDefault();
-                // Generate and store personalized curriculum
+            <button
+              onClick={() => {
                 const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
                 localStorage.setItem("assessmentResults", JSON.stringify(assessmentResults));
                 localStorage.setItem("personalizedCurriculum", JSON.stringify(curriculum));
-                
-                console.log("Curriculum data:", curriculum);
-                console.log("Wound analysis:", curriculum.woundAnalysis);
-                
-                // Extract focus information
-                const primaryWound = curriculum.woundAnalysis?.primaryWound || "Unknown";
-                const secondaryWound = curriculum.woundAnalysis?.secondaryWound || "None";
-                const timeline = curriculum.personalizationSettings?.timeline || "8 weeks";
-                const woundScores = curriculum.woundAnalysis?.wounds?.map(w => 
-                  `${w.type}: ${w.score}/24 (${w.intensity})`
-                ).join("\n") || "No wound scores available";
-                
-                // Show detailed personalization alert
-                alert("🌟 YOUR PERSONALIZED HEALING JOURNEY 🌟\n\n" +
-                      "PRIMARY FOCUS: " + primaryWound.toUpperCase() + "\n" +
-                      "Secondary Focus: " + secondaryWound.toUpperCase() + "\n" +
-                      "Recommended Timeline: " + timeline + "\n\n" +
-                      "Your Wound Profile:\n" + woundScores + "\n\n" +
-                      "✅ Your curriculum has been personalized based on your assessment\n" +
-                      "✅ Each module is adapted to your specific wound patterns\n" +
-                      "✅ Healing goals are targeted to your needs\n\n" +
-                      "Click OK to begin your personalized healing journey!");
-                
-                // Navigate to curriculum using React Router
-                // Navigate to curriculum using React Router
-                try {
-                  navigate("/curriculum");
-                } catch (error) {
-                  console.error("Navigation error:", error);
-                  // Fallback to window.location if navigate fails
-                  window.location.href = "/curriculum";
-                }
+                setGeneratedCurriculum(curriculum);
+                setShowPersonalizationModal(true);
               }}
               className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:scale-105"
             >
@@ -689,7 +661,7 @@ const Home = () => {
                 <Play className="w-5 h-5 mr-2" />
                 Start Your Personalized Journey
               </div>
-            </Link>
+            </button>
             <button
               onClick={resetAssessment}
               className="px-8 py-4 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors text-center"
@@ -698,6 +670,17 @@ const Home = () => {
             </button>
           </div>
         </div>
+
+        <PersonalizationModal
+          isOpen={showPersonalizationModal}
+          onClose={() => setShowPersonalizationModal(false)}
+          curriculum={generatedCurriculum}
+          assessmentResults={assessmentResults}
+          onStartJourney={() => {
+            setShowPersonalizationModal(false);
+            navigate("/curriculum");
+          }}
+        />
       </div>
     );
   }
@@ -1019,8 +1002,5 @@ const Home = () => {
     </div>
   );
 };
-
-import { clientAuth } from '../lib/supabasePersonalization';
-import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
 
 export default Home;

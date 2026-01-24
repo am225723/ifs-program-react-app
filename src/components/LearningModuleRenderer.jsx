@@ -16,13 +16,17 @@ import {
   ArrowRight,
   Award
 } from 'lucide-react';
+import SectionedLearningContent from './SectionedLearningContent';
+import { useData } from '../contexts/DataContext';
 
 const LearningModuleRenderer = ({ userProgress = {} }) => {
   const { moduleId } = useParams();
   const navigate = useNavigate();
+  const { saveModuleAnswers, getModuleAnswers } = useData();
   const [module, setModule] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
+  const [useSectionedView, setUseSectionedView] = useState(true);
 
   // Helper function to generate default steps for personalized modules
   const generateDefaultStepsForPersonalizedModule = (module) => {
@@ -309,7 +313,17 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
 
             {/* Dynamic Module Content */}
             <div className="bg-white rounded-2xl shadow-xl p-8">
-              {renderModuleContent(module, currentStep, module.personalizedContent)}
+              {renderModuleContentWithSections(
+                module, 
+                currentStep, 
+                module.personalizedContent,
+                useSectionedView,
+                {
+                  saveAnswer: (answers) => saveModuleAnswers(moduleId, `step-${currentStep}`, answers),
+                  getAnswer: () => getModuleAnswers(moduleId, `step-${currentStep}`),
+                  onSectionComplete: handleNextStep
+                }
+              )}
             </div>
 
             {/* Navigation */}
@@ -344,6 +358,30 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
       </div>
     </div>
   );
+};
+
+// Helper function to render module content with sectioned view option
+const renderModuleContentWithSections = (module, step, personalizedContent, useSectionedView, handlers) => {
+  const moduleSteps = module?.steps || [];
+  
+  if (moduleSteps.length > 0 && step < moduleSteps.length) {
+    const currentStep = moduleSteps[step];
+    
+    if (currentStep.type === 'learn' && useSectionedView && Array.isArray(currentStep.data?.content) && currentStep.data.content.length > 3) {
+      return (
+        <SectionedLearningContent
+          stepData={currentStep.data}
+          onSectionComplete={handlers.onSectionComplete}
+          saveAnswer={handlers.saveAnswer}
+          getAnswer={handlers.getAnswer}
+        />
+      );
+    }
+    
+    return renderActualStep(currentStep, personalizedContent);
+  }
+  
+  return renderModuleContent(module, step, personalizedContent);
 };
 
 // Helper function to render module content based on step

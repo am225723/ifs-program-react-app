@@ -275,9 +275,14 @@ export const supabaseHelpers = {
     return data || [];
   },
 
-  // Generate a simple user ID for anonymous users
+  // Generate a proper UUID for users (compatible with Supabase UUID columns)
   generateUserId() {
-    return 'anon_' + Math.random().toString(36).substr(2, 9);
+    // Generate a UUID v4 format
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 };
 
