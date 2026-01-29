@@ -1,5 +1,5 @@
 -- =====================================================
--- IFS Personalized Curriculum Database Schema
+-- IFS Personalized Curriculum Database 
 -- All tables prefixed with IFS_ for namespace clarity
 -- =====================================================
 

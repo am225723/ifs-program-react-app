@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { Settings as SettingsIcon } from 'lucide-react';
 import ClientPINLogin from './components/ClientPINLogin';
 import PINAuthDiagnostic from './components/PINAuthDiagnostic';
 import TestClientCreator from './components/TestClientCreator';
@@ -15,10 +16,12 @@ import Assessment from './pages/Assessment';
 import Resources from './pages/Resources';
 import Journal from './pages/Journal';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import AdminDashboard from './pages/AdminDashboard';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { clientAuth } from './lib/supabasePersonalization';
 
 function App() {
@@ -65,6 +68,7 @@ function App() {
   };
 
   return (
+    <ThemeProvider>
     <DataProvider>
       <Router>
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
@@ -114,6 +118,13 @@ function App() {
                       </Link>
                       <div className="w-px h-6 bg-gray-200 mx-1"></div>
                       <Link
+                        to="/settings"
+                        className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
+                        title="Customize Theme"
+                      >
+                        <SettingsIcon className="w-5 h-5" />
+                      </Link>
+                      <Link
                         to="/profile"
                         className="flex items-center gap-2 px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
                       >
@@ -146,6 +157,7 @@ function App() {
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/profile" element={<Profile client={currentClient} />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
@@ -157,6 +169,7 @@ function App() {
         </div>
       </Router>
     </DataProvider>
+    </ThemeProvider>
   );
 }
 
