@@ -4,6 +4,7 @@
 This is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It features PIN-based authentication, personalized curriculum delivery based on child wound assessment results, and comprehensive healing exercises.
 
 ## Recent Changes (January 2026)
+- Added Profile page with assessment results display and PDF export functionality
 - Fixed UUID generation for proper Supabase compatibility
 - Added PersonalizationModal with detailed post-quiz personalization display
 - Added Perplexity AI integration for enhanced personalization (with local fallback)
@@ -55,6 +56,7 @@ src/
 5. **Module 5**: Advanced Healing Exercises & Daily Practices
 
 ## Key Features
+- **Profile Page**: View assessment results with detailed wound scores and PDF export
 - **Personalized Curriculum**: Adapts content based on child wound assessment (abandonment, shame, neglect, betrayal)
 - **Personalization Modal**: Clear display of what has been personalized after assessment
 - **Sectioned Learning**: Modules broken into digestible sections (3 paragraphs each) with reflection questions
