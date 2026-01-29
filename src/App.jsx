@@ -78,31 +78,63 @@ function App() {
             </Routes>
           ) : (
             <>
-              {/* Add header with navigation */}
-              <div className="bg-white shadow-sm p-4">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
-                  <h1 className="text-xl font-bold text-gray-900">
-                    Welcome, {currentClient?.name}
-                  </h1>
-                  <div className="flex items-center gap-3">
-                    <Link
-                      to="/profile"
-                      className="px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                    >
-                      My Profile
+              {/* Modern glassmorphism header */}
+              <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-gray-200/50 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex justify-between items-center h-16">
+                    <Link to="/" className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                        <span className="text-white text-xl">✦</span>
+                      </div>
+                      <div>
+                        <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                          IFS Healing
+                        </h1>
+                        <p className="text-xs text-gray-500 -mt-0.5">Welcome, {currentClient?.name?.split(' ')[0]}</p>
+                      </div>
                     </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                    >
-                      Logout
-                    </button>
+                    <nav className="flex items-center gap-2">
+                      <Link
+                        to="/"
+                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
+                      >
+                        Home
+                      </Link>
+                      <Link
+                        to="/curriculum"
+                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
+                      >
+                        Curriculum
+                      </Link>
+                      <Link
+                        to="/journal"
+                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
+                      >
+                        Journal
+                      </Link>
+                      <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-2 px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold">
+                          {currentClient?.name?.charAt(0) || '?'}
+                        </div>
+                        <span className="hidden sm:inline">Profile</span>
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all text-sm"
+                      >
+                        Logout
+                      </button>
+                    </nav>
                   </div>
                 </div>
-              </div>
+              </header>
               
               <Routes>
-                <Route path="/" element={<Home clientId={currentClient?.id} />} />
+                <Route path="/" element={<Home clientId={currentClient?.id} client={currentClient} />} />
                 <Route path="/curriculum" element={<CurriculumSystem clientId={currentClient?.id} userProgress={{}} />} />
                 <Route path="/curriculum/module/:moduleId" element={<LearningModuleRenderer userProgress={{}} />} />
                 <Route path="/cheat-sheet" element={<CheatSheet />} />

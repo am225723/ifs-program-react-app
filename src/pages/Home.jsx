@@ -31,8 +31,9 @@ import {
 } from 'lucide-react';
 import PersonalizationModal from '../components/PersonalizationModal';
 import aiCurriculumPersonalizer from '../lib/aiCurriculumPersonalizer';
+import { assessmentManager, clientAuth } from '../lib/supabasePersonalization';
 
-const Home = () => {
+const Home = ({ clientId, client }) => {
   const navigate = useNavigate();
   const [showAssessment, setShowAssessment] = useState(false);
   const [showPersonalizationModal, setShowPersonalizationModal] = useState(false);
@@ -42,6 +43,8 @@ const Home = () => {
   const [assessmentResults, setAssessmentResults] = useState(null);
   const [userProgress, setUserProgress] = useState({});
   const [animateHero, setAnimateHero] = useState(false);
+  const [savedAssessment, setSavedAssessment] = useState(null);
+  const [loadingAssessment, setLoadingAssessment] = useState(true);
 
   useEffect(() => {
     setAnimateHero(true);
@@ -49,7 +52,23 @@ const Home = () => {
     if (savedProgress) {
       setUserProgress(JSON.parse(savedProgress));
     }
-  }, []);
+    
+    const loadSavedAssessment = async () => {
+      if (clientId) {
+        try {
+          const result = await assessmentManager.getLatestAssessment(clientId);
+          if (result.success && result.assessment) {
+            setSavedAssessment(result.assessment);
+          }
+        } catch (error) {
+          console.error('Error loading assessment:', error);
+        }
+      }
+      setLoadingAssessment(false);
+    };
+    
+    loadSavedAssessment();
+  }, [clientId]);
 
   const woundSections = [
     {
@@ -225,14 +244,12 @@ const Home = () => {
       // Save assessment results to Supabase if client is authenticated
       const currentClient = clientAuth.getCurrentClient();
       if (currentClient) {
-        await clientAuth.saveAssessment(currentClient.id, {
+        await assessmentManager.saveAssessmentResults(currentClient.id, {
           abandonment_score: results.find(r => r.id === 'abandonment')?.score || 0,
           shame_score: results.find(r => r.id === 'shame')?.score || 0,
           neglect_score: results.find(r => r.id === 'neglect')?.score || 0,
           betrayal_score: results.find(r => r.id === 'betrayal')?.score || 0,
-          responses: answers,
-          primary_wound: results[0]?.id || null,
-          personalized_curriculum: personalizedCurriculum
+          responses: answers
         });
       }
       
@@ -685,9 +702,215 @@ const Home = () => {
     );
   }
 
+  const woundColors = {
+    abandonment: { bg: 'from-blue-400 to-blue-600', light: 'bg-blue-100', text: 'text-blue-700' },
+    shame: { bg: 'from-purple-400 to-purple-600', light: 'bg-purple-100', text: 'text-purple-700' },
+    neglect: { bg: 'from-amber-400 to-amber-600', light: 'bg-amber-100', text: 'text-amber-700' },
+    betrayal: { bg: 'from-red-400 to-red-600', light: 'bg-red-100', text: 'text-red-700' }
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  const getWoundRecommendations = (wound) => {
+    const recommendations = {
+      abandonment: {
+        exercises: ['Self-Soothing Meditation', 'Inner Child Dialogue'],
+        modules: ['Module 2: Abandonment Healing', 'Module 4: Secure Attachment'],
+        affirmation: "I am worthy of love and belonging, just as I am."
+      },
+      shame: {
+        exercises: ['Self-Compassion Practice', 'Mirror Work Exercise'],
+        modules: ['Module 2: Shame Release', 'Module 4: Self-Worth Building'],
+        affirmation: "I accept myself fully, including my imperfections."
+      },
+      neglect: {
+        exercises: ['Needs Identification', 'Reparenting Meditation'],
+        modules: ['Module 2: Recognizing Needs', 'Module 4: Self-Nurturing'],
+        affirmation: "My needs matter and I deserve care and attention."
+      },
+      betrayal: {
+        exercises: ['Trust Building Practice', 'Boundary Setting Exercise'],
+        modules: ['Module 2: Trust Recovery', 'Module 4: Healthy Boundaries'],
+        affirmation: "I am safe to trust myself and choose trustworthy people."
+      }
+    };
+    return recommendations[wound] || recommendations.abandonment;
+  };
+
+  if (loadingAssessment) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your journey...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen">
-      {/* Hero Section with Assessment */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30">
+      {/* Personalized Dashboard for Returning Users */}
+      {savedAssessment && !showAssessment && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Personalized Welcome */}
+          <div className="mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              {getGreeting()}, {client?.name?.split(' ')[0] || 'there'} ✨
+            </h1>
+            <p className="text-gray-600">Continue your healing journey where you left off</p>
+          </div>
+
+          {/* Quick Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Wound Profile Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-700">Your Wound Profile</h3>
+                <Link to="/profile" className="text-purple-600 text-sm hover:underline">View Details</Link>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${woundColors[savedAssessment.primary_wound]?.bg || 'from-gray-400 to-gray-600'} flex items-center justify-center`}>
+                    <Heart className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Primary Focus</p>
+                    <p className="font-semibold capitalize text-gray-900">{savedAssessment.primary_wound}</p>
+                  </div>
+                </div>
+                {savedAssessment.secondary_wound && (
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${woundColors[savedAssessment.secondary_wound]?.bg || 'from-gray-400 to-gray-600'} flex items-center justify-center opacity-70`}>
+                      <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Secondary</p>
+                      <p className="font-medium capitalize text-gray-700">{savedAssessment.secondary_wound}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Continue Learning Card */}
+            <div className="bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl shadow-lg p-6 text-white">
+              <h3 className="font-semibold mb-2">Continue Learning</h3>
+              <p className="text-purple-100 text-sm mb-4">Your personalized curriculum is ready</p>
+              <Link
+                to="/curriculum"
+                className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-2 rounded-lg hover:bg-white/30 transition-colors"
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Resume Curriculum</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Daily Practice Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow">
+              <h3 className="font-semibold text-gray-700 mb-2">Daily Practice</h3>
+              <p className="text-gray-500 text-sm mb-4">Strengthen your Self energy</p>
+              <div className="space-y-2">
+                <Link to="/exercises" className="flex items-center gap-2 text-purple-600 hover:text-purple-700">
+                  <Play className="w-4 h-4" />
+                  <span className="text-sm">Guided Exercises</span>
+                </Link>
+                <Link to="/journal" className="flex items-center gap-2 text-purple-600 hover:text-purple-700">
+                  <BookOpen className="w-4 h-4" />
+                  <span className="text-sm">Journal Entry</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Personalized Recommendations */}
+          {savedAssessment.primary_wound && (
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-semibold text-gray-800">Personalized for Your {savedAssessment.primary_wound} Healing</h3>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-gray-600 mb-3">Recommended exercises for you:</p>
+                  <div className="space-y-2">
+                    {getWoundRecommendations(savedAssessment.primary_wound).exercises.map((exercise, i) => (
+                      <Link 
+                        key={i}
+                        to="/exercises"
+                        className="flex items-center gap-2 p-3 bg-white rounded-lg hover:shadow-md transition-all group"
+                      >
+                        <Play className="w-4 h-4 text-indigo-500" />
+                        <span className="text-sm text-gray-700 group-hover:text-indigo-600">{exercise}</span>
+                        <ArrowRight className="w-4 h-4 text-gray-400 ml-auto group-hover:text-indigo-500" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <p className="text-sm text-gray-600 mb-3">Your daily affirmation:</p>
+                  <div className="bg-white rounded-lg p-4 border-l-4 border-indigo-400">
+                    <p className="text-gray-700 italic">"{getWoundRecommendations(savedAssessment.primary_wound).affirmation}"</p>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">Repeat this affirmation daily to support your healing</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+            <h3 className="font-semibold text-gray-700 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link to="/curriculum" className="flex flex-col items-center p-4 rounded-xl hover:bg-purple-50 transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-2 group-hover:bg-purple-200 transition-colors">
+                  <BookOpen className="w-6 h-6 text-purple-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Curriculum</span>
+              </Link>
+              <Link to="/exercises" className="flex flex-col items-center p-4 rounded-xl hover:bg-pink-50 transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center mb-2 group-hover:bg-pink-200 transition-colors">
+                  <Play className="w-6 h-6 text-pink-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Exercises</span>
+              </Link>
+              <Link to="/parts-mapping" className="flex flex-col items-center p-4 rounded-xl hover:bg-blue-50 transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-2 group-hover:bg-blue-200 transition-colors">
+                  <Users className="w-6 h-6 text-blue-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Parts Map</span>
+              </Link>
+              <Link to="/journal" className="flex flex-col items-center p-4 rounded-xl hover:bg-amber-50 transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mb-2 group-hover:bg-amber-200 transition-colors">
+                  <BookOpen className="w-6 h-6 text-amber-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Journal</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Retake Assessment Option */}
+          <div className="text-center">
+            <button
+              onClick={() => setShowAssessment(true)}
+              className="text-gray-500 hover:text-purple-600 text-sm underline"
+            >
+              Retake wound assessment
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Hero Section for New Users (no assessment yet) */}
+      {!savedAssessment && !loadingAssessment && !showAssessment && (
       <div className="relative overflow-hidden bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-700">
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
         
@@ -700,6 +923,7 @@ const Home = () => {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className={`text-center transition-all duration-1000 ${animateHero ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <p className="text-purple-200 mb-4">Welcome, {client?.name?.split(' ')[0] || 'there'}</p>
             <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white">
               Heal Your
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-pink-300">
@@ -752,6 +976,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Healing Modules Grid */}
       <div className="py-20 bg-white">
