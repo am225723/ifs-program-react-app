@@ -17,6 +17,10 @@ import Resources from './pages/Resources';
 import Journal from './pages/Journal';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import PartsStudio from './pages/PartsStudio';
+import MicroLearning from './pages/MicroLearning';
+import Affirmations from './pages/Affirmations';
+import TherapyIntegration from './pages/TherapyIntegration';
 import AdminDashboard from './pages/AdminDashboard';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
@@ -158,6 +162,10 @@ function App() {
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/profile" element={<Profile client={currentClient} />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/parts-studio" element={<PartsStudio />} />
+                <Route path="/micro-learning" element={<MicroLearning />} />
+                <Route path="/affirmations" element={<Affirmations />} />
+                <Route path="/therapy" element={<TherapyIntegration />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />

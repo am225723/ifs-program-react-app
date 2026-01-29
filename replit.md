@@ -4,6 +4,10 @@
 This is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It features PIN-based authentication, personalized curriculum delivery based on child wound assessment results, and comprehensive healing exercises.
 
 ## Recent Changes (January 2026)
+- Added Parts Visualization Studio with drag-and-drop parts mapping and visual customization
+- Added Micro-Learning page with 6 guided 2-minute healing exercises
+- Added Custom Affirmations generator personalized to wound profile with favorites
+- Added Therapy Integration page for session notes and homework tracking
 - Added Theme Customization Settings page with 5 color themes (Calm Waters, Nurturing Garden, Inner Warmth, Safe Sanctuary, Peaceful Night dark mode)
 - Added animation controls (enable/disable, speed options) for accessibility
 - Modernized UI with glassmorphism header and improved navigation

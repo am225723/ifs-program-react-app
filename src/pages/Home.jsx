@@ -27,7 +27,8 @@ import {
   Wind,
   Mountain,
   Eye,
-  Info
+  Info,
+  MessageCircle
 } from 'lucide-react';
 import PersonalizationModal from '../components/PersonalizationModal';
 import aiCurriculumPersonalizer from '../lib/aiCurriculumPersonalizer';
@@ -893,6 +894,44 @@ const Home = ({ clientId, client }) => {
                   <BookOpen className="w-6 h-6 text-amber-600" />
                 </div>
                 <span className="text-sm font-medium text-gray-700">Journal</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* New Features Section */}
+          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 mb-8">
+            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-indigo-600" />
+              Healing Tools
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link to="/parts-studio" className="flex flex-col items-center p-4 rounded-xl bg-white/60 hover:bg-white transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-2 group-hover:bg-indigo-200 transition-colors">
+                  <Users className="w-6 h-6 text-indigo-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Parts Studio</span>
+                <span className="text-xs text-gray-500">Visual mapping</span>
+              </Link>
+              <Link to="/micro-learning" className="flex flex-col items-center p-4 rounded-xl bg-white/60 hover:bg-white transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-2 group-hover:bg-emerald-200 transition-colors">
+                  <Clock className="w-6 h-6 text-emerald-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Micro-Learning</span>
+                <span className="text-xs text-gray-500">2-min exercises</span>
+              </Link>
+              <Link to="/affirmations" className="flex flex-col items-center p-4 rounded-xl bg-white/60 hover:bg-white transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center mb-2 group-hover:bg-rose-200 transition-colors">
+                  <Heart className="w-6 h-6 text-rose-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Affirmations</span>
+                <span className="text-xs text-gray-500">Personalized</span>
+              </Link>
+              <Link to="/therapy" className="flex flex-col items-center p-4 rounded-xl bg-white/60 hover:bg-white transition-colors group">
+                <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center mb-2 group-hover:bg-cyan-200 transition-colors">
+                  <MessageCircle className="w-6 h-6 text-cyan-600" />
+                </div>
+                <span className="text-sm font-medium text-gray-700">Therapy Notes</span>
+                <span className="text-xs text-gray-500">Session tracking</span>
               </Link>
             </div>
           </div>
