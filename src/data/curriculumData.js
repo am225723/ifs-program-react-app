@@ -932,6 +932,135 @@ export const curriculumModules = [
         }
       },
       {
+        type: 'activity',
+        data: {
+          id: 'activity-guided-parts-dialogue',
+          title: 'Guided Parts Dialogue with Your Therapist',
+          description: 'A structured exercise for therapist-guided conversation with your internal parts using the IFS protocol',
+          type: 'parts_work',
+          prompt: 'This exercise is designed for use during a therapy session. Your therapist will guide you while you turn inward to connect with parts. The dialogue follows the IFS protocol: Find, Focus, Flesh out, Feel toward, BeFriend, and Fear. Work through each question with your therapist present to maintain Self-energy and ensure safety.',
+          questions: [
+            'FIND: Close your eyes and notice what part is most present right now. Where do you feel it in your body? What does it look like if you could see it? Describe everything you notice to your therapist.',
+            'FOCUS: Turn your full attention to this part. What emotion is it carrying? How old does it seem? What posture or expression does it have? Stay curious and describe what you observe.',
+            'FLESH OUT: Ask the part: "What do you want me to know about you? What is your job in my system?" Listen without judging. Share what you hear with your therapist. Let the part tell its full story.',
+            'FEEL TOWARD: How do you feel toward this part right now? If you feel anything other than curiosity and compassion (frustration, fear, judgment), notice that another part has stepped in. Ask that part to step back so you can be with the target part from Self.',
+            'BEFRIEND: Tell this part: "I appreciate you. I understand why you do what you do. Thank you for trying to help me." Notice how the part responds when it feels seen and appreciated. What shifts?',
+            'FEAR: Ask the part: "What are you most afraid would happen if you stopped doing your job?" This reveals the exile or wound the protector is guarding. Share what comes up with your therapist.',
+            'DEEPER CONNECTION: Ask: "What do you need from me that you have not been getting?" Listen carefully. This often reveals what the part needs to begin relaxing its extreme role.',
+            'THERAPIST CHECK-IN: Share with your therapist what you have learned. Together, discuss what this part needs and what the next step might be. Does the part want to show you more? Does it need more trust-building first?',
+            'CLOSING: Thank the part for being willing to share with you today. Let it know you will come back. Ask if there is anything else it needs before you close. Take three deep breaths to return to the room.'
+          ],
+          interactiveElements: [
+            'parts-dialogue-tracker',
+            'emotion-spectrum',
+            'body-scan-mapper'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-protector-negotiation',
+          title: 'Negotiating with Protective Parts',
+          description: 'Work with your therapist to help Manager and Firefighter parts feel safe enough to allow access to vulnerable exiles',
+          type: 'parts_work',
+          prompt: 'Protectors often block access to wounded parts because they fear the pain will be overwhelming. This exercise helps you and your therapist respectfully negotiate with these protective parts, building trust so they can eventually allow healing work with the exiles they guard. Never force past a protector — earn its trust.',
+          questions: [
+            'IDENTIFY THE GATEKEEPER: Which protective part is currently active? Is it a Manager (controlling, planning, criticizing to prevent pain) or a Firefighter (numbing, distracting, reacting when pain leaks through)? Describe its strategy to your therapist.',
+            'ACKNOWLEDGE ITS SERVICE: Tell the protector sincerely: "I see how hard you have been working to keep me safe. You have been doing this job for a very long time. Thank you." What is the protector\'s response? Does it seem surprised, skeptical, relieved?',
+            'UNDERSTAND ITS ORIGIN: Ask the protector: "When did you first start doing this job? How old was I when you took on this role?" This often reveals the original overwhelming experience that created the protective strategy.',
+            'MAP THE FEAR: Ask: "What are you most afraid would happen if you relaxed or stepped back?" Write down every fear the protector shares. These fears are usually about the exile it guards — the young wounded part carrying original pain.',
+            'ADDRESS EACH CONCERN: With your therapist, go through each fear. For example: "I am afraid the sadness will overwhelm you" — respond: "I am an adult now with my therapist here. I have tools to handle big feelings. I will not fall apart."',
+            'THE REQUEST: Gently ask: "Would you be willing to step back just a little — not all the way — so I can get to know the part you are protecting? You can step back in immediately if it feels too much. I promise to respect your boundaries."',
+            'HONOR THE ANSWER: If the protector says yes, proceed slowly with your therapist. If it says no, respect that completely. Ask: "What would you need from me before you could allow access?" This builds trust for future sessions.',
+            'POST-ACCESS CHECK: If you did access the exile, check back with the protector: "How was that for you? Was it okay? Do you need anything from me?" This is crucial for maintaining the protector\'s trust going forward.'
+          ],
+          interactiveElements: [
+            'manager-identifier',
+            'permission-seeker',
+            'safety-planner'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-unburdening-ceremony',
+          title: 'The Unburdening Ceremony',
+          description: 'Guide your wounded exile through the sacred process of releasing burdens and receiving new qualities',
+          type: 'guided_meditation',
+          prompt: 'This is the most profound activity in IFS healing. The unburdening ceremony is where your exile finally releases the toxic beliefs and painful emotions it has carried since childhood. This should ideally be done with your therapist present. Only proceed if you have received genuine permission from your protectors and the exile is truly ready.',
+          questions: [
+            'FINAL READINESS CHECK: Confirm that all protectors have given permission. Confirm the exile feels safe and ready. Confirm you can feel Self-energy — calm, curious, compassionate. Confirm your therapist or support is present. Rate your overall readiness 1-10.',
+            'WITNESSING: Allow the exile to show you its original painful experience. You do not need to relive it — simply witness it from Self, like watching a movie of the past. Tell the part: "I see what happened to you. I am so sorry. That should never have happened." What does the part show you?',
+            'RETRIEVAL: Ask the part: "Would you like to leave that place? Would you like to come with me somewhere safe?" If yes, imagine gently taking the young part out of the scene. Bring it to a safe, nurturing place. Where does it choose to go?',
+            'NAMING THE BURDENS: Ask the unburdened part: "What beliefs did you take on from that experience?" Write each one down. Common burdens: "I am not lovable," "I am broken," "It is my fault," "I am too much," "I am invisible," "I do not matter." What burdens does your part name?',
+            'NAMING THE FEELINGS: Ask: "What feelings have you been carrying?" Shame, terror, grief, rage, despair, loneliness, helplessness. Let the part name every feeling burden it carries. There may be many layers.',
+            'CHOOSING THE ELEMENT: Ask the part: "How would you like to release these burdens?" Offer the five elements: Fire (burn them away), Water (wash them away), Wind (let the breeze carry them away), Earth (release them into the ground), Light (dissolve them in radiant light). Which element does your part choose?',
+            'THE RELEASE: Guide the part through releasing each burden using its chosen element. Go slowly. Notice what happens in the part and in your body as each burden lifts. Describe the experience. What changes? What lightens?',
+            'INVITING NEW QUALITIES: Ask the now-lighter part: "What would you like to receive in place of those burdens?" Common qualities: worthiness, safety, love, joy, innocence, strength, freedom, belonging, peace. Let the part choose and absorb these qualities. What does it take in?',
+            'WITNESSING THE TRANSFORMATION: Notice how the part has changed. Does it look different? Feel different? What is its natural state now that the burdens are gone? What gifts does this part bring to your system? Describe the transformation.',
+            'SYSTEM-WIDE CHECK: Notice how your protectors respond. Often they spontaneously relax when the exile releases its burdens. Ask them: "How are you now that this part is lighter?" What shifts do you notice throughout your internal system?'
+          ],
+          interactiveElements: [
+            'guided-meditation',
+            'emotion-spectrum',
+            'readiness-assessment'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-trailhead-exploration',
+          title: 'Trailhead Exploration: From Triggers to Healing',
+          description: 'Use real-life emotional triggers as doorways to discover and heal the parts underneath your reactions',
+          type: 'reflection',
+          prompt: 'In IFS, a "trailhead" is any real-life trigger — a moment when you have a strong emotional reaction that seems bigger than the situation warrants. These triggers are doorways to parts that need attention. This exercise helps you and your therapist trace a recent trigger back to the protector and exile that created the reaction, opening a path for healing.',
+          questions: [
+            'THE TRIGGER: Describe a recent situation where you had a strong emotional reaction — something that felt bigger or more intense than the situation warranted. What happened? Who was involved? What was said or done?',
+            'THE REACTION: What exactly did you feel in that moment? What thoughts ran through your mind? What did your body do (tighten, freeze, flush, shake)? What did you want to do (yell, run, hide, fix, please)?',
+            'FINDING THE PROTECTOR: The reaction you just described IS a protector part. Turn inward and locate it. Where is it in your body? What does it look like? What is its strategy? Is it a Manager (preventing pain) or Firefighter (reacting to pain)?',
+            'ASKING THE PROTECTOR: From Self-energy, ask this protector: "What were you trying to do for me in that moment? What were you protecting me from?" Listen to its answer without judgment.',
+            'FOLLOWING THE CHAIN: Ask the protector: "Who are you protecting? What younger part of me would be hurt if you did not step in?" Follow the thread inward. Notice who appears — this is usually an exile carrying an old wound.',
+            'THE ORIGINAL WOUND: If the exile is willing to share, ask: "When did you first feel this way? Can you show me the original experience?" Let it reveal the connection between today\'s trigger and the original wound. What pattern do you see?',
+            'OFFERING WHAT WAS NEEDED: Ask the younger part: "What did you need back then that you did not receive?" Then offer it from Self right now: safety, protection, validation, comfort, love. Notice what the part receives and how it responds.',
+            'UPDATING THE PROTECTOR: Go back to the protector. Share what you learned about the exile it guards. Ask: "Now that I have connected with the part you protect, would you be willing to try a different approach next time this trigger comes up?" Discuss alternatives together.',
+            'INTEGRATION INSIGHT: Write down the connection you discovered: "When [trigger] happens, my [protector] activates because it is trying to protect my [exile] who carries [wound] from [original experience]." How does understanding this chain change your relationship with this reaction?'
+          ],
+          interactiveElements: [
+            'emotion-spectrum',
+            'body-scan-mapper',
+            'wound-selector'
+          ]
+        }
+      },
+      {
+        type: 'activity',
+        data: {
+          id: 'activity-integration-daily-practice',
+          title: 'Integration Daily Practice Planner',
+          description: 'Create a personalized daily practice plan to maintain and deepen your healing between therapy sessions',
+          type: 'reflection',
+          prompt: 'Integration is what turns moments of healing into lasting transformation. This activity helps you build a realistic daily practice that keeps you connected to your internal family, strengthens Self-leadership, and ensures that healing work done in therapy sessions continues to grow in your everyday life.',
+          questions: [
+            'MORNING CHECK-IN PLAN: Design a 5-minute morning check-in with your parts. What will you do? Examples: sit quietly and ask "How is everyone today?", scan your body for parts signals, set a Self-energy intention for the day. What morning practice feels sustainable for you?',
+            'PARTS AWARENESS PRACTICE: Throughout the day, you can notice parts activation. What are your personal signals that a part has been triggered? (racing heart, tight jaw, negative self-talk, urge to eat/drink/scroll). Write down your top 3 activation signals.',
+            'MIDDAY RESET: Design a 2-minute midday reset. This could be: three deep breaths while checking in with your parts, a brief Self-energy meditation, or simply placing a hand on your heart and saying "I am here for all of you." What reset feels right?',
+            'EVENING REFLECTION: How will you close each day with your internal family? Ideas: journal about which parts were active today, write a gratitude note to a protector that worked hard, review moments when you stayed in Self. What evening practice works for your schedule?',
+            'WEEKLY DEEPER PRACTICE: Choose one longer weekly practice (15-30 min): a formal meditation with parts, journaling dialogue with a specific part, reviewing your therapy session notes, or doing a parts mapping update. When will you do this?',
+            'SELF-CARE FOR PARTS: Different parts need different care. Your inner child might need play and creativity. Your perfectionist might need permission to rest. Your caretaker might need someone to care for IT. What self-care practices honor your specific parts?',
+            'TRIGGER RESPONSE PLAN: When you get triggered, what is your step-by-step response? Example: 1) Notice the activation, 2) Take 3 breaths, 3) Say "A part of me is activated," 4) Get curious about which part, 5) Offer it compassion. Write your personalized plan.',
+            'SUPPORT AND ACCOUNTABILITY: How will you stay consistent? Will you use a journal, an app reminder, share with a trusted friend, or bring your practice to therapy sessions? What support structure will help you maintain your practice?',
+            'CELEBRATION PRACTICE: How will you celebrate your progress? Healing deserves acknowledgment. Ideas: milestone journaling, treating yourself with kindness, sharing a win with your therapist, creating a visual reminder of how far you have come.',
+            'COMMITMENT: Write a brief commitment statement to yourself and your parts: "I commit to [specific practices] because my healing matters. I will be patient with myself and celebrate my progress." What is your commitment?'
+          ],
+          interactiveElements: [
+            'readiness-assessment'
+          ]
+        }
+      },
+      {
         type: 'learn',
         data: {
           id: 'learn-integration-living',
