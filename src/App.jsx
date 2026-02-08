@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Home as HomeIcon, BookOpen, ClipboardList, BookHeart, Handshake, LogOut } from 'lucide-react';
+import { useTheme } from './contexts/ThemeContext';
 import ClientPINLogin from './components/ClientPINLogin';
 import PINAuthDiagnostic from './components/PINAuthDiagnostic';
 import TestClientCreator from './components/TestClientCreator';
@@ -32,6 +33,7 @@ import { clientAuth } from './lib/supabasePersonalization';
 
 function BottomNav() {
   const location = useLocation();
+  const { theme } = useTheme();
   const navItems = [
     { path: '/', icon: HomeIcon, label: 'Home' },
     { path: '/curriculum', icon: BookOpen, label: 'Curriculum' },
@@ -40,8 +42,17 @@ function BottomNav() {
     { path: '/therapy', icon: Handshake, label: 'Integration' },
   ];
 
+  const accentMap = {
+    blue: { active: 'text-blue-600', bg: 'bg-blue-100' },
+    emerald: { active: 'text-emerald-600', bg: 'bg-emerald-100' },
+    amber: { active: 'text-amber-600', bg: 'bg-amber-100' },
+    purple: { active: 'text-purple-600', bg: 'bg-purple-100' },
+    indigo: { active: 'text-indigo-400', bg: 'bg-indigo-900' },
+  };
+  const accent = accentMap[theme.accent] || accentMap.purple;
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-200/50 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-lg border-t shadow-[0_-2px_10px_rgba(0,0,0,0.06)] ${theme.isDark ? 'bg-slate-900/95 border-slate-700/50' : 'bg-white/95 border-gray-200/50'}`}>
       <div className="max-w-lg mx-auto flex justify-around items-center h-16 px-2">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -52,11 +63,11 @@ function BottomNav() {
               to={item.path}
               className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-[60px] ${
                 isActive
-                  ? 'text-purple-600'
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? accent.active
+                  : theme.isDark ? 'text-slate-500 hover:text-slate-300' : 'text-gray-400 hover:text-gray-600'
               }`}
             >
-              <div className={`p-1 rounded-lg transition-all duration-200 ${isActive ? 'bg-purple-100' : ''}`}>
+              <div className={`p-1 rounded-lg transition-all duration-200 ${isActive ? accent.bg : ''}`}>
                 <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
               </div>
               <span className={`text-[10px] leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
@@ -119,18 +130,36 @@ function App() {
     <PartsProvider>
     <DataProvider>
       <Router>
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
-          {!isAuthenticated ? (
-            <Routes>
-              <Route path="/" element={<ClientPINLogin onLogin={handleLogin} />} />
-              <Route path="/test-client" element={<TestClientCreator />} />
-              <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
-              <Route path="/auth-debug" element={<AuthDebug />} />
-              <Route path="*" element={<ClientPINLogin onLogin={handleLogin} />} />
-            </Routes>
-          ) : (
-            <>
-              <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-gray-200/50 shadow-sm">
+        <AppContent
+          isAuthenticated={isAuthenticated}
+          currentClient={currentClient}
+          handleLogin={handleLogin}
+          handleLogout={handleLogout}
+        />
+      </Router>
+    </DataProvider>
+    </PartsProvider>
+    </ThemeProvider>
+  );
+}
+
+function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout }) {
+  const { theme } = useTheme();
+  const bgClass = isAuthenticated ? `bg-gradient-to-br ${theme.primary}` : '';
+
+  return (
+    <div className={`min-h-screen ${bgClass}`}>
+      {!isAuthenticated ? (
+        <Routes>
+          <Route path="/" element={<ClientPINLogin onLogin={handleLogin} />} />
+          <Route path="/test-client" element={<TestClientCreator />} />
+          <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
+          <Route path="/auth-debug" element={<AuthDebug />} />
+          <Route path="*" element={<ClientPINLogin onLogin={handleLogin} />} />
+        </Routes>
+      ) : (
+        <>
+          <header className={`sticky top-0 z-50 backdrop-blur-lg border-b shadow-sm ${theme.isDark ? 'bg-slate-900/80 border-slate-700/50' : 'bg-white/80 border-gray-200/50'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="flex justify-between items-center h-14">
                     <Link to="/" className="flex items-center gap-3">
@@ -201,10 +230,6 @@ function App() {
             </>
           )}
         </div>
-      </Router>
-    </DataProvider>
-    </PartsProvider>
-    </ThemeProvider>
   );
 }
 

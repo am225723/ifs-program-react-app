@@ -315,8 +315,7 @@ const Home = ({ clientId, client }) => {
     const Icon = currentSectionData.icon;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
-        {/* Header */}
+      <div className="min-h-screen">
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-8">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between">
@@ -486,8 +485,7 @@ const Home = ({ clientId, client }) => {
     const Icon = highestScoringSection?.icon;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
-        {/* Header */}
+      <div className="min-h-screen">
         <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-12">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="w-24 h-24 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-6">
@@ -745,7 +743,7 @@ const Home = ({ clientId, client }) => {
 
   if (loadingAssessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your journey...</p>
@@ -755,7 +753,7 @@ const Home = ({ clientId, client }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/30">
+    <div className="min-h-screen">
       {/* Personalized Dashboard for Returning Users */}
       {savedAssessment && !showAssessment && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

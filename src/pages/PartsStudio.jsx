@@ -63,7 +63,7 @@ export default function PartsStudio() {
   const getPartType = (typeId) => partTypes.find(t => t.id === typeId) || partTypes[0];
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+    <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
       <div className="max-w-6xl mx-auto px-4 py-8">
         <Link 
           to="/" 

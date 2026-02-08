@@ -299,7 +299,7 @@ const Curriculum = () => {
     const currentLessonData = module.lessons[currentLesson];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+      <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Module Header */}
           <div className={`bg-gradient-to-r ${module.color} rounded-3xl p-8 mb-8 text-white`}>
@@ -542,7 +542,7 @@ const Curriculum = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+    <div className="min-h-screen">
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

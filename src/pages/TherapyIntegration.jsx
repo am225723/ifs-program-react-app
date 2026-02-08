@@ -573,7 +573,7 @@ ${s.therapistNotes || 'N/A'}
     const showReflection = isLastStep && activeStep === activeActivity.steps.length - 1;
 
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+      <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
         <div className="max-w-3xl mx-auto px-4 py-8">
           <button
             onClick={() => { setActiveActivity(null); setIsTimerRunning(false); }}
@@ -693,7 +693,7 @@ ${s.therapistNotes || 'N/A'}
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+    <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
       <div className="max-w-5xl mx-auto px-4 py-8">
         <Link
           to="/"

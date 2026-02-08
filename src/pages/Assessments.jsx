@@ -347,7 +347,7 @@ export default function Assessments() {
 
   if (loading) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${theme.primary} flex items-center justify-center`}>
+      <div className={`min-h-screen flex items-center justify-center`}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
       </div>
     );
@@ -359,7 +359,7 @@ export default function Assessments() {
     if (!results) return null;
 
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+      <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <button
             onClick={() => { setActiveAssessment(null); setShowResults(false); setAnswers({}); }}
@@ -603,7 +603,7 @@ export default function Assessments() {
     const allAnswered = totalAnswered === totalQuestions;
 
     return (
-      <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+      <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <button
             onClick={() => { setActiveAssessment(null); setAnswers({}); }}
@@ -706,7 +706,7 @@ export default function Assessments() {
   }
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+    <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
       <div className="max-w-5xl mx-auto px-4 py-8">
         <Link
           to="/"

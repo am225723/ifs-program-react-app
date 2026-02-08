@@ -67,26 +67,23 @@ const ClientPINLogin = ({ onLogin }) => {
 
   // Show PIN login interface
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-700 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-      
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-purple-100/60 to-indigo-100/50 flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-4000"></div>
+        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-4000"></div>
       </div>
 
       <div className="relative w-full max-w-md">
         {/* Logo/Branding */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-white/20 backdrop-blur rounded-full flex items-center justify-center mx-auto mb-4">
-            <User className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <User className="w-10 h-10 text-purple-500" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Welcome Back
           </h1>
-          <p className="text-purple-100 text-lg">
+          <p className="text-gray-500 text-lg">
             Enter your personal PIN to continue your healing journey
           </p>
         </div>
@@ -176,21 +173,19 @@ const ClientPINLogin = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Token Login Switch */}
         <div className="mt-6 text-center">
           <button
             onClick={() => setUseTokenLogin(true)}
-            className="inline-flex items-center space-x-2 text-white/80 hover:text-white font-medium transition-colors duration-200"
+            className="inline-flex items-center space-x-2 text-gray-500 hover:text-purple-600 font-medium transition-colors duration-200"
           >
             <Key className="w-4 h-4" />
             <span>Login with Token Instead</span>
           </button>
         </div>
 
-        {/* Additional Info */}
-        <div className="mt-6 text-center">
-          <p className="text-white/80 text-sm">
-            🔒 Your data is secure and private
+        <div className="mt-4 text-center">
+          <p className="text-gray-400 text-sm">
+            Your data is secure and private
           </p>
         </div>
       </div>

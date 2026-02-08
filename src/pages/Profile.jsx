@@ -97,7 +97,7 @@ const Profile = ({ client }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-3 text-purple-600">
           <RefreshCw className="w-6 h-6 animate-spin" />
           <span className="text-lg">Loading your profile...</span>
@@ -107,7 +107,7 @@ const Profile = ({ client }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen">
       <style>{`
         @media print {
           body * { visibility: hidden; }
@@ -135,20 +135,20 @@ const Profile = ({ client }) => {
 
         <div ref={printRef} className="print-area">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-6 text-white">
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 sm:px-8 py-6 text-white">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                  <User className="w-8 h-8" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold">{client?.name || 'Your Profile'}</h1>
+                  <h1 className="text-xl sm:text-2xl font-bold">{client?.name || 'Your Profile'}</h1>
                   <p className="text-purple-100">IFS Healing Journey</p>
                 </div>
               </div>
             </div>
 
-            <div className="p-8">
-              <div className="flex items-center justify-between mb-6">
+            <div className="p-4 sm:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
                   <Heart className="w-5 h-5 text-pink-500" />
                   Wound Assessment Results
@@ -156,17 +156,17 @@ const Profile = ({ client }) => {
                 <div className="no-print flex gap-2">
                   <button
                     onClick={handlePrint}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700 text-sm"
                   >
                     <Printer className="w-4 h-4" />
-                    Print
+                    <span>Print</span>
                   </button>
                   <button
                     onClick={handleDownloadPDF}
-                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
                   >
                     <Download className="w-4 h-4" />
-                    Save as PDF
+                    <span>Save PDF</span>
                   </button>
                 </div>
               </div>
@@ -177,7 +177,7 @@ const Profile = ({ client }) => {
                   <h3 className="text-lg font-medium text-gray-700 mb-2">No Assessment Found</h3>
                   <p className="text-gray-500 mb-4">You haven't completed the wound assessment yet.</p>
                   <button
-                    onClick={() => navigate('/assessment')}
+                    onClick={() => navigate('/assessments')}
                     className="no-print px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                   >
                     Take Assessment
