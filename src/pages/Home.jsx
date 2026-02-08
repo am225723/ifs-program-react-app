@@ -28,7 +28,11 @@ import {
   Mountain,
   Eye,
   Info,
-  MessageCircle
+  MessageCircle,
+  MessageSquare,
+  Trophy,
+  BarChart3,
+  Smile
 } from 'lucide-react';
 import PersonalizationModal from '../components/PersonalizationModal';
 import aiCurriculumPersonalizer from '../lib/aiCurriculumPersonalizer';
@@ -326,7 +330,7 @@ const Home = ({ clientId, client }) => {
                 ← Exit Assessment
               </button>
               <div className="text-center">
-                <h1 className="text-2xl font-bold">The "Burdens of the Exile" Assessment</h1>
+                <h1 className="text-2xl font-bold">IFS Wound Assessment</h1>
                 <p className="text-purple-100 mt-2">Section {currentSection + 1} of {woundSections.length}</p>
               </div>
               <div className="text-purple-100">
@@ -1032,8 +1036,8 @@ const Home = ({ clientId, client }) => {
             {/* Assessment Description */}
             <div className="bg-white/10 backdrop-blur rounded-2xl p-6 max-w-2xl mx-auto mb-8">
               <p className="text-white text-sm leading-relaxed">
-                The "Burdens of the Exile" Assessment is a professional IFS-based tool to help you identify 
-                which parts of your inner child carry painful burdens. This isn't about labeling - it's about 
+                The IFS Wound Assessment is a professional IFS-based tool to help you identify 
+                which inner child wounds may be affecting your daily life. This isn't about labeling - it's about 
                 creating trailheads for compassionate healing.
               </p>
             </div>
@@ -1180,6 +1184,74 @@ const Home = ({ clientId, client }) => {
               </p>
               <div className="flex items-center text-pink-600 font-semibold">
                 <span>Begin Journaling</span>
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </div>
+            </Link>
+
+            <Link
+              to="/parts-dialogue"
+              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <MessageSquare className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">AI Parts Dialogue</h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Have guided conversations with your inner parts using AI-powered dialogue
+              </p>
+              <div className="flex items-center text-purple-600 font-semibold">
+                <span>Start Dialogue</span>
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </div>
+            </Link>
+
+            <Link
+              to="/mood-tracker"
+              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Smile className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Mood & Energy</h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Track your daily mood and energy levels to discover patterns in your healing
+              </p>
+              <div className="flex items-center text-amber-600 font-semibold">
+                <span>Check In</span>
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </div>
+            </Link>
+
+            <Link
+              to="/progress-timeline"
+              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-teal-400 to-cyan-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <BarChart3 className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Progress Timeline</h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                View your healing journey milestones and track your growth over time
+              </p>
+              <div className="flex items-center text-teal-600 font-semibold">
+                <span>View Timeline</span>
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </div>
+            </Link>
+
+            <Link
+              to="/gamification"
+              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Trophy className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Badges & Streaks</h3>
+              <p className="text-gray-600 mb-4 leading-relaxed">
+                Earn achievements and maintain daily streaks as you progress on your journey
+              </p>
+              <div className="flex items-center text-yellow-600 font-semibold">
+                <span>View Achievements</span>
                 <ArrowRight className="ml-2 w-5 h-5" />
               </div>
             </Link>

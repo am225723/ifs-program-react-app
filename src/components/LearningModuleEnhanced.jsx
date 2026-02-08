@@ -20,7 +20,14 @@ import {
   Brain,
   Activity,
   TrendingUp,
-  Star
+  Star,
+  Eye,
+  Layers,
+  Timer,
+  Shield,
+  SlidersHorizontal,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { progressTracker } from '../lib/supabasePersonalization';
@@ -285,11 +292,20 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
         {data.reflectionPrompts && data.reflectionPrompts.length > 0 && (
           <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">🤔 Reflection Prompts:</h3>
-            <div className="space-y-3">
+            <div className="space-y-5">
               {data.reflectionPrompts.map((prompt, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <span className="text-yellow-600 font-bold mt-1">Q{index + 1}.</span>
-                  <p className="text-gray-700 italic">{prompt}</p>
+                <div key={index} className="space-y-2">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-yellow-600 font-bold mt-1">Q{index + 1}.</span>
+                    <p className="text-gray-700 italic">{prompt}</p>
+                  </div>
+                  <textarea
+                    value={activityResponses[`reflection-${index}`] || ''}
+                    onChange={(e) => handleActivityResponse(`reflection-${index}`, e.target.value)}
+                    placeholder="Write your reflection here..."
+                    className="w-full px-4 py-3 border border-yellow-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white/80 text-gray-700"
+                    rows={3}
+                  />
                 </div>
               ))}
             </div>
@@ -380,6 +396,11 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
         {data.interactiveElements.includes('pattern-identifier') && renderPatternIdentifier()}
         {data.interactiveElements.includes('body-scan-mapper') && renderBodyScanMapper()}
         {data.interactiveElements.includes('wound-healing-planner') && renderWoundHealingPlanner()}
+        {data.interactiveElements.includes('guided-visualization') && renderGuidedVisualization()}
+        {data.interactiveElements.includes('matching-exercise') && renderMatchingExercise()}
+        {data.interactiveElements.includes('safety-checklist') && renderSafetyChecklist()}
+        {data.interactiveElements.includes('mindfulness-timer') && renderMindfulnessTimer()}
+        {data.interactiveElements.includes('scale-rating') && renderScaleRating()}
       </div>
     );
   };
@@ -865,6 +886,426 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               rows={2}
             />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Guided Visualization Component
+  const renderGuidedVisualization = () => {
+    const steps = [
+      { title: 'Settle In', instruction: 'Close your eyes and take three deep breaths. Allow your body to relax into a comfortable position. Notice the support beneath you.' },
+      { title: 'Create Safety', instruction: 'Imagine a safe, peaceful place — it could be real or imagined. Notice the colors, sounds, and feelings of this space. Let yourself feel completely protected here.' },
+      { title: 'Invite Your Inner Child', instruction: 'Gently invite your inner child to appear in this safe space. They may come as a specific age or as a feeling. Let them arrive in their own time without forcing anything.' },
+      { title: 'Observe With Curiosity', instruction: 'Notice how your inner child appears. What are they wearing? What expression do they have? What do they seem to be feeling? Simply observe with compassion.' },
+      { title: 'Offer Connection', instruction: 'Let your inner child know you see them. You might say: "I see you. I\'m here now. You\'re safe." Notice how they respond to your presence and attention.' },
+      { title: 'Listen Deeply', instruction: 'Ask your inner child: "What do you need me to know?" Listen without judgment. Whatever they share — feelings, memories, or needs — receive it with openness.' },
+      { title: 'Offer Comfort', instruction: 'Offer your inner child what they need — perhaps a hug, reassurance, or simply your continued presence. Let love and compassion flow naturally.' },
+      { title: 'Integration', instruction: 'Thank your inner child for trusting you. Let them know you will return. Slowly bring your awareness back to the present moment, carrying this connection with you.' }
+    ];
+
+    const currentVizStep = interactiveData['viz-current-step'] || 0;
+    const progress = ((currentVizStep + 1) / steps.length) * 100;
+
+    return (
+      <div className="bg-gradient-to-r from-violet-100 to-indigo-100 rounded-lg p-6 border border-violet-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <Eye className="w-5 h-5 text-violet-600" />
+          <span>Guided Visualization</span>
+        </h3>
+        <div className="mb-4">
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>Step {currentVizStep + 1} of {steps.length}</span>
+            <span>{Math.round(progress)}% complete</span>
+          </div>
+          <div className="w-full bg-violet-200 rounded-full h-2">
+            <div className="bg-violet-600 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-5 border border-violet-100 mb-4">
+          <div className="flex items-center space-x-2 mb-3">
+            <div className="w-8 h-8 bg-violet-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+              {currentVizStep + 1}
+            </div>
+            <h4 className="text-md font-semibold text-gray-900">{steps[currentVizStep].title}</h4>
+          </div>
+          <p className="text-gray-700 leading-relaxed mb-4">{steps[currentVizStep].instruction}</p>
+          <textarea
+            value={interactiveData[`viz-notes-${currentVizStep}`] || ''}
+            onChange={(e) => handleInteractiveChange(`viz-notes-${currentVizStep}`, e.target.value)}
+            placeholder="Jot down any thoughts, feelings, or images that arise..."
+            className="w-full px-4 py-3 border border-violet-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-violet-50/30"
+            rows={3}
+          />
+        </div>
+        <div className="flex justify-between">
+          <button
+            onClick={() => handleInteractiveChange('viz-current-step', Math.max(0, currentVizStep - 1))}
+            disabled={currentVizStep === 0}
+            className="flex items-center space-x-1 px-4 py-2 rounded-lg bg-white border border-violet-200 text-violet-700 hover:bg-violet-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Previous</span>
+          </button>
+          <button
+            onClick={() => handleInteractiveChange('viz-current-step', Math.min(steps.length - 1, currentVizStep + 1))}
+            disabled={currentVizStep === steps.length - 1}
+            className="flex items-center space-x-1 px-4 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <span>Next</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Matching Exercise Component
+  const renderMatchingExercise = () => {
+    const pairs = [
+      { term: 'Manager', description: 'Proactive protector that tries to prevent pain through control, perfectionism, or caretaking' },
+      { term: 'Firefighter', description: 'Reactive protector that numbs or distracts from pain through impulsive behaviors' },
+      { term: 'Exile', description: 'Wounded inner child part carrying pain, shame, fear, or traumatic memories' },
+      { term: 'Self', description: 'Core compassionate leader embodying curiosity, calm, confidence, and connectedness' },
+      { term: 'Unburdening', description: 'Process of releasing extreme beliefs and emotions that parts have been carrying' },
+      { term: 'Blending', description: 'When a part\'s emotions or beliefs take over and feel like the whole of you' }
+    ];
+
+    const shuffledDescriptions = [
+      'Wounded inner child part carrying pain, shame, fear, or traumatic memories',
+      'Core compassionate leader embodying curiosity, calm, confidence, and connectedness',
+      'Proactive protector that tries to prevent pain through control, perfectionism, or caretaking',
+      'Process of releasing extreme beliefs and emotions that parts have been carrying',
+      'Reactive protector that numbs or distracts from pain through impulsive behaviors',
+      'When a part\'s emotions or beliefs take over and feel like the whole of you'
+    ];
+
+    const showFeedback = interactiveData['matching-submitted'] || false;
+
+    return (
+      <div className="bg-gradient-to-r from-amber-100 to-yellow-100 rounded-lg p-6 border border-amber-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <Layers className="w-5 h-5 text-amber-600" />
+          <span>IFS Concept Matching</span>
+        </h3>
+        <p className="text-gray-700 mb-4">Match each IFS term with its correct description:</p>
+        <div className="space-y-3">
+          {pairs.map((pair, index) => {
+            const selectedValue = interactiveData[`match-${pair.term}`] || '';
+            const isCorrect = selectedValue === pair.description;
+            return (
+              <div key={pair.term} className="bg-white rounded-lg p-4 border border-amber-100">
+                <div className="flex flex-col md:flex-row md:items-center gap-3">
+                  <div className="md:w-1/4">
+                    <span className="font-semibold text-gray-900">{pair.term}</span>
+                  </div>
+                  <div className="md:w-3/4">
+                    <select
+                      value={selectedValue}
+                      onChange={(e) => handleInteractiveChange(`match-${pair.term}`, e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm"
+                    >
+                      <option value="">— Select a description —</option>
+                      {shuffledDescriptions.map((desc, i) => (
+                        <option key={i} value={desc}>{desc}</option>
+                      ))}
+                    </select>
+                    {showFeedback && selectedValue && (
+                      <div className={`mt-1 text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-500'}`}>
+                        {isCorrect ? '✓ Correct!' : '✗ Not quite — try again'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => handleInteractiveChange('matching-submitted', true)}
+            className="px-5 py-2 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors font-medium"
+          >
+            Check Answers
+          </button>
+        </div>
+        {showFeedback && (
+          <div className="mt-3 text-sm text-gray-600 bg-white rounded-lg p-3 border border-amber-100">
+            {pairs.every(p => interactiveData[`match-${p.term}`] === p.description)
+              ? <span className="text-green-700 font-semibold">🎉 Perfect! You matched all concepts correctly!</span>
+              : <span>Review your answers above. Incorrect matches are highlighted in red.</span>
+            }
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Safety Checklist Component
+  const renderSafetyChecklist = () => {
+    const items = [
+      { id: 'safe-space', label: 'I have a safe, private space for this work' },
+      { id: 'support-available', label: 'I have support available if I need it (therapist, trusted person, helpline)' },
+      { id: 'feel-grounded', label: 'I feel grounded and present in my body right now' },
+      { id: 'can-pause', label: 'I know I can pause or stop at any time without judgment' },
+      { id: 'not-in-crisis', label: 'I am not currently in an acute emotional crisis' },
+      { id: 'have-time', label: 'I have enough uninterrupted time for this practice' },
+      { id: 'self-care-plan', label: 'I have a self-care plan for after this session' },
+      { id: 'grounding-tools', label: 'I know at least one grounding technique I can use if needed' }
+    ];
+
+    const checkedCount = items.filter(item => interactiveData[`safety-${item.id}`]).length;
+    const progress = (checkedCount / items.length) * 100;
+    const allChecked = checkedCount === items.length;
+
+    return (
+      <div className="bg-gradient-to-r from-emerald-100 to-green-100 rounded-lg p-6 border border-emerald-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <Shield className="w-5 h-5 text-emerald-600" />
+          <span>Safety & Grounding Checklist</span>
+        </h3>
+        <p className="text-gray-700 mb-4">Before diving into deep healing work, ensure you have the following in place:</p>
+        <div className="mb-4">
+          <div className="flex justify-between text-sm text-gray-600 mb-1">
+            <span>{checkedCount} of {items.length} items</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <div className="w-full bg-emerald-200 rounded-full h-2">
+            <div className="bg-emerald-600 h-2 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+        <div className="space-y-2">
+          {items.map(item => (
+            <label key={item.id} className="flex items-start space-x-3 p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-emerald-50 transition-colors">
+              <input
+                type="checkbox"
+                className="w-5 h-5 text-emerald-600 mt-0.5 rounded"
+                checked={interactiveData[`safety-${item.id}`] || false}
+                onChange={(e) => handleInteractiveChange(`safety-${item.id}`, e.target.checked)}
+              />
+              <span className={`text-sm ${interactiveData[`safety-${item.id}`] ? 'text-emerald-700 font-medium' : 'text-gray-700'}`}>
+                {item.label}
+              </span>
+            </label>
+          ))}
+        </div>
+        {allChecked && (
+          <div className="mt-4 bg-emerald-50 border border-emerald-300 rounded-lg p-4 text-center">
+            <CheckCircle className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
+            <p className="text-emerald-800 font-semibold">You're ready for deep healing work!</p>
+            <p className="text-emerald-600 text-sm mt-1">All safety foundations are in place. Proceed with confidence and self-compassion.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Mindfulness Timer Component
+  const renderMindfulnessTimer = () => {
+    const presets = [
+      { label: '2 min', seconds: 120 },
+      { label: '5 min', seconds: 300 },
+      { label: '10 min', seconds: 600 }
+    ];
+
+    const timerDuration = interactiveData['mindful-duration'] || 120;
+    const timerActive = meditationActive;
+    const elapsed = meditationTimer;
+    const remaining = Math.max(0, timerDuration - elapsed);
+    const timerProgress = timerDuration > 0 ? (elapsed / timerDuration) * 100 : 0;
+
+    const cycleLength = 14;
+    const breathPhase = elapsed % cycleLength;
+    let breathLabel = 'Breathe in...';
+    let breathScale = 1;
+    if (breathPhase < 4) {
+      breathLabel = 'Breathe in...';
+      breathScale = 1 + (breathPhase / 4) * 0.3;
+    } else if (breathPhase < 8) {
+      breathLabel = 'Hold...';
+      breathScale = 1.3;
+    } else {
+      breathLabel = 'Breathe out...';
+      breathScale = 1.3 - ((breathPhase - 8) / 6) * 0.3;
+    }
+
+    const startTimer = (duration) => {
+      handleInteractiveChange('mindful-duration', duration);
+      setMeditationTimer(0);
+      setMeditationActive(true);
+    };
+
+    const stopTimer = () => {
+      setMeditationActive(false);
+    };
+
+    const resetTimer = () => {
+      setMeditationActive(false);
+      setMeditationTimer(0);
+    };
+
+    if (remaining === 0 && timerActive) {
+      setMeditationActive(false);
+    }
+
+    return (
+      <div className="bg-gradient-to-r from-sky-100 to-blue-100 rounded-lg p-6 border border-sky-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <Timer className="w-5 h-5 text-sky-600" />
+          <span>Mindfulness Breathing Timer</span>
+        </h3>
+        <div className="flex justify-center mb-6">
+          <div className="relative flex items-center justify-center w-48 h-48">
+            <div
+              className="absolute inset-0 rounded-full bg-sky-200 opacity-40 transition-transform duration-1000 ease-in-out"
+              style={{ transform: `scale(${timerActive ? breathScale : 1})` }}
+            />
+            <div
+              className="absolute inset-4 rounded-full bg-sky-300 opacity-50 transition-transform duration-1000 ease-in-out"
+              style={{ transform: `scale(${timerActive ? breathScale : 1})` }}
+            />
+            <div className="relative z-10 text-center">
+              <div className="text-3xl font-bold text-sky-800">{formatTime(remaining)}</div>
+              <div className="text-sm text-sky-600 mt-1 font-medium">
+                {timerActive ? breathLabel : 'Ready'}
+              </div>
+            </div>
+          </div>
+        </div>
+        {!timerActive && elapsed === 0 && (
+          <div className="flex justify-center space-x-3 mb-4">
+            {presets.map(preset => (
+              <button
+                key={preset.seconds}
+                onClick={() => startTimer(preset.seconds)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  timerDuration === preset.seconds
+                    ? 'bg-sky-600 text-white'
+                    : 'bg-white border border-sky-200 text-sky-700 hover:bg-sky-50'
+                }`}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="mb-4">
+          <div className="w-full bg-sky-200 rounded-full h-2">
+            <div className="bg-sky-600 h-2 rounded-full transition-all duration-1000" style={{ width: `${Math.min(timerProgress, 100)}%` }} />
+          </div>
+          <div className="text-center text-sm text-gray-600 mt-1">
+            Elapsed: {formatTime(elapsed)}
+          </div>
+        </div>
+        <div className="flex justify-center space-x-3">
+          {!timerActive && elapsed === 0 && (
+            <button
+              onClick={() => startTimer(timerDuration)}
+              className="flex items-center space-x-2 px-5 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors"
+            >
+              <Play className="w-4 h-4" />
+              <span>Start</span>
+            </button>
+          )}
+          {timerActive && (
+            <button
+              onClick={stopTimer}
+              className="flex items-center space-x-2 px-5 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors"
+            >
+              <Pause className="w-4 h-4" />
+              <span>Pause</span>
+            </button>
+          )}
+          {!timerActive && elapsed > 0 && (
+            <>
+              <button
+                onClick={() => setMeditationActive(true)}
+                className="flex items-center space-x-2 px-5 py-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 transition-colors"
+              >
+                <Play className="w-4 h-4" />
+                <span>Resume</span>
+              </button>
+              <button
+                onClick={resetTimer}
+                className="flex items-center space-x-2 px-5 py-2 rounded-lg bg-white border border-sky-200 text-sky-700 hover:bg-sky-50 transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reset</span>
+              </button>
+            </>
+          )}
+        </div>
+        <div className="mt-4 bg-white rounded-lg p-3 border border-sky-100 text-sm text-gray-600 text-center">
+          Breathing pattern: <strong>In (4s)</strong> → <strong>Hold (4s)</strong> → <strong>Out (6s)</strong>
+        </div>
+      </div>
+    );
+  };
+
+  // Scale Rating Component
+  const renderScaleRating = () => {
+    const questions = [
+      { id: 'self-energy-connection', question: 'How connected do you feel to Self-energy right now?', low: 'Not at all', mid: 'Somewhat', high: 'Fully' },
+      { id: 'parts-awareness', question: 'How aware are you of your different parts?', low: 'Unaware', mid: 'Developing', high: 'Very aware' },
+      { id: 'inner-child-safety', question: 'How safe does your inner child feel right now?', low: 'Unsafe', mid: 'Neutral', high: 'Very safe' },
+      { id: 'protector-trust', question: 'How much do your protector parts trust your Self leadership?', low: 'No trust', mid: 'Some trust', high: 'Full trust' },
+      { id: 'emotional-capacity', question: 'How much emotional capacity do you have for this work right now?', low: 'None', mid: 'Moderate', high: 'Abundant' }
+    ];
+
+    const ratings = questions.map(q => ({
+      ...q,
+      value: interactiveData[`scale-${q.id}`] ?? 5
+    }));
+
+    const average = ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length;
+
+    return (
+      <div className="bg-gradient-to-r from-rose-100 to-pink-100 rounded-lg p-6 border border-rose-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+          <SlidersHorizontal className="w-5 h-5 text-rose-600" />
+          <span>Self-Assessment Scale</span>
+        </h3>
+        <p className="text-gray-700 mb-4">Rate each area on a scale of 0 to 10:</p>
+        <div className="space-y-5">
+          {questions.map(q => {
+            const value = interactiveData[`scale-${q.id}`] ?? 5;
+            return (
+              <div key={q.id} className="bg-white rounded-lg p-4 border border-rose-100">
+                <p className="text-sm font-medium text-gray-800 mb-2">{q.question}</p>
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  value={value}
+                  onChange={(e) => handleInteractiveChange(`scale-${q.id}`, parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>0 — {q.low}</span>
+                  <span>5 — {q.mid}</span>
+                  <span>10 — {q.high}</span>
+                </div>
+                <div className="text-center mt-1">
+                  <span className="text-sm font-semibold text-rose-700">{value}/10</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-5 bg-white rounded-lg p-4 border border-rose-200">
+          <h4 className="text-sm font-semibold text-gray-900 mb-2">Summary</h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            {ratings.map(r => (
+              <div key={r.id} className="text-center p-2 bg-rose-50 rounded-lg">
+                <div className="text-lg font-bold text-rose-700">{r.value}</div>
+                <div className="text-xs text-gray-600 truncate">{r.question.split('?')[0].replace('How ', '').replace('do you feel ', '')}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 text-center border-t border-rose-100 pt-3">
+            <span className="text-sm text-gray-600">Overall Average: </span>
+            <span className="text-lg font-bold text-rose-700">{average.toFixed(1)}/10</span>
           </div>
         </div>
       </div>

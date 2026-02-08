@@ -123,7 +123,8 @@ export const curriculumModules = [
             'multi-select-perspectives',
             'emotion-spectrum',
             'age-identification',
-            'self-energy-meter'
+            'self-energy-meter',
+            'matching-exercise'
           ]
         }
       },
@@ -314,6 +315,7 @@ export const curriculumModules = [
             'belief-mapper',
             'pattern-identifier',
             'body-scan-mapper',
+            'guided-visualization',
             'healing-moments-journal'
           ]
         }
@@ -504,7 +506,8 @@ export const curriculumModules = [
             'manager-identifier',
             'protection-mapper',
             'appreciation-generator',
-            'trust-building-planner'
+            'trust-building-planner',
+            'scale-rating'
           ]
         }
       },
@@ -700,7 +703,8 @@ export const curriculumModules = [
             'guided-meditation',
             'self-energy-meter',
             'leadership-challenge-practice',
-            'daily-commitment-planner'
+            'daily-commitment-planner',
+            'safety-checklist'
           ]
         }
       },
@@ -818,7 +822,8 @@ export const curriculumModules = [
             'six-fs-wizard',
             'part-dialogue-journal',
             'relationship-progress-tracker',
-            'self-leadership-monitor'
+            'self-leadership-monitor',
+            'mindfulness-timer'
           ]
         }
       },

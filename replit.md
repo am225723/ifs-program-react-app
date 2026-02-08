@@ -4,6 +4,16 @@
 This is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It features PIN-based authentication, personalized curriculum delivery based on child wound assessment results, and comprehensive healing exercises.
 
 ## Recent Changes (February 2026)
+- Consolidated assessment naming: Removed "Burdens of the Exile" naming, unified as "IFS Wound Assessment"
+- Added answer textareas to reflection questions in learning modules (both LearningModule and LearningModuleEnhanced)
+- Added 5 new interactive activity types: guided-visualization, matching-exercise, safety-checklist, mindfulness-timer, scale-rating
+- Created Therapist Dashboard (/therapist-dashboard) with client overview, session notes, progress tracking, alerts
+- Created Progress Timeline (/progress-timeline) with visual milestone tracking and journey stats
+- Created Mood & Energy Tracker (/mood-tracker) with daily check-ins, trend visualization, parts connection
+- Created Gamification Hub (/gamification) with badges, streaks, XP/level system, weekly challenges
+- Created AI Parts Dialogue (/parts-dialogue) with Perplexity AI-powered conversations with inner parts
+- Enhanced Progress Reports: comprehensive downloadable report including assessment, mood, streaks, achievements
+- Added links to all new features from Home page Interactive Healing Tools section
 - Switched to bottom navigation bar (Home, Curriculum, Assessments, Journal, Integration) with top bar showing only IFS Healing name + Settings/Avatar/Logout
 - Theme system overhaul: App wrapper now uses ThemeContext for global background, all pages inherit themed background
 - Bottom nav and header are theme-aware including dark mode support
@@ -11,8 +21,8 @@ This is a React + Vite frontend application for an Internal Family Systems (IFS)
 - Profile page made responsive for mobile (stacking buttons, adaptive padding)
 - Fixed "Take Assessment" button to link to /assessments
 - Enhanced Protective Parts assessment results with identified parts listing, descriptions, roles, strategies, and "Add to Map" buttons for direct Parts Mapping integration
-- Added 7 new therapist-client activities: Inner Child Rescue Mission, Parts Council Meeting, Somatic Parts Work, Attachment Repair Exercise, Legacy Burden Exploration, Window of Tolerance Mapping, Compassionate Witnessing Practice
-- Added Assessments page with 3 structured self-assessments (IFS Wound, Protective Parts, Self-Energy) with Supabase storage and visual results
+- Added 7 new therapist-client activities
+- Added Assessments page with 3 structured self-assessments (IFS Wound, Protective Parts, Self-Energy)
 - Added PartsContext for bidirectional sync between Parts Mapping and Parts Visualization Studio
 - Added assessment insights cards to Home dashboard with quick-access links
 

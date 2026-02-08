@@ -24,6 +24,11 @@ import MicroLearning from './pages/MicroLearning';
 import Affirmations from './pages/Affirmations';
 import TherapyIntegration from './pages/TherapyIntegration';
 import AdminDashboard from './pages/AdminDashboard';
+import TherapistDashboard from './pages/TherapistDashboard';
+import ProgressTimeline from './pages/ProgressTimeline';
+import MoodTracker from './pages/MoodTracker';
+import GamificationHub from './pages/GamificationHub';
+import PartsDialogue from './pages/PartsDialogue';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
@@ -219,6 +224,11 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/affirmations" element={<Affirmations />} />
                 <Route path="/therapy" element={<TherapyIntegration />} />
                 <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/therapist-dashboard" element={<TherapistDashboard />} />
+                <Route path="/progress-timeline" element={<ProgressTimeline />} />
+                <Route path="/mood-tracker" element={<MoodTracker />} />
+                <Route path="/gamification" element={<GamificationHub />} />
+                <Route path="/parts-dialogue" element={<PartsDialogue />} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
                 <Route path="/auth-debug" element={<AuthDebug />} />

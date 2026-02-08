@@ -74,7 +74,78 @@ const Profile = ({ client }) => {
   };
 
   const handleDownloadPDF = () => {
-    window.print();
+    const moodEntries = JSON.parse(localStorage.getItem('moodEntries') || '[]');
+    const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
+    const gamificationData = JSON.parse(localStorage.getItem('gamificationData') || '{}');
+    const timeline = JSON.parse(localStorage.getItem('progressTimeline') || '[]');
+
+    let report = `IFS HEALING JOURNEY - COMPREHENSIVE PROGRESS REPORT\n`;
+    report += `${'='.repeat(55)}\n`;
+    report += `Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}\n`;
+    report += `Client: ${client?.name || 'Anonymous'}\n\n`;
+
+    if (assessment) {
+      report += `WOUND ASSESSMENT RESULTS\n${'-'.repeat(30)}\n`;
+      const scores = assessment.scores || {};
+      Object.entries(scores).forEach(([wound, score]) => {
+        const intensity = getIntensityLevel(score);
+        const bar = '█'.repeat(Math.round(score / 24 * 20)) + '░'.repeat(20 - Math.round(score / 24 * 20));
+        report += `${wound.charAt(0).toUpperCase() + wound.slice(1)}: ${score}/24 (${intensity.level})\n  [${bar}]\n`;
+      });
+      report += `\nAssessment Date: ${formatDate(assessment.created_at)}\n\n`;
+    }
+
+    if (streakData.currentStreak) {
+      report += `ENGAGEMENT & STREAKS\n${'-'.repeat(30)}\n`;
+      report += `Current Streak: ${streakData.currentStreak || 0} days\n`;
+      report += `Longest Streak: ${streakData.longestStreak || 0} days\n`;
+      report += `Total Logins: ${streakData.totalLogins || 0}\n\n`;
+    }
+
+    if (gamificationData.xp) {
+      report += `PROGRESS & ACHIEVEMENTS\n${'-'.repeat(30)}\n`;
+      report += `XP Earned: ${gamificationData.xp || 0}\n`;
+      report += `Level: ${gamificationData.level || 1}\n`;
+      const badges = gamificationData.badges?.filter(b => b.unlocked) || [];
+      if (badges.length > 0) {
+        report += `Badges Earned: ${badges.map(b => b.name).join(', ')}\n`;
+      }
+      report += '\n';
+    }
+
+    if (moodEntries.length > 0) {
+      report += `MOOD & ENERGY TRENDS (Last 7 entries)\n${'-'.repeat(30)}\n`;
+      const recent = moodEntries.slice(-7);
+      recent.forEach(entry => {
+        report += `${entry.date}: Mood=${entry.mood || 'N/A'}, Energy=${entry.energy || 'N/A'}/10`;
+        if (entry.notes) report += ` - ${entry.notes}`;
+        report += '\n';
+      });
+      const avgEnergy = recent.reduce((s, e) => s + (e.energy || 0), 0) / recent.length;
+      report += `Average Energy: ${avgEnergy.toFixed(1)}/10\n\n`;
+    }
+
+    if (timeline.length > 0) {
+      report += `JOURNEY MILESTONES (Last 10)\n${'-'.repeat(30)}\n`;
+      timeline.slice(-10).forEach(m => {
+        report += `${m.date}: [${m.type}] ${m.title}\n`;
+      });
+      report += '\n';
+    }
+
+    report += `${'='.repeat(55)}\n`;
+    report += `This report is for personal use and therapist review.\n`;
+    report += `For crisis support: 988 Suicide & Crisis Lifeline\n`;
+
+    const blob = new Blob([report], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `IFS_Progress_Report_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const formatDate = (dateString) => {

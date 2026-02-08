@@ -180,11 +180,20 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
         {data.reflectionPrompts && data.reflectionPrompts.length > 0 && (
           <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">🤔 Reflection Prompts:</h3>
-            <div className="space-y-3">
+            <div className="space-y-5">
               {data.reflectionPrompts.map((prompt, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <span className="text-yellow-600 font-bold mt-1">Q{index + 1}.</span>
-                  <p className="text-gray-700 italic">{prompt}</p>
+                <div key={index} className="space-y-2">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-yellow-600 font-bold mt-1">Q{index + 1}.</span>
+                    <p className="text-gray-700 italic">{prompt}</p>
+                  </div>
+                  <textarea
+                    value={activityResponses[`reflection-${index}`] || ''}
+                    onChange={(e) => handleActivityResponse(`reflection-${index}`, e.target.value)}
+                    placeholder="Write your reflection here..."
+                    className="w-full px-4 py-3 border border-yellow-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white/80 text-gray-700"
+                    rows={3}
+                  />
                 </div>
               ))}
             </div>
