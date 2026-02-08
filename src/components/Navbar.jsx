@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BookOpen, Heart, Map, Lightbulb, User, Menu, X, Play, CheckCircle, Book } from 'lucide-react';
+import { Home, BookOpen, Heart, Map, Lightbulb, User, Menu, X, Play, CheckCircle, Book, ClipboardList } from 'lucide-react';
 import { useState } from 'react';
 
 const Navbar = () => {
@@ -13,7 +13,7 @@ const Navbar = () => {
     { path: '/qualities', icon: Lightbulb, label: 'Qualities' },
     { path: '/parts-mapping', icon: Map, label: 'Parts Mapping' },
     { path: '/exercises', icon: Play, label: 'Exercises' },
-    { path: '/assessment', icon: CheckCircle, label: 'Assessment' },
+    { path: '/assessments', icon: ClipboardList, label: 'Assessments' },
     { path: '/resources', icon: Book, label: 'Resources' },
     { path: '/journal', icon: User, label: 'Journal' },
   ];

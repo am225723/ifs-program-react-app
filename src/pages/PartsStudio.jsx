@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Edit3, Save, X, Move, Heart, Shield, Flame, Users, Sparkles, ZoomIn, ZoomOut } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { clientAuth } from '../lib/supabasePersonalization';
+import { useParts } from '../contexts/PartsContext';
 
 const partTypes = [
   { id: 'exile', name: 'Exile', color: '#EC4899', icon: Heart, description: 'Wounded parts holding pain' },
@@ -11,26 +11,15 @@ const partTypes = [
   { id: 'self', name: 'Self', color: '#10B981', icon: Sparkles, description: 'Core compassionate essence' }
 ];
 
-const defaultParts = [
-  { id: 'self-1', type: 'self', name: 'Self', x: 300, y: 200, size: 80, notes: 'Your core essence - calm, curious, compassionate' }
-];
-
 export default function PartsStudio() {
   const { theme, getAnimationClass } = useTheme();
-  const [parts, setParts] = useState(() => {
-    const saved = localStorage.getItem('partsStudioData');
-    return saved ? JSON.parse(saved) : defaultParts;
-  });
+  const { parts, addPart, updatePart, deletePart, saveToSupabase } = useParts();
   const [selectedPart, setSelectedPart] = useState(null);
   const [draggingPart, setDraggingPart] = useState(null);
   const [zoom, setZoom] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newPart, setNewPart] = useState({ name: '', type: 'exile', notes: '' });
   const canvasRef = useRef(null);
-
-  useEffect(() => {
-    localStorage.setItem('partsStudioData', JSON.stringify(parts));
-  }, [parts]);
 
   const handleMouseDown = (e, part) => {
     setDraggingPart(part.id);
@@ -42,40 +31,33 @@ export default function PartsStudio() {
     const rect = canvasRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / zoom;
     const y = (e.clientY - rect.top) / zoom;
-    
-    setParts(prev => prev.map(p => 
-      p.id === draggingPart ? { ...p, x: Math.max(40, Math.min(560, x)), y: Math.max(40, Math.min(360, y)) } : p
-    ));
+    updatePart(draggingPart, { x: Math.max(40, Math.min(560, x)), y: Math.max(40, Math.min(360, y)) });
   };
 
   const handleMouseUp = () => {
     setDraggingPart(null);
   };
 
-  const addPart = () => {
+  const handleAddPart = () => {
     if (!newPart.name.trim()) return;
-    const part = {
-      id: `${newPart.type}-${Date.now()}`,
+    const part = addPart({
       type: newPart.type,
       name: newPart.name,
       notes: newPart.notes,
-      x: 100 + Math.random() * 400,
-      y: 100 + Math.random() * 200,
-      size: 60
-    };
-    setParts(prev => [...prev, part]);
+      role: newPart.notes
+    });
     setNewPart({ name: '', type: 'exile', notes: '' });
     setShowAddModal(false);
   };
 
-  const deletePart = (id) => {
+  const handleDeletePart = (id) => {
     if (id === 'self-1') return;
-    setParts(prev => prev.filter(p => p.id !== id));
+    deletePart(id);
     setSelectedPart(null);
   };
 
-  const updatePart = (id, updates) => {
-    setParts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  const handleSave = () => {
+    saveToSupabase();
   };
 
   const getPartType = (typeId) => partTypes.find(t => t.id === typeId) || partTypes[0];
@@ -100,14 +82,23 @@ export default function PartsStudio() {
               Map your internal family system. Drag parts to arrange them.
             </p>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white ${getAnimationClass('transition')} ${getAnimationClass('hover')}`}
-            style={{ backgroundColor: theme.accentColor }}
-          >
-            <Plus className="w-5 h-5" />
-            Add Part
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSave}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl ${theme.isDark ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'} text-white ${getAnimationClass('transition')}`}
+            >
+              <Save className="w-5 h-5" />
+              Save
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-white ${getAnimationClass('transition')} ${getAnimationClass('hover')}`}
+              style={{ backgroundColor: theme.accentColor }}
+            >
+              <Plus className="w-5 h-5" />
+              Add Part
+            </button>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -168,10 +159,10 @@ export default function PartsStudio() {
                       key={part.id}
                       className={`absolute cursor-move select-none ${getAnimationClass('transition')} ${isSelected ? 'ring-4 ring-white/50' : ''}`}
                       style={{
-                        left: part.x - part.size / 2,
-                        top: part.y - part.size / 2,
-                        width: part.size,
-                        height: part.size,
+                        left: part.x - (part.size || 60) / 2,
+                        top: part.y - (part.size || 60) / 2,
+                        width: part.size || 60,
+                        height: part.size || 60,
                       }}
                       onMouseDown={(e) => handleMouseDown(e, part)}
                       onClick={() => setSelectedPart(part)}
@@ -199,7 +190,7 @@ export default function PartsStudio() {
                   <h3 className={`font-semibold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>Part Details</h3>
                   {selectedPart.id !== 'self-1' && (
                     <button
-                      onClick={() => deletePart(selectedPart.id)}
+                      onClick={() => handleDeletePart(selectedPart.id)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -232,6 +223,20 @@ export default function PartsStudio() {
                   </div>
 
                   <div>
+                    <label className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Role</label>
+                    <input
+                      type="text"
+                      value={selectedPart.role || ''}
+                      onChange={(e) => {
+                        updatePart(selectedPart.id, { role: e.target.value });
+                        setSelectedPart(prev => ({ ...prev, role: e.target.value }));
+                      }}
+                      className={`w-full mt-1 px-3 py-2 rounded-lg border ${theme.isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200'}`}
+                      placeholder="What role does this part play?"
+                    />
+                  </div>
+
+                  <div>
                     <label className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Notes</label>
                     <textarea
                       value={selectedPart.notes || ''}
@@ -251,7 +256,7 @@ export default function PartsStudio() {
                       type="range"
                       min="40"
                       max="100"
-                      value={selectedPart.size}
+                      value={selectedPart.size || 60}
                       onChange={(e) => {
                         const size = parseInt(e.target.value);
                         updatePart(selectedPart.id, { size });
@@ -334,7 +339,7 @@ export default function PartsStudio() {
               </div>
 
               <button
-                onClick={addPart}
+                onClick={handleAddPart}
                 disabled={!newPart.name.trim()}
                 className={`w-full py-3 rounded-xl text-white font-medium ${getAnimationClass('transition')} disabled:opacity-50`}
                 style={{ backgroundColor: theme.accentColor }}

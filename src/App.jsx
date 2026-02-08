@@ -13,6 +13,7 @@ import Qualities from './pages/Qualities';
 import PartsMapping from './pages/PartsMapping';
 import Exercises from './pages/Exercises';
 import Assessment from './pages/Assessment';
+import Assessments from './pages/Assessments';
 import Resources from './pages/Resources';
 import Journal from './pages/Journal';
 import Profile from './pages/Profile';
@@ -26,6 +27,7 @@ import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { PartsProvider } from './contexts/PartsContext';
 import { clientAuth } from './lib/supabasePersonalization';
 
 function App() {
@@ -73,6 +75,7 @@ function App() {
 
   return (
     <ThemeProvider>
+    <PartsProvider>
     <DataProvider>
       <Router>
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
@@ -113,6 +116,12 @@ function App() {
                         className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
                       >
                         Curriculum
+                      </Link>
+                      <Link
+                        to="/assessments"
+                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
+                      >
+                        Assessments
                       </Link>
                       <Link
                         to="/journal"
@@ -158,6 +167,7 @@ function App() {
                 <Route path="/parts-mapping" element={<PartsMapping />} />
                 <Route path="/exercises" element={<Exercises />} />
                 <Route path="/assessment" element={<Assessment />} />
+                <Route path="/assessments" element={<Assessments />} />
                 <Route path="/resources" element={<Resources />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/profile" element={<Profile client={currentClient} />} />
@@ -177,6 +187,7 @@ function App() {
         </div>
       </Router>
     </DataProvider>
+    </PartsProvider>
     </ThemeProvider>
   );
 }

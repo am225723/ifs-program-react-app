@@ -1,0 +1,673 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  CheckCircle, Circle, ArrowRight, ArrowLeft, RotateCcw, 
+  Heart, Shield, Sparkles, AlertTriangle, Clock, TrendingUp,
+  Award, Eye, Brain, Star, Flame, Users, Activity
+} from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import { supabase } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
+
+const assessmentDefinitions = [
+  {
+    id: 'wounds',
+    title: 'IFS Wound Assessment',
+    subtitle: 'Discover which inner child wounds may be affecting you',
+    icon: Heart,
+    gradient: 'from-rose-500 to-pink-600',
+    lightBg: 'from-rose-50 to-pink-50',
+    categories: {
+      abandonment: { label: 'Abandonment', icon: Users, color: '#6366F1', description: 'Fear of being left or forgotten, difficulty trusting others will stay' },
+      shame: { label: 'Shame', icon: Eye, color: '#EC4899', description: 'Deep sense of being flawed or defective, hiding your true self' },
+      neglect: { label: 'Neglect', icon: Heart, color: '#8B5CF6', description: 'Feeling unseen, unheard, or emotionally invisible to caregivers' },
+      betrayal: { label: 'Betrayal', icon: Shield, color: '#F59E0B', description: 'Difficulty trusting after broken promises or violated boundaries' },
+      rejection: { label: 'Rejection', icon: AlertTriangle, color: '#EF4444', description: 'Fear of being pushed away or not being good enough' }
+    },
+    questions: [
+      { id: 1, text: 'I often feel anxious when people get too close to me emotionally.', category: 'abandonment' },
+      { id: 2, text: 'I feel like I have to hide parts of myself to be accepted.', category: 'shame' },
+      { id: 3, text: 'I struggle to ask for help, even when I really need it.', category: 'neglect' },
+      { id: 4, text: 'I have difficulty trusting people, even those close to me.', category: 'betrayal' },
+      { id: 5, text: 'I am extremely hard on myself when I make mistakes.', category: 'shame' },
+      { id: 6, text: 'I feel uncomfortable being the center of attention.', category: 'rejection' },
+      { id: 7, text: 'I feel like my needs don\'t matter as much as others\'.', category: 'neglect' },
+      { id: 8, text: 'I avoid getting too attached to people or things.', category: 'abandonment' },
+      { id: 9, text: 'I often feel like my emotions are "too much" or inappropriate.', category: 'shame' },
+      { id: 10, text: 'I find it hard to set boundaries with people.', category: 'betrayal' },
+      { id: 11, text: 'I worry that if people really knew me, they would leave.', category: 'abandonment' },
+      { id: 12, text: 'I feel empty or numb much of the time.', category: 'neglect' },
+      { id: 13, text: 'I constantly seek reassurance from others.', category: 'rejection' },
+      { id: 14, text: 'I feel a deep sense of unworthiness.', category: 'shame' },
+      { id: 15, text: 'I become hypervigilant in relationships, watching for signs of trouble.', category: 'betrayal' },
+      { id: 16, text: 'I struggle to identify or express my own needs.', category: 'neglect' },
+      { id: 17, text: 'I cling to relationships even when they are unhealthy.', category: 'abandonment' },
+      { id: 18, text: 'I feel I need to earn love through achievement or caretaking.', category: 'rejection' },
+      { id: 19, text: 'I feel uncomfortable receiving compliments or praise.', category: 'shame' },
+      { id: 20, text: 'I test people to see if they will stay or abandon me.', category: 'betrayal' }
+    ]
+  },
+  {
+    id: 'parts',
+    title: 'Identify Your Protective Parts',
+    subtitle: 'Learn which protective parts are most active in your system',
+    icon: Shield,
+    gradient: 'from-blue-500 to-indigo-600',
+    lightBg: 'from-blue-50 to-indigo-50',
+    categories: {
+      manager: { label: 'Manager Parts', icon: Shield, color: '#3B82F6', description: 'Proactive protectors that try to prevent pain through control, planning, and perfectionism' },
+      firefighter: { label: 'Firefighter Parts', icon: Flame, color: '#F59E0B', description: 'Reactive protectors that numb or distract when pain surfaces through impulsive behaviors' },
+      exile: { label: 'Exile Parts', icon: Heart, color: '#EC4899', description: 'Young, vulnerable parts carrying wounds of pain, shame, fear, and loneliness' }
+    },
+    questions: [
+      { id: 1, text: 'I plan everything carefully to avoid surprises or chaos.', category: 'manager' },
+      { id: 2, text: 'When I feel overwhelmed, I tend to zone out or distract myself.', category: 'firefighter' },
+      { id: 3, text: 'I criticize myself harshly to motivate myself to do better.', category: 'manager' },
+      { id: 4, text: 'I sometimes engage in impulsive behaviors when I\'m stressed.', category: 'firefighter' },
+      { id: 5, text: 'I work hard to maintain control over my emotions and environment.', category: 'manager' },
+      { id: 6, text: 'I use food, substances, or screen time to numb difficult feelings.', category: 'firefighter' },
+      { id: 7, text: 'I strive for perfection to avoid criticism or failure.', category: 'manager' },
+      { id: 8, text: 'When emotions get intense, I shut down or dissociate.', category: 'firefighter' },
+      { id: 9, text: 'I people-please to avoid conflict or rejection.', category: 'manager' },
+      { id: 10, text: 'I can be self-destructive when I\'m in pain.', category: 'firefighter' },
+      { id: 11, text: 'I often feel small, scared, or like a child inside.', category: 'exile' },
+      { id: 12, text: 'I carry a deep sense of loneliness that never fully goes away.', category: 'exile' },
+      { id: 13, text: 'I sometimes feel overwhelmed by sadness or grief from my past.', category: 'exile' },
+      { id: 14, text: 'I worry constantly about what others think of me.', category: 'manager' },
+      { id: 15, text: 'I feel a deep sense of shame about who I am.', category: 'exile' }
+    ]
+  },
+  {
+    id: 'self-energy',
+    title: 'Self-Energy Assessment',
+    subtitle: 'Evaluate your connection to the 8 C\'s of Self',
+    icon: Sparkles,
+    gradient: 'from-emerald-500 to-teal-600',
+    lightBg: 'from-emerald-50 to-teal-50',
+    categories: {
+      calmness: { label: 'Calmness', icon: Activity, color: '#06B6D4', description: 'Ability to remain centered and peaceful even in stressful situations' },
+      curiosity: { label: 'Curiosity', icon: Eye, color: '#8B5CF6', description: 'Genuine interest in understanding your inner experiences without judgment' },
+      compassion: { label: 'Compassion', icon: Heart, color: '#EC4899', description: 'Warmth and kindness toward yourself and your parts, especially those in pain' },
+      confidence: { label: 'Confidence', icon: Star, color: '#F59E0B', description: 'Trust in your ability to handle whatever arises in your inner and outer world' },
+      courage: { label: 'Courage', icon: Shield, color: '#EF4444', description: 'Willingness to face your fears and take steps toward healing' },
+      clarity: { label: 'Clarity', icon: Brain, color: '#3B82F6', description: 'Ability to see situations clearly without being clouded by parts\' perspectives' },
+      creativity: { label: 'Creativity', icon: Sparkles, color: '#10B981', description: 'Capacity to think flexibly and find novel solutions to challenges' },
+      connectedness: { label: 'Connectedness', icon: Users, color: '#6366F1', description: 'Feeling of connection to others, nature, and something larger than yourself' }
+    },
+    questions: [
+      { id: 1, text: 'I can remain calm even in stressful situations.', category: 'calmness' },
+      { id: 2, text: 'I approach my inner experiences with genuine curiosity rather than judgment.', category: 'curiosity' },
+      { id: 3, text: 'I feel compassion for myself and my struggles.', category: 'compassion' },
+      { id: 4, text: 'I trust my ability to handle difficult situations.', category: 'confidence' },
+      { id: 5, text: 'I can face my fears and take necessary risks for growth.', category: 'courage' },
+      { id: 6, text: 'I see situations clearly without being clouded by strong emotions.', category: 'clarity' },
+      { id: 7, text: 'I can think creatively and find novel solutions to problems.', category: 'creativity' },
+      { id: 8, text: 'I feel connected to others and to something larger than myself.', category: 'connectedness' },
+      { id: 9, text: 'I can sit with difficult emotions without being overwhelmed.', category: 'calmness' },
+      { id: 10, text: 'I am interested in understanding why I react the way I do.', category: 'curiosity' },
+      { id: 11, text: 'I can hold space for my pain without trying to fix it immediately.', category: 'compassion' },
+      { id: 12, text: 'I believe I am capable of healing and growth.', category: 'confidence' },
+      { id: 13, text: 'I am willing to explore painful memories when it serves my healing.', category: 'courage' },
+      { id: 14, text: 'I can distinguish between my own feelings and those influenced by others.', category: 'clarity' },
+      { id: 15, text: 'I can adapt my approach when something isn\'t working.', category: 'creativity' },
+      { id: 16, text: 'I feel a sense of belonging and meaningful connections in my life.', category: 'connectedness' }
+    ]
+  }
+];
+
+const scaleLabels = {
+  1: 'Strongly Disagree',
+  2: 'Disagree',
+  3: 'Neutral',
+  4: 'Agree',
+  5: 'Strongly Agree'
+};
+
+export default function Assessments() {
+  const { theme, getAnimationClass } = useTheme();
+  const [activeAssessment, setActiveAssessment] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [savedResults, setSavedResults] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSavedResults();
+  }, []);
+
+  const loadSavedResults = async () => {
+    try {
+      const client = clientAuth.getCurrentClientValidated();
+      if (!client) {
+        const local = localStorage.getItem('ifs_assessment_results_all');
+        if (local) setSavedResults(JSON.parse(local));
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('ifs_interactive_data')
+        .select('data, module_id')
+        .eq('client_id', client.id)
+        .in('module_id', ['assessment_wounds', 'assessment_parts', 'assessment_self-energy']);
+
+      if (!error && data) {
+        const results = {};
+        data.forEach(row => {
+          const assessmentId = row.module_id.replace('assessment_', '');
+          results[assessmentId] = row.data;
+        });
+        setSavedResults(results);
+        localStorage.setItem('ifs_assessment_results_all', JSON.stringify(results));
+      }
+    } catch (e) {
+      console.error('Error loading assessment results:', e);
+      const local = localStorage.getItem('ifs_assessment_results_all');
+      if (local) setSavedResults(JSON.parse(local));
+    }
+    setLoading(false);
+  };
+
+  const calculateResults = (assessmentId) => {
+    const assessment = assessmentDefinitions.find(a => a.id === assessmentId);
+    if (!assessment) return null;
+
+    const categoryScores = {};
+    Object.keys(assessment.categories).forEach(cat => {
+      categoryScores[cat] = { total: 0, count: 0, average: 0 };
+    });
+
+    assessment.questions.forEach(q => {
+      const answer = answers[q.id];
+      if (answer !== undefined) {
+        categoryScores[q.category].total += answer;
+        categoryScores[q.category].count += 1;
+      }
+    });
+
+    Object.keys(categoryScores).forEach(cat => {
+      if (categoryScores[cat].count > 0) {
+        categoryScores[cat].average = categoryScores[cat].total / categoryScores[cat].count;
+      }
+    });
+
+    const sorted = Object.entries(categoryScores)
+      .sort((a, b) => b[1].average - a[1].average);
+
+    return {
+      scores: categoryScores,
+      ranked: sorted,
+      primary: sorted[0]?.[0],
+      secondary: sorted[1]?.[0],
+      completedAt: new Date().toISOString(),
+      answers: { ...answers }
+    };
+  };
+
+  const saveResults = async (assessmentId, results) => {
+    setSaving(true);
+    try {
+      const client = clientAuth.getCurrentClientValidated();
+      const moduleId = `assessment_${assessmentId}`;
+
+      if (client) {
+        await supabase
+          .from('ifs_interactive_data')
+          .upsert({
+            client_id: client.id,
+            module_id: moduleId,
+            data: results,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'client_id,module_id' });
+
+        if (assessmentId === 'wounds') {
+          const woundScores = {};
+          Object.entries(results.scores).forEach(([key, val]) => {
+            woundScores[`${key}_score`] = val.average;
+          });
+
+          await supabase
+            .from('ifs_assessment_results')
+            .upsert({
+              client_id: client.id,
+              abandonment_score: results.scores.abandonment?.average || 0,
+              shame_score: results.scores.shame?.average || 0,
+              neglect_score: results.scores.neglect?.average || 0,
+              betrayal_score: results.scores.betrayal?.average || 0,
+              primary_wound: results.primary,
+              secondary_wound: results.secondary,
+              responses: results.answers,
+              created_at: new Date().toISOString()
+            });
+        }
+      }
+
+      const updatedResults = { ...savedResults, [assessmentId]: results };
+      setSavedResults(updatedResults);
+      localStorage.setItem('ifs_assessment_results_all', JSON.stringify(updatedResults));
+    } catch (e) {
+      console.error('Error saving assessment:', e);
+      const updatedResults = { ...savedResults, [assessmentId]: results };
+      setSavedResults(updatedResults);
+      localStorage.setItem('ifs_assessment_results_all', JSON.stringify(updatedResults));
+    }
+    setSaving(false);
+  };
+
+  const handleSubmit = async () => {
+    const results = calculateResults(activeAssessment);
+    await saveResults(activeAssessment, results);
+    setShowResults(true);
+  };
+
+  const handleRetake = (assessmentId) => {
+    setActiveAssessment(assessmentId);
+    setAnswers({});
+    setShowResults(false);
+  };
+
+  const getScoreLevel = (average, assessmentId) => {
+    if (assessmentId === 'self-energy') {
+      if (average >= 4) return { level: 'Strong', color: 'text-emerald-600', bg: 'bg-emerald-100', barColor: 'bg-emerald-500' };
+      if (average >= 3) return { level: 'Developing', color: 'text-yellow-600', bg: 'bg-yellow-100', barColor: 'bg-yellow-500' };
+      return { level: 'Growing Edge', color: 'text-orange-600', bg: 'bg-orange-100', barColor: 'bg-orange-500' };
+    }
+    if (average >= 4) return { level: 'High', color: 'text-red-600', bg: 'bg-red-100', barColor: 'bg-red-500' };
+    if (average >= 3) return { level: 'Moderate', color: 'text-yellow-600', bg: 'bg-yellow-100', barColor: 'bg-yellow-500' };
+    return { level: 'Low', color: 'text-green-600', bg: 'bg-green-100', barColor: 'bg-green-500' };
+  };
+
+  if (loading) {
+    return (
+      <div className={`min-h-screen bg-gradient-to-br ${theme.primary} flex items-center justify-center`}>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  if (activeAssessment && showResults) {
+    const assessment = assessmentDefinitions.find(a => a.id === activeAssessment);
+    const results = savedResults[activeAssessment];
+    if (!results) return null;
+
+    return (
+      <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <button
+            onClick={() => { setActiveAssessment(null); setShowResults(false); setAnswers({}); }}
+            className={`inline-flex items-center gap-2 mb-6 ${theme.isDark ? 'text-slate-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Assessments
+          </button>
+
+          <div className={`${theme.cardBg} rounded-2xl shadow-lg p-8 mb-8 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
+            <div className="flex items-center gap-4 mb-6">
+              <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${assessment.gradient} flex items-center justify-center`}>
+                <assessment.icon className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className={`text-2xl font-bold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {assessment.title} Results
+                </h1>
+                <p className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                  Completed {new Date(results.completedAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {results.ranked.map(([categoryId, data], index) => {
+                const category = assessment.categories[categoryId];
+                const scoreLevel = getScoreLevel(data.average, activeAssessment);
+                const CategoryIcon = category.icon;
+
+                return (
+                  <div key={categoryId} className={`p-4 rounded-xl ${theme.isDark ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: category.color + '20' }}>
+                          <CategoryIcon className="w-4 h-4" style={{ color: category.color }} />
+                        </div>
+                        <div>
+                          <span className={`font-semibold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+                            {category.label}
+                          </span>
+                          {index === 0 && (
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">
+                              Primary
+                            </span>
+                          )}
+                          {index === 1 && (
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                              Secondary
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-medium px-2 py-1 rounded-lg ${scoreLevel.bg} ${scoreLevel.color}`}>
+                          {scoreLevel.level}
+                        </span>
+                        <span className={`font-bold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {data.average.toFixed(1)}/5
+                        </span>
+                      </div>
+                    </div>
+                    <div className={`w-full h-2 rounded-full ${theme.isDark ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                      <div
+                        className={`h-2 rounded-full ${scoreLevel.barColor} transition-all duration-700`}
+                        style={{ width: `${(data.average / 5) * 100}%` }}
+                      />
+                    </div>
+                    <p className={`text-sm mt-2 ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                      {category.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={`${theme.cardBg} rounded-2xl shadow-lg p-8 mb-8 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
+            <h3 className={`text-xl font-bold mb-4 ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+              What These Results Mean
+            </h3>
+            {activeAssessment === 'wounds' && (
+              <div className={`space-y-3 ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                <p>Your results highlight which inner child wounds may be most active in your life right now. Higher scores indicate areas where protective patterns have formed around early experiences.</p>
+                <p>Your <strong>primary wound</strong> ({assessment.categories[results.primary]?.label}) is likely a core theme in your healing journey. Many of your protective parts may have formed in response to this wound.</p>
+                <p>Remember: These wounds are not permanent. With IFS work, you can unburden the exiles carrying these wounds and transform the protective parts guarding them.</p>
+              </div>
+            )}
+            {activeAssessment === 'parts' && (
+              <div className={`space-y-3 ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                <p>This assessment reveals which types of protective parts are most active in your system. Understanding your protectors is the first step toward building a relationship with them.</p>
+                <p><strong>Manager parts</strong> work proactively to prevent pain. <strong>Firefighter parts</strong> react when pain breaks through. <strong>Exile parts</strong> are the vulnerable ones your protectors are trying to shield.</p>
+                <p>All parts have positive intentions, even when their strategies cause problems. Approach each part with curiosity and compassion.</p>
+              </div>
+            )}
+            {activeAssessment === 'self-energy' && (
+              <div className={`space-y-3 ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                <p>The 8 C's represent the qualities of Self energy in IFS. Higher scores indicate areas where you naturally access Self, while lower scores show where parts may be blending with you.</p>
+                <p>Your strongest qualities are resources you can draw upon. Your growing edges are areas where daily practice can strengthen your connection to Self.</p>
+                <p>Self energy is always present — it can't be damaged or lost. Parts just sometimes block access to it. As you do IFS work, these qualities naturally become more available.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => handleRetake(activeAssessment)}
+              className={`px-6 py-3 rounded-xl font-medium ${theme.isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-white text-gray-700 hover:bg-gray-50'} border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'}`}
+            >
+              <RotateCcw className="w-4 h-4 inline mr-2" />
+              Retake Assessment
+            </button>
+            <button
+              onClick={() => { setActiveAssessment(null); setShowResults(false); setAnswers({}); }}
+              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-pink-700"
+            >
+              View All Assessments
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (activeAssessment) {
+    const assessment = assessmentDefinitions.find(a => a.id === activeAssessment);
+    const totalAnswered = Object.keys(answers).length;
+    const totalQuestions = assessment.questions.length;
+    const allAnswered = totalAnswered === totalQuestions;
+
+    return (
+      <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <button
+            onClick={() => { setActiveAssessment(null); setAnswers({}); }}
+            className={`inline-flex items-center gap-2 mb-6 ${theme.isDark ? 'text-slate-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Assessments
+          </button>
+
+          <div className={`${theme.cardBg} rounded-2xl shadow-lg p-6 mb-6 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
+            <div className="flex items-center gap-4 mb-4">
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${assessment.gradient} flex items-center justify-center`}>
+                <assessment.icon className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h1 className={`text-xl font-bold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+                  {assessment.title}
+                </h1>
+                <p className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                  {assessment.subtitle}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`flex-1 h-2 rounded-full ${theme.isDark ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                <div
+                  className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+                  style={{ width: `${(totalAnswered / totalQuestions) * 100}%` }}
+                />
+              </div>
+              <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                {totalAnswered}/{totalQuestions}
+              </span>
+            </div>
+          </div>
+
+          <div className={`${theme.cardBg} rounded-2xl p-6 mb-6 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+            <p>Rate each statement based on how true it feels for you. Answer honestly — there are no right or wrong answers. This is about understanding yourself better.</p>
+          </div>
+
+          <div className="space-y-4 mb-8">
+            {assessment.questions.map((question, index) => (
+              <div key={question.id} className={`${theme.cardBg} rounded-xl shadow-sm p-5 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
+                <div className="flex items-start gap-3 mb-4">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    answers[question.id] ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white' : (theme.isDark ? 'bg-slate-700 text-slate-400' : 'bg-gray-100 text-gray-400')
+                  }`}>
+                    <span className="text-sm font-bold">{index + 1}</span>
+                  </div>
+                  <p className={`font-medium ${theme.isDark ? 'text-white' : 'text-gray-800'}`}>{question.text}</p>
+                </div>
+                <div className="flex gap-2 ml-11">
+                  {[1, 2, 3, 4, 5].map(value => (
+                    <button
+                      key={value}
+                      onClick={() => setAnswers(prev => ({ ...prev, [question.id]: value }))}
+                      className={`flex-1 py-2 px-1 rounded-lg text-xs font-medium transition-all ${
+                        answers[question.id] === value
+                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                          : theme.isDark
+                            ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-between ml-11 mt-1">
+                  <span className={`text-xs ${theme.isDark ? 'text-slate-500' : 'text-gray-400'}`}>Disagree</span>
+                  <span className={`text-xs ${theme.isDark ? 'text-slate-500' : 'text-gray-400'}`}>Agree</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-center gap-4 pb-8">
+            <button
+              onClick={() => setAnswers({})}
+              className={`px-6 py-3 rounded-xl font-medium ${theme.isDark ? 'bg-slate-700 text-white' : 'bg-white text-gray-700'} border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'}`}
+            >
+              <RotateCcw className="w-4 h-4 inline mr-2" />
+              Reset
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!allAnswered || saving}
+              className={`px-8 py-3 rounded-xl font-medium transition-all ${
+                allAnswered
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+            >
+              {saving ? 'Saving...' : 'View Results'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen bg-gradient-to-br ${theme.primary} ${theme.isDark ? 'text-slate-100' : ''}`}>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <Link
+          to="/"
+          className={`inline-flex items-center gap-2 mb-6 ${theme.isDark ? 'text-slate-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Home
+        </Link>
+
+        <div className="text-center mb-10">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <CheckCircle className="w-10 h-10 text-white" />
+          </div>
+          <h1 className={`text-4xl font-bold mb-3 ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+            Self-Assessments
+          </h1>
+          <p className={`text-lg max-w-2xl mx-auto ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+            Gain insights into your inner world through guided self-assessments. These are reflective exercises to increase self-awareness, not diagnostic tools.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {assessmentDefinitions.map(assessment => {
+            const Icon = assessment.icon;
+            const hasResults = savedResults[assessment.id];
+
+            return (
+              <div
+                key={assessment.id}
+                className={`${theme.cardBg} rounded-2xl shadow-lg border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} overflow-hidden ${getAnimationClass('transition')} hover:shadow-xl`}
+              >
+                <div className={`bg-gradient-to-br ${assessment.gradient} p-6`}>
+                  <Icon className="w-10 h-10 text-white mb-3" />
+                  <h2 className="text-xl font-bold text-white">{assessment.title}</h2>
+                  <p className="text-white/80 text-sm mt-1">{assessment.subtitle}</p>
+                </div>
+                <div className="p-6">
+                  <div className={`flex items-center gap-2 mb-4 text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                    <Clock className="w-4 h-4" />
+                    <span>{assessment.questions.length} questions · ~5 min</span>
+                  </div>
+
+                  {hasResults && (
+                    <div className={`mb-4 p-3 rounded-xl ${theme.isDark ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Award className="w-4 h-4 text-green-500" />
+                        <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-300' : 'text-gray-700'}`}>
+                          Completed {new Date(hasResults.completedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {hasResults.ranked?.slice(0, 2).map(([catId, data]) => {
+                        const cat = assessment.categories[catId];
+                        return (
+                          <div key={catId} className="flex items-center justify-between text-sm mb-1">
+                            <span className={theme.isDark ? 'text-slate-400' : 'text-gray-600'}>{cat?.label}</span>
+                            <span className="font-medium" style={{ color: cat?.color }}>{data.average.toFixed(1)}/5</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setActiveAssessment(assessment.id);
+                        setAnswers({});
+                        setShowResults(false);
+                      }}
+                      className={`flex-1 py-2.5 rounded-xl font-medium text-sm bg-gradient-to-r ${assessment.gradient} text-white hover:opacity-90 ${getAnimationClass('transition')}`}
+                    >
+                      {hasResults ? 'Retake' : 'Start'}
+                    </button>
+                    {hasResults && (
+                      <button
+                        onClick={() => {
+                          setActiveAssessment(assessment.id);
+                          setShowResults(true);
+                        }}
+                        className={`flex-1 py-2.5 rounded-xl font-medium text-sm ${theme.isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} ${getAnimationClass('transition')}`}
+                      >
+                        View Results
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {Object.keys(savedResults).length > 0 && (
+          <div className={`${theme.cardBg} rounded-2xl shadow-lg p-8 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
+            <h2 className={`text-2xl font-bold mb-6 ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+              Your Assessment Overview
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {assessmentDefinitions.map(assessment => {
+                const results = savedResults[assessment.id];
+                if (!results) return (
+                  <div key={assessment.id} className={`p-4 rounded-xl ${theme.isDark ? 'bg-slate-800' : 'bg-gray-50'} text-center`}>
+                    <assessment.icon className={`w-8 h-8 mx-auto mb-2 ${theme.isDark ? 'text-slate-600' : 'text-gray-300'}`} />
+                    <p className={`text-sm ${theme.isDark ? 'text-slate-500' : 'text-gray-400'}`}>Not yet completed</p>
+                  </div>
+                );
+
+                return (
+                  <div key={assessment.id} className={`p-4 rounded-xl ${theme.isDark ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${assessment.gradient} flex items-center justify-center`}>
+                        <assessment.icon className="w-4 h-4 text-white" />
+                      </div>
+                      <h3 className={`font-semibold text-sm ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {assessment.title.split(' ').slice(0, 2).join(' ')}
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      {results.ranked?.slice(0, 3).map(([catId, data]) => {
+                        const cat = assessment.categories[catId];
+                        const scoreLevel = getScoreLevel(data.average, assessment.id);
+                        return (
+                          <div key={catId}>
+                            <div className="flex justify-between text-xs mb-0.5">
+                              <span className={theme.isDark ? 'text-slate-400' : 'text-gray-600'}>{cat?.label}</span>
+                              <span className={`font-medium ${scoreLevel.color}`}>{data.average.toFixed(1)}</span>
+                            </div>
+                            <div className={`w-full h-1.5 rounded-full ${theme.isDark ? 'bg-slate-700' : 'bg-gray-200'}`}>
+                              <div className={`h-1.5 rounded-full ${scoreLevel.barColor}`} style={{ width: `${(data.average / 5) * 100}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
