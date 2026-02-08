@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon, Home as HomeIcon, BookOpen, ClipboardList, BookHeart, Handshake, LogOut } from 'lucide-react';
 import ClientPINLogin from './components/ClientPINLogin';
 import PINAuthDiagnostic from './components/PINAuthDiagnostic';
 import TestClientCreator from './components/TestClientCreator';
@@ -29,6 +29,47 @@ import { DataProvider } from './contexts/DataContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PartsProvider } from './contexts/PartsContext';
 import { clientAuth } from './lib/supabasePersonalization';
+
+function BottomNav() {
+  const location = useLocation();
+  const navItems = [
+    { path: '/', icon: HomeIcon, label: 'Home' },
+    { path: '/curriculum', icon: BookOpen, label: 'Curriculum' },
+    { path: '/assessments', icon: ClipboardList, label: 'Assessments' },
+    { path: '/journal', icon: BookHeart, label: 'Journal' },
+    { path: '/therapy', icon: Handshake, label: 'Integration' },
+  ];
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-200/50 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
+      <div className="max-w-lg mx-auto flex justify-around items-center h-16 px-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path);
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-[60px] ${
+                isActive
+                  ? 'text-purple-600'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <div className={`p-1 rounded-lg transition-all duration-200 ${isActive ? 'bg-purple-100' : ''}`}>
+                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : ''}`} />
+              </div>
+              <span className={`text-[10px] leading-tight ${isActive ? 'font-semibold' : 'font-medium'}`}>
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+      <div className="h-[env(safe-area-inset-bottom)]" />
+    </nav>
+  );
+}
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -89,74 +130,46 @@ function App() {
             </Routes>
           ) : (
             <>
-              {/* Modern glassmorphism header */}
               <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/80 border-b border-gray-200/50 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className="flex justify-between items-center h-16">
+                  <div className="flex justify-between items-center h-14">
                     <Link to="/" className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                        <span className="text-white text-xl">✦</span>
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                        <span className="text-white text-lg">✦</span>
                       </div>
-                      <div>
-                        <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                          IFS Healing
-                        </h1>
-                        <p className="text-xs text-gray-500 -mt-0.5">Welcome, {currentClient?.name?.split(' ')[0]}</p>
-                      </div>
+                      <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        IFS Healing
+                      </h1>
                     </Link>
-                    <nav className="flex items-center gap-2">
-                      <Link
-                        to="/"
-                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
-                      >
-                        Home
-                      </Link>
-                      <Link
-                        to="/curriculum"
-                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
-                      >
-                        Curriculum
-                      </Link>
-                      <Link
-                        to="/assessments"
-                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
-                      >
-                        Assessments
-                      </Link>
-                      <Link
-                        to="/journal"
-                        className="px-3 py-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
-                      >
-                        Journal
-                      </Link>
-                      <div className="w-px h-6 bg-gray-200 mx-1"></div>
+                    <div className="flex items-center gap-1">
                       <Link
                         to="/settings"
                         className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-                        title="Customize Theme"
+                        title="Settings"
                       >
                         <SettingsIcon className="w-5 h-5" />
                       </Link>
                       <Link
                         to="/profile"
-                        className="flex items-center gap-2 px-3 py-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-all text-sm font-medium"
+                        className="p-2 hover:bg-purple-50 rounded-lg transition-all"
                       >
                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold">
                           {currentClient?.name?.charAt(0) || '?'}
                         </div>
-                        <span className="hidden sm:inline">Profile</span>
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all text-sm"
+                        className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+                        title="Logout"
                       >
-                        Logout
+                        <LogOut className="w-5 h-5" />
                       </button>
-                    </nav>
+                    </div>
                   </div>
                 </div>
               </header>
               
+              <div className="pb-20">
               <Routes>
                 <Route path="/" element={<Home clientId={currentClient?.id} client={currentClient} />} />
                 <Route path="/curriculum" element={<CurriculumSystem clientId={currentClient?.id} userProgress={{}} />} />
@@ -182,6 +195,9 @@ function App() {
                 <Route path="/auth-debug" element={<AuthDebug />} />
                 <Route path="*" element={<Home clientId={currentClient?.id} />} />
               </Routes>
+              </div>
+
+              <BottomNav />
             </>
           )}
         </div>
