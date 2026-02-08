@@ -3,11 +3,36 @@ import { Link } from 'react-router-dom';
 import { 
   CheckCircle, Circle, ArrowRight, ArrowLeft, RotateCcw, 
   Heart, Shield, Sparkles, AlertTriangle, Clock, TrendingUp,
-  Award, Eye, Brain, Star, Flame, Users, Activity
+  Award, Eye, Brain, Star, Flame, Users, Activity, Plus, MapPin
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useParts } from '../contexts/PartsContext';
 import { supabase } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
+
+const protectivePartsDefinitions = {
+  manager: [
+    { name: 'The Inner Critic', trigger: [3], threshold: 4, description: 'Criticizes you harshly to motivate improvement and prevent failure', role: 'Drives perfectionism through self-criticism', strategy: 'Harsh inner voice that points out flaws before others can' },
+    { name: 'The Planner', trigger: [1], threshold: 4, description: 'Plans everything meticulously to prevent chaos and maintain control', role: 'Prevents surprises through hyper-organization', strategy: 'Over-planning, list-making, need for predictability' },
+    { name: 'The Perfectionist', trigger: [7], threshold: 4, description: 'Demands flawless performance to avoid criticism or failure', role: 'Prevents exposure of perceived flaws', strategy: 'Setting impossibly high standards, never feeling "good enough"' },
+    { name: 'The People Pleaser', trigger: [9], threshold: 4, description: 'Puts others first to avoid conflict, rejection, or abandonment', role: 'Keeps relationships safe through compliance', strategy: 'Saying yes when you mean no, suppressing your own needs' },
+    { name: 'The Controller', trigger: [5], threshold: 4, description: 'Maintains tight control over emotions and environment for safety', role: 'Manages situations to prevent vulnerability', strategy: 'Emotional suppression, rigidity, need to be in charge' },
+    { name: 'The Worrier', trigger: [14], threshold: 4, description: 'Constantly scans for threats and worries about others\' opinions', role: 'Anticipates danger through hypervigilance', strategy: 'Rumination, anxiety, catastrophizing' }
+  ],
+  firefighter: [
+    { name: 'The Distractor', trigger: [2], threshold: 4, description: 'Zones out or distracts when overwhelming emotions surface', role: 'Prevents feeling overwhelming pain', strategy: 'Screen time, daydreaming, staying busy to avoid feelings' },
+    { name: 'The Numbing Part', trigger: [6], threshold: 4, description: 'Uses substances, food, or activities to numb difficult feelings', role: 'Creates emotional distance from pain', strategy: 'Overeating, substance use, excessive screen time' },
+    { name: 'The Impulse Part', trigger: [4], threshold: 4, description: 'Acts impulsively when stress builds up, seeking quick relief', role: 'Releases emotional pressure through action', strategy: 'Impulsive spending, risky behavior, sudden outbursts' },
+    { name: 'The Shutdown Part', trigger: [8], threshold: 4, description: 'Shuts down emotionally or dissociates when feelings get intense', role: 'Protects from emotional overwhelm through withdrawal', strategy: 'Going numb, disconnecting, feeling "nothing"' },
+    { name: 'The Self-Destructive Part', trigger: [10], threshold: 3, description: 'Turns pain inward through self-destructive behaviors', role: 'Redirects unbearable emotional pain', strategy: 'Self-sabotage, self-harm urges, reckless behavior' }
+  ],
+  exile: [
+    { name: 'The Scared Child', trigger: [11], threshold: 4, description: 'A young part that carries fear, smallness, and vulnerability', role: 'Holds the original feelings of being small and helpless', strategy: 'Needs safety, comfort, and reassurance from Self' },
+    { name: 'The Lonely Child', trigger: [12], threshold: 4, description: 'Carries deep loneliness and longing for connection', role: 'Holds unmet needs for belonging and attachment', strategy: 'Needs to feel seen, held, and never alone again' },
+    { name: 'The Grieving Child', trigger: [13], threshold: 4, description: 'Carries sadness and grief from painful past experiences', role: 'Holds unprocessed loss and sorrow', strategy: 'Needs to be witnessed, validated, and allowed to mourn' },
+    { name: 'The Shamed Child', trigger: [15], threshold: 4, description: 'Carries a deep sense of shame about who they are at their core', role: 'Holds beliefs of being fundamentally flawed or broken', strategy: 'Needs to be told "you are enough" and "nothing is wrong with you"' }
+  ]
+};
 
 const assessmentDefinitions = [
   {
@@ -123,14 +148,39 @@ const scaleLabels = {
   5: 'Strongly Agree'
 };
 
+function getIdentifiedParts(results) {
+  if (!results?.answers) return [];
+  const identified = [];
+
+  Object.entries(protectivePartsDefinitions).forEach(([type, partsList]) => {
+    partsList.forEach(partDef => {
+      const triggerScores = partDef.trigger.map(qId => results.answers[qId] || 0);
+      const maxScore = Math.max(...triggerScores);
+      if (maxScore >= partDef.threshold) {
+        identified.push({
+          ...partDef,
+          type,
+          intensity: maxScore,
+          intensityLabel: maxScore >= 5 ? 'Very Active' : 'Active'
+        });
+      }
+    });
+  });
+
+  identified.sort((a, b) => b.intensity - a.intensity);
+  return identified;
+}
+
 export default function Assessments() {
   const { theme, getAnimationClass } = useTheme();
+  const { parts, addPart } = useParts();
   const [activeAssessment, setActiveAssessment] = useState(null);
   const [answers, setAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [savedResults, setSavedResults] = useState({});
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [addedParts, setAddedParts] = useState({});
 
   useEffect(() => {
     loadSavedResults();
@@ -278,6 +328,23 @@ export default function Assessments() {
     return { level: 'Low', color: 'text-green-600', bg: 'bg-green-100', barColor: 'bg-green-500' };
   };
 
+  const handleAddPartToMap = (partDef) => {
+    const typeMap = { manager: 'manager', firefighter: 'firefighter', exile: 'exile' };
+    const existingNames = parts.map(p => p.name?.toLowerCase().trim());
+    if (existingNames.includes(partDef.name.toLowerCase().trim())) {
+      setAddedParts(prev => ({ ...prev, [partDef.name]: 'exists' }));
+      return;
+    }
+    addPart({
+      type: typeMap[partDef.type] || 'protector',
+      name: partDef.name,
+      role: partDef.role,
+      notes: `${partDef.description}\n\nStrategy: ${partDef.strategy}`,
+      color: partDef.type === 'manager' ? '#3B82F6' : partDef.type === 'firefighter' ? '#F59E0B' : '#EC4899'
+    });
+    setAddedParts(prev => ({ ...prev, [partDef.name]: 'added' }));
+  };
+
   if (loading) {
     return (
       <div className={`min-h-screen bg-gradient-to-br ${theme.primary} flex items-center justify-center`}>
@@ -396,6 +463,118 @@ export default function Assessments() {
               </div>
             )}
           </div>
+
+          {activeAssessment === 'parts' && (() => {
+            const identifiedParts = getIdentifiedParts(results);
+            if (identifiedParts.length === 0) return null;
+
+            const typeColors = {
+              manager: { bg: 'from-blue-500 to-blue-600', light: theme.isDark ? 'bg-blue-900/30 border-blue-800' : 'bg-blue-50 border-blue-200', text: theme.isDark ? 'text-blue-300' : 'text-blue-700', badge: 'bg-blue-100 text-blue-700' },
+              firefighter: { bg: 'from-amber-500 to-orange-600', light: theme.isDark ? 'bg-amber-900/30 border-amber-800' : 'bg-amber-50 border-amber-200', text: theme.isDark ? 'text-amber-300' : 'text-amber-700', badge: 'bg-amber-100 text-amber-700' },
+              exile: { bg: 'from-pink-500 to-rose-600', light: theme.isDark ? 'bg-pink-900/30 border-pink-800' : 'bg-pink-50 border-pink-200', text: theme.isDark ? 'text-pink-300' : 'text-pink-700', badge: 'bg-pink-100 text-pink-700' }
+            };
+            const typeLabels = { manager: 'Manager', firefighter: 'Firefighter', exile: 'Exile' };
+            const typeIcons = { manager: Shield, firefighter: Flame, exile: Heart };
+
+            return (
+              <div className={`${theme.cardBg} rounded-2xl shadow-lg p-8 mb-8 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className={`text-xl font-bold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+                      Your Identified Parts
+                    </h3>
+                    <p className={`text-sm mt-1 ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                      Based on your responses, these parts appear most active. Add them to your Parts Map to track and work with them.
+                    </p>
+                  </div>
+                  <Link
+                    to="/parts-mapping"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    View Parts Map
+                  </Link>
+                </div>
+
+                {['manager', 'firefighter', 'exile'].map(type => {
+                  const typeParts = identifiedParts.filter(p => p.type === type);
+                  if (typeParts.length === 0) return null;
+                  const TypeIcon = typeIcons[type];
+                  const colors = typeColors[type];
+
+                  return (
+                    <div key={type} className="mb-6 last:mb-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${colors.bg} flex items-center justify-center`}>
+                          <TypeIcon className="w-4 h-4 text-white" />
+                        </div>
+                        <h4 className={`font-semibold ${theme.isDark ? 'text-white' : 'text-gray-800'}`}>
+                          {typeLabels[type]} Parts
+                        </h4>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${colors.badge}`}>
+                          {typeParts.length} identified
+                        </span>
+                      </div>
+
+                      <div className="space-y-3">
+                        {typeParts.map((part, i) => {
+                          const isAdded = addedParts[part.name];
+                          return (
+                            <div key={i} className={`p-4 rounded-xl border ${colors.light} transition-all`}>
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className={`font-semibold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>{part.name}</span>
+                                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                      part.intensity >= 5 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                                    }`}>
+                                      {part.intensityLabel}
+                                    </span>
+                                  </div>
+                                  <p className={`text-sm mb-2 ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>{part.description}</p>
+                                  <div className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                                    <span className="font-medium">Role:</span> {part.role}
+                                  </div>
+                                  <div className={`text-xs mt-1 ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                                    <span className="font-medium">Strategy:</span> {part.strategy}
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => handleAddPartToMap(part)}
+                                  disabled={!!isAdded}
+                                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium flex-shrink-0 transition-all ${
+                                    isAdded === 'added'
+                                      ? 'bg-green-100 text-green-700 cursor-default'
+                                      : isAdded === 'exists'
+                                      ? (theme.isDark ? 'bg-slate-700 text-slate-400' : 'bg-gray-100 text-gray-500') + ' cursor-default'
+                                      : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-sm'
+                                  }`}
+                                >
+                                  {isAdded === 'added' ? (
+                                    <><CheckCircle className="w-3.5 h-3.5" /> Added</>
+                                  ) : isAdded === 'exists' ? (
+                                    <><CheckCircle className="w-3.5 h-3.5" /> Already Mapped</>
+                                  ) : (
+                                    <><Plus className="w-3.5 h-3.5" /> Add to Map</>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div className={`mt-6 p-4 rounded-xl ${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-purple-50 border-purple-100'} border`}>
+                  <p className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-purple-700'}`}>
+                    <strong>Next Step:</strong> After adding parts to your map, visit the <Link to="/parts-studio" className="underline font-medium">Parts Visualization Studio</Link> to explore how these parts relate to each other and to your Self energy. You can also discuss these identified parts with your therapist using the <Link to="/therapy" className="underline font-medium">Therapy Integration</Link> activities.
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="flex justify-center gap-4">
             <button

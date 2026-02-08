@@ -180,6 +180,169 @@ const therapistClientActivities = [
       'What does Self-energy feel like in your body?',
       'What anchor did you create for accessing Self?'
     ]
+  },
+  {
+    id: 'inner-child-rescue',
+    title: 'Inner Child Rescue Mission',
+    icon: 'Heart',
+    category: 'in-session',
+    duration: '25-40 min',
+    description: 'A guided journey to find, comfort, and retrieve a young exile part stuck in a painful memory. Your therapist provides safety while you connect with your inner child.',
+    steps: [
+      { title: 'Safety Setup', instruction: 'With your therapist, establish a safe internal space — a peaceful place where you can bring the child part after the rescue. Describe it in detail: What does it look like? What does it feel like? Make it vivid and real.', duration: 4 },
+      { title: 'Protector Permission', instruction: 'Ask your protector parts: "I\'d like to visit the young part you\'re guarding. Will you allow me to go to them with my therapist here?" Wait for genuine permission. If a protector is anxious, ask what it needs to feel safe enough.', duration: 5 },
+      { title: 'Travel to the Child', instruction: 'Close your eyes. With your therapist guiding, let yourself be drawn to the young part. Notice the scene: Where is this child? What age? What\'s happening around them? Don\'t change anything yet — just arrive and observe.', duration: 5 },
+      { title: 'Make Contact', instruction: 'Approach the child gently. Let them see you — the adult you are now. You might say: "Hi, I\'m you, grown up. I came to find you." Watch how the child responds. Some may be scared, some may run to you. Let it unfold naturally.', duration: 5 },
+      { title: 'Witness and Validate', instruction: 'Ask the child: "What happened to you here?" Listen to their story. Validate their experience: "That should never have happened to you. It wasn\'t your fault. Your feelings make complete sense." Let them be fully heard.', duration: 6 },
+      { title: 'Offer What Was Missing', instruction: 'Ask: "What did you need back then?" Give the child exactly what they needed — a hug, protection, comfort, words of love. This is a corrective emotional experience. Let your Self energy flow to them.', duration: 5 },
+      { title: 'Bring Them Home', instruction: 'Ask the child: "Would you like to leave this place and come live with me now?" If yes, take their hand and bring them to the safe space you created. If not yet ready, let them know you\'ll come back and they\'re not forgotten.', duration: 4 },
+      { title: 'Integration', instruction: 'Once the child is in the safe space, check in: "How do you feel now? What do you need?" Also check with your protectors — notice if they\'ve relaxed. Thank everyone involved in this healing moment.', duration: 4 }
+    ],
+    reflectionPrompts: [
+      'How old was the child part and what scene were they in?',
+      'What did the child need that they didn\'t receive originally?',
+      'Did the child come to the safe space? How do they feel there?',
+      'How did your protectors respond to the rescue?',
+      'What emotions came up for you during this process?'
+    ]
+  },
+  {
+    id: 'parts-council',
+    title: 'Parts Council Meeting',
+    icon: 'Users',
+    category: 'in-session',
+    duration: '30-45 min',
+    description: 'Facilitate a meeting between multiple parts with your therapist, allowing parts to communicate directly with each other and with Self to resolve internal conflicts.',
+    steps: [
+      { title: 'Set the Council Space', instruction: 'Imagine a round table or circle where all parts can gather. You (Self) sit at the center or head of the table. Your therapist will help you hold the space. Invite all parts who want to be heard today.', duration: 4 },
+      { title: 'Roll Call', instruction: 'Notice who shows up. Go around the circle and acknowledge each part: "I see the Inner Critic, the People Pleaser, the Scared Child..." Let each part know they are welcome and will get a turn to speak.', duration: 5 },
+      { title: 'Hear Each Voice', instruction: 'One at a time, let each part share what\'s on their mind. Your therapist will help you stay in Self as you listen. Ask each part: "What do you want the others to know?" No interrupting — just witnessing.', duration: 8 },
+      { title: 'Acknowledge Conflicts', instruction: 'Often parts are in conflict — one wants to take risks while another wants safety. Name these tensions openly: "I notice the Adventurer and the Protector have different needs." Validate both sides.', duration: 5 },
+      { title: 'Facilitate Understanding', instruction: 'Help parts see each other\'s perspectives. Ask the Protector: "Can you see that the Adventurer is trying to help too?" Often parts don\'t realize they share the same ultimate goal: your wellbeing.', duration: 6 },
+      { title: 'Seek Agreement', instruction: 'From Self, propose a way forward that honors all parts. Ask: "What if we tried this approach? Would everyone be willing?" Negotiate until you find something all parts can accept, even if imperfect.', duration: 5 },
+      { title: 'Close the Council', instruction: 'Thank every part for participating. Acknowledge their courage. Remind them: "We\'re all on the same team. I will keep listening." Set an intention to reconvene when needed.', duration: 3 }
+    ],
+    reflectionPrompts: [
+      'Which parts showed up to the council?',
+      'What conflicts or tensions were revealed between parts?',
+      'Were any parts surprised by what other parts shared?',
+      'What agreement or compromise did the system reach?',
+      'How did it feel to lead the council from Self?'
+    ]
+  },
+  {
+    id: 'somatic-parts-work',
+    title: 'Somatic Parts Work',
+    icon: 'Activity',
+    category: 'in-session',
+    duration: '20-30 min',
+    description: 'Use body sensations to discover and communicate with parts. Parts live in the body — this exercise uses somatic awareness to deepen the IFS work with your therapist.',
+    steps: [
+      { title: 'Body Scan Arrival', instruction: 'Close your eyes. Starting at the top of your head, slowly scan down through your body. Notice any area that has tension, tightness, warmth, cold, numbness, or tingling. These sensations often point to parts. Report what you find to your therapist.', duration: 4 },
+      { title: 'Choose a Sensation', instruction: 'Pick the strongest or most interesting body sensation. Place your attention directly on it. Don\'t try to change it — just be with it. Describe it to your therapist: size, shape, temperature, color, texture, movement.', duration: 4 },
+      { title: 'Ask the Sensation', instruction: 'Speak to the sensation as if it were a part: "What are you?" or "Who are you?" Wait patiently. Parts may communicate through images, words, emotions, memories, or changes in the sensation itself.', duration: 5 },
+      { title: 'Follow the Story', instruction: 'As the part reveals itself, let the sensation guide you deeper. It may move, intensify, or shift. Follow wherever it leads. Your therapist will help you stay present and curious rather than overwhelmed.', duration: 5 },
+      { title: 'Breath and Movement', instruction: 'Your therapist may guide you to breathe into the sensation, gently move the body area, or place a hand there. These somatic interventions help the part feel seen and contacted. Notice what shifts.', duration: 4 },
+      { title: 'Release and Integration', instruction: 'If the part is ready, ask what it needs to release its tension. It might need a deep breath, a stretch, a cry, or simply to be held. Follow its guidance. Notice how the body sensation changes as the part is witnessed.', duration: 4 },
+      { title: 'Final Body Check', instruction: 'Do one more quick body scan. Notice what has changed since the beginning. Are there new sensations? Has the original one shifted? Thank your body and parts for their communication.', duration: 3 }
+    ],
+    reflectionPrompts: [
+      'Where in your body did you find the strongest sensation?',
+      'What part was connected to that body sensation?',
+      'What did the part communicate through the body?',
+      'How did the sensation change during the exercise?',
+      'What did you learn about the connection between your body and your parts?'
+    ]
+  },
+  {
+    id: 'attachment-repair',
+    title: 'Attachment Repair Exercise',
+    icon: 'Heart',
+    category: 'in-session',
+    duration: '30-40 min',
+    description: 'Work with your therapist to repair attachment wounds by reparenting exile parts. This exercise addresses the core relational injuries that shape your protective system.',
+    steps: [
+      { title: 'Identify the Attachment Pattern', instruction: 'With your therapist, identify which attachment pattern is most active: anxious (clinging, fear of abandonment), avoidant (pushing away, fear of closeness), or disorganized (wanting closeness but also fearing it). Name the parts involved.', duration: 5 },
+      { title: 'Find the Origin Story', instruction: 'Ask the exile carrying this attachment wound: "When did you first learn that relationships were unsafe?" Let it show you the earliest memory. Your therapist holds the space while you witness the child\'s experience.', duration: 6 },
+      { title: 'Reparenting from Self', instruction: 'As the compassionate adult you are now, approach the child in the memory. Offer what the original caregiver couldn\'t provide: "I will never leave you. You are safe with me. Your needs matter. I see you and I choose you."', duration: 6 },
+      { title: 'New Experience Practice', instruction: 'Your therapist models a healthy attachment relationship with you in this moment. Notice how it feels to be truly seen, heard, and accepted. Let this new experience sink in. This is what healthy attachment feels like.', duration: 5 },
+      { title: 'Update Protectors', instruction: 'Let your attachment-related protectors know about this repair. The anxious part can learn that closeness is safe. The avoidant part can learn that vulnerability won\'t destroy you. Ask what they need to try new approaches.', duration: 5 },
+      { title: 'Practice New Patterns', instruction: 'With your therapist, role-play or imagine a real relationship scenario. Practice responding from Self rather than from the old attachment pattern. Notice the difference. Your therapist will coach you through it.', duration: 5 },
+      { title: 'Integration and Homework', instruction: 'Discuss with your therapist one small way you can practice this new attachment pattern before the next session. Maybe it\'s letting yourself be vulnerable with a safe person, or speaking a need out loud.', duration: 4 }
+    ],
+    reflectionPrompts: [
+      'Which attachment pattern did you explore?',
+      'What early experience shaped this pattern?',
+      'What did the child part need to hear from a caregiver?',
+      'How did it feel to receive healthy attunement from your therapist?',
+      'What small step will you practice before your next session?'
+    ]
+  },
+  {
+    id: 'legacy-burden-release',
+    title: 'Legacy Burden Exploration',
+    icon: 'Star',
+    category: 'in-session',
+    duration: '25-35 min',
+    description: 'Explore burdens passed down through your family system — beliefs, emotions, and patterns inherited from parents, grandparents, and cultural lineage. Work with your therapist to name and begin releasing them.',
+    steps: [
+      { title: 'Family Pattern Inventory', instruction: 'With your therapist, map out recurring patterns in your family: What beliefs were passed down? ("We don\'t show weakness," "Money is scarce," "Trust no one.") What emotional patterns repeat across generations? Write them down.', duration: 6 },
+      { title: 'Find the Carrier Part', instruction: 'Ask inside: "Which part of me carries these family burdens?" Notice who steps forward. This part may not have created the burden — it inherited it. Acknowledge this: "You didn\'t choose this. It was given to you."', duration: 5 },
+      { title: 'Trace the Lineage', instruction: 'Ask the part: "Where did this burden come from? Who gave it to you?" You may see images of parents, grandparents, or even ancestors you never met. Notice the chain of pain without judgment.', duration: 5 },
+      { title: 'Compassion for the Line', instruction: 'From Self, offer compassion to your entire lineage: "They carried what they could. They passed on what they couldn\'t bear. But this burden doesn\'t have to continue through me." Feel the weight of this recognition.', duration: 5 },
+      { title: 'Permission to Release', instruction: 'Ask the carrier part: "Are you ready to let go of what was never yours to carry?" If yes, choose a way to release: return it to the earth, dissolve it in light, let it flow downstream. If not ready, honor that too.', duration: 5 },
+      { title: 'Break the Chain', instruction: 'Visualize the generational chain. See yourself as the link where the pattern transforms. You\'re not breaking from your family — you\'re healing what they couldn\'t. Let new qualities fill the space where the burden was.', duration: 5 },
+      { title: 'New Legacy', instruction: 'Ask: "What do I want to carry forward instead?" Choose the qualities your lineage deserves: resilience, love, courage, joy. Feel these new qualities settling into your system. This is your new legacy.', duration: 4 }
+    ],
+    reflectionPrompts: [
+      'What legacy burdens did you identify in your family system?',
+      'Which part was carrying these burdens?',
+      'What compassion arose for your family lineage?',
+      'Were you able to release any legacy burdens? Which ones?',
+      'What new legacy do you want to create going forward?'
+    ]
+  },
+  {
+    id: 'safety-mapping',
+    title: 'Window of Tolerance Mapping',
+    icon: 'Target',
+    category: 'daily-practice',
+    duration: '10-15 min',
+    description: 'Map your window of tolerance — the zone where you can stay present and regulated. Identify which parts push you into hyperarousal (fight/flight) or hypoarousal (freeze/shutdown).',
+    steps: [
+      { title: 'Check Your Zone', instruction: 'Right now, where are you? Hyperarousal (anxious, angry, restless, can\'t sit still), Window of Tolerance (calm, present, able to think clearly), or Hypoarousal (numb, disconnected, foggy, collapsed). Rate each 1-10.', duration: 3 },
+      { title: 'Map Your Triggers', instruction: 'List 3 things that push you into hyperarousal (fight/flight). What parts activate? List 3 things that push you into hypoarousal (freeze/shutdown). What parts activate? These patterns reveal your protective system.', duration: 4 },
+      { title: 'Identify the Gatekeepers', instruction: 'Which parts control the boundaries of your window? There\'s usually a "too much" protector (shuts you down when emotions get too big) and a "too little" protector (ramps you up when you\'re too numb). Name them.', duration: 3 },
+      { title: 'Expand the Window', instruction: 'Practice pendulation: shift attention between something comfortable and something slightly uncomfortable. Stay curious. This gentle back-and-forth gradually widens your window of tolerance. Do this for 3 minutes.', duration: 3 },
+      { title: 'Anchor in the Window', instruction: 'Find what helps you stay in the window: breathing patterns, body positions, sensory experiences. Practice one right now. This becomes your go-to regulation tool. Share it with your therapist.', duration: 3 }
+    ],
+    reflectionPrompts: [
+      'Where were you on the arousal spectrum today?',
+      'What are your top triggers for hyperarousal and hypoarousal?',
+      'Which parts serve as gatekeepers for your window of tolerance?',
+      'What anchoring technique worked best for you?'
+    ]
+  },
+  {
+    id: 'compassionate-witness',
+    title: 'Compassionate Witnessing Practice',
+    icon: 'Eye',
+    category: 'daily-practice',
+    duration: '10-15 min',
+    description: 'Develop the Self\'s capacity to witness your parts without becoming overwhelmed. This practice strengthens your ability to hold space for all parts, building trust in the system.',
+    steps: [
+      { title: 'Center in Self', instruction: 'Take 5 slow breaths. Place one hand on your heart and one on your belly. Set the intention: "I am here as a compassionate witness. I don\'t need to fix anything. I just need to be present."', duration: 2 },
+      { title: 'Invite a Part', instruction: 'Gently invite a part to share something with you. Choose a part that\'s been active recently. Say: "I\'m here and I\'m listening. You can share whatever you need to at your own pace."', duration: 3 },
+      { title: 'Listen Without Agenda', instruction: 'As the part shares (through feelings, images, thoughts, or body sensations), just receive. Don\'t analyze, fix, advise, or judge. Just witness. If your mind starts problem-solving, gently return to simply being present.', duration: 4 },
+      { title: 'Validate What You Heard', instruction: 'Reflect back what the part shared: "I hear that you feel... I understand that you need... That makes sense because..." Validation is one of the most healing things Self can offer any part.', duration: 3 },
+      { title: 'Close with Appreciation', instruction: 'Thank the part for trusting you enough to share. Say: "I\'m grateful you showed me this. I won\'t forget. I\'ll carry what you shared with me." Notice how the part responds to being truly seen.', duration: 2 }
+    ],
+    reflectionPrompts: [
+      'Which part shared with you today?',
+      'What was it like to listen without trying to fix?',
+      'How did the part respond to being witnessed?',
+      'What did you learn about this part that you didn\'t know before?'
+    ]
   }
 ];
 
@@ -191,7 +354,7 @@ const categoryLabels = {
 };
 
 const iconMap = {
-  BookOpen, MessageSquare, Shield, Sparkles, Heart, Eye, Target, Brain
+  BookOpen, MessageSquare, Shield, Sparkles, Heart, Eye, Target, Brain, Users, Star, Activity: Lightbulb
 };
 
 export default function TherapyIntegration() {
