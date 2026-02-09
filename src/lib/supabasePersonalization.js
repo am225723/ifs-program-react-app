@@ -75,6 +75,7 @@ export const clientAuth = {
       localStorage.setItem('client_id', client.id);
       localStorage.setItem('client_pin', pin);
       localStorage.setItem('client_name', client.name);
+      localStorage.setItem('client_user_role', client.user_role || 'client');
 
       console.log('✅ Authentication successful!');
       return { success: true, client };
@@ -95,13 +96,15 @@ export const clientAuth = {
     const clientId = localStorage.getItem('client_id');
     const clientName = localStorage.getItem('client_name');
     const clientPin = localStorage.getItem('client_pin');
+    const userRole = localStorage.getItem('client_user_role');
 
     if (!clientId) return null;
 
     return {
       id: clientId,
       name: clientName,
-      pin: clientPin
+      pin: clientPin,
+      user_role: userRole || 'client'
     };
   },
 
@@ -112,6 +115,7 @@ export const clientAuth = {
     localStorage.removeItem('client_id');
     localStorage.removeItem('client_pin');
     localStorage.removeItem('client_name');
+    localStorage.removeItem('client_user_role');
   },
 
   /**
@@ -145,10 +149,11 @@ export const clientAuth = {
         };
       }
 
-      // Store the client
-      this.storeClient(clientData);
+      localStorage.setItem('client_id', clientData.id);
+      localStorage.setItem('client_name', clientData.name || '');
+      localStorage.setItem('client_pin', clientData.pin || '');
+      localStorage.setItem('client_user_role', clientData.user_role || 'client');
       
-      // Clean token from URL for security
       tokenAuth.cleanTokenFromURL();
 
       console.log('✅ Token authentication successful:', { name: clientData.name });

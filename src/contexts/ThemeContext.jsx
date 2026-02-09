@@ -62,6 +62,26 @@ const themePresets = {
   }
 };
 
+const darkTextMap = {
+  'text-gray-900': 'text-slate-100',
+  'text-gray-800': 'text-slate-100',
+  'text-gray-700': 'text-slate-200',
+  'text-gray-600': 'text-slate-300',
+  'text-gray-500': 'text-slate-400',
+  'text-slate-900': 'text-slate-100',
+  'text-slate-800': 'text-slate-100',
+  'text-slate-700': 'text-slate-200',
+  'text-slate-600': 'text-slate-300',
+  'bg-white/80': 'bg-slate-800/80',
+  'bg-white': 'bg-slate-800',
+  'bg-white/70': 'bg-slate-800/70',
+  'bg-white/60': 'bg-slate-800/60',
+  'bg-gray-50': 'bg-slate-800/50',
+  'bg-gray-100': 'bg-slate-700/50',
+  'border-gray-200': 'border-slate-600',
+  'border-gray-100': 'border-slate-700',
+};
+
 const animationStyles = {
   gentle: {
     slow: { transition: 'transition-all duration-700 ease-out', hover: 'hover:scale-[1.02] hover:shadow-lg' },
@@ -126,6 +146,11 @@ export function ThemeProvider({ children }) {
     return speedStyles[type] || '';
   };
 
+  const tc = (lightClass) => {
+    if (!currentTheme.isDark) return lightClass;
+    return darkTextMap[lightClass] || lightClass;
+  };
+
   const value = {
     theme: currentTheme,
     themes: themePresets,
@@ -134,7 +159,8 @@ export function ThemeProvider({ children }) {
     setAnimationsEnabled,
     animationSpeed,
     setAnimationSpeed,
-    getAnimationClass
+    getAnimationClass,
+    tc
   };
 
   return (

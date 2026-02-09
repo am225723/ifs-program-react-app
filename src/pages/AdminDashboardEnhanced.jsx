@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Users, 
   Plus, 
@@ -18,8 +19,11 @@ import {
   Calendar,
   Mail,
   Phone,
-  Key
+  Key,
+  ArrowLeft,
+  Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { clientAuth, assessmentManager, progressTracker } from '../lib/supabasePersonalization';
 
 const AdminDashboardEnhanced = () => {
@@ -43,53 +47,93 @@ const AdminDashboardEnhanced = () => {
 
   const loadClients = async () => {
     setLoading(true);
-    // In production, this would fetch from Supabase
-    // For now, using mock data
-    const mockClients = [
-      {
-        id: '1',
-        name: 'Sarah Johnson',
-        email: 'sarah@example.com',
-        pin: '123456',
-        status: 'active',
-        primaryWound: 'abandonment',
-        progress: 45,
-        lastActive: '2025-12-05',
-        modulesCompleted: 2,
-        totalModules: 6
-      },
-      {
-        id: '2',
-        name: 'Michael Chen',
-        email: 'michael@example.com',
-        pin: '234567',
-        status: 'active',
-        primaryWound: 'shame',
-        progress: 78,
-        lastActive: '2025-12-04',
-        modulesCompleted: 4,
-        totalModules: 6
-      }
-    ];
-    setClients(mockClients);
+    try {
+      const { data: clientsData, error } = await supabase
+        .from('ifs_clients')
+        .select('*')
+        .eq('user_role', 'client')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const enrichedClients = await Promise.all(
+        (clientsData || []).map(async (client) => {
+          const { data: assessment } = await supabase
+            .from('ifs_assessment_results')
+            .select('primary_wound')
+            .eq('client_id', client.id)
+            .order('assessment_date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          const { count: completedCount } = await supabase
+            .from('ifs_client_progress')
+            .select('*', { count: 'exact', head: true })
+            .eq('client_id', client.id)
+            .eq('completed', true);
+
+          return {
+            id: client.id,
+            name: client.name,
+            email: client.email || '',
+            pin: client.pin,
+            status: client.status,
+            primaryWound: assessment?.primary_wound || 'not assessed',
+            progress: completedCount ? Math.min(Math.round((completedCount / 30) * 100), 100) : 0,
+            lastActive: client.last_active ? new Date(client.last_active).toLocaleDateString() : 'Never',
+            modulesCompleted: completedCount || 0,
+            totalModules: 6,
+            created_at: client.created_at
+          };
+        })
+      );
+
+      setClients(enrichedClients);
+    } catch (error) {
+      console.error('Error loading clients:', error);
+      setClients([]);
+    }
     setLoading(false);
   };
 
-  const loadStats = () => {
-    setStats({
-      totalClients: 24,
-      activeClients: 18,
-      completedModules: 86,
-      avgProgress: 62
-    });
+  const loadStats = async () => {
+    try {
+      const { count: totalCount } = await supabase
+        .from('ifs_clients')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_role', 'client');
+
+      const { count: activeCount } = await supabase
+        .from('ifs_clients')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_role', 'client')
+        .eq('status', 'active');
+
+      const { count: modulesCount } = await supabase
+        .from('ifs_client_progress')
+        .select('*', { count: 'exact', head: true })
+        .eq('completed', true);
+
+      setStats({
+        totalClients: totalCount || 0,
+        activeClients: activeCount || 0,
+        completedModules: modulesCount || 0,
+        avgProgress: totalCount > 0 ? Math.round((modulesCount || 0) / totalCount) : 0
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
   };
 
   const handleCreateClient = async (clientData) => {
     const result = await clientAuth.createClient(clientData);
     if (result.success) {
       alert(`Client created successfully!\n\nPIN: ${result.pin}\n\nPlease provide this PIN to the client. It will not be shown again.`);
-      loadClients();
+      await loadClients();
+      await loadStats();
       setShowCreateModal(false);
+    } else {
+      alert(`Error creating client: ${result.error}`);
     }
   };
 
@@ -117,6 +161,10 @@ const AdminDashboardEnhanced = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
+              <Link to="/" className="inline-flex items-center text-sm text-purple-600 hover:text-purple-800 mb-2">
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                Back to Home
+              </Link>
               <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
               <p className="text-gray-600 mt-1">Manage clients and monitor progress</p>
             </div>
@@ -241,7 +289,26 @@ const AdminDashboardEnhanced = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredClients.map((client) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <Loader2 className="w-8 h-8 text-purple-600 animate-spin mb-3" />
+                        <span className="text-gray-500">Loading clients...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredClients.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <Users className="w-8 h-8 text-gray-400 mb-3" />
+                        <span className="text-gray-500">No clients found</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredClients.map((client) => (
                   <tr key={client.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       <div>
@@ -313,7 +380,8 @@ const AdminDashboardEnhanced = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                ))
+                )}
               </tbody>
             </table>
           </div>

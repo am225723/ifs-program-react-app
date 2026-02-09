@@ -15,8 +15,47 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Missing authorization header." }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await userClient.auth.getUser();
+
+    if (authError || !user) {
+      const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+      const callerPin = req.headers.get("x-caller-pin");
+      if (!callerPin) {
+        return new Response(
+          JSON.stringify({ success: false, error: "Authentication required." }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const { data: caller, error: callerError } = await adminClient
+        .from("ifs_clients")
+        .select("user_role")
+        .eq("pin", callerPin)
+        .maybeSingle();
+
+      if (callerError || !caller || caller.user_role !== "therapist") {
+        return new Response(
+          JSON.stringify({ success: false, error: "Only therapists can create clients." }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    const adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const { name, email, phone, notes } = await req.json();
 
@@ -37,7 +76,7 @@ serve(async (req) => {
     while (attempts < maxAttempts) {
       const candidate = Math.floor(100000 + Math.random() * 900000).toString();
 
-      const { data: existing, error: checkError } = await supabase
+      const { data: existing, error: checkError } = await adminSupabase
         .from("ifs_clients")
         .select("id")
         .eq("pin", candidate)
@@ -77,7 +116,7 @@ serve(async (req) => {
       );
     }
 
-    const { data: client, error: insertError } = await supabase
+    const { data: client, error: insertError } = await adminSupabase
       .from("ifs_clients")
       .insert({
         pin,

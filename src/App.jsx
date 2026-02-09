@@ -23,7 +23,7 @@ import PartsStudio from './pages/PartsStudio';
 import MicroLearning from './pages/MicroLearning';
 import Affirmations from './pages/Affirmations';
 import TherapyIntegration from './pages/TherapyIntegration';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboardEnhanced from './pages/AdminDashboardEnhanced';
 import TherapistDashboard from './pages/TherapistDashboard';
 import ProgressTimeline from './pages/ProgressTimeline';
 import MoodTracker from './pages/MoodTracker';
@@ -176,6 +176,15 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                       </h1>
                     </Link>
                     <div className="flex items-center gap-1">
+                      {currentClient?.user_role === 'therapist' && (
+                        <Link
+                          to="/admin"
+                          className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
+                          title="Admin Dashboard"
+                        >
+                          <ClipboardList className="w-5 h-5" />
+                        </Link>
+                      )}
                       <Link
                         to="/settings"
                         className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
@@ -223,8 +232,16 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/micro-learning" element={<MicroLearning />} />
                 <Route path="/affirmations" element={<Affirmations />} />
                 <Route path="/therapy" element={<TherapyIntegration />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/therapist-dashboard" element={<TherapistDashboard />} />
+                <Route path="/admin" element={
+                  currentClient?.user_role === 'therapist' 
+                    ? <AdminDashboardEnhanced /> 
+                    : <Home clientId={currentClient?.id} client={currentClient} />
+                } />
+                <Route path="/therapist-dashboard" element={
+                  currentClient?.user_role === 'therapist'
+                    ? <TherapistDashboard />
+                    : <Home clientId={currentClient?.id} client={currentClient} />
+                } />
                 <Route path="/progress-timeline" element={<ProgressTimeline />} />
                 <Route path="/mood-tracker" element={<MoodTracker />} />
                 <Route path="/gamification" element={<GamificationHub />} />

@@ -37,9 +37,11 @@ import {
 import PersonalizationModal from '../components/PersonalizationModal';
 import aiCurriculumPersonalizer from '../lib/aiCurriculumPersonalizer';
 import { assessmentManager, clientAuth } from '../lib/supabasePersonalization';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Home = ({ clientId, client }) => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [showAssessment, setShowAssessment] = useState(false);
   const [showPersonalizationModal, setShowPersonalizationModal] = useState(false);
   const [generatedCurriculum, setGeneratedCurriculum] = useState(null);
@@ -352,61 +354,61 @@ const Home = ({ clientId, client }) => {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
           {/* Section Header */}
-          <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
+          <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-3xl shadow-2xl p-8 mb-8`}>
             <div className="flex items-center mb-6">
               <div className={`w-20 h-20 bg-gradient-to-r ${currentSectionData.color} rounded-2xl flex items-center justify-center mr-6`}>
                 <Icon className="w-10 h-10 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">{currentSectionData.title}</h2>
-                <p className="text-xl text-gray-600 mb-2">{currentSectionData.subtitle}</p>
-                <p className="text-gray-600">{currentSectionData.description}</p>
+                <h2 className={`text-3xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>{currentSectionData.title}</h2>
+                <p className={`text-xl ${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-2`}>{currentSectionData.subtitle}</p>
+                <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>{currentSectionData.description}</p>
               </div>
             </div>
           </div>
 
           {/* Questions */}
-          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+          <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-3xl shadow-xl p-8 mb-8`}>
             <div className="mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Instructions</h3>
+                <h3 className={`text-xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'}`}>Instructions</h3>
                 <Info className="w-5 h-5 text-purple-600" />
               </div>
-              <p className="text-gray-600 leading-relaxed">
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} leading-relaxed`}>
                 Read each statement below. Rate how strongly a part of you resonates with the statement on a scale of 0–5.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-6 gap-2 mt-4 p-4 bg-purple-50 rounded-lg">
                 <div className="text-center">
                   <div className="font-bold text-purple-700">0</div>
-                  <div className="text-xs text-gray-600">Not true at all</div>
+                  <div className={`text-xs ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Not true at all</div>
                 </div>
                 <div className="text-center">
                   <div className="font-bold text-purple-700">1</div>
-                  <div className="text-xs text-gray-600">Slightly true</div>
+                  <div className={`text-xs ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Slightly true</div>
                 </div>
                 <div className="text-center">
                   <div className="font-bold text-purple-700">2</div>
-                  <div className="text-xs text-gray-600">Somewhat true</div>
+                  <div className={`text-xs ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Somewhat true</div>
                 </div>
                 <div className="text-center">
                   <div className="font-bold text-purple-700">3</div>
-                  <div className="text-xs text-gray-600">Moderately true</div>
+                  <div className={`text-xs ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Moderately true</div>
                 </div>
                 <div className="text-center">
                   <div className="font-bold text-purple-700">4</div>
-                  <div className="text-xs text-gray-600">Very true</div>
+                  <div className={`text-xs ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Very true</div>
                 </div>
                 <div className="text-center">
                   <div className="font-bold text-purple-700">5</div>
-                  <div className="text-xs text-gray-600">Deeply and painfully true</div>
+                  <div className={`text-xs ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Deeply and painfully true</div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-6">
               {currentSectionData.questions.map((question, index) => (
-                <div key={question.id} className="border-b border-gray-200 pb-6 last:border-0">
-                  <p className="text-lg text-gray-800 mb-4 leading-relaxed">
+                <div key={question.id} className={`border-b ${theme.isDark ? 'border-slate-600' : 'border-gray-200'} pb-6 last:border-0`}>
+                  <p className={`text-lg ${theme.isDark ? 'text-slate-100' : 'text-gray-800'} mb-4 leading-relaxed`}>
                     <span className="font-semibold text-purple-600 mr-2">{index + 1}.</span>
                     {question.text}
                   </p>
@@ -431,16 +433,16 @@ const Home = ({ clientId, client }) => {
           </div>
 
           {/* Protector Question */}
-          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Protector Check</h3>
-            <p className="text-lg text-gray-800 mb-6">{currentSectionData.protectorQuestion}</p>
+          <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-3xl shadow-xl p-8 mb-8`}>
+            <h3 className={`text-xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-4`}>Protector Check</h3>
+            <p className={`text-lg ${theme.isDark ? 'text-slate-100' : 'text-gray-800'} mb-6`}>{currentSectionData.protectorQuestion}</p>
             <div className="flex space-x-4">
               <button
                 onClick={() => handleProtectorAnswer(currentSectionData.id, 'Yes')}
                 className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-200 ${
                   answers[`${currentSectionData.id}_protector`] === 'Yes'
                     ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : `bg-gray-100 ${theme.isDark ? 'text-slate-200' : 'text-gray-700'} hover:bg-gray-200`
                 }`}
               >
                 Yes
@@ -450,7 +452,7 @@ const Home = ({ clientId, client }) => {
                 className={`flex-1 py-4 px-6 rounded-xl font-semibold transition-all duration-200 ${
                   answers[`${currentSectionData.id}_protector`] === 'No'
                     ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : `bg-gray-100 ${theme.isDark ? 'text-slate-200' : 'text-gray-700'} hover:bg-gray-200`
                 }`}
               >
                 No
@@ -463,12 +465,12 @@ const Home = ({ clientId, client }) => {
             <button
               onClick={handlePreviousSection}
               disabled={currentSection === 0}
-              className="px-8 py-4 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`px-8 py-4 bg-gray-200 ${theme.isDark ? 'text-slate-200' : 'text-gray-700'} rounded-xl font-semibold hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               ← Previous Section
             </button>
             <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-600">
+              <span className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
                 Score: {calculateSectionScore(currentSectionData)} / 24
               </span>
             </div>
@@ -519,19 +521,19 @@ const Home = ({ clientId, client }) => {
           </div>
 
           {/* Results Overview */}
-          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Wound Profile</h2>
+          <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-3xl shadow-xl p-8 mb-8`}>
+            <h2 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-6`}>Your Wound Profile</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {assessmentResults.map((result) => {
                 const SectionIcon = result.icon;
                 const percentage = Math.round((result.score / result.maxScore) * 100);
                 
                 return (
-                  <div key={result.id} className="border border-gray-200 rounded-xl p-6">
+                  <div key={result.id} className={`border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'} rounded-xl p-6`}>
                     <div className={`w-16 h-16 bg-gradient-to-r ${result.color} rounded-xl flex items-center justify-center mb-4`}>
                       <SectionIcon className="w-8 h-8 text-white" />
                     </div>
-                    <h3 className="font-bold text-gray-900 mb-2">{result.subtitle}</h3>
+                    <h3 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>{result.subtitle}</h3>
                     <div className="text-2xl font-bold text-purple-600 mb-2">{result.score}/24</div>
                     <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                       <div 
@@ -539,7 +541,7 @@ const Home = ({ clientId, client }) => {
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
-                    <div className="text-sm text-gray-600">{percentage}%</div>
+                    <div className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>{percentage}%</div>
                   </div>
                 );
               })}
@@ -584,9 +586,9 @@ const Home = ({ clientId, client }) => {
           </div>
 
           {/* The Next Step */}
-          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">The Next Step: Unblending</h2>
-            <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+          <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-3xl shadow-xl p-8 mb-8`}>
+            <h2 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-6`}>The Next Step: Unblending</h2>
+            <p className={`text-lg ${theme.isDark ? 'text-slate-200' : 'text-gray-700'} mb-6 leading-relaxed`}>
               If you scored highly in this section, the immediate goal is not to dig up the wound immediately, 
               but to get to know the Protector first.
             </p>
@@ -600,60 +602,60 @@ const Home = ({ clientId, client }) => {
               </blockquote>
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Recommended Next Steps</h3>
+            <div className={`${theme.isDark ? 'bg-slate-800/50' : 'bg-gray-50'} rounded-2xl p-6`}>
+              <h3 className={`text-xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-4`}>Recommended Next Steps</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Link
                   to="/parts-mapping"
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:border-purple-300 hover:shadow-lg transition-all duration-300"
+                  className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'} rounded-xl p-4 hover:border-purple-300 hover:shadow-lg transition-all duration-300`}
                 >
                   <Brain className="w-8 h-8 text-purple-600 mb-3" />
-                  <h4 className="font-bold text-gray-900 mb-2">Parts Mapping</h4>
-                  <p className="text-gray-600 text-sm">Identify and get to know your Protector parts</p>
+                  <h4 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>Parts Mapping</h4>
+                  <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} text-sm`}>Identify and get to know your Protector parts</p>
                 </Link>
                 
                 <Link
                   to="/exercises"
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:border-purple-300 hover:shadow-lg transition-all duration-300"
+                  className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'} rounded-xl p-4 hover:border-purple-300 hover:shadow-lg transition-all duration-300`}
                 >
                   <Heart className="w-8 h-8 text-pink-600 mb-3" />
-                  <h4 className="font-bold text-gray-900 mb-2">Guided Exercises</h4>
-                  <p className="text-gray-600 text-sm">Practice unblending and Self leadership</p>
+                  <h4 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>Guided Exercises</h4>
+                  <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} text-sm`}>Practice unblending and Self leadership</p>
                 </Link>
                 
                 <Link
                   to="/journal"
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:border-purple-300 hover:shadow-lg transition-all duration-300"
+                  className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'} rounded-xl p-4 hover:border-purple-300 hover:shadow-lg transition-all duration-300`}
                 >
                   <BookOpen className="w-8 h-8 text-blue-600 mb-3" />
-                  <h4 className="font-bold text-gray-900 mb-2">Healing Journal</h4>
-                  <p className="text-gray-600 text-sm">Document your conversations with parts</p>
+                  <h4 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>Healing Journal</h4>
+                  <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} text-sm`}>Document your conversations with parts</p>
                 </Link>
               </div>
             </div>
           </div>
 
           {/* All Results */}
-          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Complete Assessment Profile</h2>
+          <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-3xl shadow-xl p-8 mb-8`}>
+            <h2 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-6`}>Complete Assessment Profile</h2>
             <div className="space-y-4">
               {assessmentResults.map((result) => {
                 const SectionIcon = result.icon;
                 return (
-                  <div key={result.id} className="border border-gray-200 rounded-xl p-6">
+                  <div key={result.id} className={`border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'} rounded-xl p-6`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <div className={`w-12 h-12 bg-gradient-to-r ${result.color} rounded-lg flex items-center justify-center mr-4`}>
                           <SectionIcon className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-gray-900">{result.title}</h3>
-                          <p className="text-gray-600">{result.subtitle}</p>
+                          <h3 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'}`}>{result.title}</h3>
+                          <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>{result.subtitle}</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-purple-600">{result.score}/24</div>
-                        <div className="text-sm text-gray-600">
+                        <div className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
                           {result.score >= 18 ? 'High Priority' : 
                            result.score >= 12 ? 'Moderate Priority' : 'Low Priority'}
                         </div>
@@ -684,7 +686,7 @@ const Home = ({ clientId, client }) => {
             </button>
             <button
               onClick={resetAssessment}
-              className="px-8 py-4 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors text-center"
+              className={`px-8 py-4 bg-gray-200 ${theme.isDark ? 'text-slate-200' : 'text-gray-700'} rounded-xl font-semibold hover:bg-gray-300 transition-colors text-center`}
             >
               Retake Assessment
             </button>
@@ -750,7 +752,7 @@ const Home = ({ clientId, client }) => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your journey...</p>
+          <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Loading your journey...</p>
         </div>
       </div>
     );
@@ -763,18 +765,18 @@ const Home = ({ clientId, client }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Personalized Welcome */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            <h1 className={`text-3xl md:text-4xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>
               {getGreeting()}, {client?.name?.split(' ')[0] || 'there'} ✨
             </h1>
-            <p className="text-gray-600">Continue your healing journey where you left off</p>
+            <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Continue your healing journey where you left off</p>
           </div>
 
           {/* Quick Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             {/* Wound Profile Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow">
+            <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-sm border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} p-6 hover:shadow-lg transition-shadow`}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-700">Your Wound Profile</h3>
+                <h3 className={`font-semibold ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Your Wound Profile</h3>
                 <Link to="/profile" className="text-purple-600 text-sm hover:underline">View Details</Link>
               </div>
               <div className="space-y-3">
@@ -783,8 +785,8 @@ const Home = ({ clientId, client }) => {
                     <Heart className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Primary Focus</p>
-                    <p className="font-semibold capitalize text-gray-900">{savedAssessment.primary_wound}</p>
+                    <p className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Primary Focus</p>
+                    <p className={`font-semibold capitalize ${theme.isDark ? 'text-slate-100' : 'text-gray-900'}`}>{savedAssessment.primary_wound}</p>
                   </div>
                 </div>
                 {savedAssessment.secondary_wound && (
@@ -793,8 +795,8 @@ const Home = ({ clientId, client }) => {
                       <Shield className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Secondary</p>
-                      <p className="font-medium capitalize text-gray-700">{savedAssessment.secondary_wound}</p>
+                      <p className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Secondary</p>
+                      <p className={`font-medium capitalize ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>{savedAssessment.secondary_wound}</p>
                     </div>
                   </div>
                 )}
@@ -816,9 +818,9 @@ const Home = ({ clientId, client }) => {
             </div>
 
             {/* Daily Practice Card */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow">
-              <h3 className="font-semibold text-gray-700 mb-2">Daily Practice</h3>
-              <p className="text-gray-500 text-sm mb-4">Strengthen your Self energy</p>
+            <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-sm border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} p-6 hover:shadow-lg transition-shadow`}>
+              <h3 className={`font-semibold ${theme.isDark ? 'text-slate-200' : 'text-gray-700'} mb-2`}>Daily Practice</h3>
+              <p className={`${theme.isDark ? 'text-slate-400' : 'text-gray-500'} text-sm mb-4`}>Strengthen your Self energy</p>
               <div className="space-y-2">
                 <Link to="/exercises" className="flex items-center gap-2 text-purple-600 hover:text-purple-700">
                   <Play className="w-4 h-4" />
@@ -837,21 +839,21 @@ const Home = ({ clientId, client }) => {
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-5 h-5 text-indigo-600" />
-                <h3 className="font-semibold text-gray-800">Personalized for Your {savedAssessment.primary_wound} Healing</h3>
+                <h3 className={`font-semibold ${theme.isDark ? 'text-slate-100' : 'text-gray-800'}`}>Personalized for Your {savedAssessment.primary_wound} Healing</h3>
               </div>
               
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-gray-600 mb-3">Recommended exercises for you:</p>
+                  <p className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-3`}>Recommended exercises for you:</p>
                   <div className="space-y-2">
                     {getWoundRecommendations(savedAssessment.primary_wound).exercises.map((exercise, i) => (
                       <Link 
                         key={i}
                         to="/exercises"
-                        className="flex items-center gap-2 p-3 bg-white rounded-lg hover:shadow-md transition-all group"
+                        className={`flex items-center gap-2 p-3 ${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-lg hover:shadow-md transition-all group`}
                       >
                         <Play className="w-4 h-4 text-indigo-500" />
-                        <span className="text-sm text-gray-700 group-hover:text-indigo-600">{exercise}</span>
+                        <span className={`text-sm ${theme.isDark ? 'text-slate-200' : 'text-gray-700'} group-hover:text-indigo-600`}>{exercise}</span>
                         <ArrowRight className="w-4 h-4 text-gray-400 ml-auto group-hover:text-indigo-500" />
                       </Link>
                     ))}
@@ -859,43 +861,43 @@ const Home = ({ clientId, client }) => {
                 </div>
                 
                 <div>
-                  <p className="text-sm text-gray-600 mb-3">Your daily affirmation:</p>
-                  <div className="bg-white rounded-lg p-4 border-l-4 border-indigo-400">
-                    <p className="text-gray-700 italic">"{getWoundRecommendations(savedAssessment.primary_wound).affirmation}"</p>
+                  <p className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-3`}>Your daily affirmation:</p>
+                  <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-lg p-4 border-l-4 border-indigo-400`}>
+                    <p className={`${theme.isDark ? 'text-slate-200' : 'text-gray-700'} italic`}>"{getWoundRecommendations(savedAssessment.primary_wound).affirmation}"</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">Repeat this affirmation daily to support your healing</p>
+                  <p className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'} mt-2`}>Repeat this affirmation daily to support your healing</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-            <h3 className="font-semibold text-gray-700 mb-4">Quick Actions</h3>
+          <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-sm border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} p-6 mb-8`}>
+            <h3 className={`font-semibold ${theme.isDark ? 'text-slate-200' : 'text-gray-700'} mb-4`}>Quick Actions</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Link to="/curriculum" className="flex flex-col items-center p-4 rounded-xl hover:bg-purple-50 transition-colors group">
                 <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-2 group-hover:bg-purple-200 transition-colors">
                   <BookOpen className="w-6 h-6 text-purple-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">Curriculum</span>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Curriculum</span>
               </Link>
               <Link to="/exercises" className="flex flex-col items-center p-4 rounded-xl hover:bg-pink-50 transition-colors group">
                 <div className="w-12 h-12 rounded-xl bg-pink-100 flex items-center justify-center mb-2 group-hover:bg-pink-200 transition-colors">
                   <Play className="w-6 h-6 text-pink-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">Exercises</span>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Exercises</span>
               </Link>
               <Link to="/parts-mapping" className="flex flex-col items-center p-4 rounded-xl hover:bg-blue-50 transition-colors group">
                 <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-2 group-hover:bg-blue-200 transition-colors">
                   <Users className="w-6 h-6 text-blue-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">Parts Map</span>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Parts Map</span>
               </Link>
               <Link to="/journal" className="flex flex-col items-center p-4 rounded-xl hover:bg-amber-50 transition-colors group">
                 <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mb-2 group-hover:bg-amber-200 transition-colors">
                   <BookOpen className="w-6 h-6 text-amber-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">Journal</span>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Journal</span>
               </Link>
             </div>
           </div>
@@ -903,7 +905,7 @@ const Home = ({ clientId, client }) => {
           {/* Assessments Card */}
           <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100 p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+              <h3 className={`font-semibold ${theme.isDark ? 'text-slate-100' : 'text-gray-800'} flex items-center gap-2`}>
                 <CheckCircle className="w-5 h-5 text-purple-600" />
                 Self-Assessments
               </h3>
@@ -911,35 +913,35 @@ const Home = ({ clientId, client }) => {
                 View All <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4`}>
               Gain deeper insights into your inner world with structured assessments.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Link to="/assessments" className="flex items-center gap-3 p-3 rounded-xl bg-white/70 hover:bg-white transition-colors">
+              <Link to="/assessments" className={`flex items-center gap-3 p-3 rounded-xl ${theme.isDark ? 'bg-slate-800/70' : 'bg-white/70'} hover:bg-white transition-colors`}>
                 <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center">
                   <Heart className="w-5 h-5 text-rose-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-800">IFS Wound Assessment</p>
-                  <p className="text-xs text-gray-500">Inner child wounds</p>
+                  <p className={`text-sm font-medium ${theme.isDark ? 'text-slate-100' : 'text-gray-800'}`}>IFS Wound Assessment</p>
+                  <p className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Inner child wounds</p>
                 </div>
               </Link>
-              <Link to="/assessments" className="flex items-center gap-3 p-3 rounded-xl bg-white/70 hover:bg-white transition-colors">
+              <Link to="/assessments" className={`flex items-center gap-3 p-3 rounded-xl ${theme.isDark ? 'bg-slate-800/70' : 'bg-white/70'} hover:bg-white transition-colors`}>
                 <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-800">Protective Parts</p>
-                  <p className="text-xs text-gray-500">Your protector system</p>
+                  <p className={`text-sm font-medium ${theme.isDark ? 'text-slate-100' : 'text-gray-800'}`}>Protective Parts</p>
+                  <p className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Your protector system</p>
                 </div>
               </Link>
-              <Link to="/assessments" className="flex items-center gap-3 p-3 rounded-xl bg-white/70 hover:bg-white transition-colors">
+              <Link to="/assessments" className={`flex items-center gap-3 p-3 rounded-xl ${theme.isDark ? 'bg-slate-800/70' : 'bg-white/70'} hover:bg-white transition-colors`}>
                 <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-800">Self-Energy</p>
-                  <p className="text-xs text-gray-500">The 8 C's of Self</p>
+                  <p className={`text-sm font-medium ${theme.isDark ? 'text-slate-100' : 'text-gray-800'}`}>Self-Energy</p>
+                  <p className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>The 8 C's of Self</p>
                 </div>
               </Link>
             </div>
@@ -947,38 +949,38 @@ const Home = ({ clientId, client }) => {
 
           {/* New Features Section */}
           <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 mb-8">
-            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <h3 className={`font-semibold ${theme.isDark ? 'text-slate-100' : 'text-gray-800'} mb-4 flex items-center gap-2`}>
               <Sparkles className="w-5 h-5 text-indigo-600" />
               Healing Tools
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link to="/parts-studio" className="flex flex-col items-center p-4 rounded-xl bg-white/60 hover:bg-white transition-colors group">
+              <Link to="/parts-studio" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
                 <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mb-2 group-hover:bg-indigo-200 transition-colors">
                   <Users className="w-6 h-6 text-indigo-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">Parts Studio</span>
-                <span className="text-xs text-gray-500">Visual mapping</span>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Parts Studio</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Visual mapping</span>
               </Link>
-              <Link to="/micro-learning" className="flex flex-col items-center p-4 rounded-xl bg-white/60 hover:bg-white transition-colors group">
+              <Link to="/micro-learning" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
                 <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center mb-2 group-hover:bg-emerald-200 transition-colors">
                   <Clock className="w-6 h-6 text-emerald-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">Micro-Learning</span>
-                <span className="text-xs text-gray-500">2-min exercises</span>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Micro-Learning</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>2-min exercises</span>
               </Link>
-              <Link to="/affirmations" className="flex flex-col items-center p-4 rounded-xl bg-white/60 hover:bg-white transition-colors group">
+              <Link to="/affirmations" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
                 <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center mb-2 group-hover:bg-rose-200 transition-colors">
                   <Heart className="w-6 h-6 text-rose-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">Affirmations</span>
-                <span className="text-xs text-gray-500">Personalized</span>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Affirmations</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Personalized</span>
               </Link>
-              <Link to="/therapy" className="flex flex-col items-center p-4 rounded-xl bg-white/60 hover:bg-white transition-colors group">
+              <Link to="/therapy" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
                 <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center mb-2 group-hover:bg-cyan-200 transition-colors">
                   <MessageCircle className="w-6 h-6 text-cyan-600" />
                 </div>
-                <span className="text-sm font-medium text-gray-700">Therapy Notes</span>
-                <span className="text-xs text-gray-500">Session tracking</span>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Therapy Notes</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Session tracking</span>
               </Link>
             </div>
           </div>
@@ -987,7 +989,7 @@ const Home = ({ clientId, client }) => {
           <div className="text-center">
             <button
               onClick={() => setShowAssessment(true)}
-              className="text-gray-500 hover:text-purple-600 text-sm underline"
+              className={`${theme.isDark ? 'text-slate-400' : 'text-gray-500'} hover:text-purple-600 text-sm underline`}
             >
               Retake wound assessment
             </button>
@@ -1023,7 +1025,7 @@ const Home = ({ clientId, client }) => {
             {/* Main CTA - Assessment */}
             <button
               onClick={() => setShowAssessment(true)}
-              className="group relative inline-flex items-center px-8 py-6 bg-white text-purple-700 rounded-2xl font-bold text-xl hover:bg-purple-50 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 mb-8"
+              className={`group relative inline-flex items-center px-8 py-6 ${theme.isDark ? 'bg-slate-800' : 'bg-white'} text-purple-700 rounded-2xl font-bold text-xl hover:bg-purple-50 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105 mb-8`}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative flex items-center">
@@ -1065,11 +1067,11 @@ const Home = ({ clientId, client }) => {
       )}
 
       {/* Healing Modules Grid */}
-      <div className="py-20 bg-white">
+      <div className={`py-20 ${theme.isDark ? 'bg-slate-800' : 'bg-white'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Your Healing Pathway</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <h2 className={`text-4xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-4`}>Your Healing Pathway</h2>
+            <p className={`text-xl ${theme.isDark ? 'text-slate-300' : 'text-gray-600'} max-w-3xl mx-auto`}>
               Step-by-step modules designed to guide you through complete Inner Child healing
             </p>
           </div>
@@ -1079,22 +1081,22 @@ const Home = ({ clientId, client }) => {
               const Icon = module.icon;
               return (
                 <div key={index} className="group relative">
-                  <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border border-gray-100">
+                  <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
                     <div className={`w-16 h-16 bg-gradient-to-r ${module.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
                       <Icon className="w-8 h-8 text-white" />
                     </div>
                     
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xl font-bold text-gray-900">{module.title}</h3>
+                      <h3 className={`text-xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'}`}>{module.title}</h3>
                       <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
                         {module.level}
                       </span>
                     </div>
                     
-                    <p className="text-gray-600 mb-4 leading-relaxed">{module.description}</p>
+                    <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>{module.description}</p>
                     
                     <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center text-gray-500 text-sm">
+                      <div className={`flex items-center ${theme.isDark ? 'text-slate-400' : 'text-gray-500'} text-sm`}>
                         <Clock className="w-4 h-4 mr-1" />
                         {module.duration}
                       </div>
@@ -1130,8 +1132,8 @@ const Home = ({ clientId, client }) => {
       <div className="py-20 bg-gradient-to-br from-gray-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Interactive Healing Tools</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <h2 className={`text-4xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-4`}>Interactive Healing Tools</h2>
+            <p className={`text-xl ${theme.isDark ? 'text-slate-300' : 'text-gray-600'} max-w-3xl mx-auto`}>
               Engage with your inner world through guided exercises and activities
             </p>
           </div>
@@ -1139,13 +1141,13 @@ const Home = ({ clientId, client }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Link
               to="/parts-mapping"
-              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+              className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group`}
             >
               <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Compass className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Parts Mapping</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3`}>Parts Mapping</h3>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>
                 Interactive tool to identify, understand, and connect with your internal family of parts
               </p>
               <div className="flex items-center text-blue-600 font-semibold">
@@ -1156,13 +1158,13 @@ const Home = ({ clientId, client }) => {
 
             <Link
               to="/exercises"
-              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+              className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group`}
             >
               <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Zap className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Guided Exercises</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3`}>Guided Exercises</h3>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>
                 Meditations and practices to strengthen your Self energy and heal your parts
               </p>
               <div className="flex items-center text-green-600 font-semibold">
@@ -1173,13 +1175,13 @@ const Home = ({ clientId, client }) => {
 
             <Link
               to="/journal"
-              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+              className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group`}
             >
               <div className="w-16 h-16 bg-gradient-to-r from-pink-400 to-pink-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Heart className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Healing Journal</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3`}>Healing Journal</h3>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>
                 Sacred space to document your journey and insights from your inner world
               </p>
               <div className="flex items-center text-pink-600 font-semibold">
@@ -1190,13 +1192,13 @@ const Home = ({ clientId, client }) => {
 
             <Link
               to="/parts-dialogue"
-              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+              className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group`}
             >
               <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <MessageSquare className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">AI Parts Dialogue</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3`}>AI Parts Dialogue</h3>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>
                 Have guided conversations with your inner parts using AI-powered dialogue
               </p>
               <div className="flex items-center text-purple-600 font-semibold">
@@ -1207,13 +1209,13 @@ const Home = ({ clientId, client }) => {
 
             <Link
               to="/mood-tracker"
-              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+              className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group`}
             >
               <div className="w-16 h-16 bg-gradient-to-r from-amber-400 to-orange-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Smile className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Mood & Energy</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3`}>Mood & Energy</h3>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>
                 Track your daily mood and energy levels to discover patterns in your healing
               </p>
               <div className="flex items-center text-amber-600 font-semibold">
@@ -1224,13 +1226,13 @@ const Home = ({ clientId, client }) => {
 
             <Link
               to="/progress-timeline"
-              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+              className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group`}
             >
               <div className="w-16 h-16 bg-gradient-to-r from-teal-400 to-cyan-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <BarChart3 className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Progress Timeline</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3`}>Progress Timeline</h3>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>
                 View your healing journey milestones and track your growth over time
               </p>
               <div className="flex items-center text-teal-600 font-semibold">
@@ -1241,13 +1243,13 @@ const Home = ({ clientId, client }) => {
 
             <Link
               to="/gamification"
-              className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group"
+              className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group`}
             >
               <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Trophy className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Badges & Streaks</h3>
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3`}>Badges & Streaks</h3>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>
                 Earn achievements and maintain daily streaks as you progress on your journey
               </p>
               <div className="flex items-center text-yellow-600 font-semibold">
@@ -1260,11 +1262,11 @@ const Home = ({ clientId, client }) => {
       </div>
 
       {/* Healing Principles */}
-      <div className="py-20 bg-white">
+      <div className={`py-20 ${theme.isDark ? 'bg-slate-800' : 'bg-white'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              <h2 className={`text-4xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-6`}>
                 The IFS Healing Principles
               </h2>
               <div className="space-y-6">
@@ -1273,8 +1275,8 @@ const Home = ({ clientId, client }) => {
                     <Heart className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">No Bad Parts</h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h3 className={`text-xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>No Bad Parts</h3>
+                    <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} leading-relaxed`}>
                       Every part of you has a positive intention and is trying to help in the only way it knows how.
                     </p>
                   </div>
@@ -1285,8 +1287,8 @@ const Home = ({ clientId, client }) => {
                     <Shield className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Self-Leadership</h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h3 className={`text-xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>Self-Leadership</h3>
+                    <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} leading-relaxed`}>
                       You have a core Self that is calm, compassionate, and capable of leading your internal system.
                     </p>
                   </div>
@@ -1297,8 +1299,8 @@ const Home = ({ clientId, client }) => {
                     <Sparkles className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Unburdening</h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h3 className={`text-xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-2`}>Unburdening</h3>
+                    <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} leading-relaxed`}>
                       Parts can release the burdens they carry when they feel safe and connected to Self.
                     </p>
                   </div>
@@ -1308,28 +1310,28 @@ const Home = ({ clientId, client }) => {
 
             <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-3xl p-8">
               <div className="space-y-4">
-                <div className="bg-white rounded-2xl p-6 border border-purple-200">
-                  <h3 className="font-bold text-gray-900 mb-3 flex items-center">
+                <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl p-6 border border-purple-200`}>
+                  <h3 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3 flex items-center`}>
                     <Moon className="w-5 h-5 mr-2 text-purple-600" />
                     Your Inner Child
                   </h3>
-                  <p className="text-gray-600">The vulnerable, authentic part holding your core emotions and needs</p>
+                  <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>The vulnerable, authentic part holding your core emotions and needs</p>
                 </div>
                 
-                <div className="bg-white rounded-2xl p-6 border border-blue-200">
-                  <h3 className="font-bold text-gray-900 mb-3 flex items-center">
+                <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl p-6 border border-blue-200`}>
+                  <h3 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3 flex items-center`}>
                     <Shield className="w-5 h-5 mr-2 text-blue-600" />
                     Your Protectors
                   </h3>
-                  <p className="text-gray-600">Parts that work to keep you safe from pain and overwhelming emotions</p>
+                  <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Parts that work to keep you safe from pain and overwhelming emotions</p>
                 </div>
                 
-                <div className="bg-white rounded-2xl p-6 border border-green-200">
-                  <h3 className="font-bold text-gray-900 mb-3 flex items-center">
+                <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl p-6 border border-green-200`}>
+                  <h3 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3 flex items-center`}>
                     <Sun className="w-5 h-5 mr-2 text-green-600" />
                     Your Self
                   </h3>
-                  <p className="text-gray-600">The calm, compassionate core that can heal and lead your internal system</p>
+                  <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>The calm, compassionate core that can heal and lead your internal system</p>
                 </div>
               </div>
             </div>
@@ -1350,7 +1352,7 @@ const Home = ({ clientId, client }) => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => setShowAssessment(true)}
-              className="inline-flex items-center px-8 py-4 bg-white text-purple-700 rounded-full font-bold text-lg hover:bg-purple-50 transition-all duration-300 shadow-xl"
+              className={`inline-flex items-center px-8 py-4 ${theme.isDark ? 'bg-slate-800' : 'bg-white'} text-purple-700 rounded-full font-bold text-lg hover:bg-purple-50 transition-all duration-300 shadow-xl`}
             >
               <Brain className="mr-2 w-6 h-6" />
               Take IFS Assessment

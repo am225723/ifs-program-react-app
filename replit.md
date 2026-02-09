@@ -4,6 +4,14 @@
 This is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It features PIN-based authentication, personalized curriculum delivery based on child wound assessment results, and comprehensive healing exercises.
 
 ## Recent Changes (February 2026)
+- PWA support: manifest.json, service worker, iOS meta tags for installable mobile app
+- Admin role system: user_role column (client vs therapist), role-based route protection
+- Enhanced Admin Dashboard wired to real Supabase data (replaces mock data)
+- Admin PIN: therapists with user_role='therapist' see admin icon in header, clients cannot access /admin
+- Dark mode text visibility fix: Home page text colors are now theme-aware
+- ThemeContext: added `tc()` helper and `darkTextMap` for dark-mode-safe text colors
+- Supabase migrations organized into supabase/migrations/ (001-016) with CREATE IF NOT EXISTS
+- Supabase edge function: supabase/functions/create-client/ for generating new clients with unique PINs
 - Consolidated assessment naming: Removed "Burdens of the Exile" naming, unified as "IFS Wound Assessment"
 - Added answer textareas to reflection questions in learning modules (both LearningModule and LearningModuleEnhanced)
 - Added 5 new interactive activity types: guided-visualization, matching-exercise, safety-checklist, mindfulness-timer, scale-rating
