@@ -4,7 +4,7 @@
 -- Create the module answers table
 CREATE TABLE IF NOT EXISTS ifs_module_answers (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    client_id VARCHAR(255) NOT NULL,
+    cliesnt_id VARCHAR(255) NOT NULL,
     module_id VARCHAR(255) NOT NULL,
     step_id VARCHAR(255) NOT NULL,
     answers JSONB DEFAULT '{}'::jsonb,
