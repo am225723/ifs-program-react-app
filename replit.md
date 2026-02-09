@@ -45,7 +45,7 @@ This is a React + Vite frontend application for an Internal Family Systems (IFS)
 - Added reflection questions between module sections
 - Enhanced module question input fields with Supabase storage
 - Added Module 5: Advanced Healing Exercises & Daily Practices with 6 new activities
-- Created SQL schema for storing module question answers (`module_answers_schema.sql`)
+- Created SQL schema for storing module question answers (see `supabase/migrations/012_create_ifs_module_answers.sql`)
 - Added future features roadmap (`FUTURE_FEATURES.md`)
 
 ## Tech Stack
@@ -113,14 +113,21 @@ src/
 - `VITE_PERPLEXITY_API_KEY` - Optional: Enables AI-enhanced personalization
 
 ## Database Tables (Supabase)
-- `ifs_clients` - User data (expects UUID format for client_id)
+All migration SQL files are in `supabase/migrations/` (numbered 001-015, all use CREATE IF NOT EXISTS):
+- `ifs_clients` - User data and PIN authentication
 - `ifs_assessment_results` - Child wound assessment scores
+- `ifs_personalized_curriculum` - Customized module content per client
 - `ifs_client_progress` - Module completion progress
-- `ifs_module_answers` - Question responses (see `module_answers_schema.sql`)
-- `ifs_interactive_data` - Interactive element data
+- `ifs_module_answers` - Question responses
 - `ifs_journal_entries` - User journal entries
 - `ifs_parts` - Identified internal parts
 - `ifs_exercise_progress` - Exercise completion tracking
+- `ifs_therapist_notes` - Therapist session notes
+- `ifs_milestones` - Client achievement milestones
+- `ifs_content_library` - Shared content resources
+
+## Supabase Edge Functions
+- `supabase/functions/create-client/` - Creates new clients with auto-generated unique 6-digit PIN
 
 ## Deployment
 The app deploys to Vercel as a static site:
@@ -135,5 +142,5 @@ The app deploys to Vercel as a static site:
 ## Notes
 - The app requires Supabase configuration for full functionality
 - PIN-based authentication system for secure user access
-- Run `module_answers_schema.sql` in Supabase SQL Editor to create the answers table
+- Run the numbered SQL files in `supabase/migrations/` in Supabase SQL Editor to set up all tables
 - Perplexity AI is optional - the app works fully with local personalization fallback
