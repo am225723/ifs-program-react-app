@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -27,7 +27,18 @@ import {
   Shield,
   SlidersHorizontal,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MessageSquare,
+  Pen,
+  ArrowUp,
+  ArrowDown,
+  Check,
+  X,
+  Send,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { progressTracker } from '../lib/supabasePersonalization';
@@ -42,6 +53,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
   const [meditationActive, setMeditationActive] = useState(false);
   const [meditationTimer, setMeditationTimer] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
+  const [incompleteItems, setIncompleteItems] = useState([]);
   
   const { 
     userId, 
@@ -165,8 +178,49 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     }));
   };
 
+  const getStepRequirements = useCallback((step) => {
+    if (!step) return [];
+    const missing = [];
+    const data = step.data;
+
+    if (step.type === 'learn' && data.reflectionPrompts) {
+      data.reflectionPrompts.forEach((prompt, index) => {
+        const val = activityResponses[`reflection-${index}`];
+        if (!val || val.trim().length === 0) {
+          missing.push(`Reflection question ${index + 1}`);
+        }
+      });
+    }
+
+    if (step.type === 'activity' && data.questions) {
+      data.questions.forEach((q, index) => {
+        const val = activityResponses[`question-${index}`];
+        if (!val || val.trim().length === 0) {
+          missing.push(`Question ${index + 1}`);
+        }
+      });
+    }
+
+    return missing;
+  }, [activityResponses]);
+
+  const isCurrentStepComplete = useCallback(() => {
+    if (!currentStep) return true;
+    if (currentStep.type === 'result') return true;
+    return getStepRequirements(currentStep).length === 0;
+  }, [currentStep, getStepRequirements]);
+
   // Navigate to next step
   const nextStep = () => {
+    const missing = getStepRequirements(currentStep);
+    if (missing.length > 0) {
+      setIncompleteItems(missing);
+      setShowIncompleteWarning(true);
+      setTimeout(() => setShowIncompleteWarning(false), 5000);
+      return;
+    }
+    setShowIncompleteWarning(false);
+    setIncompleteItems([]);
     completeStep();
     if (isLastStep) {
       completeModule();
@@ -401,6 +455,13 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
         {data.interactiveElements.includes('safety-checklist') && renderSafetyChecklist()}
         {data.interactiveElements.includes('mindfulness-timer') && renderMindfulnessTimer()}
         {data.interactiveElements.includes('scale-rating') && renderScaleRating()}
+        {data.interactiveElements.includes('true-false-quiz') && renderTrueFalseQuiz()}
+        {data.interactiveElements.includes('drag-to-rank') && renderDragToRank()}
+        {data.interactiveElements.includes('letter-to-parts') && renderLetterToParts()}
+        {data.interactiveElements.includes('scenario-cards') && renderScenarioCards()}
+        {data.interactiveElements.includes('emotion-wheel') && renderEmotionWheel()}
+        {data.interactiveElements.includes('fill-in-blank') && renderFillInBlank()}
+        {data.interactiveElements.includes('parts-dialogue') && renderPartsDialogue()}
       </div>
     );
   };
@@ -1312,6 +1373,464 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     );
   };
 
+  const renderTrueFalseQuiz = () => {
+    const statements = [
+      { text: "All parts have positive intent, even if their strategies cause problems.", answer: true, explanation: "In IFS, every part has a positive intention — it's trying to protect or help the system, even if the behavior seems harmful." },
+      { text: "Firefighter parts are always harmful and should be eliminated.", answer: false, explanation: "Firefighter parts use extreme strategies to manage pain, but they are not 'bad.' They need compassion and understanding, not elimination." },
+      { text: "Self energy cannot be developed or strengthened over time.", answer: false, explanation: "Self energy is inherent in everyone and can be accessed more readily through practice, meditation, and IFS work." },
+      { text: "Exiles are parts that carry painful emotions and memories from the past.", answer: true, explanation: "Exiles hold burdens — extreme feelings and beliefs from past experiences, often from childhood." },
+      { text: "The goal of IFS is to get rid of problematic parts.", answer: false, explanation: "IFS never aims to eliminate parts. The goal is to help parts unburden and find healthier roles in the system." },
+      { text: "Managers are proactive protectors that try to prevent painful experiences.", answer: true, explanation: "Managers work preemptively to keep exiles' pain from surfacing through control, planning, and caretaking." },
+      { text: "A person can only have one protective part active at a time.", answer: false, explanation: "Multiple parts can be active simultaneously, and parts often interact with and polarize against each other." },
+      { text: "The 8 C's of Self include Curiosity, Compassion, Calm, and Clarity.", answer: true, explanation: "The 8 C's — Curiosity, Compassion, Calm, Clarity, Confidence, Courage, Creativity, and Connectedness — are qualities of Self energy." },
+      { text: "Unburdening is the process where an exile releases its extreme feelings and beliefs.", answer: true, explanation: "In unburdening, an exile releases the painful emotions and limiting beliefs it has been carrying, often through a ritualistic process." },
+      { text: "Parts work should only be done with a professional therapist.", answer: false, explanation: "While complex trauma work benefits from professional guidance, many IFS techniques like Self-led check-ins can be practiced independently." }
+    ];
+
+    const quizAnswers = interactiveData['tf-quiz-answers'] || {};
+    const answeredCount = Object.keys(quizAnswers).length;
+    const correctCount = Object.values(quizAnswers).filter(a => a.correct).length;
+
+    return (
+      <div className="bg-gradient-to-r from-emerald-100 to-teal-100 rounded-lg p-6 border border-emerald-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">✅ True or False Quiz</h3>
+        <p className="text-gray-700 mb-4">Test your IFS knowledge — select True or False for each statement.</p>
+        {answeredCount > 0 && (
+          <div className="mb-4 p-3 bg-white rounded-lg border border-emerald-200 text-center">
+            <span className="text-sm text-gray-600">Score: </span>
+            <span className="text-lg font-bold text-emerald-700">{correctCount}/{answeredCount}</span>
+            <span className="text-sm text-gray-500 ml-1">answered</span>
+          </div>
+        )}
+        <div className="space-y-4">
+          {statements.map((stmt, index) => {
+            const answer = quizAnswers[index];
+            const answered = answer !== undefined;
+            return (
+              <div key={index} className={`p-4 rounded-lg border ${answered ? (answer.correct ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300') : 'bg-white border-gray-200'}`}>
+                <p className="text-gray-800 font-medium mb-3">{index + 1}. {stmt.text}</p>
+                <div className="flex gap-3 mb-2">
+                  <button
+                    onClick={() => {
+                      if (!answered) {
+                        const isCorrect = stmt.answer === true;
+                        const newAnswers = { ...quizAnswers, [index]: { selected: true, correct: isCorrect } };
+                        handleInteractiveChange('tf-quiz-answers', newAnswers);
+                      }
+                    }}
+                    disabled={answered}
+                    className={`px-5 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition-colors ${
+                      answered && answer.selected === true
+                        ? (answer.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white')
+                        : answered ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                    }`}
+                  >
+                    <Check className="w-4 h-4" /> True
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!answered) {
+                        const isCorrect = stmt.answer === false;
+                        const newAnswers = { ...quizAnswers, [index]: { selected: false, correct: isCorrect } };
+                        handleInteractiveChange('tf-quiz-answers', newAnswers);
+                      }
+                    }}
+                    disabled={answered}
+                    className={`px-5 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition-colors ${
+                      answered && answer.selected === false
+                        ? (answer.correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white')
+                        : answered ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                    }`}
+                  >
+                    <X className="w-4 h-4" /> False
+                  </button>
+                </div>
+                {answered && (
+                  <div className={`mt-2 p-3 rounded-lg text-sm ${answer.correct ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    <span className="font-semibold">{answer.correct ? '✓ Correct!' : '✗ Incorrect.'}</span> {stmt.explanation}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderDragToRank = () => {
+    const defaultItems = ['Curiosity', 'Compassion', 'Calm', 'Clarity', 'Confidence', 'Courage', 'Creativity', 'Connectedness'];
+    const items = interactiveData['rank-items'] || defaultItems;
+
+    const moveItem = (index, direction) => {
+      const newItems = [...items];
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= newItems.length) return;
+      [newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]];
+      handleInteractiveChange('rank-items', newItems);
+    };
+
+    return (
+      <div className="bg-gradient-to-r from-violet-100 to-purple-100 rounded-lg p-6 border border-violet-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">📊 Rank Self Qualities</h3>
+        <p className="text-gray-700 mb-4">Rank these Self qualities by how strongly you feel them right now. Use the arrows to reorder — #1 is the strongest.</p>
+        <div className="space-y-2">
+          {items.map((item, index) => (
+            <div key={item} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-violet-200 hover:shadow-sm transition-shadow">
+              <div className="w-8 h-8 bg-gradient-to-r from-violet-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                {index + 1}
+              </div>
+              <span className="flex-1 font-medium text-gray-800">{item}</span>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => moveItem(index, -1)}
+                  disabled={index === 0}
+                  className={`p-1 rounded ${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-violet-600 hover:bg-violet-100'}`}
+                >
+                  <ArrowUp className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => moveItem(index, 1)}
+                  disabled={index === items.length - 1}
+                  className={`p-1 rounded ${index === items.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-violet-600 hover:bg-violet-100'}`}
+                >
+                  <ArrowDown className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderLetterToParts = () => {
+    const partName = interactiveData['letter-part-name'] || '';
+    const greeting = interactiveData['letter-greeting'] || '';
+    const body = interactiveData['letter-body'] || '';
+    const closing = interactiveData['letter-closing'] || '';
+
+    return (
+      <div className="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg p-6 border border-amber-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">✉️ Letter to a Part</h3>
+        <p className="text-gray-700 mb-4">Write a compassionate letter from your Self to one of your parts. This exercise helps build trust and connection.</p>
+        <div className="bg-white rounded-xl p-6 border-2 border-amber-200 shadow-sm" style={{ fontFamily: 'Georgia, serif' }}>
+          <div className="mb-5">
+            <label className="block text-sm font-medium text-gray-600 mb-1">Name of the part you're writing to:</label>
+            <input
+              type="text"
+              value={partName}
+              onChange={(e) => handleInteractiveChange('letter-part-name', e.target.value)}
+              placeholder="e.g., My Inner Critic, The Worrier, Little Me..."
+              className="w-full px-4 py-2 border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent text-gray-800"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm text-gray-500 italic mb-1">Dear {partName || '[part name]'}, I want you to know...</label>
+            <textarea
+              value={greeting}
+              onChange={(e) => handleInteractiveChange('letter-greeting', e.target.value)}
+              placeholder="Start with what you appreciate about this part and acknowledge its efforts..."
+              className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent text-gray-700"
+              rows={3}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm text-gray-500 italic mb-1">What I understand about you now is...</label>
+            <textarea
+              value={body}
+              onChange={(e) => handleInteractiveChange('letter-body', e.target.value)}
+              placeholder="Share your understanding of this part's role, fears, and what it carries for you..."
+              className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent text-gray-700"
+              rows={5}
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-500 italic mb-1">My promise to you is...</label>
+            <textarea
+              value={closing}
+              onChange={(e) => handleInteractiveChange('letter-closing', e.target.value)}
+              placeholder="Make a commitment to this part about how you'll show up for it going forward..."
+              className="w-full px-4 py-3 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent text-gray-700"
+              rows={3}
+            />
+          </div>
+          <div className="mt-4 pt-3 border-t border-amber-100 text-right">
+            <span className="text-gray-500 italic">With love and compassion,</span>
+            <br />
+            <span className="text-gray-700 font-medium">Your Self</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderScenarioCards = () => {
+    const scenarios = [
+      { id: 'shame-work', title: "Shame After a Mistake at Work", description: "You feel intense shame after making a visible mistake during a team presentation. Your face burns and you want to disappear." },
+      { id: 'anger-boundary', title: "Anger When Boundaries Are Crossed", description: "A close friend repeatedly cancels plans last minute. You feel a surge of anger but also guilt for feeling angry." },
+      { id: 'anxiety-future', title: "Anxiety About the Future", description: "You wake up at 3 AM with racing thoughts about finances, your career, and whether you're 'on track' in life." },
+      { id: 'numbness-conflict', title: "Numbness During Conflict", description: "During an argument with your partner, you suddenly feel nothing — like you've checked out emotionally and can't access any feelings." },
+      { id: 'perfectionism-project', title: "Perfectionism Paralysis", description: "You've been working on a creative project but can't finish it because nothing feels good enough. You keep revising endlessly." }
+    ];
+
+    const openCard = interactiveData['scenario-open-card'] || null;
+
+    return (
+      <div className="bg-gradient-to-r from-sky-100 to-blue-100 rounded-lg p-6 border border-sky-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">🎭 Role-Play Scenario Cards</h3>
+        <p className="text-gray-700 mb-4">Explore each scenario through an IFS lens. Click a card to expand it and reflect on the parts involved.</p>
+        <div className="space-y-3">
+          {scenarios.map((scenario) => {
+            const isOpen = openCard === scenario.id;
+            return (
+              <div key={scenario.id} className="bg-white rounded-lg border border-sky-200 overflow-hidden">
+                <button
+                  onClick={() => handleInteractiveChange('scenario-open-card', isOpen ? null : scenario.id)}
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-sky-50 transition-colors"
+                >
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{scenario.title}</h4>
+                    {!isOpen && <p className="text-sm text-gray-500 mt-1 line-clamp-1">{scenario.description}</p>}
+                  </div>
+                  {isOpen ? <ChevronUp className="w-5 h-5 text-sky-600 flex-shrink-0" /> : <ChevronDown className="w-5 h-5 text-sky-600 flex-shrink-0" />}
+                </button>
+                {isOpen && (
+                  <div className="px-4 pb-4 space-y-4 border-t border-sky-100">
+                    <p className="text-gray-700 mt-3 italic bg-sky-50 p-3 rounded-lg">{scenario.description}</p>
+                    <div>
+                      <label className="block text-sm font-medium text-sky-800 mb-1">Which part is activated?</label>
+                      <textarea
+                        value={interactiveData[`scenario-${scenario.id}-part`] || ''}
+                        onChange={(e) => handleInteractiveChange(`scenario-${scenario.id}-part`, e.target.value)}
+                        placeholder="Identify the part(s) showing up in this situation..."
+                        className="w-full px-3 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 focus:border-transparent text-sm"
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-sky-800 mb-1">What does this part need?</label>
+                      <textarea
+                        value={interactiveData[`scenario-${scenario.id}-need`] || ''}
+                        onChange={(e) => handleInteractiveChange(`scenario-${scenario.id}-need`, e.target.value)}
+                        placeholder="What is this part trying to protect you from? What does it need to feel safe?"
+                        className="w-full px-3 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 focus:border-transparent text-sm"
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-sky-800 mb-1">How would Self respond?</label>
+                      <textarea
+                        value={interactiveData[`scenario-${scenario.id}-self`] || ''}
+                        onChange={(e) => handleInteractiveChange(`scenario-${scenario.id}-self`, e.target.value)}
+                        placeholder="How could you respond from Self energy — with curiosity, compassion, and calm?"
+                        className="w-full px-3 py-2 border border-sky-200 rounded-lg focus:ring-2 focus:ring-sky-400 focus:border-transparent text-sm"
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderEmotionWheel = () => {
+    const emotionCategories = [
+      { primary: 'Joy', color: 'bg-yellow-400', hoverColor: 'hover:bg-yellow-100', borderColor: 'border-yellow-300', secondary: ['Happy', 'Grateful', 'Playful', 'Content', 'Proud'] },
+      { primary: 'Sadness', color: 'bg-blue-400', hoverColor: 'hover:bg-blue-100', borderColor: 'border-blue-300', secondary: ['Lonely', 'Grieving', 'Disappointed', 'Hopeless', 'Melancholy'] },
+      { primary: 'Anger', color: 'bg-red-400', hoverColor: 'hover:bg-red-100', borderColor: 'border-red-300', secondary: ['Frustrated', 'Resentful', 'Irritated', 'Bitter', 'Enraged'] },
+      { primary: 'Fear', color: 'bg-purple-400', hoverColor: 'hover:bg-purple-100', borderColor: 'border-purple-300', secondary: ['Anxious', 'Insecure', 'Overwhelmed', 'Panicked', 'Vulnerable'] },
+      { primary: 'Surprise', color: 'bg-orange-400', hoverColor: 'hover:bg-orange-100', borderColor: 'border-orange-300', secondary: ['Amazed', 'Confused', 'Shocked', 'Startled', 'Awestruck'] },
+      { primary: 'Disgust', color: 'bg-green-400', hoverColor: 'hover:bg-green-100', borderColor: 'border-green-300', secondary: ['Ashamed', 'Contemptuous', 'Repulsed', 'Self-loathing', 'Judgmental'] }
+    ];
+
+    const selectedEmotions = interactiveData['emotion-wheel-selected'] || [];
+
+    const toggleEmotion = (emotion) => {
+      const updated = selectedEmotions.includes(emotion)
+        ? selectedEmotions.filter(e => e !== emotion)
+        : [...selectedEmotions, emotion];
+      handleInteractiveChange('emotion-wheel-selected', updated);
+    };
+
+    return (
+      <div className="bg-gradient-to-r from-pink-100 to-rose-100 rounded-lg p-6 border border-pink-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">🎡 Emotion Wheel</h3>
+        <p className="text-gray-700 mb-4">Click on the emotions you're currently experiencing. Explore both primary and secondary emotions.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {emotionCategories.map((category) => (
+            <div key={category.primary} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => toggleEmotion(category.primary)}
+                className={`w-full flex items-center gap-2 p-3 font-semibold text-gray-800 transition-colors ${
+                  selectedEmotions.includes(category.primary) ? 'bg-gradient-to-r from-gray-100 to-gray-50 ring-2 ring-inset ring-gray-400' : category.hoverColor
+                }`}
+              >
+                <div className={`w-4 h-4 rounded-full ${category.color}`} />
+                {category.primary}
+                {selectedEmotions.includes(category.primary) && <Check className="w-4 h-4 ml-auto text-green-600" />}
+              </button>
+              <div className="p-2 grid grid-cols-1 gap-1">
+                {category.secondary.map((emotion) => (
+                  <button
+                    key={emotion}
+                    onClick={() => toggleEmotion(emotion)}
+                    className={`text-left text-sm px-3 py-1.5 rounded transition-colors ${
+                      selectedEmotions.includes(emotion) ? `${category.borderColor} border bg-gray-50 font-medium` : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {selectedEmotions.includes(emotion) && <Check className="w-3 h-3 inline mr-1 text-green-600" />}
+                    {emotion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        {selectedEmotions.length > 0 && (
+          <div className="mt-4 p-4 bg-white rounded-lg border border-pink-200">
+            <h4 className="text-sm font-semibold text-gray-700 mb-2">Currently feeling:</h4>
+            <div className="flex flex-wrap gap-2">
+              {selectedEmotions.map((emotion) => (
+                <span
+                  key={emotion}
+                  onClick={() => toggleEmotion(emotion)}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-pink-200 to-rose-200 text-pink-800 rounded-full text-sm font-medium cursor-pointer hover:from-pink-300 hover:to-rose-300"
+                >
+                  {emotion}
+                  <X className="w-3 h-3" />
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderFillInBlank = () => {
+    const sentences = [
+      { id: 'fib-1', before: 'When I notice a', blank1: 'type of', after1: 'part is active, I can bring', blank2: 'quality', after2: 'to it from my Self.' },
+      { id: 'fib-2', before: 'The part that wants to', blank1: 'behavior', after1: 'is trying to protect me from feeling', blank2: 'emotion', after2: '.' },
+      { id: 'fib-3', before: 'My', blank1: 'part name', after1: 'part carries the burden of', blank2: 'burden', after2: 'from my past.' },
+      { id: 'fib-4', before: 'When I lead with Self energy, I feel', blank1: 'sensation', after1: 'in my body and', blank2: 'quality', after2: 'in my mind.' },
+      { id: 'fib-5', before: 'The manager part that', blank1: 'strategy', after1: 'is afraid that without it, I would experience', blank2: 'fear', after2: '.' },
+      { id: 'fib-6', before: 'Instead of blending with my', blank1: 'part', after1: 'part, I can ask it to', blank2: 'action', after2: 'so I can be present.' },
+      { id: 'fib-7', before: 'The exile that holds', blank1: 'feeling', after1: 'needs to know that it is', blank2: 'reassurance', after2: 'now.' },
+      { id: 'fib-8', before: 'Unburdening my', blank1: 'part name', after1: 'part would allow it to take on a new role of', blank2: 'new role', after2: '.' }
+    ];
+
+    return (
+      <div className="bg-gradient-to-r from-cyan-100 to-sky-100 rounded-lg p-6 border border-cyan-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">📝 Fill in the Blanks</h3>
+        <p className="text-gray-700 mb-4">Complete each sentence with your own IFS insights. The placeholders give hints about what to fill in.</p>
+        <div className="space-y-4">
+          {sentences.map((s) => (
+            <div key={s.id} className="p-4 bg-white rounded-lg border border-cyan-200">
+              <p className="text-gray-800 leading-relaxed flex flex-wrap items-center gap-1">
+                <span>{s.before}</span>
+                <input
+                  type="text"
+                  value={interactiveData[`${s.id}-blank1`] || ''}
+                  onChange={(e) => handleInteractiveChange(`${s.id}-blank1`, e.target.value)}
+                  placeholder={s.blank1}
+                  className="inline-block w-32 px-2 py-1 border-b-2 border-cyan-400 bg-cyan-50 text-center text-sm focus:outline-none focus:border-cyan-600 rounded-sm"
+                />
+                <span>{s.after1}</span>
+                <input
+                  type="text"
+                  value={interactiveData[`${s.id}-blank2`] || ''}
+                  onChange={(e) => handleInteractiveChange(`${s.id}-blank2`, e.target.value)}
+                  placeholder={s.blank2}
+                  className="inline-block w-32 px-2 py-1 border-b-2 border-cyan-400 bg-cyan-50 text-center text-sm focus:outline-none focus:border-cyan-600 rounded-sm"
+                />
+                <span>{s.after2}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderPartsDialogue = () => {
+    const partName = interactiveData['dialogue-part-name'] || '';
+    const selfPrompts = [
+      "Hello. I notice you're here with me right now. Can you tell me — what are you feeling?",
+      "Thank you for sharing that. How long have you been carrying this feeling?",
+      "That sounds like a heavy burden. What are you most afraid would happen if you let go of it?",
+      "I hear you. I want you to know that I'm here and I'm not going anywhere. What do you need from me right now?",
+      "I appreciate you trusting me with this. Is there something you want me to understand about your role in my life?",
+      "You've been working so hard to protect me. If you could do anything else — any role at all — what would you want to do instead?"
+    ];
+
+    const dialogueResponses = interactiveData['dialogue-responses'] || {};
+
+    return (
+      <div className="bg-gradient-to-r from-indigo-100 to-violet-100 rounded-lg p-6 border border-indigo-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-indigo-600" /> Parts Dialogue Simulation
+        </h3>
+        <p className="text-gray-700 mb-4">Have a compassionate dialogue between your Self and a part. Self's prompts are provided — you write the part's responses.</p>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Name the part you'll dialogue with:</label>
+          <input
+            type="text"
+            value={partName}
+            onChange={(e) => handleInteractiveChange('dialogue-part-name', e.target.value)}
+            placeholder="e.g., The Anxious One, My Inner Critic, The Protector..."
+            className="w-full px-4 py-2 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:border-transparent"
+          />
+        </div>
+        {partName && (
+          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+            {selfPrompts.map((prompt, index) => {
+              const prevAnswered = index === 0 || dialogueResponses[index - 1];
+              if (!prevAnswered && index > 0) return null;
+              return (
+                <div key={index} className="space-y-3">
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm">
+                      <p className="text-xs font-semibold mb-1 opacity-80">Self</p>
+                      <p className="text-sm">{prompt}</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] w-full">
+                      <div className="bg-gradient-to-r from-blue-100 to-sky-100 px-4 py-3 rounded-2xl rounded-br-sm border border-blue-200">
+                        <p className="text-xs font-semibold mb-1 text-blue-700">{partName}</p>
+                        <textarea
+                          value={dialogueResponses[index] || ''}
+                          onChange={(e) => {
+                            const newResponses = { ...dialogueResponses, [index]: e.target.value };
+                            handleInteractiveChange('dialogue-responses', newResponses);
+                          }}
+                          placeholder={`Write ${partName}'s response...`}
+                          className="w-full bg-transparent text-sm text-gray-700 focus:outline-none resize-none placeholder-blue-400"
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {!partName && (
+          <div className="text-center py-8 text-gray-400">
+            <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-30" />
+            <p className="text-sm">Enter a part name above to begin the dialogue</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Render Result section
   const renderResultSection = (step) => {
     const data = step.data;
@@ -1541,8 +2060,24 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
           {renderStepContent()}
         </div>
 
+        {showIncompleteWarning && incompleteItems.length > 0 && (
+          <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 animate-pulse">
+            <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-amber-800 font-medium text-sm">Please complete before continuing:</p>
+              <ul className="mt-1 space-y-0.5">
+                {incompleteItems.map((item, i) => (
+                  <li key={i} className="text-amber-700 text-sm flex items-center gap-1.5">
+                    <Lock className="w-3 h-3" /> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
         {/* Navigation */}
-        <div className="mt-8 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between">
           <button
             onClick={previousStep}
             disabled={isFirstStep}
@@ -1567,8 +2102,13 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
 
           <button
             onClick={nextStep}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-colors flex items-center space-x-2 shadow-lg"
+            className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 shadow-lg ${
+              isCurrentStepComplete()
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed'
+            }`}
           >
+            {!isCurrentStepComplete() && <Lock className="w-4 h-4" />}
             <span>{isLastStep ? 'Complete Module' : 'Next Step'}</span>
             <ArrowRight className="w-5 h-5" />
           </button>

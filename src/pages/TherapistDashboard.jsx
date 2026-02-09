@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { 
   Users, User, TrendingUp, Calendar, FileText, MessageSquare, 
   Clock, CheckCircle, AlertTriangle, Activity, Heart, Shield,
-  ChevronRight, Search, Filter, Plus, Eye, BarChart3, Sparkles
+  ChevronRight, Search, Filter, Plus, Eye, BarChart3, Sparkles,
+  BookOpen, ChevronDown, ChevronUp, MessageCircle, Flag, Lightbulb
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
@@ -129,6 +130,9 @@ const TherapistDashboard = () => {
   const [filterWound, setFilterWound] = useState('all');
   const [filterRisk, setFilterRisk] = useState('all');
   const [activeTab, setActiveTab] = useState('clients');
+  const [expandedModules, setExpandedModules] = useState({});
+  const [selectedInsightClient, setSelectedInsightClient] = useState('');
+  const [therapistFeedback, setTherapistFeedback] = useState({});
   const [sessionNotes, setSessionNotes] = useState([]);
   const [noteForm, setNoteForm] = useState({
     clientId: '',
@@ -145,6 +149,14 @@ const TherapistDashboard = () => {
         setSessionNotes(JSON.parse(saved));
       } catch (e) {
         console.error('Failed to load session notes:', e);
+      }
+    }
+    const savedFeedback = localStorage.getItem('therapist_client_feedback');
+    if (savedFeedback) {
+      try {
+        setTherapistFeedback(JSON.parse(savedFeedback));
+      } catch (e) {
+        console.error('Failed to load therapist feedback:', e);
       }
     }
   }, []);
@@ -186,6 +198,195 @@ const TherapistDashboard = () => {
       notes: '',
       goals: ''
     });
+  };
+
+  const toggleModule = (moduleId) => {
+    setExpandedModules(prev => ({ ...prev, [moduleId]: !prev[moduleId] }));
+  };
+
+  const handleFeedbackChange = (clientId, value) => {
+    const updated = { ...therapistFeedback, [clientId]: value };
+    setTherapistFeedback(updated);
+    localStorage.setItem('therapist_client_feedback', JSON.stringify(updated));
+  };
+
+  const lessonPlans = [
+    {
+      id: 'm1',
+      title: 'Module 1: Foundations of IFS & Your Inner Child',
+      goals: 'Help client understand IFS model, identify their parts, experience Self energy',
+      topics: [
+        'What does your inner world feel like?',
+        'When do you notice different parts of yourself?',
+        'What does your inner critic sound like?'
+      ],
+      activities: ['Parts mapping exercise', 'Self-energy check-in', 'Identifying 3 main protector parts'],
+      watchFor: ['Client resistance to multiplicity concept', 'Strong critic parts', 'Difficulty accessing Self'],
+      duration: '60 min suggested',
+      homework: 'Daily Self-energy check-in, notice 3 parts during the week'
+    },
+    {
+      id: 'm2',
+      title: 'Module 2: Deep Dive into Inner Child Wounds',
+      goals: 'Identify primary wounds, understand wound-behavior connections, begin building compassion for wounded parts',
+      topics: [
+        'What childhood experiences still affect you?',
+        'When do you feel youngest/most vulnerable?',
+        'What beliefs about yourself formed in childhood?'
+      ],
+      activities: ['Wound identification exercise', 'Timeline of key childhood moments', 'Connecting current triggers to old wounds'],
+      watchFor: ['Flooding/overwhelm', 'Dissociation', 'Strong protector activation', 'Grief responses'],
+      duration: '90 min (allow extra time for emotional processing)',
+      homework: 'Journal about one wound pattern noticed during the week'
+    },
+    {
+      id: 'm3',
+      title: 'Module 3: The Protective System',
+      goals: 'Map the protective system, appreciate protector roles, understand manager vs firefighter dynamics',
+      topics: [
+        'What do your protectors do to keep you safe?',
+        'What would happen if they stopped?',
+        'How do they feel about therapy?'
+      ],
+      activities: ['Protector appreciation exercise', 'Role-play conversation with a protector', 'Mapping protector-exile relationships'],
+      watchFor: ['Client identifying with protectors', 'Shame about firefighter behaviors', 'Resistance to exploring what protectors guard'],
+      duration: '60 min',
+      homework: 'Thank a protector part daily, notice firefighter activation'
+    },
+    {
+      id: 'm4',
+      title: 'Module 4: Healing Protocols & Integration',
+      goals: 'Practice unburdening protocol, integrate healed parts, celebrate transformation',
+      topics: [
+        'What would your inner child need to hear?',
+        'What burden is this part ready to release?',
+        'Where would it like to put this burden?'
+      ],
+      activities: ['Guided unburdening ceremony', 'Reparenting visualization', 'Integration meditation'],
+      watchFor: ['Parts that aren\'t ready', 'Incomplete unburdening', 'Need for multiple sessions', 'New protectors arising'],
+      duration: '90 min',
+      homework: 'Daily reparenting check-in with inner child'
+    },
+    {
+      id: 'm5',
+      title: 'Module 5: Advanced Healing & Daily Practices',
+      goals: 'Establish sustainable daily practice, address remaining wounds, build long-term resilience',
+      topics: [
+        'How has your relationship with your parts changed?',
+        'What practices feel most helpful?',
+        'What still needs attention?'
+      ],
+      activities: ['Create personalized daily IFS practice plan', 'Address secondary wounds', 'Practice Self-led living'],
+      watchFor: ['Premature termination desire', 'New wounds surfacing', 'Maintaining gains', 'Relapse patterns'],
+      duration: '60 min',
+      homework: 'Full daily practice routine for 2 weeks'
+    }
+  ];
+
+  const mockClientInsights = {
+    c1: {
+      recentAnswers: [
+        { question: 'How do you feel when your inner critic speaks?', answer: 'I notice tension in my chest and a voice saying I\'m not good enough. I tried to breathe through it.', module: 'Module 1' },
+        { question: 'What childhood memory comes up most often?', answer: 'When my parents would leave for work trips. I felt so alone and scared.', module: 'Module 2' },
+        { question: 'Describe your protector parts.', answer: 'My perfectionist part works overtime. It believes if I\'m perfect, nobody will leave me.', module: 'Module 3' }
+      ],
+      flaggedResponses: [
+        { question: 'How do you cope when overwhelmed?', answer: 'Sometimes I feel like shutting down completely and not talking to anyone for days.', severity: 'orange', reason: 'Isolation pattern detected' },
+        { question: 'What happens when your wound is triggered?', answer: 'I feel worthless and like nothing will ever change.', severity: 'red', reason: 'Hopelessness language detected' }
+      ],
+      sessionPrep: [
+        'Follow up on abandonment wound work from last session',
+        'Check in on daily Self-energy practice adherence',
+        'Explore perfectionist protector\'s relationship with the exile',
+        'Introduce unburdening concept if client seems ready',
+        'Assess progress on recognizing inner critic patterns'
+      ]
+    },
+    c2: {
+      recentAnswers: [
+        { question: 'What does trust feel like in your body?', answer: 'I don\'t really know. My body tenses up when I think about trusting someone.', module: 'Module 1' },
+        { question: 'When was trust first broken for you?', answer: 'My best friend in middle school told everyone my secrets. I never trusted anyone the same way.', module: 'Module 2' }
+      ],
+      flaggedResponses: [
+        { question: 'How are you feeling about the therapy process?', answer: 'I\'m not sure this is working. I feel angry most of the time and I don\'t know why I bother.', severity: 'red', reason: 'Disengagement risk and persistent anger' },
+        { question: 'What do you do when you feel betrayed?', answer: 'I cut people off completely. I\'d rather be alone than hurt again.', severity: 'orange', reason: 'Extreme avoidance pattern' },
+        { question: 'How often do you feel safe?', answer: 'Almost never. I\'m always waiting for the other shoe to drop.', severity: 'orange', reason: 'Chronic hypervigilance' }
+      ],
+      sessionPrep: [
+        'Address therapy engagement concerns directly',
+        'Validate anger as a protector response',
+        'Explore the firefighter pattern of cutting people off',
+        'Consider slower pacing for trust-building',
+        'Check for any external stressors contributing to disengagement'
+      ]
+    },
+    c3: {
+      recentAnswers: [
+        { question: 'How has your relationship with your parts changed?', answer: 'I can now notice my shame part without being consumed by it. I feel more compassion for her.', module: 'Module 4' },
+        { question: 'What unburdening experience was most meaningful?', answer: 'Releasing the belief that I\'m fundamentally broken. I visualized putting it into a river.', module: 'Module 4' },
+        { question: 'What daily practice works best for you?', answer: 'Morning check-ins with my parts. I ask each one how they\'re doing before starting my day.', module: 'Module 5' }
+      ],
+      flaggedResponses: [
+        { question: 'Are there any parts that still feel burdened?', answer: 'My younger self still carries some sadness about never feeling seen by my father.', severity: 'orange', reason: 'Unresolved paternal wound' }
+      ],
+      sessionPrep: [
+        'Celebrate significant progress in parts work',
+        'Explore remaining paternal wound with care',
+        'Discuss long-term maintenance strategies',
+        'Consider reducing session frequency as client stabilizes',
+        'Review and refine daily IFS practice routine'
+      ]
+    },
+    c4: {
+      recentAnswers: [
+        { question: 'What does your inner world feel like?', answer: 'Empty, mostly. Like a dark room with no one in it.', module: 'Module 1' },
+        { question: 'When do you notice different parts of yourself?', answer: 'I don\'t really. I just feel numb most of the time.', module: 'Module 1' }
+      ],
+      flaggedResponses: [
+        { question: 'How do you feel about starting this process?', answer: 'I don\'t feel much of anything. Everyone says I should care more but I can\'t.', severity: 'red', reason: 'Emotional numbness / possible dissociation' },
+        { question: 'What do you need most right now?', answer: 'I honestly don\'t know. I\'ve never been asked that before.', severity: 'orange', reason: 'Neglect wound activation' }
+      ],
+      sessionPrep: [
+        'Use somatic approaches to help client connect with body',
+        'Go slowly with parts identification — numbness is protective',
+        'Validate the neglect experience without pushing',
+        'Consider grounding exercises before parts work',
+        'Build rapport before deeper wound exploration'
+      ]
+    },
+    c5: {
+      recentAnswers: [
+        { question: 'What do your protectors do to keep you safe?', answer: 'My people-pleaser part works really hard. She makes sure everyone else is happy so they won\'t leave.', module: 'Module 3' },
+        { question: 'What would happen if your protectors stopped?', answer: 'I think I\'d be completely alone. That terrifies me.', module: 'Module 3' },
+        { question: 'How do your protectors feel about therapy?', answer: 'They\'re cautious but willing. My anxious part keeps checking if you\'re going to judge me.', module: 'Module 3' }
+      ],
+      flaggedResponses: [
+        { question: 'What happens when someone important pulls away?', answer: 'I panic and do anything to get them back, even things that hurt me.', severity: 'orange', reason: 'Self-sacrificing pattern linked to abandonment' }
+      ],
+      sessionPrep: [
+        'Appreciate the people-pleaser protector before exploring deeper',
+        'Address abandonment fears showing up in session',
+        'Begin mapping exile-protector relationships',
+        'Introduce concept of Self-led relationships',
+        'Check homework on protector appreciation practice'
+      ]
+    },
+    c6: {
+      recentAnswers: [
+        { question: 'What does your inner world feel like?', answer: 'Chaotic. Like everyone\'s yelling and I can\'t make them stop.', module: 'Module 1' }
+      ],
+      flaggedResponses: [
+        { question: 'How do you cope when shame is activated?', answer: 'I drink. Or I lash out at people I care about. Then I feel more shame.', severity: 'red', reason: 'Substance use and harmful coping behaviors' },
+        { question: 'What does your inner critic say?', answer: 'That I\'m disgusting and don\'t deserve love. That everyone can see how broken I am.', severity: 'red', reason: 'Severe self-criticism and worthlessness' }
+      ],
+      sessionPrep: [
+        'Priority: Assess safety and substance use frequency',
+        'Approach shame work very gently — high activation risk',
+        'Focus on stabilization before deep parts work',
+        'Build alliance with protector parts first',
+        'Consider more frequent sessions given risk level'
+      ]
+    }
   };
 
   const formatDate = (dateStr) => {
@@ -251,7 +452,9 @@ const TherapistDashboard = () => {
           { id: 'notes', label: 'Session Notes', icon: FileText },
           { id: 'progress', label: 'Progress', icon: BarChart3 },
           { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
-          { id: 'actions', label: 'Quick Actions', icon: Sparkles }
+          { id: 'actions', label: 'Quick Actions', icon: Sparkles },
+          { id: 'lessons', label: 'Lesson Plans', icon: BookOpen },
+          { id: 'insights', label: 'Client Insights', icon: Eye }
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -635,6 +838,250 @@ const TherapistDashboard = () => {
               </button>
             );
           })}
+        </div>
+      )}
+
+      {activeTab === 'lessons' && (
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className={`text-lg font-semibold ${textPrimary}`}>IFS Session Lesson Plans</h2>
+              <p className={`text-sm ${textSecondary}`}>Detailed guides for each module session</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {lessonPlans.map((module, index) => (
+              <div key={module.id} className={`${cardBg} rounded-xl border ${cardBorder} overflow-hidden transition-all`}>
+                <button
+                  onClick={() => toggleModule(module.id)}
+                  className={`w-full flex items-center justify-between p-5 text-left ${hoverBg} transition-colors`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold ${textPrimary}`}>{module.title}</h3>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className={`text-xs ${textMuted} flex items-center gap-1`}>
+                          <Clock className="w-3 h-3" />
+                          {module.duration}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {expandedModules[module.id] ? (
+                    <ChevronUp className={`w-5 h-5 ${textMuted} flex-shrink-0`} />
+                  ) : (
+                    <ChevronDown className={`w-5 h-5 ${textMuted} flex-shrink-0`} />
+                  )}
+                </button>
+
+                {expandedModules[module.id] && (
+                  <div className={`px-5 pb-5 border-t ${cardBorder}`}>
+                    <div className="grid md:grid-cols-2 gap-5 mt-5">
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Lightbulb className="w-4 h-4 text-purple-500" />
+                          <h4 className={`font-medium ${textPrimary} text-sm`}>Session Goals</h4>
+                        </div>
+                        <p className={`text-sm ${textSecondary} leading-relaxed`}>{module.goals}</p>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <MessageCircle className="w-4 h-4 text-indigo-500" />
+                          <h4 className={`font-medium ${textPrimary} text-sm`}>Discussion Topics</h4>
+                        </div>
+                        <ul className="space-y-2">
+                          {module.topics.map((topic, i) => (
+                            <li key={i} className={`text-sm ${textSecondary} flex items-start gap-2`}>
+                              <span className="text-purple-400 mt-0.5 flex-shrink-0">&ldquo;</span>
+                              <span className="italic">{topic}</span>
+                              <span className="text-purple-400 mt-0.5 flex-shrink-0">&rdquo;</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <Activity className="w-4 h-4 text-emerald-500" />
+                          <h4 className={`font-medium ${textPrimary} text-sm`}>Activities to Do Together</h4>
+                        </div>
+                        <ul className="space-y-1.5">
+                          {module.activities.map((activity, i) => (
+                            <li key={i} className={`text-sm ${textSecondary} flex items-center gap-2`}>
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                              {activity}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <AlertTriangle className="w-4 h-4 text-amber-500" />
+                          <h4 className={`font-medium ${textPrimary} text-sm`}>What to Watch For</h4>
+                        </div>
+                        <ul className="space-y-1.5">
+                          {module.watchFor.map((item, i) => (
+                            <li key={i} className={`text-sm ${textSecondary} flex items-center gap-2`}>
+                              <Flag className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className={`mt-5 p-4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-purple-50'} border ${isDark ? 'border-slate-600' : 'border-purple-100'}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <BookOpen className="w-4 h-4 text-purple-500" />
+                        <h4 className={`font-medium ${textPrimary} text-sm`}>Homework Assignment</h4>
+                      </div>
+                      <p className={`text-sm ${textSecondary}`}>{module.homework}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'insights' && (
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+              <Eye className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className={`text-lg font-semibold ${textPrimary}`}>Client Insights</h2>
+              <p className={`text-sm ${textSecondary}`}>Review client responses and prepare for sessions</p>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label className={`block text-sm font-medium ${textSecondary} mb-2`}>Select a Client</label>
+            <select
+              value={selectedInsightClient}
+              onChange={(e) => setSelectedInsightClient(e.target.value)}
+              className={`w-full sm:w-80 px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+            >
+              <option value="">Choose a client...</option>
+              {mockClients.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {!selectedInsightClient && (
+            <div className={`${cardBg} rounded-xl border ${cardBorder} p-12 text-center`}>
+              <Eye className={`w-12 h-12 mx-auto mb-3 ${textMuted}`} />
+              <p className={`font-medium ${textSecondary}`}>Select a client to view insights</p>
+              <p className={`text-sm mt-1 ${textMuted}`}>Choose from the dropdown above to see their responses and session prep</p>
+            </div>
+          )}
+
+          {selectedInsightClient && mockClientInsights[selectedInsightClient] && (() => {
+            const insights = mockClientInsights[selectedInsightClient];
+            const client = mockClients.find(c => c.id === selectedInsightClient);
+            return (
+              <div className="space-y-6">
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                  <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                    <MessageCircle className="w-5 h-5 text-purple-500" />
+                    Recent Answers
+                  </h3>
+                  <div className="space-y-4">
+                    {insights.recentAnswers.map((item, i) => (
+                      <div key={i} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{item.module}</span>
+                        </div>
+                        <p className={`text-sm font-medium ${textPrimary} mb-2`}>{item.question}</p>
+                        <p className={`text-sm ${textSecondary} italic leading-relaxed`}>"{item.answer}"</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                  <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                    <Flag className="w-5 h-5 text-red-500" />
+                    Flagged Responses
+                  </h3>
+                  <div className="space-y-4">
+                    {insights.flaggedResponses.map((item, i) => {
+                      const isRed = item.severity === 'red';
+                      const flagBg = isRed
+                        ? (isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200')
+                        : (isDark ? 'bg-orange-900/20 border-orange-800' : 'bg-orange-50 border-orange-200');
+                      const flagColor = isRed ? 'text-red-500' : 'text-orange-500';
+                      const badgeBg = isRed ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700';
+                      return (
+                        <div key={i} className={`p-4 rounded-lg border ${flagBg}`}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Flag className={`w-4 h-4 ${flagColor}`} />
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeBg}`}>
+                              {item.reason}
+                            </span>
+                          </div>
+                          <p className={`text-sm font-medium ${textPrimary} mb-2`}>{item.question}</p>
+                          <p className={`text-sm ${textSecondary} italic leading-relaxed`}>"{item.answer}"</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                  <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                    <Lightbulb className="w-5 h-5 text-amber-500" />
+                    Session Prep
+                  </h3>
+                  <p className={`text-sm ${textSecondary} mb-4`}>
+                    Suggested talking points for your next session with {client?.name}:
+                  </p>
+                  <ul className="space-y-2.5">
+                    {insights.sessionPrep.map((point, i) => (
+                      <li key={i} className={`flex items-start gap-3 text-sm ${textSecondary}`}>
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0 mt-0.5">
+                          {i + 1}
+                        </div>
+                        <span className="leading-relaxed">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                  <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                    <FileText className="w-5 h-5 text-purple-500" />
+                    Therapist Feedback
+                  </h3>
+                  <p className={`text-sm ${textSecondary} mb-3`}>
+                    Write your feedback or comments on {client?.name}'s responses:
+                  </p>
+                  <textarea
+                    value={therapistFeedback[selectedInsightClient] || ''}
+                    onChange={(e) => handleFeedbackChange(selectedInsightClient, e.target.value)}
+                    rows={5}
+                    placeholder={`Add your notes and feedback for ${client?.name}...`}
+                    className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none resize-none`}
+                  />
+                  <p className={`text-xs ${textMuted} mt-2 flex items-center gap-1`}>
+                    <CheckCircle className="w-3 h-3" />
+                    Feedback is automatically saved
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

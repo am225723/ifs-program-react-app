@@ -12,6 +12,11 @@ This is a React + Vite frontend application for an Internal Family Systems (IFS)
 - ThemeContext: added `tc()` helper and `darkTextMap` for dark-mode-safe text colors
 - Supabase migrations organized into supabase/migrations/ (001-016) with CREATE IF NOT EXISTS
 - Supabase edge function: supabase/functions/create-client/ for generating new clients with unique PINs
+- Added 7 MORE interactive activity types: true-false-quiz, drag-to-rank, letter-to-parts, scenario-cards, emotion-wheel, fill-in-blank, parts-dialogue
+- Full meditation scripts: Cultivating Self Energy (18 steps), Safe Place Visualization (18 steps), Body-Based Connection (17 steps) with breathing cues, pause indicators, rich sensory detail
+- Enhanced Therapist Dashboard: Lesson Plans tab with detailed session guides for all 5 modules, Client Insights tab with answer review, flagged responses, session prep, therapist feedback
+- Step progression blocking: clients must answer all reflection questions before advancing to next step, with visual warning and locked button
+- Integrated new activity types across all 5 curriculum modules for varied engagement
 - Consolidated assessment naming: Removed "Burdens of the Exile" naming, unified as "IFS Wound Assessment"
 - Added answer textareas to reflection questions in learning modules (both LearningModule and LearningModuleEnhanced)
 - Added 5 new interactive activity types: guided-visualization, matching-exercise, safety-checklist, mindfulness-timer, scale-rating

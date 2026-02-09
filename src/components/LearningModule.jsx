@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -14,7 +14,9 @@ import {
   RotateCcw,
   Save,
   Share,
-  Download
+  Download,
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 
 const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
@@ -23,6 +25,8 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
   const [activityResponses, setActivityResponses] = useState({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [showCertificate, setShowCertificate] = useState(false);
+  const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
+  const [incompleteItems, setIncompleteItems] = useState([]);
 
   const steps = module.steps || [];
   const currentStep = steps[currentStepIndex];
@@ -81,8 +85,46 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
     }));
   };
 
+  const getStepRequirements = useCallback((step) => {
+    if (!step) return [];
+    const missing = [];
+    const data = step.data;
+    if (step.type === 'learn' && data.reflectionPrompts) {
+      data.reflectionPrompts.forEach((prompt, index) => {
+        const val = activityResponses[`reflection-${index}`];
+        if (!val || val.trim().length === 0) {
+          missing.push(`Reflection question ${index + 1}`);
+        }
+      });
+    }
+    if (step.type === 'activity' && data.questions) {
+      data.questions.forEach((q, index) => {
+        const val = activityResponses[`question-${index}`];
+        if (!val || val.trim().length === 0) {
+          missing.push(`Question ${index + 1}`);
+        }
+      });
+    }
+    return missing;
+  }, [activityResponses]);
+
+  const isCurrentStepComplete = useCallback(() => {
+    if (!currentStep) return true;
+    if (currentStep.type === 'result') return true;
+    return getStepRequirements(currentStep).length === 0;
+  }, [currentStep, getStepRequirements]);
+
   // Navigate to next step
   const nextStep = () => {
+    const missing = getStepRequirements(currentStep);
+    if (missing.length > 0) {
+      setIncompleteItems(missing);
+      setShowIncompleteWarning(true);
+      setTimeout(() => setShowIncompleteWarning(false), 5000);
+      return;
+    }
+    setShowIncompleteWarning(false);
+    setIncompleteItems([]);
     completeStep();
     if (isLastStep) {
       completeModule();
@@ -479,8 +521,24 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
           {renderStepContent()}
         </div>
 
+        {showIncompleteWarning && incompleteItems.length > 0 && (
+          <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 animate-pulse">
+            <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-amber-800 font-medium text-sm">Please complete before continuing:</p>
+              <ul className="mt-1 space-y-0.5">
+                {incompleteItems.map((item, i) => (
+                  <li key={i} className="text-amber-700 text-sm flex items-center gap-1.5">
+                    <Lock className="w-3 h-3" /> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+
         {/* Navigation */}
-        <div className="mt-8 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between">
           <button
             onClick={previousStep}
             disabled={isFirstStep}
@@ -505,8 +563,13 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
 
           <button
             onClick={nextStep}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-colors flex items-center space-x-2 shadow-lg"
+            className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 shadow-lg ${
+              isCurrentStepComplete()
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed'
+            }`}
           >
+            {!isCurrentStepComplete() && <Lock className="w-4 h-4" />}
             <span>{isLastStep ? 'Complete Module' : 'Next Step'}</span>
             <ArrowRight className="w-5 h-5" />
           </button>
