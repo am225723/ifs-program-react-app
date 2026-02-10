@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase, supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const DataContext = createContext();
 
@@ -8,7 +9,6 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Initialize user on app start
   useEffect(() => {
     initializeUser();
   }, []);
@@ -16,548 +16,208 @@ export const DataProvider = ({ children }) => {
   const initializeUser = async () => {
     try {
       setLoading(true);
-      
-      // Check for existing user ID in localStorage
-      let existingUserId = localStorage.getItem('ifs-user-id');
-      
-      if (!existingUserId) {
-        // Generate new anonymous user ID
-        existingUserId = supabaseHelpers.generateUserId();
-        localStorage.setItem('ifs-user-id', existingUserId);
+      const client = clientAuth.getCurrentClient();
+      if (client?.id) {
+        setUserId(client.id);
+        await supabaseHelpers.saveUserData(client.id, {
+          last_active: new Date().toISOString()
+        });
       }
-      
-      setUserId(existingUserId);
-      
-      // Create or update user in database
-      await supabaseHelpers.saveUserData(existingUserId, {
-        last_active: new Date().toISOString()
-      });
-      
-    } catch (error) {
-      console.error('Error initializing user:', error);
-      // Fallback to local-only mode if Supabase fails
-      let existingUserId = localStorage.getItem('ifs-user-id');
-      if (!existingUserId) {
-        existingUserId = 'local_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('ifs-user-id', existingUserId);
-      }
-      setUserId(existingUserId);
-      setError(null); // Don't show error to user, just fall back to local mode
+    } catch (err) {
+      console.error('Error initializing user:', err);
+      const client = clientAuth.getCurrentClient();
+      if (client?.id) setUserId(client.id);
     } finally {
       setLoading(false);
     }
   };
 
-  // Module progress functions
   const saveModuleProgress = useCallback(async (moduleId, progress) => {
     if (!userId) return;
-    
     try {
-      // Save to Supabase
       await supabaseHelpers.saveModuleProgress(userId, moduleId, progress);
-      
-      // Also save to localStorage as backup
-      localStorage.setItem(`module-progress-${moduleId}`, JSON.stringify({
-        ...progress,
-        lastSaved: new Date().toISOString()
-      }));
-      
-    } catch (error) {
-      console.error('Error saving module progress:', error);
-      // Fallback to localStorage only
-      localStorage.setItem(`module-progress-${moduleId}`, JSON.stringify({
-        ...progress,
-        lastSaved: new Date().toISOString()
-      }));
+    } catch (err) {
+      console.error('Error saving module progress:', err);
     }
   }, [userId]);
 
   const getModuleProgress = useCallback(async (moduleId) => {
     if (!userId) return null;
-    
     try {
-      // Try to get from Supabase first
-      let data = await supabaseHelpers.getModuleProgress(userId, moduleId);
-      
-      // If no data from Supabase, try localStorage
-      if (!data) {
-        const localData = localStorage.getItem(`module-progress-${moduleId}`);
-        if (localData) {
-          data = JSON.parse(localData);
-          // Sync with Supabase in background
-          supabaseHelpers.saveModuleProgress(userId, moduleId, data);
-        }
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error getting module progress:', error);
-      // Fallback to localStorage
-      const localData = localStorage.getItem(`module-progress-${moduleId}`);
-      return localData ? JSON.parse(localData) : null;
+      return await supabaseHelpers.getModuleProgress(userId, moduleId);
+    } catch (err) {
+      console.error('Error getting module progress:', err);
+      return null;
     }
   }, [userId]);
 
   const getAllModuleProgress = useCallback(async () => {
     if (!userId) return [];
-    
     try {
-      const data = await supabaseHelpers.getAllModuleProgress(userId);
-      
-      // Merge with localStorage data
-      const mergedData = {};
-      
-      // Process Supabase data
-      data.forEach(progress => {
-        mergedData[progress.module_id] = progress;
-      });
-      
-      // Add any localStorage data not in Supabase
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('module-progress-')) {
-          const moduleId = key.replace('module-progress-', '');
-          const localData = localStorage.getItem(key);
-          if (localData && !mergedData[moduleId]) {
-            try {
-              const parsed = JSON.parse(localData);
-              mergedData[moduleId] = parsed;
-              // Sync to Supabase in background
-              supabaseHelpers.saveModuleProgress(userId, moduleId, parsed);
-            } catch (e) {
-              console.warn('Error parsing local data:', e);
-            }
-          }
-        }
-      }
-      
-      return Object.values(mergedData);
-    } catch (error) {
-      console.error('Error getting all progress:', error);
+      return await supabaseHelpers.getAllModuleProgress(userId);
+    } catch (err) {
+      console.error('Error getting all progress:', err);
       return [];
     }
   }, [userId]);
 
-  // Interactive data functions
   const saveInteractiveData = useCallback(async (moduleId, data) => {
     if (!userId) return;
-    
     try {
-      // Save to Supabase
       await supabaseHelpers.saveInteractiveData(userId, moduleId, data);
-      
-      // Backup to localStorage
-      localStorage.setItem(`interactive-data-${moduleId}`, JSON.stringify(data));
-      
-    } catch (error) {
-      console.error('Error saving interactive data:', error);
-      // Fallback to localStorage
-      localStorage.setItem(`interactive-data-${moduleId}`, JSON.stringify(data));
+    } catch (err) {
+      console.error('Error saving interactive data:', err);
     }
   }, [userId]);
 
   const getInteractiveData = useCallback(async (moduleId) => {
     if (!userId) return {};
-    
     try {
-      // Try Supabase first
-      let data = await supabaseHelpers.getInteractiveData(userId, moduleId);
-      
-      // Fallback to localStorage
-      if (!data) {
-        const localData = localStorage.getItem(`interactive-data-${moduleId}`);
-        if (localData) {
-          try {
-            data = JSON.parse(localData);
-            // Sync to Supabase in background
-            supabaseHelpers.saveInteractiveData(userId, moduleId, data);
-          } catch (e) {
-            console.warn('Error parsing local interactive data:', e);
-            data = {};
-          }
-        }
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error getting interactive data:', error);
-      // Fallback to localStorage
-      const localData = localStorage.getItem(`interactive-data-${moduleId}`);
-      return localData ? JSON.parse(localData) : {};
+      return await supabaseHelpers.getInteractiveData(userId, moduleId);
+    } catch (err) {
+      console.error('Error getting interactive data:', err);
+      return {};
     }
   }, [userId]);
 
-  // Assessment functions
   const saveAssessment = useCallback(async (assessmentData) => {
     if (!userId) return null;
-    
     try {
-      const data = await supabaseHelpers.saveAssessment(userId, {
-        ...assessmentData,
-        user_id: userId
-      });
-      
-      // Backup to localStorage
-      localStorage.setItem('assessment-data', JSON.stringify(assessmentData));
-      
-      return data;
-    } catch (error) {
-      console.error('Error saving assessment:', error);
-      // Fallback to localStorage
-      localStorage.setItem('assessment-data', JSON.stringify(assessmentData));
+      return await supabaseHelpers.saveAssessment(userId, { ...assessmentData, user_id: userId });
+    } catch (err) {
+      console.error('Error saving assessment:', err);
       return null;
     }
   }, [userId]);
 
   const getAssessment = useCallback(async () => {
     if (!userId) return null;
-    
     try {
-      let data = await supabaseHelpers.getAssessment(userId);
-      
-      // Fallback to localStorage
-      if (!data) {
-        const localData = localStorage.getItem('assessment-data');
-        if (localData) {
-          try {
-            data = JSON.parse(localData);
-            // Sync to Supabase in background
-            supabaseHelpers.saveAssessment(userId, data);
-          } catch (e) {
-            console.warn('Error parsing local assessment data:', e);
-            data = null;
-          }
-        }
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error getting assessment:', error);
-      // Fallback to localStorage
-      const localData = localStorage.getItem('assessment-data');
-      return localData ? JSON.parse(localData) : null;
+      return await supabaseHelpers.getAssessment(userId);
+    } catch (err) {
+      console.error('Error getting assessment:', err);
+      return null;
     }
   }, [userId]);
 
-  // Journal functions
   const saveJournalEntry = useCallback(async (entry) => {
     if (!userId) return null;
-    
     try {
-      const data = await supabaseHelpers.saveJournalEntry(userId, entry);
-      
-      // Sync with localStorage (keep recent entries)
-      const localEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
-      localEntries.unshift(data);
-      // Keep only last 10 entries in localStorage
-      localStorage.setItem('journal-entries', JSON.stringify(localEntries.slice(0, 10)));
-      
-      return data;
-    } catch (error) {
-      console.error('Error saving journal entry:', error);
-      // Fallback to localStorage only
-      const localEntry = {
-        ...entry,
-        id: Date.now().toString(),
-        created_at: new Date().toISOString()
-      };
-      const localEntries = JSON.parse(localStorage.getItem('journal-entries') || '[]');
-      localEntries.unshift(localEntry);
-      localStorage.setItem('journal-entries', JSON.stringify(localEntries.slice(0, 10)));
-      return localEntry;
+      return await supabaseHelpers.saveJournalEntry(userId, entry);
+    } catch (err) {
+      console.error('Error saving journal entry:', err);
+      return null;
     }
   }, [userId]);
 
   const getJournalEntries = useCallback(async () => {
     if (!userId) return [];
-    
     try {
-      let data = await supabaseHelpers.getJournalEntries(userId);
-      
-      // If Supabase data is empty, try localStorage
-      if (!data || data.length === 0) {
-        const localData = localStorage.getItem('journal-entries');
-        if (localData) {
-          try {
-            data = JSON.parse(localData);
-            // Sync to Supabase in background
-            data.forEach(entry => {
-              if (!entry.synced) {
-                supabaseHelpers.saveJournalEntry(userId, entry);
-                entry.synced = true;
-              }
-            });
-          } catch (e) {
-            console.warn('Error parsing local journal data:', e);
-            data = [];
-          }
-        }
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error getting journal entries:', error);
-      // Fallback to localStorage
-      const localData = localStorage.getItem('journal-entries');
-      return localData ? JSON.parse(localData) : [];
+      return await supabaseHelpers.getJournalEntries(userId);
+    } catch (err) {
+      console.error('Error getting journal entries:', err);
+      return [];
     }
   }, [userId]);
 
-  // Parts functions
   const savePart = useCallback(async (partData) => {
     if (!userId) return null;
-    
     try {
-      const data = await supabaseHelpers.savePart(userId, partData);
-      
-      // Sync with localStorage
-      const localParts = JSON.parse(localStorage.getItem('parts') || '{}');
-      localParts[partData.id] = { ...partData, synced: true };
-      localStorage.setItem('parts', JSON.stringify(localParts));
-      
-      return data;
-    } catch (error) {
-      console.error('Error saving part:', error);
-      // Fallback to localStorage only
-      const localParts = JSON.parse(localStorage.getItem('parts') || '{}');
-      const localPart = { ...partData, id: Date.now().toString() };
-      localParts[partData.id || localPart.id] = localPart;
-      localStorage.setItem('parts', JSON.stringify(localParts));
-      return localPart;
+      return await supabaseHelpers.savePart(userId, partData);
+    } catch (err) {
+      console.error('Error saving part:', err);
+      return null;
     }
   }, [userId]);
 
   const getParts = useCallback(async () => {
     if (!userId) return [];
-    
     try {
-      let data = await supabaseHelpers.getParts(userId);
-      
-      // If Supabase data is empty, try localStorage
-      if (!data || data.length === 0) {
-        const localData = localStorage.getItem('parts');
-        if (localData) {
-          try {
-            const partsObj = JSON.parse(localData);
-            data = Object.values(partsObj);
-            // Sync to Supabase in background
-            data.forEach(part => {
-              if (!part.synced) {
-                supabaseHelpers.savePart(userId, part);
-                part.synced = true;
-              }
-            });
-          } catch (e) {
-            console.warn('Error parsing local parts data:', e);
-            data = [];
-          }
-        }
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error getting parts:', error);
-      // Fallback to localStorage
-      const localData = localStorage.getItem('parts');
-      if (localData) {
-        try {
-          return Object.values(JSON.parse(localData));
-        } catch (e) {
-          console.warn('Error parsing local parts data:', e);
-          return [];
-        }
-      }
+      return await supabaseHelpers.getParts(userId);
+    } catch (err) {
+      console.error('Error getting parts:', err);
       return [];
     }
   }, []);
 
-  // Module answers functions (for saving question responses)
   const saveModuleAnswers = useCallback(async (moduleId, stepId, answers) => {
     if (!userId) return null;
-    
     try {
-      const data = await supabaseHelpers.saveModuleAnswers(userId, moduleId, stepId, {
+      return await supabaseHelpers.saveModuleAnswers(userId, moduleId, stepId, {
         ...answers,
         savedAt: new Date().toISOString()
       });
-      
-      // Backup to localStorage
-      const key = `module-answers-${moduleId}-${stepId}`;
-      localStorage.setItem(key, JSON.stringify(answers));
-      
-      return data;
-    } catch (error) {
-      console.error('Error saving module answers:', error);
-      // Fallback to localStorage
-      const key = `module-answers-${moduleId}-${stepId}`;
-      localStorage.setItem(key, JSON.stringify(answers));
+    } catch (err) {
+      console.error('Error saving module answers:', err);
       return null;
     }
   }, [userId]);
 
   const getModuleAnswers = useCallback(async (moduleId, stepId) => {
     if (!userId) return {};
-    
     try {
-      let data = await supabaseHelpers.getModuleAnswers(userId, moduleId, stepId);
-      
-      // Fallback to localStorage
-      if (!data || Object.keys(data).length === 0) {
-        const key = `module-answers-${moduleId}-${stepId}`;
-        const localData = localStorage.getItem(key);
-        if (localData) {
-          try {
-            data = JSON.parse(localData);
-            // Sync to Supabase in background
-            supabaseHelpers.saveModuleAnswers(userId, moduleId, stepId, data);
-          } catch (e) {
-            console.warn('Error parsing local module answers:', e);
-            data = {};
-          }
-        }
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Error getting module answers:', error);
-      const key = `module-answers-${moduleId}-${stepId}`;
-      const localData = localStorage.getItem(key);
-      return localData ? JSON.parse(localData) : {};
+      return await supabaseHelpers.getModuleAnswers(userId, moduleId, stepId);
+    } catch (err) {
+      console.error('Error getting module answers:', err);
+      return {};
     }
   }, [userId]);
 
   const getAllModuleAnswers = useCallback(async (moduleId) => {
     if (!userId) return [];
-    
     try {
-      const data = await supabaseHelpers.getAllModuleAnswers(userId, moduleId);
-      return data || [];
-    } catch (error) {
-      console.error('Error getting all module answers:', error);
+      return await supabaseHelpers.getAllModuleAnswers(userId, moduleId);
+    } catch (err) {
+      console.error('Error getting all module answers:', err);
       return [];
     }
   }, [userId]);
 
-  // Exercise progress functions
   const saveExerciseProgress = useCallback(async (exerciseId, progress) => {
     if (!userId) return null;
-    
     try {
-      const data = await supabaseHelpers.saveExerciseProgress(userId, exerciseId, progress);
-      
-      // Sync with localStorage
-      const localProgress = JSON.parse(localStorage.getItem('exercise-progress') || '{}');
-      localProgress[exerciseId] = { ...progress, synced: true };
-      localStorage.setItem('exercise-progress', JSON.stringify(localProgress));
-      
-      return data;
-    } catch (error) {
-      console.error('Error saving exercise progress:', error);
-      // Fallback to localStorage
-      const localProgress = JSON.parse(localStorage.getItem('exercise-progress') || '{}');
-      const newProgress = { ...progress, synced: false };
-      localProgress[exerciseId] = newProgress;
-      localStorage.setItem('exercise-progress', JSON.stringify(localProgress));
-      return newProgress;
+      return await supabaseHelpers.saveExerciseProgress(userId, exerciseId, progress);
+    } catch (err) {
+      console.error('Error saving exercise progress:', err);
+      return null;
     }
   }, [userId]);
 
   const getExerciseProgress = useCallback(async () => {
     if (!userId) return [];
-    
     try {
-      let data = await supabaseHelpers.getExerciseProgress(userId);
-      
-      // If Supabase data is empty, try localStorage
-      if (!data || data.length === 0) {
-        const localData = localStorage.getItem('exercise-progress');
-        if (localData) {
-          try {
-            const progressObj = JSON.parse(localData);
-            data = Object.entries(progressObj).map(([exerciseId, progress]) => ({
-              exercise_id: exerciseId,
-              ...progress
-            }));
-            // Sync to Supabase in background
-            data.forEach(progress => {
-              if (!progress.synced) {
-                supabaseHelpers.saveExerciseProgress(userId, progress.exercise_id, progress);
-                progress.synced = true;
-              }
-            });
-          } catch (e) {
-            console.warn('Error parsing local exercise progress:', e);
-            data = [];
-          }
-        }
-      }
-      
-      return data;
-    } catch (error) {
-      console('Error getting exercise progress:', error);
-      // Fallback to localStorage
-      const localData = localStorage.getItem('exercise-progress');
-      if (localData) {
-        try {
-          const progressObj = JSON.parse(localData);
-          return Object.entries(progressObj).map(([exerciseId, progress]) => ({
-            exercise_id: exerciseId,
-            ...progress
-          }));
-        } catch (e) {
-          console.warn('Error parsing local exercise progress:', e);
-          return [];
-        }
-      }
+      return await supabaseHelpers.getExerciseProgress(userId);
+    } catch (err) {
+      console.error('Error getting exercise progress:', err);
       return [];
     }
   }, [userId]);
 
-  // Clear all data
   const clearAllData = useCallback(() => {
-    localStorage.clear();
     setUserId(null);
-    // Reinitialize user
     initializeUser();
   }, []);
 
   const value = {
-    // State
     userId,
     loading,
     error,
-    
-    // Module progress
     saveModuleProgress,
     getModuleProgress,
     getAllModuleProgress,
-    
-    // Interactive data
     saveInteractiveData,
     getInteractiveData,
-    
-    // Assessment
     saveAssessment,
     getAssessment,
-    
-    // Journal
     saveJournalEntry,
     getJournalEntries,
-    
-    // Parts
     savePart,
     getParts,
-    
-    // Exercise progress
     saveExerciseProgress,
     getExerciseProgress,
-    
-    // Module answers
     saveModuleAnswers,
     getModuleAnswers,
     getAllModuleAnswers,
-    
-    // Utility
     clearAllData,
   };
 
@@ -568,7 +228,6 @@ export const DataProvider = ({ children }) => {
   );
 };
 
-// Custom hook to use the DataContext
 export const useData = () => {
   const context = useContext(DataContext);
   if (!context) {

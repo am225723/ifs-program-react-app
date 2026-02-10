@@ -7,7 +7,8 @@ import {
   BookOpen, ChevronDown, ChevronUp, MessageCircle, Flag, Lightbulb
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const mockClients = [
   {
@@ -143,29 +144,31 @@ const TherapistDashboard = () => {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('therapist_session_notes');
-    if (saved) {
+    const loadData = async () => {
+      const client = clientAuth.getCurrentClient();
+      const therapistId = client?.id;
+      if (!therapistId) return;
       try {
-        setSessionNotes(JSON.parse(saved));
+        const [notesData, feedbackData] = await Promise.all([
+          supabaseHelpers.getTherapistNotes(therapistId),
+          supabaseHelpers.getTherapistFeedback(therapistId)
+        ]);
+        if (notesData && notesData.length > 0) {
+          setSessionNotes(notesData);
+        }
+        if (feedbackData && feedbackData.length > 0) {
+          const feedbackObj = {};
+          feedbackData.forEach(fb => {
+            if (fb.client_id) feedbackObj[fb.client_id] = fb.feedback;
+          });
+          setTherapistFeedback(feedbackObj);
+        }
       } catch (e) {
-        console.error('Failed to load session notes:', e);
+        console.error('Failed to load therapist data:', e);
       }
-    }
-    const savedFeedback = localStorage.getItem('therapist_client_feedback');
-    if (savedFeedback) {
-      try {
-        setTherapistFeedback(JSON.parse(savedFeedback));
-      } catch (e) {
-        console.error('Failed to load therapist feedback:', e);
-      }
-    }
+    };
+    loadData();
   }, []);
-
-  useEffect(() => {
-    if (sessionNotes.length > 0) {
-      localStorage.setItem('therapist_session_notes', JSON.stringify(sessionNotes));
-    }
-  }, [sessionNotes]);
 
   const filteredClients = mockClients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -181,8 +184,10 @@ const TherapistDashboard = () => {
     avgProgress: Math.round(mockClients.reduce((sum, c) => sum + c.progress, 0) / mockClients.length)
   };
 
-  const handleSaveNote = () => {
+  const handleSaveNote = async () => {
     if (!noteForm.clientId || !noteForm.notes) return;
+    const therapist = clientAuth.getCurrentClient();
+    const therapistId = therapist?.id;
     const client = mockClients.find(c => c.id === noteForm.clientId);
     const newNote = {
       id: Date.now().toString(),
@@ -190,6 +195,18 @@ const TherapistDashboard = () => {
       clientName: client?.name || 'Unknown',
       createdAt: new Date().toISOString()
     };
+    if (therapistId) {
+      try {
+        const saved = await supabaseHelpers.saveTherapistNotes(therapistId, noteForm.clientId, {
+          content: noteForm.notes,
+          sessionDate: noteForm.date,
+          noteType: noteForm.sessionType
+        });
+        if (saved) newNote.id = saved.id;
+      } catch (err) {
+        console.error('Error saving therapist note:', err);
+      }
+    }
     setSessionNotes(prev => [newNote, ...prev]);
     setNoteForm({
       clientId: '',
@@ -204,10 +221,19 @@ const TherapistDashboard = () => {
     setExpandedModules(prev => ({ ...prev, [moduleId]: !prev[moduleId] }));
   };
 
-  const handleFeedbackChange = (clientId, value) => {
+  const handleFeedbackChange = async (clientId, value) => {
     const updated = { ...therapistFeedback, [clientId]: value };
     setTherapistFeedback(updated);
-    localStorage.setItem('therapist_client_feedback', JSON.stringify(updated));
+    const therapist = clientAuth.getCurrentClient();
+    if (therapist?.id) {
+      try {
+        await supabaseHelpers.saveTherapistFeedback(therapist.id, clientId, {
+          feedback: value
+        });
+      } catch (err) {
+        console.error('Error saving therapist feedback:', err);
+      }
+    }
   };
 
   const lessonPlans = [

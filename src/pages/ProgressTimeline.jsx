@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useData } from '../contexts/DataContext';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const milestoneTypes = {
   module: { label: 'Module', color: 'purple', icon: BookOpen, bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300', dot: 'bg-purple-500', darkBg: 'bg-purple-900/30', darkText: 'text-purple-300', darkBorder: 'border-purple-700' },
@@ -48,20 +50,27 @@ export default function ProgressTimeline() {
   const [activeFilters, setActiveFilters] = useState(new Set(['module', 'assessment', 'journal', 'exercise', 'badge']));
 
   useEffect(() => {
-    const stored = localStorage.getItem('progressTimeline');
-    if (stored) {
+    const loadMilestones = async () => {
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      if (!clientId) return;
       try {
-        setMilestones(JSON.parse(stored));
+        const data = await supabaseHelpers.getMilestones(clientId);
+        if (data && data.length > 0) {
+          setMilestones(data);
+        } else {
+          const sample = generateSampleMilestones();
+          setMilestones(sample);
+          for (const milestone of sample) {
+            await supabaseHelpers.saveMilestone(clientId, milestone);
+          }
+        }
       } catch {
         const sample = generateSampleMilestones();
         setMilestones(sample);
-        localStorage.setItem('progressTimeline', JSON.stringify(sample));
       }
-    } else {
-      const sample = generateSampleMilestones();
-      setMilestones(sample);
-      localStorage.setItem('progressTimeline', JSON.stringify(sample));
-    }
+    };
+    loadMilestones();
   }, []);
 
   const toggleFilter = (type) => {

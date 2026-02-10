@@ -11,25 +11,20 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-// Helper functions for database operations
 export const supabaseHelpers = {
-  // Module Progress Functions
   async saveModuleProgress(userId, moduleId, progress) {
     const { data, error } = await supabase
       .from('ifs_client_progress')
       .upsert({
         client_id: userId,
         module_id: moduleId,
-        current_step: progress.currentStep || 0,
+        current_step: progress.currentStep ?? progress.current_step ?? 0,
         responses: progress.responses || {},
-        completed_steps: progress.completedSteps || [],
-        interactive_data: progress.interactiveData || {},
-        is_completed: progress.isCompleted || false,
+        completed_steps: progress.completedSteps ?? progress.completed_steps ?? [],
+        interactive_data: progress.interactiveData ?? progress.interactive_data ?? {},
+        is_completed: progress.isCompleted ?? progress.is_completed ?? false,
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'client_id,module_id'
-      });
-    
+      }, { onConflict: 'client_id,module_id' });
     if (error) console.error('Error saving module progress:', error);
     return data;
   },
@@ -41,7 +36,6 @@ export const supabaseHelpers = {
       .eq('client_id', userId)
       .eq('module_id', moduleId)
       .single();
-    
     if (error && error.code !== 'PGRST116') console.error('Error fetching module progress:', error);
     return data;
   },
@@ -50,25 +44,20 @@ export const supabaseHelpers = {
     const { data, error } = await supabase
       .from('ifs_client_progress')
       .select('*')
-      .eq('client_id', 'anonymous');
-    
+      .eq('client_id', userId);
     if (error) console.error('Error fetching all progress:', error);
     return data || [];
   },
 
-  // Interactive Data Functions
-  async saveInteractiveData(userId, moduleId, data) {
+  async saveInteractiveData(userId, moduleId, interactiveData) {
     const { error } = await supabase
       .from('ifs_interactive_data')
       .upsert({
         client_id: userId,
         module_id: moduleId,
-        data: data,
+        data: interactiveData,
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'client_id,module_id'
-      });
-    
+      }, { onConflict: 'client_id,module_id' });
     if (error) console.error('Error saving interactive data:', error);
     return !error;
   },
@@ -80,12 +69,10 @@ export const supabaseHelpers = {
       .eq('client_id', userId)
       .eq('module_id', moduleId)
       .single();
-    
     if (error && error.code !== 'PGRST116') console.error('Error fetching interactive data:', error);
     return data?.data || {};
   },
 
-  // Assessment Results Functions
   async saveAssessment(userId, assessmentData) {
     const { data, error } = await supabase
       .from('ifs_assessment_results')
@@ -94,7 +81,6 @@ export const supabaseHelpers = {
         ...assessmentData,
         created_at: new Date().toISOString()
       });
-    
     if (error) console.error('Error saving assessment:', error);
     return data;
   },
@@ -107,12 +93,10 @@ export const supabaseHelpers = {
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
-    
     if (error && error.code !== 'PGRST116') console.error('Error fetching assessment:', error);
     return data;
   },
 
-  // Journal Functions
   async saveJournalEntry(userId, entry) {
     const { data, error } = await supabase
       .from('ifs_journal_entries')
@@ -121,12 +105,23 @@ export const supabaseHelpers = {
         title: entry.title,
         content: entry.content,
         mood: entry.mood,
+        tags: entry.tags || [],
         parts_identified: entry.partsIdentified,
         created_at: new Date().toISOString()
-      });
-    
+      })
+      .select()
+      .single();
     if (error) console.error('Error saving journal entry:', error);
     return data;
+  },
+
+  async deleteJournalEntry(entryId) {
+    const { error } = await supabase
+      .from('ifs_journal_entries')
+      .delete()
+      .eq('id', entryId);
+    if (error) console.error('Error deleting journal entry:', error);
+    return !error;
   },
 
   async getJournalEntries(userId) {
@@ -135,12 +130,10 @@ export const supabaseHelpers = {
       .select('*')
       .eq('client_id', userId)
       .order('created_at', { ascending: false });
-    
     if (error) console.error('Error fetching journal entries:', error);
     return data || [];
   },
 
-  // Parts Mapping Functions
   async savePart(userId, partData) {
     const { data, error } = await supabase
       .from('ifs_parts')
@@ -148,15 +141,18 @@ export const supabaseHelpers = {
         client_id: userId,
         id: partData.id,
         name: partData.name,
+        type: partData.type,
         role: partData.role,
         description: partData.description,
         triggers: partData.triggers,
         positive_intentions: partData.positiveIntentions,
+        x: partData.x,
+        y: partData.y,
+        size: partData.size,
+        color: partData.color,
+        notes: partData.notes,
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'client_id,id'
-      });
-    
+      }, { onConflict: 'client_id,id' });
     if (error) console.error('Error saving part:', error);
     return data;
   },
@@ -167,12 +163,20 @@ export const supabaseHelpers = {
       .select('*')
       .eq('client_id', userId)
       .order('updated_at', { ascending: false });
-    
     if (error) console.error('Error fetching parts:', error);
     return data || [];
   },
 
-  // Exercise Progress Functions
+  async deletePart(userId, partId) {
+    const { error } = await supabase
+      .from('ifs_parts')
+      .delete()
+      .eq('client_id', userId)
+      .eq('id', partId);
+    if (error) console.error('Error deleting part:', error);
+    return !error;
+  },
+
   async saveExerciseProgress(userId, exerciseId, progress) {
     const { data, error } = await supabase
       .from('ifs_exercise_progress')
@@ -182,11 +186,9 @@ export const supabaseHelpers = {
         completed: progress.completed,
         notes: progress.notes,
         completion_time: progress.completionTime,
+        data: progress.data || {},
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'client_id,exercise_id'
-      });
-    
+      }, { onConflict: 'client_id,exercise_id' });
     if (error) console.error('Error saving exercise progress:', error);
     return data;
   },
@@ -196,19 +198,16 @@ export const supabaseHelpers = {
       .from('ifs_exercise_progress')
       .select('*')
       .eq('client_id', userId);
-    
     if (error) console.error('Error fetching exercise progress:', error);
     return data || [];
   },
 
-  // Client Functions
   async getClientData(userId) {
     const { data, error } = await supabase
       .from('ifs_clients')
       .select('*')
       .eq('id', userId)
       .single();
-    
     if (error && error.code !== 'PGRST116') console.error('Error fetching client data:', error);
     return data;
   },
@@ -220,20 +219,15 @@ export const supabaseHelpers = {
         id: userId,
         ...userData,
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'id'
-      });
-    
+      }, { onConflict: 'id' });
     if (error) console.error('Error saving client data:', error);
     return data;
   },
 
-  // Alias for saveClientData to maintain backward compatibility
   async saveUserData(userId, userData) {
     return this.saveClientData(userId, userData);
   },
 
-  // Save module question answers
   async saveModuleAnswers(userId, moduleId, stepId, answers) {
     const { data, error } = await supabase
       .from('ifs_module_answers')
@@ -243,10 +237,7 @@ export const supabaseHelpers = {
         step_id: stepId,
         answers: answers,
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'client_id,module_id,step_id'
-      });
-    
+      }, { onConflict: 'client_id,module_id,step_id' });
     if (error) console.error('Error saving module answers:', error);
     return data;
   },
@@ -259,7 +250,6 @@ export const supabaseHelpers = {
       .eq('module_id', moduleId)
       .eq('step_id', stepId)
       .single();
-    
     if (error && error.code !== 'PGRST116') console.error('Error fetching module answers:', error);
     return data?.answers || {};
   },
@@ -270,14 +260,315 @@ export const supabaseHelpers = {
       .select('*')
       .eq('client_id', userId)
       .eq('module_id', moduleId);
-    
     if (error) console.error('Error fetching all module answers:', error);
     return data || [];
   },
 
-  // Generate a proper UUID for users (compatible with Supabase UUID columns)
+  async saveMoodEntry(userId, entry) {
+    const { data, error } = await supabase
+      .from('ifs_mood_entries')
+      .insert({
+        client_id: userId,
+        mood: entry.mood,
+        energy: entry.energy,
+        emotions: entry.emotions || [],
+        notes: entry.notes,
+        date: entry.date || new Date().toISOString()
+      })
+      .select()
+      .single();
+    if (error) console.error('Error saving mood entry:', error);
+    return data;
+  },
+
+  async getMoodEntries(userId) {
+    const { data, error } = await supabase
+      .from('ifs_mood_entries')
+      .select('*')
+      .eq('client_id', userId)
+      .order('date', { ascending: false });
+    if (error) console.error('Error fetching mood entries:', error);
+    return data || [];
+  },
+
+  async saveTherapySession(userId, session) {
+    const { data, error } = await supabase
+      .from('ifs_therapy_sessions')
+      .insert({
+        client_id: userId,
+        session_date: session.date,
+        therapist_notes: session.therapistNotes,
+        my_notes: session.myNotes,
+        parts_discussed: session.partsDiscussed,
+        insights: session.insights,
+        next_session_goals: session.nextSessionGoals
+      })
+      .select()
+      .single();
+    if (error) console.error('Error saving therapy session:', error);
+    return data;
+  },
+
+  async getTherapySessions(userId) {
+    const { data, error } = await supabase
+      .from('ifs_therapy_sessions')
+      .select('*')
+      .eq('client_id', userId)
+      .order('session_date', { ascending: false });
+    if (error) console.error('Error fetching therapy sessions:', error);
+    return data || [];
+  },
+
+  async saveTherapyHomework(userId, hw) {
+    const { data, error } = await supabase
+      .from('ifs_therapy_homework')
+      .insert({
+        client_id: userId,
+        title: hw.title,
+        description: hw.description,
+        due_date: hw.dueDate,
+        completed: hw.completed || false
+      })
+      .select()
+      .single();
+    if (error) console.error('Error saving homework:', error);
+    return data;
+  },
+
+  async updateTherapyHomework(homeworkId, updates) {
+    const { data, error } = await supabase
+      .from('ifs_therapy_homework')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', homeworkId)
+      .select()
+      .single();
+    if (error) console.error('Error updating homework:', error);
+    return data;
+  },
+
+  async getTherapyHomework(userId) {
+    const { data, error } = await supabase
+      .from('ifs_therapy_homework')
+      .select('*')
+      .eq('client_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) console.error('Error fetching homework:', error);
+    return data || [];
+  },
+
+  async saveTherapyActivityProgress(userId, activityId, progressData) {
+    const { data, error } = await supabase
+      .from('ifs_therapy_activity_progress')
+      .upsert({
+        client_id: userId,
+        activity_id: activityId,
+        progress_data: progressData.data || {},
+        completed: progressData.completed || false,
+        reflections: progressData.reflections || {},
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'client_id,activity_id' });
+    if (error) console.error('Error saving activity progress:', error);
+    return data;
+  },
+
+  async getTherapyActivityProgress(userId) {
+    const { data, error } = await supabase
+      .from('ifs_therapy_activity_progress')
+      .select('*')
+      .eq('client_id', userId);
+    if (error) console.error('Error fetching activity progress:', error);
+    return data || [];
+  },
+
+  async savePartsDialogue(userId, partId, messages) {
+    const { data, error } = await supabase
+      .from('ifs_parts_dialogue')
+      .upsert({
+        client_id: userId,
+        part_id: partId,
+        messages: messages,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'client_id,part_id' });
+    if (error) console.error('Error saving parts dialogue:', error);
+    return data;
+  },
+
+  async getPartsDialogue(userId, partId) {
+    const { data, error } = await supabase
+      .from('ifs_parts_dialogue')
+      .select('messages')
+      .eq('client_id', userId)
+      .eq('part_id', partId)
+      .single();
+    if (error && error.code !== 'PGRST116') console.error('Error fetching parts dialogue:', error);
+    return data?.messages || [];
+  },
+
+  async getAllPartsDialogues(userId) {
+    const { data, error } = await supabase
+      .from('ifs_parts_dialogue')
+      .select('*')
+      .eq('client_id', userId);
+    if (error) console.error('Error fetching all dialogues:', error);
+    return data || [];
+  },
+
+  async saveGamification(userId, gamData) {
+    const { data, error } = await supabase
+      .from('ifs_gamification')
+      .upsert({
+        client_id: userId,
+        xp: gamData.xp || 0,
+        level: gamData.level || 1,
+        badges: gamData.badges || {},
+        weekly_challenges: gamData.weeklyChallenges || [],
+        streak_current: gamData.streakCurrent || 0,
+        streak_longest: gamData.streakLongest || 0,
+        last_login_date: gamData.lastLoginDate,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'client_id' });
+    if (error) console.error('Error saving gamification:', error);
+    return data;
+  },
+
+  async getGamification(userId) {
+    const { data, error } = await supabase
+      .from('ifs_gamification')
+      .select('*')
+      .eq('client_id', userId)
+      .single();
+    if (error && error.code !== 'PGRST116') console.error('Error fetching gamification:', error);
+    return data;
+  },
+
+  async savePreferences(userId, prefs) {
+    const { data, error } = await supabase
+      .from('ifs_client_preferences')
+      .upsert({
+        client_id: userId,
+        theme: prefs.theme || {},
+        animations_enabled: prefs.animationsEnabled !== undefined ? prefs.animationsEnabled : true,
+        animation_speed: prefs.animationSpeed || 'normal',
+        favorite_affirmations: prefs.favoriteAffirmations || [],
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'client_id' });
+    if (error) console.error('Error saving preferences:', error);
+    return data;
+  },
+
+  async getPreferences(userId) {
+    const { data, error } = await supabase
+      .from('ifs_client_preferences')
+      .select('*')
+      .eq('client_id', userId)
+      .single();
+    if (error && error.code !== 'PGRST116') console.error('Error fetching preferences:', error);
+    return data;
+  },
+
+  async saveMilestone(userId, milestone) {
+    const { data, error } = await supabase
+      .from('ifs_milestones')
+      .insert({
+        client_id: userId,
+        type: milestone.type,
+        title: milestone.title,
+        description: milestone.description,
+        details: milestone.details,
+        date: milestone.date || new Date().toISOString()
+      })
+      .select()
+      .single();
+    if (error) console.error('Error saving milestone:', error);
+    return data;
+  },
+
+  async getMilestones(userId) {
+    const { data, error } = await supabase
+      .from('ifs_milestones')
+      .select('*')
+      .eq('client_id', userId)
+      .order('date', { ascending: false });
+    if (error) console.error('Error fetching milestones:', error);
+    return data || [];
+  },
+
+  async savePersonalizedCurriculum(userId, curriculumData) {
+    const { data, error } = await supabase
+      .from('ifs_personalized_curriculum')
+      .upsert({
+        client_id: userId,
+        curriculum_data: curriculumData,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'client_id' });
+    if (error) console.error('Error saving curriculum:', error);
+    return data;
+  },
+
+  async getPersonalizedCurriculum(userId) {
+    const { data, error } = await supabase
+      .from('ifs_personalized_curriculum')
+      .select('curriculum_data')
+      .eq('client_id', userId)
+      .single();
+    if (error && error.code !== 'PGRST116') console.error('Error fetching curriculum:', error);
+    return data?.curriculum_data || null;
+  },
+
+  async saveTherapistFeedback(therapistId, clientId, feedback) {
+    const { data, error } = await supabase
+      .from('ifs_therapist_feedback')
+      .insert({
+        therapist_id: therapistId,
+        client_id: clientId,
+        module_id: feedback.moduleId,
+        step_id: feedback.stepId,
+        feedback: feedback.feedback,
+        flagged: feedback.flagged || false
+      })
+      .select()
+      .single();
+    if (error) console.error('Error saving feedback:', error);
+    return data;
+  },
+
+  async getTherapistFeedback(clientId) {
+    const { data, error } = await supabase
+      .from('ifs_therapist_feedback')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false });
+    if (error) console.error('Error fetching feedback:', error);
+    return data || [];
+  },
+
+  async saveTherapistNotes(therapistId, clientId, notes) {
+    const { data, error } = await supabase
+      .from('ifs_therapist_notes')
+      .insert({
+        therapist_id: therapistId,
+        client_id: clientId,
+        note_type: notes.noteType || 'session',
+        content: notes.content,
+        session_date: notes.sessionDate
+      })
+      .select()
+      .single();
+    if (error) console.error('Error saving therapist notes:', error);
+    return data;
+  },
+
+  async getTherapistNotes(clientId) {
+    const { data, error } = await supabase
+      .from('ifs_therapist_notes')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false });
+    if (error) console.error('Error fetching therapist notes:', error);
+    return data || [];
+  },
+
   generateUserId() {
-    // Generate a UUID v4 format
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       const r = Math.random() * 16 | 0;
       const v = c === 'x' ? r : (r & 0x3 | 0x8);

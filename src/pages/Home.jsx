@@ -37,6 +37,7 @@ import {
 import PersonalizationModal from '../components/PersonalizationModal';
 import aiCurriculumPersonalizer from '../lib/aiCurriculumPersonalizer';
 import { assessmentManager, clientAuth } from '../lib/supabasePersonalization';
+import { supabaseHelpers } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Home = ({ clientId, client }) => {
@@ -55,10 +56,22 @@ const Home = ({ clientId, client }) => {
 
   useEffect(() => {
     setAnimateHero(true);
-    const savedProgress = localStorage.getItem('userProgress');
-    if (savedProgress) {
-      setUserProgress(JSON.parse(savedProgress));
-    }
+    
+    const loadProgress = async () => {
+      if (clientId) {
+        try {
+          const allProgress = await supabaseHelpers.getAllModuleProgress(clientId);
+          const progressObj = {};
+          (allProgress || []).forEach(p => {
+            progressObj[p.module_id] = p;
+          });
+          setUserProgress(progressObj);
+        } catch (err) {
+          console.error('Error loading progress:', err);
+        }
+      }
+    };
+    loadProgress();
     
     const loadSavedAssessment = async () => {
       if (clientId) {
@@ -245,9 +258,6 @@ const Home = ({ clientId, client }) => {
       console.log('🧠 Generating personalized curriculum based on assessment...');
       const personalizedCurriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(results);
       
-      // Save personalized curriculum to localStorage for immediate use
-      localStorage.setItem('personalizedCurriculum', JSON.stringify(personalizedCurriculum));
-      
       // Save assessment results to Supabase if client is authenticated
       const currentClient = clientAuth.getCurrentClient();
       if (currentClient) {
@@ -258,6 +268,7 @@ const Home = ({ clientId, client }) => {
           betrayal_score: results.find(r => r.id === 'betrayal')?.score || 0,
           responses: answers
         });
+        await supabaseHelpers.savePersonalizedCurriculum(currentClient.id, personalizedCurriculum);
       }
       
       console.log('✅ Personalized curriculum generated successfully');
@@ -670,10 +681,16 @@ const Home = ({ clientId, client }) => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => {
+              onClick={async () => {
                 const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
-                localStorage.setItem("assessmentResults", JSON.stringify(assessmentResults));
-                localStorage.setItem("personalizedCurriculum", JSON.stringify(curriculum));
+                const currentClient = clientAuth.getCurrentClient();
+                if (currentClient?.id) {
+                  try {
+                    await supabaseHelpers.savePersonalizedCurriculum(currentClient.id, curriculum);
+                  } catch (err) {
+                    console.error('Error saving curriculum:', err);
+                  }
+                }
                 setGeneratedCurriculum(curriculum);
                 setShowPersonalizationModal(true);
               }}

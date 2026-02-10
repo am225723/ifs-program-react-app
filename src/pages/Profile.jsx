@@ -16,6 +16,8 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { assessmentManager } from '../lib/supabasePersonalization';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const woundColors = {
   abandonment: { bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-700', fill: 'bg-blue-500' },
@@ -38,9 +40,14 @@ const Profile = ({ client }) => {
   const [allAssessments, setAllAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+  const [moodEntries, setMoodEntries] = useState([]);
+  const [gamificationData, setGamificationData] = useState({});
+  const [streakData, setStreakData] = useState({});
+  const [timeline, setTimeline] = useState([]);
 
   useEffect(() => {
     loadAssessmentData();
+    loadSupabaseData();
   }, [client]);
 
   const loadAssessmentData = async () => {
@@ -69,16 +76,30 @@ const Profile = ({ client }) => {
     setLoading(false);
   };
 
+  const loadSupabaseData = async () => {
+    const currentClient = clientAuth.getCurrentClient();
+    const clientId = currentClient?.id || client?.id;
+    if (!clientId) return;
+    try {
+      const [mood, gam, miles] = await Promise.all([
+        supabaseHelpers.getMoodEntries(clientId),
+        supabaseHelpers.getGamification(clientId),
+        supabaseHelpers.getMilestones(clientId),
+      ]);
+      setMoodEntries(mood || []);
+      if (gam) {
+        setGamificationData({ xp: gam.xp, level: gam.level, badges: gam.badges });
+        setStreakData({ currentStreak: gam.streak_current, longestStreak: gam.streak_longest, totalLogins: gam.total_logins });
+      }
+      setTimeline(miles || []);
+    } catch (err) { console.error('Error loading profile data:', err); }
+  };
+
   const handlePrint = () => {
     window.print();
   };
 
   const handleDownloadPDF = () => {
-    const moodEntries = JSON.parse(localStorage.getItem('moodEntries') || '[]');
-    const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
-    const gamificationData = JSON.parse(localStorage.getItem('gamificationData') || '{}');
-    const timeline = JSON.parse(localStorage.getItem('progressTimeline') || '[]');
-
     let report = `IFS HEALING JOURNEY - COMPREHENSIVE PROGRESS REPORT\n`;
     report += `${'='.repeat(55)}\n`;
     report += `Generated: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}\n`;

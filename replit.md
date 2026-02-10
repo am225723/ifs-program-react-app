@@ -131,26 +131,41 @@ src/
 
 ## Environment Variables
 - `VITE_PERPLEXITY_API_KEY` - Optional: Enables AI-enhanced personalization
+- Supabase URL and anon key are hardcoded in `src/lib/supabase.js`
 
-## Database Tables (Supabase)
-All migration SQL files are in `supabase/migrations/` (numbered 001-015, all use CREATE IF NOT EXISTS):
+## Data Storage
+- ALL data saves to Supabase (zero localStorage for data)
+- Only session auth (client_id, pin, name, role) uses localStorage for login persistence
+- Complete SQL schema: `supabase/complete_schema.sql` (run in Supabase SQL Editor)
+
+## Database Tables (Supabase) - 20 tables total
+Complete schema in `supabase/complete_schema.sql`:
 - `ifs_clients` - User data and PIN authentication
 - `ifs_assessment_results` - Child wound assessment scores
 - `ifs_personalized_curriculum` - Customized module content per client
 - `ifs_client_progress` - Module completion progress
 - `ifs_module_answers` - Question responses
 - `ifs_journal_entries` - User journal entries
-- `ifs_parts` - Identified internal parts
+- `ifs_parts` - Identified internal parts (with x, y, size for visual mapping)
+- `ifs_interactive_data` - Generic key-value data for modules
 - `ifs_exercise_progress` - Exercise completion tracking
 - `ifs_therapist_notes` - Therapist session notes
 - `ifs_milestones` - Client achievement milestones
 - `ifs_content_library` - Shared content resources
+- `ifs_mood_entries` - Mood & energy tracking entries
+- `ifs_therapy_sessions` - Client-recorded therapy sessions
+- `ifs_therapy_homework` - Therapy homework assignments
+- `ifs_parts_dialogue` - AI parts dialogue conversation history
+- `ifs_gamification` - XP, levels, badges, streaks, challenges
+- `ifs_client_preferences` - Theme, animation, favorite affirmations
+- `ifs_therapist_feedback` - Therapist feedback on client answers
+- `ifs_therapy_activity_progress` - Therapy activity completion
 
 ## Supabase Edge Functions
 - `supabase/functions/create-client/` - Creates new clients with auto-generated unique 6-digit PIN
 
 ## Deployment
-The app deploys to Vercel as a static site:
+The app deploys as a static site:
 ```json
 {
   "buildCommand": "npm run build",
@@ -160,7 +175,7 @@ The app deploys to Vercel as a static site:
 ```
 
 ## Notes
-- The app requires Supabase configuration for full functionality
+- The app requires Supabase for full functionality (no localStorage fallbacks)
 - PIN-based authentication system for secure user access
-- Run the numbered SQL files in `supabase/migrations/` in Supabase SQL Editor to set up all tables
+- Run `supabase/complete_schema.sql` in Supabase SQL Editor to set up ALL 20 tables
 - Perplexity AI is optional - the app works fully with local personalization fallback

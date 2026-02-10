@@ -5,6 +5,8 @@ import {
   Heart, Cloud, CloudRain, CloudSun, Zap, Save, Plus, BarChart3
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const moodOptions = [
   { value: 5, label: 'Great', icon: Sun, color: 'text-yellow-500', bg: 'bg-yellow-100', darkBg: 'bg-yellow-900/30', ring: 'ring-yellow-400' },
@@ -51,22 +53,27 @@ export default function MoodTracker() {
   const [savedToday, setSavedToday] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem('moodEntries');
-    if (stored) {
+    const loadEntries = async () => {
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      if (!clientId) return;
       try {
-        const parsed = JSON.parse(stored);
-        setEntries(parsed);
-        const today = new Date().toDateString();
-        const todayEntry = parsed.find(e => new Date(e.date).toDateString() === today);
-        if (todayEntry) {
-          setMood(todayEntry.mood);
-          setEnergy(todayEntry.energy);
-          setSelectedEmotions(todayEntry.emotions || []);
-          setNotes(todayEntry.notes || '');
-          setSavedToday(true);
+        const data = await supabaseHelpers.getMoodEntries(clientId);
+        if (data && data.length > 0) {
+          setEntries(data);
+          const today = new Date().toDateString();
+          const todayEntry = data.find(e => new Date(e.date).toDateString() === today);
+          if (todayEntry) {
+            setMood(todayEntry.mood);
+            setEnergy(todayEntry.energy);
+            setSelectedEmotions(todayEntry.emotions || []);
+            setNotes(todayEntry.notes || '');
+            setSavedToday(true);
+          }
         }
       } catch { /* ignore */ }
-    }
+    };
+    loadEntries();
   }, []);
 
   const toggleEmotion = (emotion) => {
@@ -75,22 +82,26 @@ export default function MoodTracker() {
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (mood === null) return;
+    const client = clientAuth.getCurrentClient();
+    const clientId = client?.id;
+    if (!clientId) return;
     const entry = {
-      id: Date.now(),
-      date: new Date().toISOString(),
       mood,
       energy,
       emotions: selectedEmotions,
       notes,
+      date: new Date().toISOString(),
     };
-    const today = new Date().toDateString();
-    const filtered = entries.filter(e => new Date(e.date).toDateString() !== today);
-    const updated = [entry, ...filtered];
-    setEntries(updated);
-    localStorage.setItem('moodEntries', JSON.stringify(updated));
-    setSavedToday(true);
+    const saved = await supabaseHelpers.saveMoodEntry(clientId, entry);
+    if (saved) {
+      const today = new Date().toDateString();
+      const filtered = entries.filter(e => new Date(e.date).toDateString() !== today);
+      const updated = [saved, ...filtered];
+      setEntries(updated);
+      setSavedToday(true);
+    }
   };
 
   const days = parseInt(viewRange);

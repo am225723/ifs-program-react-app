@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Play, Check, ChevronRight, Heart, Sparkles, Wind, Sun, Moon, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const microExercises = [
   {
@@ -108,15 +110,24 @@ export default function MicroLearning() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [timer, setTimer] = useState(0);
-  const [completedToday, setCompletedToday] = useState(() => {
-    const saved = localStorage.getItem('microLearningCompleted');
-    if (saved) {
-      const data = JSON.parse(saved);
-      const today = new Date().toDateString();
-      return data.date === today ? data.completed : [];
-    }
-    return [];
-  });
+  const [completedToday, setCompletedToday] = useState([]);
+
+  useEffect(() => {
+    const loadCompleted = async () => {
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      if (!clientId) return;
+      try {
+        const data = await supabaseHelpers.getExerciseProgress(clientId);
+        const today = new Date().toDateString();
+        const todayCompleted = (data || [])
+          .filter(ep => ep.exercise_id?.startsWith('micro-') && ep.completed && ep.data?.completedAt && new Date(ep.data.completedAt).toDateString() === today)
+          .map(ep => ep.exercise_id.replace('micro-', ''));
+        setCompletedToday(todayCompleted);
+      } catch { /* ignore */ }
+    };
+    loadCompleted();
+  }, []);
 
   useEffect(() => {
     if (isPlaying && activeExercise) {
@@ -142,15 +153,20 @@ export default function MicroLearning() {
     setIsPlaying(true);
   };
 
-  const completeExercise = () => {
+  const completeExercise = async () => {
     setIsPlaying(false);
     if (activeExercise && !completedToday.includes(activeExercise.id)) {
       const newCompleted = [...completedToday, activeExercise.id];
       setCompletedToday(newCompleted);
-      localStorage.setItem('microLearningCompleted', JSON.stringify({
-        date: new Date().toDateString(),
-        completed: newCompleted
-      }));
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      if (clientId) {
+        await supabaseHelpers.saveExerciseProgress(clientId, `micro-${activeExercise.id}`, {
+          completed: true,
+          completionTime: new Date().toISOString(),
+          data: { completedAt: new Date().toISOString() }
+        });
+      }
     }
   };
 

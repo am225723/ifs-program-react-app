@@ -190,8 +190,6 @@ export default function Assessments() {
     try {
       const client = clientAuth.getCurrentClientValidated();
       if (!client) {
-        const local = localStorage.getItem('ifs_assessment_results_all');
-        if (local) setSavedResults(JSON.parse(local));
         setLoading(false);
         return;
       }
@@ -209,12 +207,9 @@ export default function Assessments() {
           results[assessmentId] = row.data;
         });
         setSavedResults(results);
-        localStorage.setItem('ifs_assessment_results_all', JSON.stringify(results));
       }
     } catch (e) {
       console.error('Error loading assessment results:', e);
-      const local = localStorage.getItem('ifs_assessment_results_all');
-      if (local) setSavedResults(JSON.parse(local));
     }
     setLoading(false);
   };
@@ -295,12 +290,10 @@ export default function Assessments() {
 
       const updatedResults = { ...savedResults, [assessmentId]: results };
       setSavedResults(updatedResults);
-      localStorage.setItem('ifs_assessment_results_all', JSON.stringify(updatedResults));
     } catch (e) {
       console.error('Error saving assessment:', e);
       const updatedResults = { ...savedResults, [assessmentId]: results };
       setSavedResults(updatedResults);
-      localStorage.setItem('ifs_assessment_results_all', JSON.stringify(updatedResults));
     }
     setSaving(false);
   };

@@ -184,15 +184,13 @@ const Journal = () => {
               wordCount: row.content?.split(' ').length || 0
             }));
             setEntries(mapped);
-            localStorage.setItem('journalEntries', JSON.stringify(mapped));
             return;
           }
         }
       } catch (err) {
         console.error('Error loading entries from Supabase:', err);
       }
-      const savedEntries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
-      setEntries(savedEntries);
+      setEntries([]);
     };
     loadEntries();
   }, []);
@@ -246,7 +244,6 @@ const Journal = () => {
 
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
-    localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
     
     setSavedMessage('Entry saved successfully!');
     setEntryTitle('');
@@ -272,7 +269,6 @@ const Journal = () => {
 
     const updatedEntries = entries.filter(entry => entry.id !== entryId);
     setEntries(updatedEntries);
-    localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
     setSelectedEntry(null);
   };
 

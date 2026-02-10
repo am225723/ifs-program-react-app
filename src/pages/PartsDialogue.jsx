@@ -5,6 +5,8 @@ import {
   Volume2, Loader
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
 const apiKey = import.meta.env.VITE_PERPLEXITY_API_KEY;
@@ -130,15 +132,17 @@ export default function PartsDialogue() {
   const hasApiKey = !!apiKey;
 
   useEffect(() => {
-    const saved = localStorage.getItem('partsDialogueHistory');
-    if (saved) {
+    const loadMessages = async () => {
+      const client = clientAuth.getCurrentClient();
+      if (!client?.id) return;
       try {
-        const parsed = JSON.parse(saved);
-        if (parsed[selectedPart.id]) {
-          setMessages(parsed[selectedPart.id]);
-        }
-      } catch {}
-    }
+        const msgs = await supabaseHelpers.getPartsDialogue(client.id, selectedPart.id);
+        setMessages(msgs || []);
+      } catch (err) {
+        console.error('Error loading parts dialogue:', err);
+      }
+    };
+    loadMessages();
   }, []);
 
   useEffect(() => {
@@ -146,23 +150,30 @@ export default function PartsDialogue() {
   }, [messages]);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('partsDialogueHistory');
-      const all = saved ? JSON.parse(saved) : {};
-      all[selectedPart.id] = messages;
-      localStorage.setItem('partsDialogueHistory', JSON.stringify(all));
-    } catch {}
+    if (messages.length === 0) return;
+    const saveMessages = async () => {
+      const client = clientAuth.getCurrentClient();
+      if (!client?.id) return;
+      try {
+        await supabaseHelpers.savePartsDialogue(client.id, selectedPart.id, messages);
+      } catch (err) {
+        console.error('Error saving parts dialogue:', err);
+      }
+    };
+    saveMessages();
   }, [messages, selectedPart.id]);
 
-  const handlePartSelect = (part) => {
+  const handlePartSelect = async (part) => {
     setSelectedPart(part);
-    const saved = localStorage.getItem('partsDialogueHistory');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setMessages(parsed[part.id] || []);
-      } catch { setMessages([]); }
-    } else {
+    const client = clientAuth.getCurrentClient();
+    if (!client?.id) {
+      setMessages([]);
+      return;
+    }
+    try {
+      const msgs = await supabaseHelpers.getPartsDialogue(client.id, part.id);
+      setMessages(msgs || []);
+    } catch {
       setMessages([]);
     }
   };
@@ -231,14 +242,16 @@ export default function PartsDialogue() {
     setIsLoading(false);
   };
 
-  const clearConversation = () => {
+  const clearConversation = async () => {
     setMessages([]);
-    try {
-      const saved = localStorage.getItem('partsDialogueHistory');
-      const all = saved ? JSON.parse(saved) : {};
-      all[selectedPart.id] = [];
-      localStorage.setItem('partsDialogueHistory', JSON.stringify(all));
-    } catch {}
+    const client = clientAuth.getCurrentClient();
+    if (client?.id) {
+      try {
+        await supabaseHelpers.savePartsDialogue(client.id, selectedPart.id, []);
+      } catch (err) {
+        console.error('Error clearing dialogue:', err);
+      }
+    }
   };
 
   const handleKeyDown = (e) => {

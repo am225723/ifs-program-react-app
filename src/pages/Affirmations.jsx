@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Heart, Copy, Check, Sparkles, Volume2, Star, BookOpen } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { assessmentManager } from '../lib/supabasePersonalization';
-import { clientAuth } from '../lib/supabasePersonalization';
+import { supabaseHelpers } from '../lib/supabase';
+import { assessmentManager, clientAuth } from '../lib/supabasePersonalization';
 
 const woundAffirmations = {
   abandonment: {
@@ -110,15 +110,25 @@ export default function Affirmations() {
   const [savedAssessment, setSavedAssessment] = useState(null);
   const [currentAffirmation, setCurrentAffirmation] = useState('');
   const [copied, setCopied] = useState(false);
-  const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem('favoriteAffirmations');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [favorites, setFavorites] = useState([]);
   const [showAllWound, setShowAllWound] = useState(false);
 
   useEffect(() => {
     loadAssessment();
+    loadFavorites();
   }, []);
+
+  const loadFavorites = async () => {
+    const client = clientAuth.getCurrentClient();
+    const clientId = client?.id;
+    if (!clientId) return;
+    try {
+      const prefs = await supabaseHelpers.getPreferences(clientId);
+      if (prefs?.favorite_affirmations) {
+        setFavorites(prefs.favorite_affirmations);
+      }
+    } catch { /* ignore */ }
+  };
 
   useEffect(() => {
     if (savedAssessment?.primary_wound) {
@@ -157,12 +167,16 @@ export default function Affirmations() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const toggleFavorite = (affirmation) => {
+  const toggleFavorite = async (affirmation) => {
     const newFavorites = favorites.includes(affirmation)
       ? favorites.filter(f => f !== affirmation)
       : [...favorites, affirmation];
     setFavorites(newFavorites);
-    localStorage.setItem('favoriteAffirmations', JSON.stringify(newFavorites));
+    const client = clientAuth.getCurrentClient();
+    const clientId = client?.id;
+    if (clientId) {
+      await supabaseHelpers.savePreferences(clientId, { favoriteAffirmations: newFavorites });
+    }
   };
 
   const primaryWound = savedAssessment?.primary_wound;

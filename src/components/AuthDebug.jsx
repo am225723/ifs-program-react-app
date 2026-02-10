@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clientAuth } from '../lib/supabasePersonalization';
+import { supabaseHelpers } from '../lib/supabase';
 
 const AuthDebug = () => {
   const navigate = useNavigate();
@@ -11,25 +12,32 @@ const AuthDebug = () => {
     checkAuthStatus();
   }, []);
 
-  const checkAuthStatus = () => {
+  const checkAuthStatus = async () => {
     const client = clientAuth.getCurrentClientValidated();
-    const curriculum = localStorage.getItem('personalizedCurriculum');
-    const assessment = localStorage.getItem('assessmentResults');
+    const clientId = client?.id;
+    
+    let curriculum = null;
+    let assessment = null;
+
+    if (clientId) {
+      try {
+        curriculum = await supabaseHelpers.getPersonalizedCurriculum(clientId);
+        assessment = await supabaseHelpers.getAssessment(clientId);
+      } catch (err) {
+        console.error('Error loading data from Supabase:', err);
+      }
+    }
     
     setAuthStatus({
       isAuthenticated: !!client,
       client: client,
-      hasSession: !!localStorage.getItem('clientSession'),
+      hasSession: !!client,
       hasCurriculum: !!curriculum,
       hasAssessment: !!assessment
     });
 
     if (curriculum) {
-      try {
-        setPersonalizedCurriculum(JSON.parse(curriculum));
-      } catch (e) {
-        console.error('Error parsing curriculum:', e);
-      }
+      setPersonalizedCurriculum(curriculum);
     }
   };
 

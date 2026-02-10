@@ -28,6 +28,8 @@ import {
   getTotalEstimatedTime
 } from '../data/curriculumData';
 import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   const [completedModules, setCompletedModules] = useState([]);
@@ -42,18 +44,24 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
       setCompletedModules(userProgress.completedModules);
     }
 
-    // Load personalized curriculum
-    const savedCurriculum = localStorage.getItem('personalizedCurriculum');
-    if (savedCurriculum) {
+    const loadCurriculum = async () => {
+      const client = clientAuth.getCurrentClient();
+      const id = client?.id;
+      if (!id) return;
+      
       try {
-        const curriculum = JSON.parse(savedCurriculum);
-        setPersonalizedCurriculum(curriculum);
-        setIsPersonalized(true);
-        console.log('✅ Loaded personalized curriculum:', curriculum.primaryWound);
+        const curriculum = await supabaseHelpers.getPersonalizedCurriculum(id);
+        if (curriculum) {
+          setPersonalizedCurriculum(curriculum);
+          setIsPersonalized(true);
+          console.log('✅ Loaded personalized curriculum:', curriculum.primaryWound);
+        }
       } catch (error) {
         console.error('❌ Error loading personalized curriculum:', error);
       }
-    }
+    };
+
+    loadCurriculum();
   }, [userProgress]);
 
   // Get next recommended module

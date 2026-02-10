@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Lock
 } from 'lucide-react';
+import { useData } from '../contexts/DataContext';
 
 const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -28,6 +29,8 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
   const [incompleteItems, setIncompleteItems] = useState([]);
 
+  const { userId, saveModuleProgress, getModuleProgress } = useData();
+
   const steps = module.steps || [];
   const currentStep = steps[currentStepIndex];
   const isLastStep = currentStepIndex === steps.length - 1;
@@ -35,19 +38,34 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
 
   // Load saved progress
   useEffect(() => {
-    if (userProgress[module.id]) {
-      const savedStep = userProgress[module.id].currentStep || 0;
-      const savedResponses = userProgress[module.id].responses || {};
-      const savedCompletedSteps = userProgress[module.id].completedSteps || [];
-      
-      setCurrentStepIndex(savedStep);
-      setActivityResponses(savedResponses);
-      setCompletedSteps(savedCompletedSteps);
-    }
-  }, [module.id, userProgress]);
+    const loadProgress = async () => {
+      if (!userId) return;
+      try {
+        const progress = await getModuleProgress(module.id);
+        if (progress) {
+          setCurrentStepIndex(progress.current_step || 0);
+          setActivityResponses(progress.responses || {});
+          setCompletedSteps(progress.completed_steps || []);
+          setIsCompleted(progress.is_completed || false);
+        }
+      } catch (error) {
+        console.error('Error loading progress:', error);
+        if (userProgress[module.id]) {
+          const savedStep = userProgress[module.id].currentStep || 0;
+          const savedResponses = userProgress[module.id].responses || {};
+          const savedCompletedSteps = userProgress[module.id].completedSteps || [];
+          setCurrentStepIndex(savedStep);
+          setActivityResponses(savedResponses);
+          setCompletedSteps(savedCompletedSteps);
+        }
+      }
+    };
+    loadProgress();
+  }, [module.id, userProgress, userId, getModuleProgress]);
 
   // Save progress
-  const saveProgress = () => {
+  const saveProgress = async () => {
+    if (!userId) return;
     const progress = {
       currentStep: currentStepIndex,
       responses: activityResponses,
@@ -55,7 +73,11 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
       lastAccessed: new Date().toISOString()
     };
     
-    localStorage.setItem(`module-progress-${module.id}`, JSON.stringify(progress));
+    try {
+      await saveModuleProgress(module.id, progress);
+    } catch (error) {
+      console.error('Error saving progress:', error);
+    }
     
     // Notify parent component
     if (typeof window !== 'undefined' && window.onModuleProgress) {
@@ -145,12 +167,13 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
     setIsCompleted(true);
     completeStep();
     
-    // Save completion
-    const completedModules = JSON.parse(localStorage.getItem('completedModules') || '[]');
-    if (!completedModules.includes(module.id)) {
-      completedModules.push(module.id);
-      localStorage.setItem('completedModules', JSON.stringify(completedModules));
-    }
+    saveModuleProgress(module.id, {
+      currentStep: steps.length - 1,
+      responses: activityResponses,
+      completedSteps: [...completedSteps, currentStepIndex],
+      isCompleted: true,
+      completedAt: new Date().toISOString()
+    });
     
     if (onComplete) {
       onComplete(module);
@@ -158,13 +181,25 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
   };
 
   // Reset module
-  const resetModule = () => {
+  const resetModule = async () => {
     setCurrentStepIndex(0);
     setCompletedSteps([]);
     setActivityResponses({});
     setIsCompleted(false);
     setShowCertificate(false);
-    localStorage.removeItem(`module-progress-${module.id}`);
+    
+    if (userId) {
+      try {
+        await saveModuleProgress(module.id, {
+          currentStep: 0,
+          responses: {},
+          completedSteps: [],
+          isCompleted: false
+        });
+      } catch (error) {
+        console.error('Error resetting module:', error);
+      }
+    }
   };
 
   // Render Learn section

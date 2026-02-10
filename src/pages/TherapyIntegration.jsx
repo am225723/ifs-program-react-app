@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Calendar, FileText, CheckSquare, Clock, MessageSquare, Download, Trash2, Edit3, Save, X, ChevronDown, ChevronUp, Heart, Shield, Users, Play, Pause, Star, BookOpen, Target, Sparkles, Eye, Brain, AlertCircle, Lightbulb } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const therapistClientActivities = [
   {
@@ -360,18 +362,9 @@ const iconMap = {
 export default function TherapyIntegration() {
   const { theme, getAnimationClass } = useTheme();
   const [activeTab, setActiveTab] = useState('activities');
-  const [sessions, setSessions] = useState(() => {
-    const saved = localStorage.getItem('therapySessions');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [homework, setHomework] = useState(() => {
-    const saved = localStorage.getItem('therapyHomework');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [activityProgress, setActivityProgress] = useState(() => {
-    const saved = localStorage.getItem('therapyActivityProgress');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [sessions, setSessions] = useState([]);
+  const [homework, setHomework] = useState([]);
+  const [activityProgress, setActivityProgress] = useState({});
   const [activeActivity, setActiveActivity] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
   const [stepTimer, setStepTimer] = useState(0);
@@ -397,16 +390,34 @@ export default function TherapyIntegration() {
   });
 
   useEffect(() => {
-    localStorage.setItem('therapySessions', JSON.stringify(sessions));
-  }, [sessions]);
-
-  useEffect(() => {
-    localStorage.setItem('therapyHomework', JSON.stringify(homework));
-  }, [homework]);
-
-  useEffect(() => {
-    localStorage.setItem('therapyActivityProgress', JSON.stringify(activityProgress));
-  }, [activityProgress]);
+    const loadData = async () => {
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      if (!clientId) return;
+      try {
+        const [sessionsData, homeworkData, activityData] = await Promise.all([
+          supabaseHelpers.getTherapySessions(clientId),
+          supabaseHelpers.getTherapyHomework(clientId),
+          supabaseHelpers.getTherapyActivityProgress(clientId)
+        ]);
+        setSessions(sessionsData || []);
+        setHomework(homeworkData || []);
+        const progressObj = {};
+        (activityData || []).forEach(item => {
+          progressObj[item.activity_id] = {
+            completedAt: item.updated_at,
+            reflections: item.reflections || {},
+            timesCompleted: item.progress_data?.timesCompleted || 1,
+            completed: item.completed
+          };
+        });
+        setActivityProgress(progressObj);
+      } catch (err) {
+        console.error('Error loading therapy data:', err);
+      }
+    };
+    loadData();
+  }, []);
 
   useEffect(() => {
     let interval;
@@ -446,17 +457,27 @@ export default function TherapyIntegration() {
     }
   };
 
-  const completeActivity = () => {
+  const completeActivity = async () => {
     if (activeActivity) {
-      const progress = {
-        ...activityProgress,
-        [activeActivity.id]: {
-          completedAt: new Date().toISOString(),
-          reflections: activityReflections,
-          timesCompleted: (activityProgress[activeActivity.id]?.timesCompleted || 0) + 1
-        }
+      const newTimesCompleted = (activityProgress[activeActivity.id]?.timesCompleted || 0) + 1;
+      const progressEntry = {
+        completedAt: new Date().toISOString(),
+        reflections: activityReflections,
+        timesCompleted: newTimesCompleted
       };
-      setActivityProgress(progress);
+      setActivityProgress(prev => ({ ...prev, [activeActivity.id]: progressEntry }));
+      const client = clientAuth.getCurrentClient();
+      if (client?.id) {
+        try {
+          await supabaseHelpers.saveTherapyActivityProgress(client.id, activeActivity.id, {
+            data: { timesCompleted: newTimesCompleted },
+            completed: true,
+            reflections: activityReflections
+          });
+        } catch (err) {
+          console.error('Error saving activity progress:', err);
+        }
+      }
       setActiveActivity(null);
       setActiveStep(0);
       setStepTimer(0);
@@ -464,14 +485,28 @@ export default function TherapyIntegration() {
     }
   };
 
-  const addSession = () => {
+  const addSession = async () => {
     if (!newSession.date) return;
-    const session = {
-      id: Date.now(),
-      ...newSession,
-      createdAt: new Date().toISOString()
+    const client = clientAuth.getCurrentClient();
+    const clientId = client?.id;
+    const sessionData = {
+      date: newSession.date,
+      therapistNotes: newSession.therapistNotes,
+      myNotes: newSession.myNotes,
+      partsDiscussed: newSession.partsDiscussed,
+      insights: newSession.insights,
+      nextSessionGoals: newSession.nextSessionGoals
     };
-    setSessions(prev => [session, ...prev]);
+    let savedSession = { id: Date.now(), ...newSession, createdAt: new Date().toISOString() };
+    if (clientId) {
+      try {
+        const result = await supabaseHelpers.saveTherapySession(clientId, sessionData);
+        if (result) savedSession = result;
+      } catch (err) {
+        console.error('Error saving session:', err);
+      }
+    }
+    setSessions(prev => [savedSession, ...prev]);
     setNewSession({
       date: new Date().toISOString().split('T')[0],
       therapistNotes: '',
@@ -487,22 +522,42 @@ export default function TherapyIntegration() {
     setSessions(prev => prev.filter(s => s.id !== id));
   };
 
-  const addHomework = () => {
+  const addHomework = async () => {
     if (!newHomework.title) return;
-    const hw = {
-      id: Date.now(),
-      ...newHomework,
-      createdAt: new Date().toISOString()
+    const client = clientAuth.getCurrentClient();
+    const clientId = client?.id;
+    const hwData = {
+      title: newHomework.title,
+      description: newHomework.description,
+      dueDate: newHomework.dueDate,
+      completed: false
     };
-    setHomework(prev => [hw, ...prev]);
+    let savedHw = { id: Date.now(), ...newHomework, createdAt: new Date().toISOString() };
+    if (clientId) {
+      try {
+        const result = await supabaseHelpers.saveTherapyHomework(clientId, hwData);
+        if (result) savedHw = result;
+      } catch (err) {
+        console.error('Error saving homework:', err);
+      }
+    }
+    setHomework(prev => [savedHw, ...prev]);
     setNewHomework({ title: '', description: '', dueDate: '', completed: false });
     setShowAddHomework(false);
   };
 
-  const toggleHomework = (id) => {
+  const toggleHomework = async (id) => {
+    const hw = homework.find(h => h.id === id);
+    if (!hw) return;
+    const newCompleted = !hw.completed;
     setHomework(prev => prev.map(h =>
-      h.id === id ? { ...h, completed: !h.completed } : h
+      h.id === id ? { ...h, completed: newCompleted } : h
     ));
+    try {
+      await supabaseHelpers.updateTherapyHomework(id, { completed: newCompleted });
+    } catch (err) {
+      console.error('Error updating homework:', err);
+    }
   };
 
   const deleteHomework = (id) => {

@@ -29,6 +29,8 @@ import {
   Eye,
   Info
 } from 'lucide-react';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const Home = () => {
   const [showAssessment, setShowAssessment] = useState(false);
@@ -40,10 +42,17 @@ const Home = () => {
 
   useEffect(() => {
     setAnimateHero(true);
-    const savedProgress = localStorage.getItem('userProgress');
-    if (savedProgress) {
-      setUserProgress(JSON.parse(savedProgress));
-    }
+    const loadUserProgress = async () => {
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      if (clientId) {
+        const progress = await supabaseHelpers.getAllModuleProgress(clientId);
+        if (progress && progress.length > 0) {
+          setUserProgress(progress);
+        }
+      }
+    };
+    loadUserProgress();
   }, []);
 
   const woundSections = [
@@ -214,12 +223,10 @@ const Home = () => {
       console.log('🧠 Generating personalized curriculum based on assessment...');
       const personalizedCurriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(results);
       
-      // Save personalized curriculum to localStorage for immediate use
-      localStorage.setItem('personalizedCurriculum', JSON.stringify(personalizedCurriculum));
-      
       // Save assessment results to Supabase if client is authenticated
       const currentClient = clientAuth.getCurrentClient();
       if (currentClient) {
+        await supabaseHelpers.savePersonalizedCurriculum(currentClient.id, personalizedCurriculum);
         await clientAuth.saveAssessment(currentClient.id, {
           abandonment_score: results.find(r => r.id === 'abandonment')?.score || 0,
           shame_score: results.find(r => r.id === 'shame')?.score || 0,
@@ -644,13 +651,17 @@ const Home = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/curriculum"
-              onClick={() => {
+              onClick={async () => {
                 // Ensure personalized curriculum is loaded when navigating
-                const personalizedCurriculum = localStorage.getItem('personalizedCurriculum');
-                if (!personalizedCurriculum && assessmentResults) {
-                  // Generate curriculum if not already done
-                  const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
-                  localStorage.setItem('personalizedCurriculum', JSON.stringify(curriculum));
+                const client = clientAuth.getCurrentClient();
+                const clientId = client?.id;
+                if (clientId && assessmentResults) {
+                  const personalizedCurriculum = await supabaseHelpers.getPersonalizedCurriculum(clientId);
+                  if (!personalizedCurriculum) {
+                    // Generate curriculum if not already saved
+                    const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentResults);
+                    await supabaseHelpers.savePersonalizedCurriculum(clientId, curriculum);
+                  }
                 }
               }}
               className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-center shadow-lg hover:shadow-xl transform hover:scale-105"

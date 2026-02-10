@@ -19,6 +19,8 @@ import {
   Activity,
   Zap
 } from 'lucide-react';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const Curriculum = () => {
   const [searchParams] = useSearchParams();
@@ -28,8 +30,21 @@ const Curriculum = () => {
   const [showModuleDetail, setShowModuleDetail] = useState(false);
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('completedModules') || '[]');
-    setCompletedModules(saved);
+    const loadCompleted = async () => {
+      const client = clientAuth.getCurrentClient();
+      if (client?.id) {
+        try {
+          const allProgress = await supabaseHelpers.getAllModuleProgress(client.id);
+          const completed = (allProgress || [])
+            .filter(p => p.is_completed)
+            .map(p => p.module_id);
+          setCompletedModules(completed);
+        } catch (err) {
+          console.error('Error loading completed modules:', err);
+        }
+      }
+    };
+    loadCompleted();
     if (selectedModule) {
       setShowModuleDetail(true);
     }
@@ -503,7 +518,10 @@ const Curriculum = () => {
                           // Complete module
                           const updatedCompleted = [...completedModules, selectedModule];
                           setCompletedModules(updatedCompleted);
-                          localStorage.setItem('completedModules', JSON.stringify(updatedCompleted));
+                          const client = clientAuth.getCurrentClient();
+                          if (client?.id) {
+                            supabaseHelpers.saveModuleProgress(client.id, selectedModule, { isCompleted: true });
+                          }
                           setShowModuleDetail(false);
                         }
                       }}

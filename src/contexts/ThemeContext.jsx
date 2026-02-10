@@ -106,32 +106,55 @@ const animationStyles = {
 };
 
 export function ThemeProvider({ children }) {
-  const [currentTheme, setCurrentTheme] = useState(() => {
-    const saved = localStorage.getItem('userTheme');
-    return saved ? JSON.parse(saved) : themePresets.sanctuary;
-  });
-
-  const [animationsEnabled, setAnimationsEnabled] = useState(() => {
-    const saved = localStorage.getItem('animationsEnabled');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
-
-  const [animationSpeed, setAnimationSpeed] = useState(() => {
-    const saved = localStorage.getItem('animationSpeed');
-    return saved || 'normal';
-  });
+  const [currentTheme, setCurrentTheme] = useState(themePresets.sanctuary);
+  const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  const [animationSpeed, setAnimationSpeed] = useState('normal');
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('userTheme', JSON.stringify(currentTheme));
-  }, [currentTheme]);
+    loadPreferences();
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('animationsEnabled', JSON.stringify(animationsEnabled));
-  }, [animationsEnabled]);
+    if (prefsLoaded) {
+      savePreferences();
+    }
+  }, [currentTheme, animationsEnabled, animationSpeed, prefsLoaded]);
 
-  useEffect(() => {
-    localStorage.setItem('animationSpeed', animationSpeed);
-  }, [animationSpeed]);
+  const loadPreferences = async () => {
+    try {
+      const { clientAuth } = await import('../lib/supabasePersonalization');
+      const client = clientAuth.getCurrentClient();
+      if (!client?.id) { setPrefsLoaded(true); return; }
+      const { supabaseHelpers } = await import('../lib/supabase');
+      const prefs = await supabaseHelpers.getPreferences(client.id);
+      if (prefs) {
+        if (prefs.theme && Object.keys(prefs.theme).length > 0) setCurrentTheme(prefs.theme);
+        if (prefs.animations_enabled !== null && prefs.animations_enabled !== undefined) setAnimationsEnabled(prefs.animations_enabled);
+        if (prefs.animation_speed) setAnimationSpeed(prefs.animation_speed);
+      }
+    } catch (e) {
+      console.error('Error loading theme preferences:', e);
+    } finally {
+      setPrefsLoaded(true);
+    }
+  };
+
+  const savePreferences = async () => {
+    try {
+      const { clientAuth } = await import('../lib/supabasePersonalization');
+      const client = clientAuth.getCurrentClient();
+      if (!client?.id) return;
+      const { supabaseHelpers } = await import('../lib/supabase');
+      await supabaseHelpers.savePreferences(client.id, {
+        theme: currentTheme,
+        animationsEnabled,
+        animationSpeed
+      });
+    } catch (e) {
+      console.error('Error saving theme preferences:', e);
+    }
+  };
 
   const selectTheme = (themeId) => {
     if (themePresets[themeId]) {

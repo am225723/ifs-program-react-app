@@ -6,6 +6,8 @@ import {
   Crown, Zap, Sun, Moon, Gift
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const LEVEL_NAMES = [
   'Curious Explorer',
@@ -82,33 +84,61 @@ export default function GamificationHub() {
   const { theme } = useTheme();
   const isDark = theme.isDark;
 
-  const [gamificationData, setGamificationData] = useState(() => {
-    const saved = localStorage.getItem('gamificationData');
-    if (saved) {
-      try { return JSON.parse(saved); } catch { return getDefaultGamificationData(); }
-    }
-    return getDefaultGamificationData();
-  });
-
-  const [streakData, setStreakData] = useState(() => {
-    const saved = localStorage.getItem('streakData');
-    if (saved) {
-      try { return JSON.parse(saved); } catch { return getDefaultStreakData(); }
-    }
-    return getDefaultStreakData();
-  });
-
+  const [gamificationData, setGamificationData] = useState(getDefaultGamificationData());
+  const [streakData, setStreakData] = useState(getDefaultStreakData());
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('gamificationData', JSON.stringify(gamificationData));
-  }, [gamificationData]);
+    const loadData = async () => {
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      if (!clientId) { setDataLoaded(true); return; }
+      try {
+        const data = await supabaseHelpers.getGamification(clientId);
+        if (data) {
+          setGamificationData({
+            xp: data.xp || 0,
+            level: data.level || 1,
+            badges: data.badges || getDefaultGamificationData().badges,
+            weeklyChallenges: data.weekly_challenges || DEFAULT_WEEKLY_CHALLENGES,
+            weekStartDate: data.week_start_date || new Date().toISOString(),
+            lastUpdated: data.updated_at || new Date().toISOString(),
+          });
+          setStreakData({
+            currentStreak: data.streak_current || 1,
+            longestStreak: data.streak_longest || 1,
+            lastLoginDate: data.last_login_date || new Date().toISOString().split('T')[0],
+            totalLogins: data.total_logins || 1,
+          });
+        }
+      } catch (err) { console.error('Error loading gamification:', err); }
+      setDataLoaded(true);
+    };
+    loadData();
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('streakData', JSON.stringify(streakData));
-  }, [streakData]);
+    if (!dataLoaded) return;
+    const saveData = async () => {
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      if (!clientId) return;
+      await supabaseHelpers.saveGamification(clientId, {
+        xp: gamificationData.xp,
+        level: gamificationData.level,
+        badges: gamificationData.badges,
+        weeklyChallenges: gamificationData.weeklyChallenges,
+        streakCurrent: streakData.currentStreak,
+        streakLongest: streakData.longestStreak,
+        lastLoginDate: streakData.lastLoginDate,
+      });
+    };
+    saveData();
+  }, [gamificationData, streakData, dataLoaded]);
 
   useEffect(() => {
+    if (!dataLoaded) return;
     const today = new Date().toISOString().split('T')[0];
     if (streakData.lastLoginDate !== today) {
       const lastDate = new Date(streakData.lastLoginDate);
@@ -125,7 +155,7 @@ export default function GamificationHub() {
         };
       });
     }
-  }, []);
+  }, [dataLoaded]);
 
   const currentLevel = Math.min(Math.floor(gamificationData.xp / XP_PER_LEVEL) + 1, 10);
   const xpInCurrentLevel = gamificationData.xp % XP_PER_LEVEL;

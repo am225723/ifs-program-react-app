@@ -18,11 +18,13 @@ import {
 } from 'lucide-react';
 import SectionedLearningContent from './SectionedLearningContent';
 import { useData } from '../contexts/DataContext';
+import { supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const LearningModuleRenderer = ({ userProgress = {} }) => {
   const { moduleId } = useParams();
   const navigate = useNavigate();
-  const { saveModuleAnswers, getModuleAnswers } = useData();
+  const { saveModuleAnswers, getModuleAnswers, userId } = useData();
   const [module, setModule] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
@@ -86,22 +88,29 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
     try {
       setIsLoading(true);
       
-      // Try to load from personalized curriculum first
-      const personalizedCurriculum = localStorage.getItem('personalizedCurriculum');
+      const client = clientAuth.getCurrentClient();
+      const clientId = client?.id;
+      
+      let personalizedCurriculum = null;
       let targetModule = null;
 
+      if (clientId) {
+        try {
+          personalizedCurriculum = await supabaseHelpers.getPersonalizedCurriculum(clientId);
+        } catch (err) {
+          console.error('Error loading personalized curriculum:', err);
+        }
+      }
+
       if (personalizedCurriculum) {
-        const curriculum = JSON.parse(personalizedCurriculum);
-        targetModule = curriculum.personalizedModules?.find(m => m.id === moduleId);
+        targetModule = personalizedCurriculum.personalizedModules?.find(m => m.id === moduleId);
       }
       
-      // If not found in personalized curriculum, load from default modules
       if (!targetModule) {
         const { curriculumModules } = await import("../data/curriculumData.js");
         targetModule = curriculumModules.find(m => m.id === moduleId);
       }
 
-      // If found in personalized curriculum but missing steps, add them
       if (targetModule && !targetModule.steps && personalizedCurriculum) {
         targetModule.steps = generateDefaultStepsForPersonalizedModule(targetModule);
         targetModule.estimatedTime = targetModule.estimatedTime || `${targetModule.estimatedMinutes || 30} minutes`;
@@ -173,15 +182,20 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
     const userModules = userProgress.completedModules || [];
     if (!userModules.includes(moduleId)) {
       userModules.push(moduleId);
-      // Here you would also save to backend/localStorage
+      // Progress is saved via Supabase
     }
   };
 
-  const saveProgress = (progressData) => {
-    // Save to localStorage for now - in production, save to backend
-    const allProgress = JSON.parse(localStorage.getItem('moduleProgress') || '{}');
-    allProgress[moduleId] = progressData;
-    localStorage.setItem('moduleProgress', JSON.stringify(allProgress));
+  const saveProgress = async (progressData) => {
+    const client = clientAuth.getCurrentClient();
+    const clientId = client?.id;
+    if (clientId) {
+      try {
+        await supabaseHelpers.saveModuleProgress(clientId, moduleId, progressData);
+      } catch (err) {
+        console.error('Error saving module progress:', err);
+      }
+    }
   };
 
   if (isLoading) {

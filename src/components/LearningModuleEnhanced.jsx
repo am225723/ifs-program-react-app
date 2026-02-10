@@ -131,9 +131,6 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
       }
     } catch (error) {
       console.error('Error saving progress:', error);
-      // Fallback to localStorage
-      localStorage.setItem(`module-progress-${module.id}`, JSON.stringify(progress));
-      localStorage.setItem(`interactive-data-${module.id}`, JSON.stringify(interactiveData));
     }
   };
 
@@ -241,12 +238,13 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     setIsCompleted(true);
     completeStep();
     
-    // Save completion
-    const completedModules = JSON.parse(localStorage.getItem('completedModules') || '[]');
-    if (!completedModules.includes(module.id)) {
-      completedModules.push(module.id);
-      localStorage.setItem('completedModules', JSON.stringify(completedModules));
-    }
+    saveModuleProgress(module.id, {
+      current_step: steps.length - 1,
+      responses: activityResponses,
+      completed_steps: [...completedSteps, currentStepIndex],
+      is_completed: true,
+      completedAt: new Date().toISOString()
+    });
     
     if (onComplete) {
       onComplete(module);
@@ -279,9 +277,6 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
       }
     }
     
-    // Clear from localStorage as well
-    localStorage.removeItem(`module-progress-${module.id}`);
-    localStorage.removeItem(`interactive-data-${module.id}`);
   };
 
   // Format meditation time
