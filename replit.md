@@ -4,6 +4,13 @@
 This is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It features PIN-based authentication, personalized curriculum delivery based on child wound assessment results, and comprehensive healing exercises.
 
 ## Recent Changes (February 2026)
+- Fixed dark mode text visibility: Home page cards (Recommendations, Assessments, Healing Tools, IFS Principles) now use dark backgrounds in dark mode instead of invisible light text on light bg
+- Journal entries now save to Supabase (ifs_journal_entries table) with localStorage fallback
+- Journal streak calculation is real (counts consecutive days with entries from today backward)
+- Journal average mood is real (calculates from all entry moods)
+- Journal page fully theme-aware with dark mode support
+- Protective Parts assessment: "Add All to Map" button added, parts auto-save to Supabase via PartsContext
+- Protective Parts assessment links to Parts Studio for visualization after adding parts
 - PWA support: manifest.json, service worker, iOS meta tags for installable mobile app
 - Admin role system: user_role column (client vs therapist), role-based route protection
 - Enhanced Admin Dashboard wired to real Supabase data (replaces mock data)

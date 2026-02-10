@@ -26,6 +26,52 @@ import {
   Sun
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
+import { supabase, supabaseHelpers } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
+import { useTheme } from '../contexts/ThemeContext';
+
+const calculateStreak = (entries) => {
+  if (!entries || entries.length === 0) return 0;
+  const uniqueDays = new Set(
+    entries.map(e => {
+      const d = new Date(e.date);
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    })
+  );
+  let streak = 0;
+  const now = new Date();
+  for (let i = 0; i < 365; i++) {
+    const check = new Date(now);
+    check.setDate(check.getDate() - i);
+    const key = `${check.getFullYear()}-${check.getMonth()}-${check.getDate()}`;
+    if (uniqueDays.has(key)) {
+      streak++;
+    } else {
+      if (i === 0) continue;
+      break;
+    }
+  }
+  return streak;
+};
+
+const moodValues = { amazing: 5, good: 4, neutral: 3, challenged: 2, difficult: 1 };
+const moodEmojis = [
+  { value: 'difficult', emoji: '😢', threshold: 1.5 },
+  { value: 'challenged', emoji: '😔', threshold: 2.5 },
+  { value: 'neutral', emoji: '😐', threshold: 3.5 },
+  { value: 'good', emoji: '😊', threshold: 4.5 },
+  { value: 'amazing', emoji: '😄', threshold: 5.1 },
+];
+
+const calculateAverageMood = (entries) => {
+  if (!entries || entries.length === 0) return '😐';
+  const total = entries.reduce((sum, e) => sum + (moodValues[e.mood] || 3), 0);
+  const avg = total / entries.length;
+  for (const m of moodEmojis) {
+    if (avg < m.threshold) return m.emoji;
+  }
+  return '😄';
+};
 
 const Journal = () => {
   const [entries, setEntries] = useState([]);
@@ -41,6 +87,7 @@ const Journal = () => {
   const [showPrompts, setShowPrompts] = useState(false);
   const [savedMessage, setSavedMessage] = useState('');
   const textAreaRef = useRef(null);
+  const { theme } = useTheme();
 
   const journalPrompts = [
     {
@@ -116,8 +163,38 @@ const Journal = () => {
   ];
 
   useEffect(() => {
-    const savedEntries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
-    setEntries(savedEntries);
+    const loadEntries = async () => {
+      try {
+        const client = clientAuth.getCurrentClientValidated();
+        if (client) {
+          const { data, error } = await supabase
+            .from('ifs_journal_entries')
+            .select('*')
+            .eq('client_id', client.id)
+            .order('created_at', { ascending: false });
+
+          if (!error && data && data.length > 0) {
+            const mapped = data.map(row => ({
+              id: row.id,
+              title: row.title,
+              content: row.content,
+              tags: row.tags || [],
+              mood: row.mood || 'neutral',
+              date: row.created_at,
+              wordCount: row.content?.split(' ').length || 0
+            }));
+            setEntries(mapped);
+            localStorage.setItem('journalEntries', JSON.stringify(mapped));
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Error loading entries from Supabase:', err);
+      }
+      const savedEntries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
+      setEntries(savedEntries);
+    };
+    loadEntries();
   }, []);
 
   useEffect(() => {
@@ -127,7 +204,7 @@ const Journal = () => {
     }
   }, [savedMessage]);
 
-  const handleSaveEntry = () => {
+  const handleSaveEntry = async () => {
     if (!entryTitle.trim() || !entryContent.trim()) {
       alert('Please add both a title and content to your entry.');
       return;
@@ -143,6 +220,30 @@ const Journal = () => {
       wordCount: entryContent.split(' ').length
     };
 
+    try {
+      const client = clientAuth.getCurrentClientValidated();
+      if (client) {
+        const { data, error } = await supabase
+          .from('ifs_journal_entries')
+          .insert({
+            client_id: client.id,
+            title: entryTitle,
+            content: entryContent,
+            mood: entryMood,
+            tags: entryTags,
+            created_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (!error && data && data.id) {
+          newEntry.id = data.id;
+        }
+      }
+    } catch (err) {
+      console.error('Error saving entry to Supabase:', err);
+    }
+
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
     localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
@@ -156,7 +257,19 @@ const Journal = () => {
     setIsWriting(false);
   };
 
-  const handleDeleteEntry = (entryId) => {
+  const handleDeleteEntry = async (entryId) => {
+    try {
+      const client = clientAuth.getCurrentClientValidated();
+      if (client) {
+        await supabase
+          .from('ifs_journal_entries')
+          .delete()
+          .eq('id', entryId);
+      }
+    } catch (err) {
+      console.error('Error deleting entry from Supabase:', err);
+    }
+
     const updatedEntries = entries.filter(entry => entry.id !== entryId);
     setEntries(updatedEntries);
     localStorage.setItem('journalEntries', JSON.stringify(updatedEntries));
@@ -189,6 +302,19 @@ const Journal = () => {
     return entryContent.split(' ').filter(word => word.length > 0).length;
   };
 
+  const cardBg = theme.isDark ? 'bg-slate-800' : 'bg-white';
+  const textPrimary = theme.isDark ? 'text-white' : 'text-gray-900';
+  const textSecondary = theme.isDark ? 'text-slate-300' : 'text-gray-600';
+  const textTertiary = theme.isDark ? 'text-slate-400' : 'text-gray-500';
+  const inputBg = theme.isDark ? 'bg-slate-700 text-white border-slate-600' : 'border-gray-300';
+  const inputText = theme.isDark ? 'text-white placeholder-slate-400' : 'text-gray-900 placeholder-gray-400';
+  const textareaText = theme.isDark ? 'text-slate-200 placeholder-slate-400' : 'text-gray-700 placeholder-gray-400';
+  const subtleBg = theme.isDark ? 'bg-slate-700' : 'bg-gray-100';
+  const subtleBgHover = theme.isDark ? 'hover:bg-slate-600' : 'hover:bg-gray-200';
+  const modalBg = theme.isDark ? 'bg-slate-800' : 'bg-white';
+  const promptBg = theme.isDark ? 'bg-slate-700' : 'bg-gray-50';
+  const promptHover = theme.isDark ? 'hover:bg-slate-600' : 'hover:bg-purple-50';
+
   if (isWriting) {
     return (
       <div className="min-h-screen">
@@ -196,7 +322,7 @@ const Journal = () => {
           <div className="flex items-center justify-between mb-8">
             <button
               onClick={() => setIsWriting(false)}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className={`flex items-center ${textSecondary} hover:${textPrimary} transition-colors`}
             >
               ← Back to Journal
             </button>
@@ -215,22 +341,20 @@ const Journal = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            {/* Entry Header */}
+          <div className={`${cardBg} rounded-3xl shadow-xl p-8`}>
             <div className="mb-6">
               <input
                 type="text"
                 value={entryTitle}
                 onChange={(e) => setEntryTitle(e.target.value)}
                 placeholder="Entry title..."
-                className="w-full text-3xl font-bold text-gray-900 placeholder-gray-400 border-none outline-none mb-4"
+                className={`w-full text-3xl font-bold ${inputText} border-none outline-none mb-4 bg-transparent`}
               />
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
-                  {/* Mood Selector */}
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-600">Mood:</span>
+                    <span className={`text-sm ${textSecondary}`}>Mood:</span>
                     <div className="flex space-x-2">
                       {moods.map((mood) => (
                         <button
@@ -238,8 +362,8 @@ const Journal = () => {
                           onClick={() => setEntryMood(mood.value)}
                           className={`text-2xl p-2 rounded-lg transition-all ${
                             entryMood === mood.value 
-                              ? 'bg-gray-100 ring-2 ring-purple-500' 
-                              : 'hover:bg-gray-50'
+                              ? `${subtleBg} ring-2 ring-purple-500` 
+                              : `${subtleBgHover}`
                           }`}
                         >
                           {mood.emoji}
@@ -248,8 +372,7 @@ const Journal = () => {
                     </div>
                   </div>
 
-                  {/* Word Count */}
-                  <div className="text-sm text-gray-500">
+                  <div className={`text-sm ${textTertiary}`}>
                     {getWordCount()} words
                   </div>
                 </div>
@@ -264,20 +387,18 @@ const Journal = () => {
               </div>
             </div>
 
-            {/* Writing Area */}
             <textarea
               ref={textAreaRef}
               value={entryContent}
               onChange={(e) => setEntryContent(e.target.value)}
               placeholder="Start writing about your inner world..."
-              className="w-full h-96 text-lg text-gray-700 placeholder-gray-400 border-none outline-none resize-none leading-relaxed"
+              className={`w-full h-96 text-lg ${textareaText} border-none outline-none resize-none leading-relaxed bg-transparent`}
             />
 
-            {/* Tags */}
             <div className="mt-6">
               <div className="flex items-center space-x-2 mb-3">
-                <Tag className="w-4 h-4 text-gray-600" />
-                <span className="text-sm text-gray-600">Tags:</span>
+                <Tag className={`w-4 h-4 ${textSecondary}`} />
+                <span className={`text-sm ${textSecondary}`}>Tags:</span>
               </div>
               <div className="flex flex-wrap gap-2 mb-3">
                 {entryTags.map((tag, index) => (
@@ -300,7 +421,7 @@ const Journal = () => {
                   <button
                     key={tag}
                     onClick={() => setEntryTags([...entryTags, tag])}
-                    className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition-colors"
+                    className={`${subtleBg} ${textSecondary} px-3 py-1 rounded-full text-sm ${subtleBgHover} transition-colors`}
                   >
                     + {tag}
                   </button>
@@ -309,15 +430,14 @@ const Journal = () => {
             </div>
           </div>
 
-          {/* Prompts Modal */}
           {showPrompts && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[80vh] overflow-y-auto p-8">
+              <div className={`${modalBg} rounded-3xl max-w-4xl w-full max-h-[80vh] overflow-y-auto p-8`}>
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900">Journal Prompts</h3>
+                  <h3 className={`text-2xl font-bold ${textPrimary}`}>Journal Prompts</h3>
                   <button
                     onClick={() => setShowPrompts(false)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className={`${textTertiary} hover:${textSecondary}`}
                   >
                     ×
                   </button>
@@ -332,16 +452,16 @@ const Journal = () => {
                           <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                             <Icon className="w-5 h-5 text-purple-600" />
                           </div>
-                          <h4 className="font-bold text-gray-900">{category.title}</h4>
+                          <h4 className={`font-bold ${textPrimary}`}>{category.title}</h4>
                         </div>
                         <div className="space-y-2">
                           {category.prompts.map((prompt, index) => (
                             <button
                               key={index}
                               onClick={() => handlePromptSelect(prompt)}
-                              className="w-full text-left p-3 bg-gray-50 rounded-lg hover:bg-purple-50 hover:border-purple-200 border border-transparent transition-all duration-200"
+                              className={`w-full text-left p-3 ${promptBg} rounded-lg ${promptHover} border border-transparent transition-all duration-200`}
                             >
-                              <p className="text-sm text-gray-700">{prompt}</p>
+                              <p className={`text-sm ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>{prompt}</p>
                             </button>
                           ))}
                         </div>
@@ -364,7 +484,7 @@ const Journal = () => {
           <div className="flex items-center justify-between mb-8">
             <button
               onClick={() => setSelectedEntry(null)}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className={`flex items-center ${textSecondary} hover:${textPrimary} transition-colors`}
             >
               ← Back to Entries
             </button>
@@ -378,15 +498,14 @@ const Journal = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-xl p-8">
-            {/* Entry Header */}
+          <div className={`${cardBg} rounded-3xl shadow-xl p-8`}>
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{selectedEntry.title}</h1>
+              <h1 className={`text-3xl font-bold ${textPrimary} mb-4`}>{selectedEntry.title}</h1>
               
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
                   <span className="text-2xl">{getMoodEmoji(selectedEntry.mood)}</span>
-                  <div className="text-gray-600">
+                  <div className={textSecondary}>
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
                       {new Date(selectedEntry.date).toLocaleDateString()}
@@ -397,7 +516,7 @@ const Journal = () => {
                     </div>
                   </div>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className={`text-sm ${textTertiary}`}>
                   {selectedEntry.wordCount} words
                 </div>
               </div>
@@ -416,9 +535,8 @@ const Journal = () => {
               )}
             </div>
 
-            {/* Entry Content */}
             <div className="prose prose-lg max-w-none">
-              <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+              <div className={`${theme.isDark ? 'text-slate-200' : 'text-gray-700'} leading-relaxed whitespace-pre-wrap`}>
                 {selectedEntry.content}
               </div>
             </div>
@@ -430,7 +548,6 @@ const Journal = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex items-center justify-between">
@@ -452,62 +569,60 @@ const Journal = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Stats Bar */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className={`${cardBg} rounded-2xl shadow-lg p-6`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600">Total Entries</span>
+              <span className={textSecondary}>Total Entries</span>
               <BookOpen className="w-5 h-5 text-purple-600" />
             </div>
-            <div className="text-2xl font-bold text-gray-900">{entries.length}</div>
+            <div className={`text-2xl font-bold ${textPrimary}`}>{entries.length}</div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className={`${cardBg} rounded-2xl shadow-lg p-6`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600">Total Words</span>
+              <span className={textSecondary}>Total Words</span>
               <PenTool className="w-5 h-5 text-blue-600" />
             </div>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className={`text-2xl font-bold ${textPrimary}`}>
               {entries.reduce((total, entry) => total + (entry.wordCount || 0), 0).toLocaleString()}
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className={`${cardBg} rounded-2xl shadow-lg p-6`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600">Current Streak</span>
+              <span className={textSecondary}>Current Streak</span>
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
-            <div className="text-2xl font-bold text-gray-900">7 days</div>
+            <div className={`text-2xl font-bold ${textPrimary}`}>{calculateStreak(entries)} days</div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className={`${cardBg} rounded-2xl shadow-lg p-6`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600">Avg Mood</span>
+              <span className={textSecondary}>Avg Mood</span>
               <Star className="w-5 h-5 text-yellow-600" />
             </div>
-            <div className="text-2xl font-bold text-gray-900">😊</div>
+            <div className={`text-2xl font-bold ${textPrimary}`}>{calculateAverageMood(entries)}</div>
           </div>
         </div>
 
-        {/* Actions Bar */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <div className={`${cardBg} rounded-2xl shadow-lg p-6 mb-8`}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="flex items-center space-x-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${textTertiary} w-5 h-5`} />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search entries..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className={`w-full pl-10 pr-4 py-2 border ${inputBg} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                 />
               </div>
               
               <select
                 value={selectedMood}
                 onChange={(e) => setSelectedMood(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className={`px-4 py-2 border ${inputBg} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
               >
                 <option value="all">All Moods</option>
                 {moods.map((mood) => (
@@ -528,19 +643,18 @@ const Journal = () => {
           </div>
         </div>
 
-        {/* Recent Entries */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Recent Entries</h2>
+          <h2 className={`text-2xl font-bold ${textPrimary} mb-6`}>Recent Entries</h2>
           
           {filteredEntries.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BookOpen className="w-10 h-10 text-gray-400" />
+            <div className={`${cardBg} rounded-2xl shadow-lg p-12 text-center`}>
+              <div className={`w-20 h-20 ${subtleBg} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                <BookOpen className={`w-10 h-10 ${textTertiary}`} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className={`text-xl font-semibold ${textPrimary} mb-2`}>
                 {entries.length === 0 ? 'No journal entries yet' : 'No entries found'}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className={`${textSecondary} mb-6`}>
                 {entries.length === 0 
                   ? 'Start your healing journey by writing your first entry' 
                   : 'Try adjusting your search or filters'
@@ -559,25 +673,25 @@ const Journal = () => {
                 <div
                   key={entry.id}
                   onClick={() => setSelectedEntry(entry)}
-                  className="bg-white rounded-2xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-all duration-300 group"
+                  className={`${cardBg} rounded-2xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-all duration-300 group`}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <span className="text-2xl">{getMoodEmoji(entry.mood)}</span>
-                    <Eye className="w-5 h-5 text-gray-400 group-hover:text-purple-600 transition-colors" />
+                    <Eye className={`w-5 h-5 ${textTertiary} group-hover:text-purple-600 transition-colors`} />
                   </div>
                   
-                  <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                  <h3 className={`text-lg font-bold ${textPrimary} mb-2 group-hover:text-purple-600 transition-colors`}>
                     {entry.title}
                   </h3>
                   
-                  <p className="text-gray-600 mb-4 line-clamp-3">
+                  <p className={`${textSecondary} mb-4 line-clamp-3`}>
                     {entry.content.length > 150 
                       ? entry.content.substring(0, 150) + '...' 
                       : entry.content
                     }
                   </p>
                   
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className={`flex items-center justify-between text-sm ${textTertiary}`}>
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
                       {new Date(entry.date).toLocaleDateString()}
@@ -596,7 +710,7 @@ const Journal = () => {
                         </span>
                       ))}
                       {entry.tags.length > 3 && (
-                        <span className="text-xs text-gray-500">+{entry.tags.length - 3}</span>
+                        <span className={`text-xs ${textTertiary}`}>+{entry.tags.length - 3}</span>
                       )}
                     </div>
                   )}

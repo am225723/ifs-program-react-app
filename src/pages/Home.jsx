@@ -836,9 +836,9 @@ const Home = ({ clientId, client }) => {
 
           {/* Personalized Recommendations */}
           {savedAssessment.primary_wound && (
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 mb-8">
+            <div className={`${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-100'} rounded-2xl border p-6 mb-8`}>
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-indigo-600" />
+                <Sparkles className={`w-5 h-5 ${theme.isDark ? 'text-indigo-400' : 'text-indigo-600'}`} />
                 <h3 className={`font-semibold ${theme.isDark ? 'text-slate-100' : 'text-gray-800'}`}>Personalized for Your {savedAssessment.primary_wound} Healing</h3>
               </div>
               
@@ -903,7 +903,7 @@ const Home = ({ clientId, client }) => {
           </div>
 
           {/* Assessments Card */}
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100 p-6 mb-8">
+          <div className={`${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100'} rounded-2xl border p-6 mb-8`}>
             <div className="flex items-center justify-between mb-4">
               <h3 className={`font-semibold ${theme.isDark ? 'text-slate-100' : 'text-gray-800'} flex items-center gap-2`}>
                 <CheckCircle className="w-5 h-5 text-purple-600" />
@@ -948,7 +948,7 @@ const Home = ({ clientId, client }) => {
           </div>
 
           {/* New Features Section */}
-          <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 mb-8">
+          <div className={`${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-100'} rounded-2xl border p-6 mb-8`}>
             <h3 className={`font-semibold ${theme.isDark ? 'text-slate-100' : 'text-gray-800'} mb-4 flex items-center gap-2`}>
               <Sparkles className="w-5 h-5 text-indigo-600" />
               Healing Tools
@@ -1129,7 +1129,7 @@ const Home = ({ clientId, client }) => {
       </div>
 
       {/* Interactive Features */}
-      <div className="py-20 bg-gradient-to-br from-gray-50 to-purple-50">
+      <div className={`py-20 ${theme.isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-gray-50 to-purple-50'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className={`text-4xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-4`}>Interactive Healing Tools</h2>
@@ -1308,7 +1308,7 @@ const Home = ({ clientId, client }) => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-3xl p-8">
+            <div className={`${theme.isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-purple-100 to-pink-100'} rounded-3xl p-8`}>
               <div className="space-y-4">
                 <div className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl p-6 border border-purple-200`}>
                   <h3 className={`font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3 flex items-center`}>

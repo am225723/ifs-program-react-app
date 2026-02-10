@@ -173,7 +173,7 @@ function getIdentifiedParts(results) {
 
 export default function Assessments() {
   const { theme, getAnimationClass } = useTheme();
-  const { parts, addPart } = useParts();
+  const { parts, addPart, saveToSupabase } = useParts();
   const [activeAssessment, setActiveAssessment] = useState(null);
   const [answers, setAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
@@ -343,6 +343,30 @@ export default function Assessments() {
       color: partDef.type === 'manager' ? '#3B82F6' : partDef.type === 'firefighter' ? '#F59E0B' : '#EC4899'
     });
     setAddedParts(prev => ({ ...prev, [partDef.name]: 'added' }));
+    setTimeout(() => saveToSupabase(), 500);
+  };
+
+  const handleAddAllPartsToMap = (identifiedParts) => {
+    let addedCount = 0;
+    const existingNames = parts.map(p => p.name?.toLowerCase().trim());
+    identifiedParts.forEach(partDef => {
+      if (existingNames.includes(partDef.name.toLowerCase().trim())) {
+        setAddedParts(prev => ({ ...prev, [partDef.name]: 'exists' }));
+        return;
+      }
+      addPart({
+        type: partDef.type,
+        name: partDef.name,
+        role: partDef.role,
+        notes: `${partDef.description}\n\nStrategy: ${partDef.strategy}`,
+        color: partDef.type === 'manager' ? '#3B82F6' : partDef.type === 'firefighter' ? '#F59E0B' : '#EC4899'
+      });
+      setAddedParts(prev => ({ ...prev, [partDef.name]: 'added' }));
+      addedCount++;
+    });
+    if (addedCount > 0) {
+      setTimeout(() => saveToSupabase(), 500);
+    }
   };
 
   if (loading) {
@@ -487,13 +511,27 @@ export default function Assessments() {
                       Based on your responses, these parts appear most active. Add them to your Parts Map to track and work with them.
                     </p>
                   </div>
-                  <Link
-                    to="/parts-mapping"
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    View Parts Map
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleAddAllPartsToMap(identifiedParts)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                        identifiedParts.every(p => addedParts[p.name])
+                          ? (theme.isDark ? 'bg-slate-700 text-slate-400' : 'bg-gray-100 text-gray-500') + ' cursor-default'
+                          : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700'
+                      }`}
+                      disabled={identifiedParts.every(p => addedParts[p.name])}
+                    >
+                      <Plus className="w-4 h-4" />
+                      {identifiedParts.every(p => addedParts[p.name]) ? 'All Added' : 'Add All to Map'}
+                    </button>
+                    <Link
+                      to="/parts-studio"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      View Parts Map
+                    </Link>
+                  </div>
                 </div>
 
                 {['manager', 'firefighter', 'exile'].map(type => {
