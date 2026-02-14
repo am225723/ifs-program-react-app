@@ -153,12 +153,11 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
     setExpandedCategories(newExpanded);
   };
 
-  // Handle module selection
   const handleModuleSelect = (module) => {
     const status = getModuleStatus(module);
     if (status === 'available' || status === 'completed') {
       setCurrentModule(module);
-      onModuleSelect(module);
+      if (onModuleSelect) onModuleSelect(module);
     }
   };
 

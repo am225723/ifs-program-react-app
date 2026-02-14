@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -43,6 +43,104 @@ import {
 import { useData } from '../contexts/DataContext';
 import { progressTracker } from '../lib/supabasePersonalization';
 
+const VoiceRecorder = ({ onRecordingComplete, label }) => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState(null);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
+  const timerRef = useRef(null);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        setAudioURL(url);
+        stream.getTracks().forEach(t => t.stop());
+        if (onRecordingComplete) onRecordingComplete(blob, url);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      timerRef.current = setInterval(() => setRecordingTime(t => t + 1), 1000);
+    } catch (err) {
+      console.error('Microphone access denied:', err);
+      alert('Please allow microphone access to record your response.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+  };
+
+  const deleteRecording = () => {
+    if (audioURL) URL.revokeObjectURL(audioURL);
+    setAudioURL(null);
+    setRecordingTime(0);
+  };
+
+  const formatRecTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
+
+  return (
+    <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-4 border border-red-200">
+      <div className="flex items-center gap-2 mb-3">
+        <Activity className="w-4 h-4 text-red-500" />
+        <span className="text-sm font-medium text-gray-700">{label || 'Voice Recording'}</span>
+      </div>
+      {!audioURL ? (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={isRecording ? stopRecording : startRecording}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              isRecording
+                ? 'bg-red-600 text-white animate-pulse'
+                : 'bg-red-100 text-red-700 hover:bg-red-200'
+            }`}
+          >
+            {isRecording ? (
+              <><Pause className="w-4 h-4" /><span>Stop ({formatRecTime(recordingTime)})</span></>
+            ) : (
+              <><Play className="w-4 h-4" /><span>Record Response</span></>
+            )}
+          </button>
+          {isRecording && (
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              <span className="text-xs text-red-600">Recording...</span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center gap-3">
+          <audio src={audioURL} controls className="flex-1 h-10" />
+          <button
+            onClick={deleteRecording}
+            className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+            title="Delete recording"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
@@ -52,6 +150,9 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
   const [interactiveData, setInteractiveData] = useState({});
   const [meditationActive, setMeditationActive] = useState(false);
   const [meditationTimer, setMeditationTimer] = useState(0);
+  const [meditationStepIndex, setMeditationStepIndex] = useState(0);
+  const [meditationStepTimer, setMeditationStepTimer] = useState(0);
+  const [meditationCompleted, setMeditationCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false);
   const [incompleteItems, setIncompleteItems] = useState([]);
@@ -140,16 +241,36 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     return () => clearTimeout(timer);
   }, [currentStepIndex, activityResponses, completedSteps, interactiveData]);
 
-  // Meditation timer
   useEffect(() => {
     let interval;
     if (meditationActive) {
       interval = setInterval(() => {
         setMeditationTimer(prev => prev + 1);
+        setMeditationStepTimer(prev => {
+          const currentActivityData = currentStep?.data;
+          const meditationSteps = currentActivityData?.guidedSteps || [];
+          if (meditationSteps.length === 0) return prev;
+          const currentMedText = meditationSteps[meditationStepIndex];
+          if (!currentMedText) return prev;
+          const pauseMatch = currentMedText.match(/\[(?:Pause|Allow)\s+(?:for\s+)?(\d+)\s+seconds?(?:\s+of\s+silence)?\]/i);
+          const stepDuration = pauseMatch ? parseInt(pauseMatch[1]) : 20;
+          const next = prev + 1;
+          if (next >= stepDuration) {
+            if (meditationStepIndex < meditationSteps.length - 1) {
+              setMeditationStepIndex(i => i + 1);
+              return 0;
+            } else {
+              setMeditationActive(false);
+              setMeditationCompleted(true);
+              return prev;
+            }
+          }
+          return next;
+        });
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [meditationActive]);
+  }, [meditationActive, meditationStepIndex, currentStep]);
 
   // Handle step completion
   const completeStep = () => {
@@ -403,6 +524,9 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   rows={4}
                 />
+                <div className="mt-2">
+                  <VoiceRecorder label={`Record answer for Question ${index + 1}`} />
+                </div>
               </div>
             ))}
           </div>
@@ -679,55 +803,183 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     );
   };
 
-  // Guided Meditation Component
   const renderGuidedMeditation = () => {
+    const currentActivityData = currentStep?.data;
+    const meditationSteps = currentActivityData?.guidedSteps || [];
+    const hasSteps = meditationSteps.length > 0;
+    const currentMedStep = meditationSteps[meditationStepIndex];
+    const pauseMatch = currentMedStep ? currentMedStep.match(/\[(?:Pause|Allow)\s+(?:for\s+)?(\d+)\s+seconds?(?:\s+of\s+silence)?\]/i) : null;
+    const stepPauseDuration = pauseMatch ? parseInt(pauseMatch[1]) : 20;
+    const isBreathingStep = currentMedStep ? /breath|breathe|inhale|exhale/i.test(currentMedStep) : false;
+
+    const handleMeditationPlayPause = () => {
+      if (!hasSteps) {
+        setMeditationActive(!meditationActive);
+        return;
+      }
+      if (meditationCompleted) {
+        setMeditationStepIndex(0);
+        setMeditationStepTimer(0);
+        setMeditationCompleted(false);
+        setMeditationActive(true);
+        return;
+      }
+      setMeditationActive(!meditationActive);
+    };
+
+    const handleMeditationReset = () => {
+      setMeditationActive(false);
+      setMeditationTimer(0);
+      setMeditationStepIndex(0);
+      setMeditationStepTimer(0);
+      setMeditationCompleted(false);
+    };
+
+    const goToMeditationStep = (idx) => {
+      setMeditationStepIndex(idx);
+      setMeditationStepTimer(0);
+    };
+
     return (
-      <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-6 border border-purple-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">🧘‍♀️ Guided Meditation</h3>
-        <div className="text-center">
-          <div className="mb-4">
-            <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              {meditationActive ? (
-                <Pause className="w-12 h-12 text-white" />
-              ) : (
-                <Play className="w-12 h-12 text-white" />
-              )}
+      <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 border border-purple-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Guided Meditation</h3>
+
+        {hasSteps ? (
+          <div>
+            <div className="text-center mb-6">
+              <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-1000 ${
+                meditationActive
+                  ? isBreathingStep
+                    ? 'bg-gradient-to-r from-blue-400 to-teal-400 animate-pulse scale-110'
+                    : 'bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse'
+                  : 'bg-gradient-to-r from-purple-500 to-pink-500'
+              }`}>
+                {meditationActive ? (
+                  isBreathingStep ? <Brain className="w-12 h-12 text-white" /> : <Pause className="w-12 h-12 text-white" />
+                ) : (
+                  <Play className="w-12 h-12 text-white" />
+                )}
+              </div>
+              <div className="text-sm text-gray-600 mb-1">
+                Step {meditationStepIndex + 1} of {meditationSteps.length}
+              </div>
+              <div className="text-lg font-bold text-gray-900">
+                {meditationActive ? formatTime(meditationTimer) : meditationCompleted ? 'Complete' : 'Ready to begin'}
+              </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-2">
-              {meditationActive ? formatTime(meditationTimer) : 'Ready to begin'}
+
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+              <div
+                className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${((meditationStepIndex + (meditationActive ? meditationStepTimer / stepPauseDuration : 0)) / meditationSteps.length) * 100}%` }}
+              />
+            </div>
+
+            {isBreathingStep && meditationActive && (
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                  <Brain className="w-4 h-4" />
+                  Breathing Exercise - Follow along
+                </div>
+              </div>
+            )}
+
+            {pauseMatch && meditationActive && (
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium animate-pulse">
+                  <Clock className="w-4 h-4" />
+                  Pause - {stepPauseDuration - meditationStepTimer}s remaining
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white rounded-xl p-6 mb-6 border border-purple-200 min-h-[120px]">
+              <p className="text-gray-800 text-lg leading-relaxed italic">
+                {currentMedStep ? currentMedStep.replace(/\[(?:Pause|Allow)\s+(?:for\s+)?(\d+)\s+seconds?(?:\s+of\s+silence)?\]/gi, '').trim() : ''}
+              </p>
+            </div>
+
+            <VoiceRecorder label="Record your thoughts during this meditation" />
+
+            <div className="flex justify-center gap-3 mt-4">
+              <button
+                onClick={() => goToMeditationStep(Math.max(0, meditationStepIndex - 1))}
+                disabled={meditationStepIndex === 0}
+                className="p-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleMeditationPlayPause}
+                className="px-8 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+              >
+                {meditationCompleted ? (
+                  <><RotateCcw className="w-5 h-5" /><span>Restart</span></>
+                ) : meditationActive ? (
+                  <><Pause className="w-5 h-5" /><span>Pause</span></>
+                ) : (
+                  <><Play className="w-5 h-5" /><span>{meditationStepIndex > 0 ? 'Resume' : 'Begin Meditation'}</span></>
+                )}
+              </button>
+              <button
+                onClick={() => goToMeditationStep(Math.min(meditationSteps.length - 1, meditationStepIndex + 1))}
+                disabled={meditationStepIndex >= meditationSteps.length - 1}
+                className="p-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+              >
+                <ArrowRight className="w-5 h-5" />
+              </button>
+              <button
+                onClick={handleMeditationReset}
+                className="p-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                title="Reset"
+              >
+                <RotateCcw className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="mt-6 max-h-48 overflow-y-auto">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Full Transcript</h4>
+              <div className="space-y-2">
+                {meditationSteps.map((step, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => goToMeditationStep(idx)}
+                    className={`w-full text-left p-3 rounded-lg text-sm transition-all ${
+                      idx === meditationStepIndex
+                        ? 'bg-purple-100 border-2 border-purple-300 text-purple-900'
+                        : idx < meditationStepIndex
+                        ? 'bg-green-50 border border-green-200 text-green-800'
+                        : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                        idx === meditationStepIndex ? 'bg-purple-600 text-white' : idx < meditationStepIndex ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                      }`}>
+                        {idx < meditationStepIndex ? '✓' : idx + 1}
+                      </span>
+                      <span className="line-clamp-2">{step.replace(/\[(?:Pause|Allow).*?\]/gi, '').trim().substring(0, 120)}...</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="flex justify-center space-x-4">
+        ) : (
+          <div className="text-center">
+            <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              {meditationActive ? <Pause className="w-12 h-12 text-white" /> : <Play className="w-12 h-12 text-white" />}
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-4">{meditationActive ? formatTime(meditationTimer) : 'Ready to begin'}</div>
             <button
               onClick={() => setMeditationActive(!meditationActive)}
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center space-x-2"
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2 mx-auto"
             >
-              {meditationActive ? (
-                <>
-                  <Pause className="w-5 h-5" />
-                  <span>Pause</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-5 h-5" />
-                  <span>Start Meditation</span>
-                </>
-              )}
+              {meditationActive ? <><Pause className="w-5 h-5" /><span>Pause</span></> : <><Play className="w-5 h-5" /><span>Start Meditation</span></>}
             </button>
-            {meditationActive && (
-              <button
-                onClick={() => {
-                  setMeditationActive(false);
-                  setMeditationTimer(0);
-                }}
-                className="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-              >
-                Reset
-              </button>
-            )}
+            <VoiceRecorder label="Record your meditation reflection" />
           </div>
-          <p className="text-sm text-gray-600 mt-4">10-15 minutes • Find a quiet, comfortable space</p>
-        </div>
+        )}
       </div>
     );
   };

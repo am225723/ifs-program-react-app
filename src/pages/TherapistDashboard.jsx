@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Users, User, TrendingUp, Calendar, FileText, MessageSquare, 
@@ -9,108 +9,6 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
-
-const mockClients = [
-  {
-    id: 'c1',
-    name: 'Sarah Mitchell',
-    primaryWound: 'abandonment',
-    secondaryWound: 'shame',
-    progress: 72,
-    lastActive: '2026-02-07',
-    riskLevel: 'low',
-    modulesCompleted: 8,
-    assessmentsTaken: 3,
-    journalEntries: 15,
-    weeklyProgress: [40, 48, 55, 60, 65, 68, 72],
-    sessionCount: 12,
-    joinDate: '2025-11-15'
-  },
-  {
-    id: 'c2',
-    name: 'James Cooper',
-    primaryWound: 'betrayal',
-    secondaryWound: 'neglect',
-    progress: 45,
-    lastActive: '2026-01-28',
-    riskLevel: 'high',
-    modulesCompleted: 4,
-    assessmentsTaken: 2,
-    journalEntries: 6,
-    weeklyProgress: [20, 25, 30, 35, 40, 42, 45],
-    sessionCount: 8,
-    joinDate: '2025-12-01'
-  },
-  {
-    id: 'c3',
-    name: 'Emily Chen',
-    primaryWound: 'shame',
-    secondaryWound: 'abandonment',
-    progress: 88,
-    lastActive: '2026-02-08',
-    riskLevel: 'low',
-    modulesCompleted: 11,
-    assessmentsTaken: 4,
-    journalEntries: 28,
-    weeklyProgress: [50, 58, 65, 72, 78, 84, 88],
-    sessionCount: 16,
-    joinDate: '2025-09-20'
-  },
-  {
-    id: 'c4',
-    name: 'Marcus Johnson',
-    primaryWound: 'neglect',
-    secondaryWound: 'betrayal',
-    progress: 33,
-    lastActive: '2026-02-05',
-    riskLevel: 'medium',
-    modulesCompleted: 3,
-    assessmentsTaken: 1,
-    journalEntries: 4,
-    weeklyProgress: [10, 15, 18, 22, 26, 30, 33],
-    sessionCount: 5,
-    joinDate: '2026-01-10'
-  },
-  {
-    id: 'c5',
-    name: 'Rachel Torres',
-    primaryWound: 'abandonment',
-    secondaryWound: 'neglect',
-    progress: 61,
-    lastActive: '2026-02-06',
-    riskLevel: 'low',
-    modulesCompleted: 6,
-    assessmentsTaken: 2,
-    journalEntries: 12,
-    weeklyProgress: [30, 36, 42, 48, 53, 58, 61],
-    sessionCount: 10,
-    joinDate: '2025-10-05'
-  },
-  {
-    id: 'c6',
-    name: 'David Okafor',
-    primaryWound: 'shame',
-    secondaryWound: 'betrayal',
-    progress: 19,
-    lastActive: '2026-01-20',
-    riskLevel: 'high',
-    modulesCompleted: 2,
-    assessmentsTaken: 1,
-    journalEntries: 2,
-    weeklyProgress: [5, 8, 10, 12, 14, 17, 19],
-    sessionCount: 3,
-    joinDate: '2026-01-05'
-  }
-];
-
-const mockAlerts = [
-  { id: 'a1', type: 'warning', icon: AlertTriangle, message: 'James Cooper hasn\'t logged in for 11 days', client: 'James Cooper', time: '2 hours ago' },
-  { id: 'a2', type: 'warning', icon: AlertTriangle, message: 'David Okafor hasn\'t logged in for 19 days', client: 'David Okafor', time: '5 hours ago' },
-  { id: 'a3', type: 'success', icon: CheckCircle, message: 'Emily Chen completed a new assessment', client: 'Emily Chen', time: '1 day ago' },
-  { id: 'a4', type: 'info', icon: FileText, message: 'Rachel Torres wrote a journal entry flagged for review', client: 'Rachel Torres', time: '2 days ago' },
-  { id: 'a5', type: 'success', icon: Sparkles, message: 'Sarah Mitchell reached 72% overall progress', client: 'Sarah Mitchell', time: '3 days ago' },
-  { id: 'a6', type: 'info', icon: Activity, message: 'Marcus Johnson started Module 4: Parts Dialogue', client: 'Marcus Johnson', time: '3 days ago' }
-];
 
 const woundColorMap = {
   abandonment: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
@@ -124,6 +22,100 @@ const riskColors = {
   medium: { bg: 'bg-yellow-100', text: 'text-yellow-700', dot: 'bg-yellow-500', label: 'Medium Risk' },
   high: { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500', label: 'High Risk' }
 };
+
+const sessionPrepByWound = {
+  abandonment: [
+    'Follow up on abandonment wound work from last session',
+    'Check in on daily Self-energy practice adherence',
+    'Explore people-pleaser protector\'s relationship with the exile',
+    'Introduce unburdening concept if client seems ready',
+    'Assess progress on recognizing abandonment triggers'
+  ],
+  shame: [
+    'Approach shame work very gently — high activation risk',
+    'Check in on inner critic patterns and frequency',
+    'Explore the shame part\'s origins with compassion',
+    'Focus on building Self-compassion practices',
+    'Assess readiness for deeper exile work'
+  ],
+  betrayal: [
+    'Address trust-building in the therapeutic relationship',
+    'Validate anger as a protector response',
+    'Explore the firefighter pattern of cutting people off',
+    'Consider slower pacing for trust work',
+    'Check for any external stressors contributing to hypervigilance'
+  ],
+  neglect: [
+    'Use somatic approaches to help client connect with body',
+    'Go slowly with parts identification — numbness is protective',
+    'Validate the neglect experience without pushing',
+    'Consider grounding exercises before parts work',
+    'Build rapport before deeper wound exploration'
+  ]
+};
+
+const TOTAL_MODULES = 12;
+
+function calculateRiskLevel(lastActive) {
+  if (!lastActive) return 'high';
+  const diffMs = Date.now() - new Date(lastActive).getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays > 14) return 'high';
+  if (diffDays > 7) return 'medium';
+  return 'low';
+}
+
+function generateAlertsFromClients(clients, recentAssessments, recentJournals) {
+  const alerts = [];
+  const now = new Date();
+
+  clients.forEach(client => {
+    if (!client.lastActive) return;
+    const diffDays = Math.floor((now - new Date(client.lastActive)) / (1000 * 60 * 60 * 24));
+    if (diffDays > 7) {
+      alerts.push({
+        id: `inactive-${client.id}`,
+        type: 'warning',
+        icon: AlertTriangle,
+        message: `${client.name} hasn't logged in for ${diffDays} days`,
+        client: client.name,
+        time: `${diffDays} days inactive`
+      });
+    }
+  });
+
+  recentAssessments.forEach(a => {
+    const client = clients.find(c => c.id === a.client_id);
+    if (client) {
+      const daysAgo = Math.floor((now - new Date(a.created_at || a.assessment_date)) / (1000 * 60 * 60 * 24));
+      alerts.push({
+        id: `assessment-${a.id}`,
+        type: 'success',
+        icon: CheckCircle,
+        message: `${client.name} completed a new assessment`,
+        client: client.name,
+        time: daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`
+      });
+    }
+  });
+
+  recentJournals.forEach(j => {
+    const client = clients.find(c => c.id === j.client_id);
+    if (client) {
+      const daysAgo = Math.floor((now - new Date(j.created_at)) / (1000 * 60 * 60 * 24));
+      alerts.push({
+        id: `journal-${j.id}`,
+        type: 'info',
+        icon: FileText,
+        message: `${client.name} wrote a new journal entry`,
+        client: client.name,
+        time: daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`
+      });
+    }
+  });
+
+  return alerts;
+}
 
 const TherapistDashboard = () => {
   const { theme } = useTheme();
@@ -143,8 +135,149 @@ const TherapistDashboard = () => {
     goals: ''
   });
 
+  const [clients, setClients] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [clientInsights, setClientInsights] = useState(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [clientActivities, setClientActivities] = useState({});
+
+  const loadDashboardData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data: clientRows, error: clientErr } = await supabase
+        .from('ifs_clients')
+        .select('id, name, pin, email, phone, status, last_active, created_at, user_role')
+        .eq('user_role', 'client')
+        .eq('status', 'active');
+
+      if (clientErr) {
+        console.error('Error loading clients:', clientErr);
+        setLoading(false);
+        return;
+      }
+
+      const clientList = clientRows || [];
+
+      if (clientList.length === 0) {
+        setClients([]);
+        setAlerts([]);
+        setLoading(false);
+        return;
+      }
+
+      const clientIds = clientList.map(c => c.id);
+
+      const [
+        { data: assessments },
+        { data: progressRows },
+        { data: journalRows },
+        { data: activityRows }
+      ] = await Promise.all([
+        supabase
+          .from('ifs_assessment_results')
+          .select('id, client_id, primary_wound, secondary_wound, assessment_date, created_at')
+          .in('client_id', clientIds)
+          .order('assessment_date', { ascending: false }),
+        supabase
+          .from('ifs_client_progress')
+          .select('id, client_id, module_id, completed, is_completed')
+          .in('client_id', clientIds),
+        supabase
+          .from('ifs_journal_entries')
+          .select('id, client_id, created_at')
+          .in('client_id', clientIds)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('ifs_therapy_activity_progress')
+          .select('id, client_id, activity_id, completed')
+          .in('client_id', clientIds)
+      ]);
+
+      const assessmentsByClient = {};
+      (assessments || []).forEach(a => {
+        if (!assessmentsByClient[a.client_id]) assessmentsByClient[a.client_id] = [];
+        assessmentsByClient[a.client_id].push(a);
+      });
+
+      const progressByClient = {};
+      (progressRows || []).forEach(p => {
+        if (!progressByClient[p.client_id]) progressByClient[p.client_id] = [];
+        progressByClient[p.client_id].push(p);
+      });
+
+      const journalsByClient = {};
+      (journalRows || []).forEach(j => {
+        if (!journalsByClient[j.client_id]) journalsByClient[j.client_id] = [];
+        journalsByClient[j.client_id].push(j);
+      });
+
+      const activitiesByClient = {};
+      (activityRows || []).forEach(a => {
+        if (!activitiesByClient[a.client_id]) activitiesByClient[a.client_id] = [];
+        activitiesByClient[a.client_id].push(a);
+      });
+      setClientActivities(activitiesByClient);
+
+      const enrichedClients = clientList.map(c => {
+        const clientAssessments = assessmentsByClient[c.id] || [];
+        const latestAssessment = clientAssessments[0];
+        const clientProgress = progressByClient[c.id] || [];
+        const clientJournals = journalsByClient[c.id] || [];
+
+        const completedModules = new Set();
+        clientProgress.forEach(p => {
+          if (p.completed || p.is_completed) completedModules.add(p.module_id);
+        });
+
+        const modulesCompleted = completedModules.size;
+        const progress = TOTAL_MODULES > 0 ? Math.round((modulesCompleted / TOTAL_MODULES) * 100) : 0;
+
+        return {
+          id: c.id,
+          name: c.name,
+          primaryWound: latestAssessment?.primary_wound || 'unknown',
+          secondaryWound: latestAssessment?.secondary_wound || null,
+          progress,
+          lastActive: c.last_active,
+          riskLevel: calculateRiskLevel(c.last_active),
+          modulesCompleted,
+          assessmentsTaken: clientAssessments.length,
+          journalEntries: clientJournals.length,
+          joinDate: c.created_at,
+          therapyActivities: (activitiesByClient[c.id] || []).filter(a => a.completed).length,
+          totalActivities: (activitiesByClient[c.id] || []).length
+        };
+      });
+
+      setClients(enrichedClients);
+
+      const recentAssessments = (assessments || [])
+        .filter(a => {
+          const d = new Date(a.created_at || a.assessment_date);
+          return (Date.now() - d.getTime()) < 14 * 24 * 60 * 60 * 1000;
+        })
+        .slice(0, 10);
+
+      const recentJournals = (journalRows || [])
+        .filter(j => {
+          const d = new Date(j.created_at);
+          return (Date.now() - d.getTime()) < 14 * 24 * 60 * 60 * 1000;
+        })
+        .slice(0, 10);
+
+      const generatedAlerts = generateAlertsFromClients(enrichedClients, recentAssessments, recentJournals);
+      setAlerts(generatedAlerts);
+
+    } catch (e) {
+      console.error('Failed to load dashboard data:', e);
+    }
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
-    const loadData = async () => {
+    const loadInitialData = async () => {
+      await loadDashboardData();
       const client = clientAuth.getCurrentClient();
       const therapistId = client?.id;
       if (!therapistId) return;
@@ -154,7 +287,22 @@ const TherapistDashboard = () => {
           supabaseHelpers.getTherapistFeedback(therapistId)
         ]);
         if (notesData && notesData.length > 0) {
-          setSessionNotes(notesData);
+          const formattedNotes = notesData.map(n => {
+            const noteClient = clients.length > 0
+              ? clients.find(c => c.id === n.client_id)
+              : null;
+            return {
+              id: n.id,
+              clientId: n.client_id,
+              clientName: noteClient?.name || n.client_id?.substring(0, 8) || 'Unknown',
+              date: n.session_date || n.created_at,
+              sessionType: n.note_type || 'Individual',
+              notes: n.content,
+              goals: '',
+              createdAt: n.created_at
+            };
+          });
+          setSessionNotes(formattedNotes);
         }
         if (feedbackData && feedbackData.length > 0) {
           const feedbackObj = {};
@@ -167,10 +315,70 @@ const TherapistDashboard = () => {
         console.error('Failed to load therapist data:', e);
       }
     };
-    loadData();
+    loadInitialData();
   }, []);
 
-  const filteredClients = mockClients.filter(client => {
+  const loadClientInsights = useCallback(async (clientId) => {
+    if (!clientId) {
+      setClientInsights(null);
+      return;
+    }
+    setInsightsLoading(true);
+    try {
+      const [
+        { data: moduleAnswers },
+        { data: activityProgress }
+      ] = await Promise.all([
+        supabase
+          .from('ifs_module_answers')
+          .select('*')
+          .eq('client_id', clientId)
+          .order('updated_at', { ascending: false })
+          .limit(20),
+        supabase
+          .from('ifs_therapy_activity_progress')
+          .select('*')
+          .eq('client_id', clientId)
+      ]);
+
+      const recentAnswers = [];
+      (moduleAnswers || []).forEach(ma => {
+        const answers = ma.answers || {};
+        Object.entries(answers).forEach(([question, answer]) => {
+          if (typeof answer === 'string' && answer.trim().length > 0) {
+            recentAnswers.push({
+              question: question,
+              answer: answer,
+              module: ma.module_id || 'Unknown Module',
+              stepId: ma.step_id
+            });
+          }
+        });
+      });
+
+      const client = clients.find(c => c.id === clientId);
+      const wound = client?.primaryWound || 'abandonment';
+      const sessionPrep = sessionPrepByWound[wound] || sessionPrepByWound.abandonment;
+
+      setClientInsights({
+        recentAnswers: recentAnswers.slice(0, 10),
+        activityProgress: activityProgress || [],
+        sessionPrep
+      });
+    } catch (e) {
+      console.error('Error loading client insights:', e);
+      setClientInsights(null);
+    }
+    setInsightsLoading(false);
+  }, [clients]);
+
+  useEffect(() => {
+    if (selectedInsightClient) {
+      loadClientInsights(selectedInsightClient);
+    }
+  }, [selectedInsightClient, loadClientInsights]);
+
+  const filteredClients = clients.filter(client => {
     const matchesSearch = client.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesWound = filterWound === 'all' || client.primaryWound === filterWound;
     const matchesRisk = filterRisk === 'all' || client.riskLevel === filterRisk;
@@ -178,21 +386,25 @@ const TherapistDashboard = () => {
   });
 
   const stats = {
-    totalClients: mockClients.length,
-    activeSessions: 4,
-    assessmentsCompleted: mockClients.reduce((sum, c) => sum + c.assessmentsTaken, 0),
-    avgProgress: Math.round(mockClients.reduce((sum, c) => sum + c.progress, 0) / mockClients.length)
+    totalClients: clients.length,
+    activeSessions: clients.filter(c => c.riskLevel === 'low').length,
+    assessmentsCompleted: clients.reduce((sum, c) => sum + c.assessmentsTaken, 0),
+    avgProgress: clients.length > 0 ? Math.round(clients.reduce((sum, c) => sum + c.progress, 0) / clients.length) : 0
   };
 
   const handleSaveNote = async () => {
     if (!noteForm.clientId || !noteForm.notes) return;
     const therapist = clientAuth.getCurrentClient();
     const therapistId = therapist?.id;
-    const client = mockClients.find(c => c.id === noteForm.clientId);
+    const client = clients.find(c => c.id === noteForm.clientId);
     const newNote = {
       id: Date.now().toString(),
-      ...noteForm,
+      clientId: noteForm.clientId,
       clientName: client?.name || 'Unknown',
+      date: noteForm.date,
+      sessionType: noteForm.sessionType,
+      notes: noteForm.notes,
+      goals: noteForm.goals,
       createdAt: new Date().toISOString()
     };
     if (therapistId) {
@@ -309,118 +521,14 @@ const TherapistDashboard = () => {
     }
   ];
 
-  const mockClientInsights = {
-    c1: {
-      recentAnswers: [
-        { question: 'How do you feel when your inner critic speaks?', answer: 'I notice tension in my chest and a voice saying I\'m not good enough. I tried to breathe through it.', module: 'Module 1' },
-        { question: 'What childhood memory comes up most often?', answer: 'When my parents would leave for work trips. I felt so alone and scared.', module: 'Module 2' },
-        { question: 'Describe your protector parts.', answer: 'My perfectionist part works overtime. It believes if I\'m perfect, nobody will leave me.', module: 'Module 3' }
-      ],
-      flaggedResponses: [
-        { question: 'How do you cope when overwhelmed?', answer: 'Sometimes I feel like shutting down completely and not talking to anyone for days.', severity: 'orange', reason: 'Isolation pattern detected' },
-        { question: 'What happens when your wound is triggered?', answer: 'I feel worthless and like nothing will ever change.', severity: 'red', reason: 'Hopelessness language detected' }
-      ],
-      sessionPrep: [
-        'Follow up on abandonment wound work from last session',
-        'Check in on daily Self-energy practice adherence',
-        'Explore perfectionist protector\'s relationship with the exile',
-        'Introduce unburdening concept if client seems ready',
-        'Assess progress on recognizing inner critic patterns'
-      ]
-    },
-    c2: {
-      recentAnswers: [
-        { question: 'What does trust feel like in your body?', answer: 'I don\'t really know. My body tenses up when I think about trusting someone.', module: 'Module 1' },
-        { question: 'When was trust first broken for you?', answer: 'My best friend in middle school told everyone my secrets. I never trusted anyone the same way.', module: 'Module 2' }
-      ],
-      flaggedResponses: [
-        { question: 'How are you feeling about the therapy process?', answer: 'I\'m not sure this is working. I feel angry most of the time and I don\'t know why I bother.', severity: 'red', reason: 'Disengagement risk and persistent anger' },
-        { question: 'What do you do when you feel betrayed?', answer: 'I cut people off completely. I\'d rather be alone than hurt again.', severity: 'orange', reason: 'Extreme avoidance pattern' },
-        { question: 'How often do you feel safe?', answer: 'Almost never. I\'m always waiting for the other shoe to drop.', severity: 'orange', reason: 'Chronic hypervigilance' }
-      ],
-      sessionPrep: [
-        'Address therapy engagement concerns directly',
-        'Validate anger as a protector response',
-        'Explore the firefighter pattern of cutting people off',
-        'Consider slower pacing for trust-building',
-        'Check for any external stressors contributing to disengagement'
-      ]
-    },
-    c3: {
-      recentAnswers: [
-        { question: 'How has your relationship with your parts changed?', answer: 'I can now notice my shame part without being consumed by it. I feel more compassion for her.', module: 'Module 4' },
-        { question: 'What unburdening experience was most meaningful?', answer: 'Releasing the belief that I\'m fundamentally broken. I visualized putting it into a river.', module: 'Module 4' },
-        { question: 'What daily practice works best for you?', answer: 'Morning check-ins with my parts. I ask each one how they\'re doing before starting my day.', module: 'Module 5' }
-      ],
-      flaggedResponses: [
-        { question: 'Are there any parts that still feel burdened?', answer: 'My younger self still carries some sadness about never feeling seen by my father.', severity: 'orange', reason: 'Unresolved paternal wound' }
-      ],
-      sessionPrep: [
-        'Celebrate significant progress in parts work',
-        'Explore remaining paternal wound with care',
-        'Discuss long-term maintenance strategies',
-        'Consider reducing session frequency as client stabilizes',
-        'Review and refine daily IFS practice routine'
-      ]
-    },
-    c4: {
-      recentAnswers: [
-        { question: 'What does your inner world feel like?', answer: 'Empty, mostly. Like a dark room with no one in it.', module: 'Module 1' },
-        { question: 'When do you notice different parts of yourself?', answer: 'I don\'t really. I just feel numb most of the time.', module: 'Module 1' }
-      ],
-      flaggedResponses: [
-        { question: 'How do you feel about starting this process?', answer: 'I don\'t feel much of anything. Everyone says I should care more but I can\'t.', severity: 'red', reason: 'Emotional numbness / possible dissociation' },
-        { question: 'What do you need most right now?', answer: 'I honestly don\'t know. I\'ve never been asked that before.', severity: 'orange', reason: 'Neglect wound activation' }
-      ],
-      sessionPrep: [
-        'Use somatic approaches to help client connect with body',
-        'Go slowly with parts identification — numbness is protective',
-        'Validate the neglect experience without pushing',
-        'Consider grounding exercises before parts work',
-        'Build rapport before deeper wound exploration'
-      ]
-    },
-    c5: {
-      recentAnswers: [
-        { question: 'What do your protectors do to keep you safe?', answer: 'My people-pleaser part works really hard. She makes sure everyone else is happy so they won\'t leave.', module: 'Module 3' },
-        { question: 'What would happen if your protectors stopped?', answer: 'I think I\'d be completely alone. That terrifies me.', module: 'Module 3' },
-        { question: 'How do your protectors feel about therapy?', answer: 'They\'re cautious but willing. My anxious part keeps checking if you\'re going to judge me.', module: 'Module 3' }
-      ],
-      flaggedResponses: [
-        { question: 'What happens when someone important pulls away?', answer: 'I panic and do anything to get them back, even things that hurt me.', severity: 'orange', reason: 'Self-sacrificing pattern linked to abandonment' }
-      ],
-      sessionPrep: [
-        'Appreciate the people-pleaser protector before exploring deeper',
-        'Address abandonment fears showing up in session',
-        'Begin mapping exile-protector relationships',
-        'Introduce concept of Self-led relationships',
-        'Check homework on protector appreciation practice'
-      ]
-    },
-    c6: {
-      recentAnswers: [
-        { question: 'What does your inner world feel like?', answer: 'Chaotic. Like everyone\'s yelling and I can\'t make them stop.', module: 'Module 1' }
-      ],
-      flaggedResponses: [
-        { question: 'How do you cope when shame is activated?', answer: 'I drink. Or I lash out at people I care about. Then I feel more shame.', severity: 'red', reason: 'Substance use and harmful coping behaviors' },
-        { question: 'What does your inner critic say?', answer: 'That I\'m disgusting and don\'t deserve love. That everyone can see how broken I am.', severity: 'red', reason: 'Severe self-criticism and worthlessness' }
-      ],
-      sessionPrep: [
-        'Priority: Assess safety and substance use frequency',
-        'Approach shame work very gently — high activation risk',
-        'Focus on stabilization before deep parts work',
-        'Build alliance with protector parts first',
-        'Consider more frequent sessions given risk level'
-      ]
-    }
-  };
-
   const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   const daysSince = (dateStr) => {
+    if (!dateStr) return 999;
     const diff = new Date() - new Date(dateStr);
     return Math.floor(diff / (1000 * 60 * 60 * 24));
   };
@@ -433,6 +541,19 @@ const TherapistDashboard = () => {
   const textMuted = isDark ? 'text-slate-500' : 'text-gray-400';
   const inputBg = isDark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-gray-300 text-gray-900';
   const hoverBg = isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-50';
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className={`${textSecondary}`}>Loading dashboard data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -451,7 +572,7 @@ const TherapistDashboard = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           { label: 'Total Clients', value: stats.totalClients, icon: Users, color: 'from-blue-500 to-blue-600' },
-          { label: 'Active Sessions', value: stats.activeSessions, icon: Calendar, color: 'from-emerald-500 to-emerald-600' },
+          { label: 'Active Clients', value: stats.activeSessions, icon: Calendar, color: 'from-emerald-500 to-emerald-600' },
           { label: 'Assessments Done', value: stats.assessmentsCompleted, icon: CheckCircle, color: 'from-purple-500 to-purple-600' },
           { label: 'Avg Progress', value: `${stats.avgProgress}%`, icon: TrendingUp, color: 'from-amber-500 to-amber-600' }
         ].map((stat) => {
@@ -495,9 +616,9 @@ const TherapistDashboard = () => {
             >
               <Icon className="w-4 h-4" />
               {tab.label}
-              {tab.id === 'alerts' && (
+              {tab.id === 'alerts' && alerts.filter(a => a.type === 'warning').length > 0 && (
                 <span className="w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                  {mockAlerts.filter(a => a.type === 'warning').length}
+                  {alerts.filter(a => a.type === 'warning').length}
                 </span>
               )}
             </button>
@@ -545,7 +666,7 @@ const TherapistDashboard = () => {
 
           <div className="grid gap-4">
             {filteredClients.map(client => {
-              const wound = woundColorMap[client.primaryWound];
+              const wound = woundColorMap[client.primaryWound] || woundColorMap.abandonment;
               const risk = riskColors[client.riskLevel];
               const inactive = daysSince(client.lastActive);
               return (
@@ -570,11 +691,14 @@ const TherapistDashboard = () => {
                           </span>
                           <span className={`text-xs ${textMuted} flex items-center gap-1`}>
                             <Clock className="w-3 h-3" />
-                            {inactive === 0 ? 'Active today' : `${inactive}d ago`}
+                            {inactive === 0 ? 'Active today' : inactive >= 999 ? 'Never active' : `${inactive}d ago`}
                           </span>
-                          <span className={`text-xs ${textMuted}`}>
-                            {client.sessionCount} sessions
-                          </span>
+                          {client.therapyActivities > 0 && (
+                            <span className={`text-xs ${textMuted} flex items-center gap-1`}>
+                              <Activity className="w-3 h-3" />
+                              {client.therapyActivities} activities done
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -593,7 +717,11 @@ const TherapistDashboard = () => {
                       </div>
 
                       <div className="flex items-center gap-1">
-                        <button className={`p-2 rounded-lg ${hoverBg} ${textSecondary} transition-colors`} title="View Profile">
+                        <button
+                          onClick={() => { setSelectedInsightClient(client.id); setActiveTab('insights'); }}
+                          className={`p-2 rounded-lg ${hoverBg} ${textSecondary} transition-colors`}
+                          title="View Insights"
+                        >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
@@ -640,7 +768,7 @@ const TherapistDashboard = () => {
                   className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
                 >
                   <option value="">Select a client...</option>
-                  {mockClients.map(c => (
+                  {clients.map(c => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
@@ -743,8 +871,7 @@ const TherapistDashboard = () => {
           </h2>
 
           <div className="space-y-8">
-            {mockClients.map(client => {
-              const maxVal = Math.max(client.modulesCompleted, client.assessmentsTaken, client.journalEntries);
+            {clients.map(client => {
               return (
                 <div key={client.id}>
                   <div className="flex items-center gap-3 mb-3">
@@ -758,14 +885,14 @@ const TherapistDashboard = () => {
                     <span className={`ml-auto text-sm font-semibold ${textPrimary}`}>{client.progress}%</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 ml-11">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 ml-11">
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <span className={`text-xs ${textSecondary}`}>Modules</span>
-                        <span className={`text-xs font-medium ${textPrimary}`}>{client.modulesCompleted}/12</span>
+                        <span className={`text-xs font-medium ${textPrimary}`}>{client.modulesCompleted}/{TOTAL_MODULES}</span>
                       </div>
                       <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${(client.modulesCompleted / 12) * 100}%` }} />
+                        <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${(client.modulesCompleted / TOTAL_MODULES) * 100}%` }} />
                       </div>
                     </div>
                     <div>
@@ -774,7 +901,7 @@ const TherapistDashboard = () => {
                         <span className={`text-xs font-medium ${textPrimary}`}>{client.assessmentsTaken}</span>
                       </div>
                       <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${(client.assessmentsTaken / 5) * 100}%` }} />
+                        <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${Math.min((client.assessmentsTaken / 5) * 100, 100)}%` }} />
                       </div>
                     </div>
                     <div>
@@ -786,26 +913,26 @@ const TherapistDashboard = () => {
                         <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${Math.min((client.journalEntries / 30) * 100, 100)}%` }} />
                       </div>
                     </div>
-                  </div>
-
-                  <div className="ml-11 mt-3">
-                    <p className={`text-xs ${textMuted} mb-1`}>Weekly Progress Trend</p>
-                    <div className="flex items-end gap-1 h-10">
-                      {client.weeklyProgress.map((val, i) => (
-                        <div
-                          key={i}
-                          className={`flex-1 rounded-t transition-all ${
-                            i === client.weeklyProgress.length - 1 ? 'bg-purple-500' : isDark ? 'bg-slate-600' : 'bg-purple-200'
-                          }`}
-                          style={{ height: `${(val / 100) * 40}px` }}
-                          title={`Week ${i + 1}: ${val}%`}
-                        />
-                      ))}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs ${textSecondary}`}>Therapy Activities</span>
+                        <span className={`text-xs font-medium ${textPrimary}`}>{client.therapyActivities}/{client.totalActivities || 0}</span>
+                      </div>
+                      <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${client.totalActivities > 0 ? (client.therapyActivities / client.totalActivities) * 100 : 0}%` }} />
+                      </div>
                     </div>
                   </div>
                 </div>
               );
             })}
+
+            {clients.length === 0 && (
+              <div className="text-center py-8">
+                <Users className={`w-10 h-10 mx-auto mb-3 ${textMuted}`} />
+                <p className={`${textSecondary}`}>No client data available</p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -817,27 +944,35 @@ const TherapistDashboard = () => {
             Alerts & Notifications
           </h2>
           <div className="space-y-3">
-            {mockAlerts.map(alert => {
-              const Icon = alert.icon;
-              const alertStyles = {
-                warning: { bg: isDark ? 'bg-red-900/30 border-red-800' : 'bg-red-50 border-red-200', icon: 'text-red-500' },
-                success: { bg: isDark ? 'bg-green-900/30 border-green-800' : 'bg-green-50 border-green-200', icon: 'text-green-500' },
-                info: { bg: isDark ? 'bg-blue-900/30 border-blue-800' : 'bg-blue-50 border-blue-200', icon: 'text-blue-500' }
-              };
-              const style = alertStyles[alert.type];
-              return (
-                <div key={alert.id} className={`flex items-start gap-3 p-4 rounded-lg border ${style.bg}`}>
-                  <Icon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${style.icon}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${textPrimary}`}>{alert.message}</p>
-                    <p className={`text-xs mt-1 ${textMuted}`}>{alert.time}</p>
+            {alerts.length === 0 ? (
+              <div className="text-center py-8">
+                <CheckCircle className={`w-10 h-10 mx-auto mb-3 ${textMuted}`} />
+                <p className={`${textSecondary}`}>No alerts at this time</p>
+                <p className={`text-sm mt-1 ${textMuted}`}>All clients are active and on track</p>
+              </div>
+            ) : (
+              alerts.map(alert => {
+                const Icon = alert.icon;
+                const alertStyles = {
+                  warning: { bg: isDark ? 'bg-red-900/30 border-red-800' : 'bg-red-50 border-red-200', icon: 'text-red-500' },
+                  success: { bg: isDark ? 'bg-green-900/30 border-green-800' : 'bg-green-50 border-green-200', icon: 'text-green-500' },
+                  info: { bg: isDark ? 'bg-blue-900/30 border-blue-800' : 'bg-blue-50 border-blue-200', icon: 'text-blue-500' }
+                };
+                const style = alertStyles[alert.type];
+                return (
+                  <div key={alert.id} className={`flex items-start gap-3 p-4 rounded-lg border ${style.bg}`}>
+                    <Icon className={`w-5 h-5 mt-0.5 flex-shrink-0 ${style.icon}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm ${textPrimary}`}>{alert.message}</p>
+                      <p className={`text-xs mt-1 ${textMuted}`}>{alert.time}</p>
+                    </div>
+                    <button className={`text-xs px-3 py-1 rounded-lg ${hoverBg} ${textSecondary} border ${cardBorder} flex-shrink-0`}>
+                      View
+                    </button>
                   </div>
-                  <button className={`text-xs px-3 py-1 rounded-lg ${hoverBg} ${textSecondary} border ${cardBorder} flex-shrink-0`}>
-                    View
-                  </button>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
       )}
@@ -999,7 +1134,7 @@ const TherapistDashboard = () => {
               className={`w-full sm:w-80 px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
             >
               <option value="">Choose a client...</option>
-              {mockClients.map(c => (
+              {clients.map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
@@ -1013,57 +1148,67 @@ const TherapistDashboard = () => {
             </div>
           )}
 
-          {selectedInsightClient && mockClientInsights[selectedInsightClient] && (() => {
-            const insights = mockClientInsights[selectedInsightClient];
-            const client = mockClients.find(c => c.id === selectedInsightClient);
+          {selectedInsightClient && insightsLoading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          {selectedInsightClient && !insightsLoading && clientInsights && (() => {
+            const client = clients.find(c => c.id === selectedInsightClient);
             return (
               <div className="space-y-6">
                 <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
                   <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
                     <MessageCircle className="w-5 h-5 text-purple-500" />
-                    Recent Answers
+                    Recent Module Answers
                   </h3>
-                  <div className="space-y-4">
-                    {insights.recentAnswers.map((item, i) => (
-                      <div key={i} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{item.module}</span>
-                        </div>
-                        <p className={`text-sm font-medium ${textPrimary} mb-2`}>{item.question}</p>
-                        <p className={`text-sm ${textSecondary} italic leading-relaxed`}>"{item.answer}"</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
-                  <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-                    <Flag className="w-5 h-5 text-red-500" />
-                    Flagged Responses
-                  </h3>
-                  <div className="space-y-4">
-                    {insights.flaggedResponses.map((item, i) => {
-                      const isRed = item.severity === 'red';
-                      const flagBg = isRed
-                        ? (isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200')
-                        : (isDark ? 'bg-orange-900/20 border-orange-800' : 'bg-orange-50 border-orange-200');
-                      const flagColor = isRed ? 'text-red-500' : 'text-orange-500';
-                      const badgeBg = isRed ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700';
-                      return (
-                        <div key={i} className={`p-4 rounded-lg border ${flagBg}`}>
+                  {clientInsights.recentAnswers.length === 0 ? (
+                    <div className="text-center py-6">
+                      <MessageSquare className={`w-8 h-8 mx-auto mb-2 ${textMuted}`} />
+                      <p className={`text-sm ${textSecondary}`}>No module answers recorded yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {clientInsights.recentAnswers.map((item, i) => (
+                        <div key={i} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
                           <div className="flex items-center gap-2 mb-2">
-                            <Flag className={`w-4 h-4 ${flagColor}`} />
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeBg}`}>
-                              {item.reason}
-                            </span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{item.module}</span>
                           </div>
                           <p className={`text-sm font-medium ${textPrimary} mb-2`}>{item.question}</p>
                           <p className={`text-sm ${textSecondary} italic leading-relaxed`}>"{item.answer}"</p>
                         </div>
-                      );
-                    })}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
+
+                {clientInsights.activityProgress.length > 0 && (
+                  <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                    <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                      <Activity className="w-5 h-5 text-emerald-500" />
+                      Therapy Activity Progress
+                    </h3>
+                    <div className="space-y-3">
+                      {clientInsights.activityProgress.map((act, i) => (
+                        <div key={i} className={`flex items-center gap-3 p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                          {act.completed ? (
+                            <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                          ) : (
+                            <Clock className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-medium ${textPrimary}`}>{act.activity_id}</p>
+                            <p className={`text-xs ${textMuted}`}>{act.completed ? 'Completed' : 'In Progress'}</p>
+                          </div>
+                          {act.reflections && Object.keys(act.reflections).length > 0 && (
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">Has reflections</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
                   <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
@@ -1074,7 +1219,7 @@ const TherapistDashboard = () => {
                     Suggested talking points for your next session with {client?.name}:
                   </p>
                   <ul className="space-y-2.5">
-                    {insights.sessionPrep.map((point, i) => (
+                    {clientInsights.sessionPrep.map((point, i) => (
                       <li key={i} className={`flex items-start gap-3 text-sm ${textSecondary}`}>
                         <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0 mt-0.5">
                           {i + 1}
