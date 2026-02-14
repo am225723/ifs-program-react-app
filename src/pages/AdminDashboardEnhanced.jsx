@@ -146,11 +146,13 @@ const AdminDashboardEnhanced = () => {
         .select('*', { count: 'exact', head: true })
         .eq('completed', true);
 
+      const TOTAL_MODULES = 12;
+      const avgProg = totalCount > 0 ? Math.round(((modulesCount || 0) / (totalCount * TOTAL_MODULES)) * 100) : 0;
       setStats({
         totalClients: totalCount || 0,
         activeClients: activeCount || 0,
         completedModules: modulesCount || 0,
-        avgProgress: totalCount > 0 ? Math.round((modulesCount || 0) / totalCount) : 0
+        avgProgress: Math.min(avgProg, 100)
       });
     } catch (error) {
       console.error('Error loading stats:', error);

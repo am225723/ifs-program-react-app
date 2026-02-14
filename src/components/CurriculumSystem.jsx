@@ -342,13 +342,14 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                   )}
                 </div>
               </div>
-              <button
+              <Link
+                to={`/curriculum/module/${nextModule.id}`}
                 onClick={() => handleModuleSelect(nextModule)}
                 className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors flex items-center space-x-2"
               >
                 <span>Start Module</span>
                 <ChevronRight className="w-5 h-5" />
-              </button>
+              </Link>
             </div>
           </div>
         )}
