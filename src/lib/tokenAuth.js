@@ -74,6 +74,7 @@ class TokenAuth {
    * Remove token from URL (for security)
    */
   cleanTokenFromURL() {
+    if (window.location.pathname === '/sso/callback') return;
     const url = new URL(window.location);
     url.searchParams.delete('token');
     const cleanURL = url.pathname + url.search + url.hash;
