@@ -176,7 +176,7 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="flex justify-between items-center h-14">
                     <Link to="/" className="flex items-center gap-2">
-                      <img src="/logo.png" alt="ITS" className="w-9 h-9 rounded-lg object-cover" />
+                      <img src="/logo.png" alt="ITS" className="w-9 h-auto" />
                       <h1 className="text-base font-bold bg-gradient-to-r from-amber-700 to-emerald-700 bg-clip-text text-transparent leading-tight">
                         Intrinsic Therapeutic<br/>Solutions
                       </h1>
