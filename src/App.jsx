@@ -158,6 +158,7 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
       {!isAuthenticated ? (
         <Routes>
           <Route path="/" element={<ClientPINLogin onLogin={handleLogin} />} />
+          <Route path="/sso/callback" element={<SSOCallback onLogin={handleLogin} />} />
           <Route path="/test-client" element={<TestClientCreator />} />
           <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
           <Route path="/auth-debug" element={<AuthDebug />} />
