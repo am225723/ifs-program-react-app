@@ -184,24 +184,33 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                     </Link>
                     <div className="flex items-center gap-1">
                       {currentClient?.user_role === 'therapist' && (
-                        <Link
-                          to="/admin"
-                          className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
-                          title="Admin Dashboard"
-                        >
-                          <ClipboardList className="w-5 h-5" />
-                        </Link>
+                        <>
+                          <Link
+                            to="/admin"
+                            className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-purple-400 hover:bg-slate-800' : 'text-gray-500 hover:text-purple-600 hover:bg-purple-50'}`}
+                            title="Admin Dashboard"
+                          >
+                            <ClipboardList className="w-5 h-5" />
+                          </Link>
+                          <Link
+                            to="/therapist-dashboard"
+                            className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-purple-400 hover:bg-slate-800' : 'text-gray-500 hover:text-purple-600 hover:bg-purple-50'}`}
+                            title="Therapist Dashboard"
+                          >
+                            <BookOpen className="w-5 h-5" />
+                          </Link>
+                        </>
                       )}
                       <Link
                         to="/settings"
-                        className="p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all"
+                        className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-purple-400 hover:bg-slate-800' : 'text-gray-500 hover:text-purple-600 hover:bg-purple-50'}`}
                         title="Settings"
                       >
                         <SettingsIcon className="w-5 h-5" />
                       </Link>
                       <Link
                         to="/profile"
-                        className="p-2 hover:bg-purple-50 rounded-lg transition-all"
+                        className={`p-2 rounded-lg transition-all ${theme.isDark ? 'hover:bg-slate-800' : 'hover:bg-purple-50'}`}
                       >
                         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold">
                           {currentClient?.name?.charAt(0) || '?'}

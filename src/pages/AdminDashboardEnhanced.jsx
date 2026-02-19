@@ -267,6 +267,10 @@ const AdminDashboardEnhanced = () => {
               </Link>
               <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
               <p className="text-gray-600 mt-1">Manage clients and monitor progress</p>
+              <Link to="/therapist-dashboard" className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800 mt-1 font-medium">
+                <BookOpen className="w-4 h-4 mr-1" />
+                Go to Therapist Dashboard (Lesson Plans & Client Insights)
+              </Link>
             </div>
             <div className="flex items-center gap-3">
               <button
