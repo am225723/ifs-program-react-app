@@ -5,7 +5,7 @@ import {
   Clock, CheckCircle, AlertTriangle, Activity, Heart, Shield,
   ChevronRight, Search, Filter, Plus, Eye, BarChart3, Sparkles,
   BookOpen, ChevronDown, ChevronUp, MessageCircle, Flag, Lightbulb,
-  Play, Target
+  Play, Target, X, Copy, Download, ArrowLeft, RefreshCw
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
@@ -142,6 +142,14 @@ const TherapistDashboard = () => {
   const [clientInsights, setClientInsights] = useState(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [clientActivities, setClientActivities] = useState({});
+
+  const [activeAction, setActiveAction] = useState(null);
+  const [newClientForm, setNewClientForm] = useState({ name: '', email: '', phone: '' });
+  const [newClientResult, setNewClientResult] = useState(null);
+  const [newClientLoading, setNewClientLoading] = useState(false);
+  const [reminderForm, setReminderForm] = useState({ clientId: '', type: 'session', message: '' });
+  const [reminderSaved, setReminderSaved] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
@@ -453,6 +461,171 @@ const TherapistDashboard = () => {
         console.error('Error saving therapist feedback:', err);
       }
     }
+  };
+
+  const generateUniquePIN = async () => {
+    const maxAttempts = 20;
+    for (let i = 0; i < maxAttempts; i++) {
+      const pin = String(Math.floor(100000 + Math.random() * 900000));
+      const { data } = await supabase
+        .from('ifs_clients')
+        .select('id')
+        .eq('pin', pin)
+        .limit(1);
+      if (!data || data.length === 0) return pin;
+    }
+    return null;
+  };
+
+  const handleCreateClient = async () => {
+    if (!newClientForm.name.trim()) return;
+    setNewClientLoading(true);
+    try {
+      const pin = await generateUniquePIN();
+      if (!pin) {
+        setNewClientResult({ error: 'Could not generate a unique PIN. Please try again.' });
+        setNewClientLoading(false);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('ifs_clients')
+        .insert({
+          name: newClientForm.name.trim(),
+          email: newClientForm.email.trim() || null,
+          phone: newClientForm.phone.trim() || null,
+          pin,
+          user_role: 'client',
+          status: 'active',
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      if (error) {
+        setNewClientResult({ error: error.message });
+      } else {
+        setNewClientResult({ success: true, name: data.name, pin });
+        await loadDashboardData();
+      }
+    } catch (e) {
+      setNewClientResult({ error: e.message });
+    }
+    setNewClientLoading(false);
+  };
+
+  const reminderTemplates = {
+    session: 'Hi {name}, this is a friendly reminder about your upcoming IFS therapy session. Please review your journal entries and any homework from last session before we meet.',
+    activity: 'Hi {name}, you have some pending activities in your IFS healing program. Taking a few minutes to complete them will help reinforce what you\'ve learned.',
+    checkin: 'Hi {name}, just checking in on you. How are you doing with your IFS practice? Remember, even a brief moment of Self-energy connection counts.',
+    assessment: 'Hi {name}, it\'s been a while since your last assessment. Retaking the IFS Wound Assessment can help us track your healing progress together.'
+  };
+
+  const handleSendReminder = async () => {
+    if (!reminderForm.clientId || !reminderForm.message.trim()) return;
+    const therapist = clientAuth.getCurrentClient();
+    try {
+      await supabase.from('ifs_therapist_notes').insert({
+        therapist_id: therapist?.id,
+        client_id: reminderForm.clientId,
+        content: `[REMINDER - ${reminderForm.type.toUpperCase()}] ${reminderForm.message}`,
+        note_type: 'reminder',
+        session_date: new Date().toISOString().split('T')[0],
+        created_at: new Date().toISOString()
+      });
+      setReminderSaved(true);
+      setTimeout(() => setReminderSaved(false), 3000);
+    } catch (e) {
+      console.error('Error saving reminder:', e);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    });
+  };
+
+  const handleExportReports = async () => {
+    setExportLoading(true);
+    try {
+      const clientIds = clients.map(c => c.id);
+      const [
+        { data: assessments },
+        { data: progressRows },
+        { data: journalRows },
+        { data: moodRows },
+        { data: activityRows }
+      ] = await Promise.all([
+        supabase.from('ifs_assessment_results').select('*').in('client_id', clientIds),
+        supabase.from('ifs_client_progress').select('*').in('client_id', clientIds),
+        supabase.from('ifs_journal_entries').select('id, client_id, created_at, mood').in('client_id', clientIds),
+        supabase.from('ifs_mood_entries').select('client_id, mood, energy, date').in('client_id', clientIds),
+        supabase.from('ifs_therapy_activity_progress').select('client_id, activity_id, completed').in('client_id', clientIds)
+      ]);
+
+      let csv = 'Client Name,Primary Wound,Secondary Wound,Modules Completed,Progress %,Journal Entries,Avg Mood,Activities Completed,Risk Level,Join Date,Last Active\n';
+      clients.forEach(c => {
+        const clientAssess = (assessments || []).filter(a => a.client_id === c.id);
+        const latestA = clientAssess.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+        const journals = (journalRows || []).filter(j => j.client_id === c.id);
+        const moods = (moodRows || []).filter(m => m.client_id === c.id);
+        const avgMood = moods.length > 0 ? (moods.reduce((s, m) => s + (m.mood || 0), 0) / moods.length).toFixed(1) : 'N/A';
+        const activities = (activityRows || []).filter(a => a.client_id === c.id);
+        const completedActs = activities.filter(a => a.completed).length;
+        csv += `"${c.name}",${latestA?.primary_wound || 'N/A'},${latestA?.secondary_wound || 'N/A'},${c.modulesCompleted},${c.progress}%,${journals.length},${avgMood},${completedActs}/${activities.length},${c.riskLevel},${formatDate(c.joinDate)},${formatDate(c.lastActive)}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ifs_client_reports_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Export error:', e);
+    }
+    setExportLoading(false);
+  };
+
+  const getGroupAnalytics = () => {
+    if (clients.length === 0) return null;
+    const woundCounts = { abandonment: 0, shame: 0, neglect: 0, betrayal: 0, unknown: 0 };
+    const riskCounts = { low: 0, medium: 0, high: 0 };
+    let totalProgress = 0;
+    let totalModules = 0;
+    let totalJournals = 0;
+    let totalAssessments = 0;
+    let totalActivities = 0;
+    let completedActivities = 0;
+
+    clients.forEach(c => {
+      woundCounts[c.primaryWound] = (woundCounts[c.primaryWound] || 0) + 1;
+      riskCounts[c.riskLevel] = (riskCounts[c.riskLevel] || 0) + 1;
+      totalProgress += c.progress;
+      totalModules += c.modulesCompleted;
+      totalJournals += c.journalEntries;
+      totalAssessments += c.assessmentsTaken;
+      totalActivities += c.totalActivities || 0;
+      completedActivities += c.therapyActivities || 0;
+    });
+
+    const avgProgress = Math.round(totalProgress / clients.length);
+    const avgModules = (totalModules / clients.length).toFixed(1);
+    const activeRate = Math.round((riskCounts.low / clients.length) * 100);
+    const activityCompletionRate = totalActivities > 0 ? Math.round((completedActivities / totalActivities) * 100) : 0;
+
+    return {
+      woundCounts, riskCounts, avgProgress, avgModules,
+      totalJournals, totalAssessments, activeRate,
+      totalActivities, completedActivities, activityCompletionRate
+    };
   };
 
   const lessonPlans = [
@@ -986,27 +1159,393 @@ const TherapistDashboard = () => {
       )}
 
       {activeTab === 'actions' && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { label: 'Create New Client PIN', icon: Plus, color: 'from-blue-500 to-blue-600', desc: 'Generate a secure access PIN for a new client' },
-            { label: 'Send Reminder', icon: MessageSquare, color: 'from-emerald-500 to-emerald-600', desc: 'Send session or activity reminders to clients' },
-            { label: 'Export All Reports', icon: FileText, color: 'from-purple-500 to-purple-600', desc: 'Download comprehensive progress reports' },
-            { label: 'View Group Analytics', icon: BarChart3, color: 'from-amber-500 to-amber-600', desc: 'Analyze trends across all clients' }
-          ].map((action) => {
-            const Icon = action.icon;
-            return (
+        <div>
+          {!activeAction && (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { id: 'create-client', label: 'Create New Client PIN', icon: Plus, color: 'from-blue-500 to-blue-600', desc: 'Generate a secure access PIN for a new client' },
+                { id: 'send-reminder', label: 'Send Reminder', icon: MessageSquare, color: 'from-emerald-500 to-emerald-600', desc: 'Send session or activity reminders to clients' },
+                { id: 'export-reports', label: 'Export All Reports', icon: Download, color: 'from-purple-500 to-purple-600', desc: 'Download comprehensive progress reports' },
+                { id: 'group-analytics', label: 'View Group Analytics', icon: BarChart3, color: 'from-amber-500 to-amber-600', desc: 'Analyze trends across all clients' }
+              ].map((action) => {
+                const Icon = action.icon;
+                return (
+                  <button
+                    key={action.id}
+                    onClick={() => {
+                      setActiveAction(action.id);
+                      if (action.id === 'create-client') {
+                        setNewClientForm({ name: '', email: '', phone: '' });
+                        setNewClientResult(null);
+                      }
+                      if (action.id === 'send-reminder') {
+                        setReminderForm({ clientId: '', type: 'session', message: '' });
+                        setReminderSaved(false);
+                      }
+                    }}
+                    className={`${cardBg} rounded-xl border ${cardBorder} p-5 text-left transition-all hover:shadow-lg group`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className={`font-semibold ${textPrimary} mb-1`}>{action.label}</h3>
+                    <p className={`text-sm ${textMuted}`}>{action.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {activeAction && (
+            <div>
               <button
-                key={action.label}
-                className={`${cardBg} rounded-xl border ${cardBorder} p-5 text-left transition-all hover:shadow-lg group`}
+                onClick={() => { setActiveAction(null); setNewClientResult(null); setReminderSaved(false); }}
+                className={`flex items-center gap-2 mb-4 text-sm ${textSecondary} hover:${textPrimary} transition-colors`}
               >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className={`font-semibold ${textPrimary} mb-1`}>{action.label}</h3>
-                <p className={`text-sm ${textMuted}`}>{action.desc}</p>
+                <ArrowLeft className="w-4 h-4" />
+                Back to Quick Actions
               </button>
-            );
-          })}
+
+              {activeAction === 'create-client' && (
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-6 max-w-lg`}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                      <Plus className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className={`text-lg font-semibold ${textPrimary}`}>Create New Client</h2>
+                      <p className={`text-sm ${textSecondary}`}>A unique 6-digit PIN will be generated automatically</p>
+                    </div>
+                  </div>
+
+                  {newClientResult?.success ? (
+                    <div className="space-y-4">
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-5 text-center">
+                        <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
+                        <h3 className="text-lg font-semibold text-emerald-800 mb-1">Client Created</h3>
+                        <p className="text-sm text-emerald-600 mb-4">{newClientResult.name} is ready to log in</p>
+                        <div className="bg-white rounded-lg p-4 border border-emerald-200 inline-block">
+                          <p className="text-xs text-gray-500 mb-1">Access PIN</p>
+                          <p className="text-3xl font-mono font-bold text-gray-900 tracking-widest">{newClientResult.pin}</p>
+                        </div>
+                        <div className="mt-4">
+                          <button
+                            onClick={() => { copyToClipboard(newClientResult.pin); }}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-200 transition-colors"
+                          >
+                            <Copy className="w-4 h-4" />
+                            Copy PIN
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => { setNewClientResult(null); setNewClientForm({ name: '', email: '', phone: '' }); }}
+                        className="w-full py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        Create Another Client
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Client Name *</label>
+                        <input
+                          type="text"
+                          value={newClientForm.name}
+                          onChange={e => setNewClientForm(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Enter client's full name"
+                          className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-blue-500 outline-none`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Email (optional)</label>
+                        <input
+                          type="email"
+                          value={newClientForm.email}
+                          onChange={e => setNewClientForm(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="client@email.com"
+                          className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-blue-500 outline-none`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Phone (optional)</label>
+                        <input
+                          type="tel"
+                          value={newClientForm.phone}
+                          onChange={e => setNewClientForm(prev => ({ ...prev, phone: e.target.value }))}
+                          placeholder="(555) 123-4567"
+                          className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-blue-500 outline-none`}
+                        />
+                      </div>
+                      {newClientResult?.error && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+                          {newClientResult.error}
+                        </div>
+                      )}
+                      <button
+                        onClick={handleCreateClient}
+                        disabled={newClientLoading || !newClientForm.name.trim()}
+                        className="w-full py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {newClientLoading ? (
+                          <><RefreshCw className="w-4 h-4 animate-spin" /> Generating PIN...</>
+                        ) : (
+                          <><Plus className="w-4 h-4" /> Create Client & Generate PIN</>
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeAction === 'send-reminder' && (
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-6 max-w-lg`}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className={`text-lg font-semibold ${textPrimary}`}>Send Reminder</h2>
+                      <p className={`text-sm ${textSecondary}`}>Compose a reminder and copy it to send via your preferred method</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Select Client</label>
+                      <select
+                        value={reminderForm.clientId}
+                        onChange={e => {
+                          setReminderForm(prev => ({ ...prev, clientId: e.target.value }));
+                          setReminderSaved(false);
+                        }}
+                        className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-emerald-500 outline-none`}
+                      >
+                        <option value="">Choose a client...</option>
+                        {clients.map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Reminder Type</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: 'session', label: 'Session' },
+                          { id: 'activity', label: 'Activity' },
+                          { id: 'checkin', label: 'Check-in' },
+                          { id: 'assessment', label: 'Assessment' }
+                        ].map(t => (
+                          <button
+                            key={t.id}
+                            onClick={() => {
+                              const client = clients.find(c => c.id === reminderForm.clientId);
+                              const msg = reminderTemplates[t.id].replace('{name}', client?.name || '[Client]');
+                              setReminderForm(prev => ({ ...prev, type: t.id, message: msg }));
+                            }}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium border transition-all ${
+                              reminderForm.type === t.id
+                                ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
+                                : `${cardBg} ${cardBorder} ${textSecondary} hover:border-emerald-300`
+                            }`}
+                          >
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Message</label>
+                      <textarea
+                        value={reminderForm.message}
+                        onChange={e => setReminderForm(prev => ({ ...prev, message: e.target.value }))}
+                        rows={4}
+                        placeholder="Type your reminder message..."
+                        className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-emerald-500 outline-none resize-none`}
+                      />
+                    </div>
+                    {reminderSaved && (
+                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-2 text-sm text-emerald-700">
+                        <CheckCircle className="w-4 h-4" />
+                        Reminder saved and ready to send
+                      </div>
+                    )}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          copyToClipboard(reminderForm.message);
+                          handleSendReminder();
+                        }}
+                        disabled={!reminderForm.clientId || !reminderForm.message.trim()}
+                        className="flex-1 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-lg text-sm font-medium hover:from-emerald-600 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Copy & Save Reminder
+                      </button>
+                    </div>
+                    <p className={`text-xs ${textMuted}`}>
+                      The message will be copied to your clipboard so you can paste it in your preferred messaging app. A log of the reminder is saved in your session notes.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {activeAction === 'export-reports' && (
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-6 max-w-lg`}>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                      <Download className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className={`text-lg font-semibold ${textPrimary}`}>Export All Reports</h2>
+                      <p className={`text-sm ${textSecondary}`}>Download a comprehensive CSV report of all client data</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className={`rounded-lg border ${cardBorder} p-4`}>
+                      <h3 className={`text-sm font-medium ${textPrimary} mb-3`}>Report includes:</h3>
+                      <ul className={`text-sm ${textSecondary} space-y-2`}>
+                        {['Client names and wound profiles', 'Module completion progress', 'Journal entry counts', 'Average mood scores', 'Activity completion rates', 'Risk levels and engagement status', 'Join dates and last activity'].map((item, i) => (
+                          <li key={i} className="flex items-center gap-2">
+                            <CheckCircle className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className={`rounded-lg border ${cardBorder} p-4 bg-purple-50/50`}>
+                      <p className={`text-sm ${textSecondary}`}>
+                        <span className="font-medium">{clients.length} clients</span> will be included in this report
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleExportReports}
+                      disabled={exportLoading || clients.length === 0}
+                      className="w-full py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {exportLoading ? (
+                        <><RefreshCw className="w-4 h-4 animate-spin" /> Generating Report...</>
+                      ) : (
+                        <><Download className="w-4 h-4" /> Download CSV Report</>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeAction === 'group-analytics' && (() => {
+                const analytics = getGroupAnalytics();
+                if (!analytics) {
+                  return (
+                    <div className={`${cardBg} rounded-xl border ${cardBorder} p-6 text-center`}>
+                      <p className={textSecondary}>No client data available for analytics.</p>
+                    </div>
+                  );
+                }
+                const maxWound = Math.max(...Object.values(analytics.woundCounts));
+                return (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                        <BarChart3 className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className={`text-lg font-semibold ${textPrimary}`}>Group Analytics</h2>
+                        <p className={`text-sm ${textSecondary}`}>Trends across all {clients.length} clients</p>
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {[
+                        { label: 'Avg Progress', value: `${analytics.avgProgress}%`, sub: `${analytics.avgModules} modules avg`, color: 'from-blue-500 to-blue-600' },
+                        { label: 'Active Rate', value: `${analytics.activeRate}%`, sub: `${analytics.riskCounts.low} of ${clients.length} active`, color: 'from-emerald-500 to-emerald-600' },
+                        { label: 'Total Journals', value: analytics.totalJournals, sub: `${(analytics.totalJournals / clients.length).toFixed(1)} per client`, color: 'from-purple-500 to-purple-600' },
+                        { label: 'Activity Rate', value: `${analytics.activityCompletionRate}%`, sub: `${analytics.completedActivities}/${analytics.totalActivities} done`, color: 'from-amber-500 to-amber-600' }
+                      ].map(stat => (
+                        <div key={stat.label} className={`${cardBg} rounded-xl border ${cardBorder} p-4`}>
+                          <p className={`text-xs ${textMuted} mb-1`}>{stat.label}</p>
+                          <p className={`text-2xl font-bold ${textPrimary}`}>{stat.value}</p>
+                          <p className={`text-xs ${textSecondary} mt-1`}>{stat.sub}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                        <h3 className={`text-sm font-semibold ${textPrimary} mb-4`}>Wound Distribution</h3>
+                        <div className="space-y-3">
+                          {Object.entries(analytics.woundCounts).filter(([k]) => k !== 'unknown').map(([wound, count]) => {
+                            const colors = woundColorMap[wound] || { bg: 'bg-gray-100', text: 'text-gray-700' };
+                            const pct = maxWound > 0 ? Math.round((count / clients.length) * 100) : 0;
+                            return (
+                              <div key={wound}>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className={`text-sm capitalize ${textSecondary}`}>{wound}</span>
+                                  <span className={`text-sm font-medium ${textPrimary}`}>{count} ({pct}%)</span>
+                                </div>
+                                <div className={`h-2.5 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-100'}`}>
+                                  <div
+                                    className={`h-full rounded-full ${colors.bg.replace('bg-', 'bg-')}`}
+                                    style={{ width: `${pct}%`, backgroundColor: wound === 'abandonment' ? '#3b82f6' : wound === 'shame' ? '#8b5cf6' : wound === 'neglect' ? '#f59e0b' : '#ef4444' }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {analytics.woundCounts.unknown > 0 && (
+                            <p className={`text-xs ${textMuted} mt-2`}>{analytics.woundCounts.unknown} client(s) have not completed an assessment yet</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                        <h3 className={`text-sm font-semibold ${textPrimary} mb-4`}>Engagement Status</h3>
+                        <div className="space-y-3">
+                          {[
+                            { key: 'low', label: 'Active (< 7 days)', color: '#10b981' },
+                            { key: 'medium', label: 'At Risk (7-14 days)', color: '#f59e0b' },
+                            { key: 'high', label: 'Inactive (> 14 days)', color: '#ef4444' }
+                          ].map(status => {
+                            const count = analytics.riskCounts[status.key];
+                            const pct = Math.round((count / clients.length) * 100);
+                            return (
+                              <div key={status.key}>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className={`text-sm ${textSecondary}`}>{status.label}</span>
+                                  <span className={`text-sm font-medium ${textPrimary}`}>{count} ({pct}%)</span>
+                                </div>
+                                <div className={`h-2.5 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-100'}`}>
+                                  <div
+                                    className="h-full rounded-full"
+                                    style={{ width: `${pct}%`, backgroundColor: status.color }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="mt-5 pt-4 border-t border-gray-200">
+                          <h4 className={`text-xs font-medium ${textMuted} uppercase tracking-wider mb-3`}>Summary</h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <p className={`text-xs ${textMuted}`}>Assessments</p>
+                              <p className={`text-lg font-semibold ${textPrimary}`}>{analytics.totalAssessments}</p>
+                            </div>
+                            <div>
+                              <p className={`text-xs ${textMuted}`}>Avg Modules</p>
+                              <p className={`text-lg font-semibold ${textPrimary}`}>{analytics.avgModules}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </div>
       )}
 

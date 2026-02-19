@@ -4,6 +4,7 @@
 This is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It features PIN-based authentication, personalized curriculum delivery based on child wound assessment results, and comprehensive healing exercises.
 
 ## Recent Changes (February 2026)
+- Therapist Dashboard Quick Actions fully functional: Create New Client PIN (generates unique 6-digit PIN, saves to Supabase), Send Reminder (compose with templates, copy to clipboard, save log), Export All Reports (CSV download with all client data), View Group Analytics (wound distribution, engagement status, progress stats)
 - Client Personalization Panel in Therapist Dashboard: Client Insights tab now shows full wound assessment scores, primary/secondary wounds, and per-module personalization details (wound focus, healing goals, tailored activities)
 - Co-Therapy Session page (/co-therapy): Therapist selects a client and guides 9 IFS therapy activities together with step-by-step instructions, therapist clinical guidance, observation checklists, per-step notes, client reflections, timer, and progress saving to client's Supabase record with coTherapy flag
 - LearningModuleRenderer refactored to delegate rendering to LearningModuleEnhanced, enabling all 12 interactive activity types in curriculum modules
