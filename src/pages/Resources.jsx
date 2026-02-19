@@ -259,7 +259,7 @@ const Resources = () => {
             </div>
           </div>
 
-          <div className="card bg-gradient-to-br from-purple-50 to-pink-50">
+          <div className="card bg-gradient-to-br from-amber-50 to-emerald-50">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">Find a Therapist</h2>
             <p className="text-lg text-gray-700 mb-4">
               While self-work is valuable, working with a trained IFS therapist can provide deeper healing and support.

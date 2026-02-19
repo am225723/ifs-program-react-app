@@ -42,8 +42,8 @@ export default function Settings() {
 
         <div className={`${theme.cardBg} backdrop-blur-sm rounded-2xl shadow-lg border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} p-6 mb-8 ${getAnimationClass('transition')}`}>
           <div className="flex items-center gap-3 mb-6">
-            <div className={`p-2 rounded-xl ${theme.isDark ? 'bg-purple-900/50' : 'bg-purple-100'}`}>
-              <Palette className={`w-6 h-6 ${theme.isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+            <div className={`p-2 rounded-xl ${theme.isDark ? 'bg-amber-900/50' : 'bg-amber-100'}`}>
+              <Palette className={`w-6 h-6 ${theme.isDark ? 'text-amber-400' : 'text-amber-600'}`} />
             </div>
             <div>
               <h2 className={`text-xl font-semibold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>Color Theme</h2>
@@ -89,8 +89,8 @@ export default function Settings() {
 
         <div className={`${theme.cardBg} backdrop-blur-sm rounded-2xl shadow-lg border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} p-6 mb-8 ${getAnimationClass('transition')}`}>
           <div className="flex items-center gap-3 mb-6">
-            <div className={`p-2 rounded-xl ${theme.isDark ? 'bg-pink-900/50' : 'bg-pink-100'}`}>
-              <Sparkles className={`w-6 h-6 ${theme.isDark ? 'text-pink-400' : 'text-pink-600'}`} />
+            <div className={`p-2 rounded-xl ${theme.isDark ? 'bg-emerald-900/50' : 'bg-emerald-100'}`}>
+              <Sparkles className={`w-6 h-6 ${theme.isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
             </div>
             <div>
               <h2 className={`text-xl font-semibold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>Animations</h2>

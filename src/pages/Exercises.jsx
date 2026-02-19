@@ -37,7 +37,7 @@ const Exercises = () => {
       id: 'connection',
       title: 'Self-Connection',
       description: 'Exercises to strengthen your Self energy',
-      color: 'from-purple-400 to-purple-600',
+      color: 'from-amber-400 to-amber-600',
       icon: Brain,
       exercises: [
         {
@@ -68,7 +68,7 @@ const Exercises = () => {
       id: 'inner-child',
       title: 'Inner Child Work',
       description: 'Connect with and heal your inner child',
-      color: 'from-pink-400 to-pink-600',
+      color: 'from-emerald-400 to-emerald-600',
       icon: Heart,
       exercises: [
         {
@@ -313,7 +313,7 @@ const Exercises = () => {
   if (selectedExercise && selectedExercise.isBreathing) {
     const phaseConfig = {
       inhale: { text: 'Inhale', color: 'from-blue-400 to-blue-600', duration: selectedExercise.inhale },
-      hold: { text: 'Hold', color: 'from-purple-400 to-purple-600', duration: selectedExercise.hold1 || selectedExercise.hold2 },
+      hold: { text: 'Hold', color: 'from-amber-400 to-amber-600', duration: selectedExercise.hold1 || selectedExercise.hold2 },
       exhale: { text: 'Exhale', color: 'from-green-400 to-green-600', duration: selectedExercise.exhale }
     };
     
@@ -429,10 +429,10 @@ const Exercises = () => {
                 <p className="text-xl text-gray-600 mb-8">{selectedExercise.description}</p>
 
                 {/* Audio Player */}
-                <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-8 mb-8">
+                <div className="bg-gradient-to-r from-amber-100 to-emerald-100 rounded-2xl p-8 mb-8">
                   <div className="flex items-center justify-center mb-8">
                     <div className="relative">
-                      <div className="w-32 h-32 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
+                      <div className="w-32 h-32 bg-gradient-to-r from-amber-600 to-emerald-600 rounded-full flex items-center justify-center">
                         {isPlaying ? (
                           <Pause className="w-16 h-16 text-white" />
                         ) : (
@@ -440,7 +440,7 @@ const Exercises = () => {
                         )}
                       </div>
                       {isPlaying && (
-                        <div className="absolute inset-0 rounded-full border-4 border-purple-300 animate-ping"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-amber-300 animate-ping"></div>
                       )}
                     </div>
                   </div>
@@ -453,7 +453,7 @@ const Exercises = () => {
                     </div>
                     <div className="w-full bg-white/50 rounded-full h-2">
                       <div 
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${(currentTime / duration) * 100}%` }}
                       />
                     </div>
@@ -510,28 +510,28 @@ const Exercises = () => {
               {/* Instructions */}
               <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <Headphones className="w-5 h-5 mr-2 text-purple-600" />
+                  <Headphones className="w-5 h-5 mr-2 text-amber-600" />
                   Instructions
                 </h3>
                 <ul className="space-y-3 text-gray-600">
                   <li className="flex items-start">
-                    <span className="text-purple-600 mr-2">•</span>
+                    <span className="text-amber-600 mr-2">•</span>
                     Find a quiet, comfortable space
                   </li>
                   <li className="flex items-start">
-                    <span className="text-purple-600 mr-2">•</span>
+                    <span className="text-amber-600 mr-2">•</span>
                     Use headphones for best experience
                   </li>
                   <li className="flex items-start">
-                    <span className="text-purple-600 mr-2">•</span>
+                    <span className="text-amber-600 mr-2">•</span>
                     Close your eyes when ready
                   </li>
                   <li className="flex items-start">
-                    <span className="text-purple-600 mr-2">•</span>
+                    <span className="text-amber-600 mr-2">•</span>
                     Follow the guidance at your own pace
                   </li>
                   <li className="flex items-start">
-                    <span className="text-purple-600 mr-2">•</span>
+                    <span className="text-amber-600 mr-2">•</span>
                     Be gentle with yourself throughout
                   </li>
                 </ul>
@@ -544,10 +544,10 @@ const Exercises = () => {
                   className="w-full flex items-center justify-between text-left"
                 >
                   <h3 className="text-lg font-bold text-gray-900 flex items-center">
-                    <Eye className="w-5 h-5 mr-2 text-purple-600" />
+                    <Eye className="w-5 h-5 mr-2 text-amber-600" />
                     Transcript
                   </h3>
-                  <span className="text-purple-600">
+                  <span className="text-amber-600">
                     {showTranscript ? 'Hide' : 'Show'}
                   </span>
                 </button>
@@ -591,13 +591,13 @@ const Exercises = () => {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+      <div className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Guided Healing Exercises
             </h1>
-            <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+            <p className="text-xl text-amber-100 max-w-3xl mx-auto">
               Transformative practices to strengthen your Self, heal your inner child, and harmonize your parts
             </p>
           </div>
@@ -612,10 +612,10 @@ const Exercises = () => {
             className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 group"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Brain className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Brain className="w-6 h-6 text-amber-600" />
               </div>
-              <Play className="w-5 h-5 text-purple-600" />
+              <Play className="w-5 h-5 text-amber-600" />
             </div>
             <h3 className="font-bold text-gray-900 mb-2">Quick Self-Connection</h3>
             <p className="text-sm text-gray-600">5-minute practice to center yourself</p>
@@ -640,10 +640,10 @@ const Exercises = () => {
             className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 group"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Heart className="w-6 h-6 text-pink-600" />
+              <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Heart className="w-6 h-6 text-emerald-600" />
               </div>
-              <Play className="w-5 h-5 text-pink-600" />
+              <Play className="w-5 h-5 text-emerald-600" />
             </div>
             <h3 className="font-bold text-gray-900 mb-2">Inner Child Check-in</h3>
             <p className="text-sm text-gray-600">Quick connection with your inner child</p>
@@ -688,7 +688,7 @@ const Exercises = () => {
                       </div>
                     </div>
 
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-amber-600 transition-colors">
                       {exercise.title}
                     </h3>
                     
@@ -698,14 +698,14 @@ const Exercises = () => {
 
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-medium px-2 py-1 rounded ${
-                        exercise.type === 'meditation' ? 'bg-purple-100 text-purple-700' :
+                        exercise.type === 'meditation' ? 'bg-amber-100 text-amber-700' :
                         exercise.type === 'practice' ? 'bg-blue-100 text-blue-700' :
                         exercise.type === 'technique' ? 'bg-green-100 text-green-700' :
                         'bg-orange-100 text-orange-700'
                       }`}>
                         {exercise.type}
                       </span>
-                      <div className="flex items-center text-purple-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity">
                         <span className="text-sm font-medium">Start</span>
                         <Play className="w-4 h-4 ml-1" />
                       </div>
@@ -720,12 +720,12 @@ const Exercises = () => {
 
       {/* Tips Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-3xl p-8">
+        <div className="bg-gradient-to-r from-amber-100 to-emerald-100 rounded-3xl p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Tips for Effective Practice</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex items-start space-x-3">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                <Target className="w-4 h-4 text-purple-600" />
+                <Target className="w-4 h-4 text-amber-600" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1">Be Consistent</h3>
@@ -735,7 +735,7 @@ const Exercises = () => {
             
             <div className="flex items-start space-x-3">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                <Heart className="w-4 h-4 text-pink-600" />
+                <Heart className="w-4 h-4 text-emerald-600" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1">Be Gentle</h3>

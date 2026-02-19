@@ -171,7 +171,7 @@ export default function GamificationHub() {
   return (
     <div className={`max-w-4xl mx-auto px-4 py-6 space-y-6 ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>
       <div className="text-center mb-2">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-emerald-600 bg-clip-text text-transparent">
           Your Healing Journey
         </h1>
         <p className={`text-sm mt-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
@@ -200,17 +200,17 @@ export default function GamificationHub() {
         </div>
       </div>
 
-      <div className={`rounded-2xl p-6 ${isDark ? 'bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-purple-700/30' : 'bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200'}`}>
+      <div className={`rounded-2xl p-6 ${isDark ? 'bg-gradient-to-br from-amber-900/40 to-indigo-900/40 border border-amber-700/30' : 'bg-gradient-to-br from-amber-50 to-stone-50 border border-amber-200'}`}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Crown className={`w-6 h-6 ${isDark ? 'text-yellow-400' : 'text-yellow-500'}`} />
             <div>
               <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>Level {currentLevel}</p>
-              <p className={`text-lg font-bold ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>{LEVEL_NAMES[currentLevel - 1]}</p>
+              <p className={`text-lg font-bold ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>{LEVEL_NAMES[currentLevel - 1]}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className={`text-2xl font-bold ${isDark ? 'text-purple-300' : 'text-purple-600'}`}>{gamificationData.xp} XP</p>
+            <p className={`text-2xl font-bold ${isDark ? 'text-amber-300' : 'text-amber-600'}`}>{gamificationData.xp} XP</p>
             {currentLevel < 10 && (
               <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
                 {XP_PER_LEVEL - xpInCurrentLevel} XP to next level
@@ -220,7 +220,7 @@ export default function GamificationHub() {
         </div>
         <div className={`w-full rounded-full h-3 ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`}>
           <div
-            className="h-3 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+            className="h-3 rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-500"
             style={{ width: `${xpProgress}%` }}
           />
         </div>
@@ -236,7 +236,7 @@ export default function GamificationHub() {
             {XP_ACTIONS.map((item, i) => (
               <div key={i} className={`flex items-center justify-between text-xs px-2 py-1 rounded ${isDark ? 'bg-slate-800/50' : 'bg-white/60'}`}>
                 <span className={isDark ? 'text-slate-300' : 'text-gray-600'}>{item.action}</span>
-                <span className={`font-semibold ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>+{item.xp}</span>
+                <span className={`font-semibold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>+{item.xp}</span>
               </div>
             ))}
           </div>
@@ -260,7 +260,7 @@ export default function GamificationHub() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
                 selectedCategory === cat
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-amber-600 text-white'
                   : isDark
                     ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -308,7 +308,7 @@ export default function GamificationHub() {
                   <div className="mt-2">
                     <div className={`w-full rounded-full h-1.5 ${isDark ? 'bg-slate-700' : 'bg-gray-200'}`}>
                       <div
-                        className="h-1.5 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-300"
+                        className="h-1.5 rounded-full bg-gradient-to-r from-amber-400 to-emerald-400 transition-all duration-300"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -359,7 +359,7 @@ export default function GamificationHub() {
                       {challenge.title}
                     </span>
                   </div>
-                  <span className={`text-xs font-semibold ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>
+                  <span className={`text-xs font-semibold ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
                     +{challenge.xpReward} XP
                   </span>
                 </div>
@@ -382,8 +382,8 @@ export default function GamificationHub() {
         </div>
       </div>
 
-      <div className={`rounded-2xl p-6 text-center ${isDark ? 'bg-slate-800/60 border border-slate-700/40' : 'bg-gradient-to-br from-rose-50 to-purple-50 border border-purple-200'}`}>
-        <Heart className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-pink-400' : 'text-pink-500'}`} />
+      <div className={`rounded-2xl p-6 text-center ${isDark ? 'bg-slate-800/60 border border-slate-700/40' : 'bg-gradient-to-br from-rose-50 to-amber-50 border border-amber-200'}`}>
+        <Heart className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-emerald-400' : 'text-emerald-500'}`} />
         <p className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>
           Your healing journey is personal — no comparison needed.
         </p>

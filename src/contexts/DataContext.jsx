@@ -5,13 +5,31 @@ import { clientAuth } from '../lib/supabasePersonalization';
 const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
-  const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useState(() => {
+    const client = clientAuth.getCurrentClient();
+    return client?.id || null;
+  });
   const [loading, setLoading] = useState(true);
+  const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     initializeUser();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const client = clientAuth.getCurrentClient();
+      const currentId = client?.id || null;
+      if (currentId && currentId !== userId) {
+        setUserId(currentId);
+        initializeUser();
+      } else if (!currentId && userId) {
+        setUserId(null);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [userId]);
 
   const initializeUser = async () => {
     try {
@@ -29,8 +47,68 @@ export const DataProvider = ({ children }) => {
       if (client?.id) setUserId(client.id);
     } finally {
       setLoading(false);
+      setIsReady(true);
     }
   };
+
+  const awardXP = useCallback(async (action, amount) => {
+    if (!userId) return;
+    try {
+      const data = await supabaseHelpers.getGamification(userId);
+      const currentXP = data?.xp || 0;
+      const newXP = currentXP + amount;
+      const newLevel = Math.min(Math.floor(newXP / 500) + 1, 10);
+      const badges = data?.badges || {};
+      
+      const ensureBadge = (id) => {
+        if (!badges[id]) badges[id] = { unlocked: false, progress: 0 };
+      };
+      
+      if (action === 'module_complete') {
+        ensureBadge('module_1');
+        ensureBadge('knowledge_seeker');
+        ensureBadge('all_modules');
+        badges.module_1 = { unlocked: true, progress: 1 };
+        badges.knowledge_seeker.progress = (badges.knowledge_seeker.progress || 0) + 1;
+        if (badges.knowledge_seeker.progress >= 5) badges.knowledge_seeker.unlocked = true;
+        badges.all_modules.progress = (badges.all_modules.progress || 0) + 1;
+        if (badges.all_modules.progress >= 8) badges.all_modules.unlocked = true;
+      }
+      if (action === 'journal_entry') {
+        ensureBadge('journal_keeper');
+        badges.journal_keeper.progress = (badges.journal_keeper.progress || 0) + 1;
+        if (badges.journal_keeper.progress >= 15) badges.journal_keeper.unlocked = true;
+      }
+      if (action === 'assessment_complete') {
+        ensureBadge('first_assessment');
+        ensureBadge('wound_healer');
+        badges.first_assessment = { unlocked: true, progress: 1 };
+        badges.wound_healer.progress = (badges.wound_healer.progress || 0) + 1;
+        if (badges.wound_healer.progress >= 3) badges.wound_healer.unlocked = true;
+      }
+      if (action === 'exercise_complete') {
+        ensureBadge('exercises_10');
+        badges.exercises_10.progress = (badges.exercises_10.progress || 0) + 1;
+        if (badges.exercises_10.progress >= 10) badges.exercises_10.unlocked = true;
+      }
+      if (action === 'parts_mapped') {
+        ensureBadge('parts_explorer');
+        badges.parts_explorer.progress = (badges.parts_explorer.progress || 0) + 1;
+        if (badges.parts_explorer.progress >= 5) badges.parts_explorer.unlocked = true;
+      }
+
+      await supabaseHelpers.saveGamification(userId, {
+        xp: newXP,
+        level: newLevel,
+        badges,
+        streakCurrent: data?.streak_current || 1,
+        streakLongest: data?.streak_longest || 1,
+        lastLoginDate: data?.last_login_date || new Date().toISOString().split('T')[0],
+      });
+    } catch (err) {
+      console.error('Error awarding XP:', err);
+    }
+  }, [userId]);
 
   const saveModuleProgress = useCallback(async (moduleId, progress) => {
     if (!userId) return;
@@ -219,6 +297,9 @@ export const DataProvider = ({ children }) => {
     getModuleAnswers,
     getAllModuleAnswers,
     clearAllData,
+    awardXP,
+    initializeUser,
+    isReady,
   };
 
   return (

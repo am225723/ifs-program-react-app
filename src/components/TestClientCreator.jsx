@@ -45,7 +45,7 @@ const TestClientCreator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-100 to-emerald-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
         <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
           Create Test Client
@@ -62,7 +62,7 @@ const TestClientCreator = () => {
           className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 ${
             isLoading
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
+              : 'bg-gradient-to-r from-amber-600 to-emerald-600 hover:from-amber-700 hover:to-emerald-700 shadow-lg hover:shadow-xl'
           }`}
         >
           {isLoading ? (
@@ -105,7 +105,7 @@ const TestClientCreator = () => {
         <div className="mt-6 text-center">
           <a 
             href="/" 
-            className="text-purple-600 hover:text-purple-700 text-sm font-semibold"
+            className="text-amber-600 hover:text-amber-700 text-sm font-semibold"
           >
             ← Back to Login
           </a>

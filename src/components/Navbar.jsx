@@ -23,10 +23,10 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-amber-600 to-emerald-600 rounded-full flex items-center justify-center">
               <Heart className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-amber-600 to-emerald-600 bg-clip-text text-transparent">
               The Luminous Self
             </span>
           </Link>
@@ -42,8 +42,8 @@ const Navbar = () => {
                   to={item.path}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
                     isActive
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                      : 'text-gray-700 hover:bg-purple-50'
+                      ? 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white shadow-md'
+                      : 'text-gray-700 hover:bg-amber-50'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -56,7 +56,7 @@ const Navbar = () => {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-purple-50"
+            className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-amber-50"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -75,8 +75,8 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-all duration-300 ${
                     isActive
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
-                      : 'text-gray-700 hover:bg-purple-50'
+                      ? 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white shadow-md'
+                      : 'text-gray-700 hover:bg-amber-50'
                   }`}
                 >
                   <Icon className="w-5 h-5" />

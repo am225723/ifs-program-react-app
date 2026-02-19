@@ -13,7 +13,7 @@ import { clientAuth } from '../lib/supabasePersonalization';
 
 const woundColorMap = {
   abandonment: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
-  shame: { bg: 'bg-purple-100', text: 'text-purple-700', dot: 'bg-purple-500' },
+  shame: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
   neglect: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
   betrayal: { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' }
 };
@@ -748,7 +748,7 @@ const TherapistDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className={`${textSecondary}`}>Loading dashboard data...</p>
           </div>
         </div>
@@ -774,7 +774,7 @@ const TherapistDashboard = () => {
         {[
           { label: 'Total Clients', value: stats.totalClients, icon: Users, color: 'from-blue-500 to-blue-600' },
           { label: 'Active Clients', value: stats.activeSessions, icon: Calendar, color: 'from-emerald-500 to-emerald-600' },
-          { label: 'Assessments Done', value: stats.assessmentsCompleted, icon: CheckCircle, color: 'from-purple-500 to-purple-600' },
+          { label: 'Assessments Done', value: stats.assessmentsCompleted, icon: CheckCircle, color: 'from-amber-500 to-amber-600' },
           { label: 'Avg Progress', value: `${stats.avgProgress}%`, icon: TrendingUp, color: 'from-amber-500 to-amber-600' }
         ].map((stat) => {
           const Icon = stat.icon;
@@ -812,7 +812,7 @@ const TherapistDashboard = () => {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                 activeTab === tab.id
-                  ? 'bg-purple-600 text-white shadow-md'
+                  ? 'bg-amber-600 text-white shadow-md'
                   : `${cardBg} ${textSecondary} border ${cardBorder} ${hoverBg}`
               }`}
             >
@@ -838,14 +838,14 @@ const TherapistDashboard = () => {
                 placeholder="Search clients..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full pl-10 pr-4 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none`}
+                className={`w-full pl-10 pr-4 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none`}
               />
             </div>
             <div className="flex gap-2">
               <select
                 value={filterWound}
                 onChange={(e) => setFilterWound(e.target.value)}
-                className={`px-3 py-2.5 rounded-lg border ${inputBg} text-sm focus:ring-2 focus:ring-purple-500 outline-none`}
+                className={`px-3 py-2.5 rounded-lg border ${inputBg} text-sm focus:ring-2 focus:ring-amber-500 outline-none`}
               >
                 <option value="all">All Wounds</option>
                 <option value="abandonment">Abandonment</option>
@@ -856,7 +856,7 @@ const TherapistDashboard = () => {
               <select
                 value={filterRisk}
                 onChange={(e) => setFilterRisk(e.target.value)}
-                className={`px-3 py-2.5 rounded-lg border ${inputBg} text-sm focus:ring-2 focus:ring-purple-500 outline-none`}
+                className={`px-3 py-2.5 rounded-lg border ${inputBg} text-sm focus:ring-2 focus:ring-amber-500 outline-none`}
               >
                 <option value="all">All Risk Levels</option>
                 <option value="low">Low Risk</option>
@@ -875,7 +875,7 @@ const TherapistDashboard = () => {
                 <div key={client.id} className={`${cardBg} rounded-xl border ${cardBorder} p-4 sm:p-5 transition-all hover:shadow-lg`}>
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-emerald-400 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                         {client.name.charAt(0)}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -958,7 +958,7 @@ const TherapistDashboard = () => {
         <div className="grid lg:grid-cols-2 gap-6">
           <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
             <h2 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-              <FileText className="w-5 h-5 text-purple-500" />
+              <FileText className="w-5 h-5 text-amber-500" />
               New Session Note
             </h2>
             <div className="space-y-4">
@@ -967,7 +967,7 @@ const TherapistDashboard = () => {
                 <select
                   value={noteForm.clientId}
                   onChange={(e) => setNoteForm(f => ({ ...f, clientId: e.target.value }))}
-                  className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+                  className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none`}
                 >
                   <option value="">Select a client...</option>
                   {clients.map(c => (
@@ -982,7 +982,7 @@ const TherapistDashboard = () => {
                     type="date"
                     value={noteForm.date}
                     onChange={(e) => setNoteForm(f => ({ ...f, date: e.target.value }))}
-                    className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+                    className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none`}
                   />
                 </div>
                 <div>
@@ -990,7 +990,7 @@ const TherapistDashboard = () => {
                   <select
                     value={noteForm.sessionType}
                     onChange={(e) => setNoteForm(f => ({ ...f, sessionType: e.target.value }))}
-                    className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+                    className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none`}
                   >
                     <option value="Individual">Individual</option>
                     <option value="Group">Group</option>
@@ -1005,7 +1005,7 @@ const TherapistDashboard = () => {
                   onChange={(e) => setNoteForm(f => ({ ...f, notes: e.target.value }))}
                   rows={4}
                   placeholder="Document session observations, client responses, techniques used..."
-                  className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none resize-none`}
+                  className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none resize-none`}
                 />
               </div>
               <div>
@@ -1015,13 +1015,13 @@ const TherapistDashboard = () => {
                   onChange={(e) => setNoteForm(f => ({ ...f, goals: e.target.value }))}
                   rows={3}
                   placeholder="Outline focus areas and objectives for the next meeting..."
-                  className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none resize-none`}
+                  className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none resize-none`}
                 />
               </div>
               <button
                 onClick={handleSaveNote}
                 disabled={!noteForm.clientId || !noteForm.notes}
-                className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
               >
                 <CheckCircle className="w-4 h-4" />
                 Save Session Note
@@ -1031,7 +1031,7 @@ const TherapistDashboard = () => {
 
           <div>
             <h2 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-              <Clock className="w-5 h-5 text-purple-500" />
+              <Clock className="w-5 h-5 text-amber-500" />
               Previous Notes
             </h2>
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
@@ -1047,7 +1047,7 @@ const TherapistDashboard = () => {
                     <div className="flex items-center justify-between mb-2">
                       <span className={`font-medium ${textPrimary}`}>{note.clientName}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{note.sessionType}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{note.sessionType}</span>
                         <span className={`text-xs ${textMuted}`}>{formatDate(note.date)}</span>
                       </div>
                     </div>
@@ -1068,7 +1068,7 @@ const TherapistDashboard = () => {
       {activeTab === 'progress' && (
         <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
           <h2 className={`text-lg font-semibold ${textPrimary} mb-6 flex items-center gap-2`}>
-            <BarChart3 className="w-5 h-5 text-purple-500" />
+            <BarChart3 className="w-5 h-5 text-amber-500" />
             Client Progress Overview
           </h2>
 
@@ -1077,7 +1077,7 @@ const TherapistDashboard = () => {
               return (
                 <div key={client.id}>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-emerald-400 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {client.name.charAt(0)}
                     </div>
                     <div>
@@ -1103,7 +1103,7 @@ const TherapistDashboard = () => {
                         <span className={`text-xs font-medium ${textPrimary}`}>{client.assessmentsTaken}</span>
                       </div>
                       <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-purple-500 rounded-full transition-all" style={{ width: `${Math.min((client.assessmentsTaken / 5) * 100, 100)}%` }} />
+                        <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${Math.min((client.assessmentsTaken / 5) * 100, 100)}%` }} />
                       </div>
                     </div>
                     <div>
@@ -1186,7 +1186,7 @@ const TherapistDashboard = () => {
               {[
                 { id: 'create-client', label: 'Create New Client PIN', icon: Plus, color: 'from-blue-500 to-blue-600', desc: 'Generate a secure access PIN for a new client' },
                 { id: 'send-reminder', label: 'Send Reminder', icon: MessageSquare, color: 'from-emerald-500 to-emerald-600', desc: 'Send session or activity reminders to clients' },
-                { id: 'export-reports', label: 'Export All Reports', icon: Download, color: 'from-purple-500 to-purple-600', desc: 'Download comprehensive progress reports' },
+                { id: 'export-reports', label: 'Export All Reports', icon: Download, color: 'from-amber-500 to-amber-600', desc: 'Download comprehensive progress reports' },
                 { id: 'group-analytics', label: 'View Group Analytics', icon: BarChart3, color: 'from-amber-500 to-amber-600', desc: 'Analyze trends across all clients' }
               ].map((action) => {
                 const Icon = action.icon;
@@ -1430,7 +1430,7 @@ const TherapistDashboard = () => {
               {activeAction === 'export-reports' && (
                 <div className={`${cardBg} rounded-xl border ${cardBorder} p-6 max-w-lg`}>
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
                       <Download className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -1445,13 +1445,13 @@ const TherapistDashboard = () => {
                       <ul className={`text-sm ${textSecondary} space-y-2`}>
                         {['Client names and wound profiles', 'Module completion progress', 'Journal entry counts', 'Average mood scores', 'Activity completion rates', 'Risk levels and engagement status', 'Join dates and last activity'].map((item, i) => (
                           <li key={i} className="flex items-center gap-2">
-                            <CheckCircle className="w-3.5 h-3.5 text-purple-500 flex-shrink-0" />
+                            <CheckCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
                             {item}
                           </li>
                         ))}
                       </ul>
                     </div>
-                    <div className={`rounded-lg border ${cardBorder} p-4 bg-purple-50/50`}>
+                    <div className={`rounded-lg border ${cardBorder} p-4 bg-amber-50/50`}>
                       <p className={`text-sm ${textSecondary}`}>
                         <span className="font-medium">{clients.length} clients</span> will be included in this report
                       </p>
@@ -1459,7 +1459,7 @@ const TherapistDashboard = () => {
                     <button
                       onClick={handleExportReports}
                       disabled={exportLoading || clients.length === 0}
-                      className="w-full py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg text-sm font-medium hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {exportLoading ? (
                         <><RefreshCw className="w-4 h-4 animate-spin" /> Generating Report...</>
@@ -1497,7 +1497,7 @@ const TherapistDashboard = () => {
                       {[
                         { label: 'Avg Progress', value: `${analytics.avgProgress}%`, sub: `${analytics.avgModules} modules avg`, color: 'from-blue-500 to-blue-600' },
                         { label: 'Active Rate', value: `${analytics.activeRate}%`, sub: `${analytics.riskCounts.low} of ${clients.length} active`, color: 'from-emerald-500 to-emerald-600' },
-                        { label: 'Total Journals', value: analytics.totalJournals, sub: `${(analytics.totalJournals / clients.length).toFixed(1)} per client`, color: 'from-purple-500 to-purple-600' },
+                        { label: 'Total Journals', value: analytics.totalJournals, sub: `${(analytics.totalJournals / clients.length).toFixed(1)} per client`, color: 'from-amber-500 to-amber-600' },
                         { label: 'Activity Rate', value: `${analytics.activityCompletionRate}%`, sub: `${analytics.completedActivities}/${analytics.totalActivities} done`, color: 'from-amber-500 to-amber-600' }
                       ].map(stat => (
                         <div key={stat.label} className={`${cardBg} rounded-xl border ${cardBorder} p-4`}>
@@ -1589,7 +1589,7 @@ const TherapistDashboard = () => {
       {activeTab === 'lessons' && (
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -1605,7 +1605,7 @@ const TherapistDashboard = () => {
                   className={`w-full flex items-center justify-between p-5 text-left ${hoverBg} transition-colors`}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {index + 1}
                     </div>
                     <div>
@@ -1630,7 +1630,7 @@ const TherapistDashboard = () => {
                     <div className="grid md:grid-cols-2 gap-5 mt-5">
                       <div>
                         <div className="flex items-center gap-2 mb-3">
-                          <Lightbulb className="w-4 h-4 text-purple-500" />
+                          <Lightbulb className="w-4 h-4 text-amber-500" />
                           <h4 className={`font-medium ${textPrimary} text-sm`}>Session Goals</h4>
                         </div>
                         <p className={`text-sm ${textSecondary} leading-relaxed`}>{module.goals}</p>
@@ -1638,15 +1638,15 @@ const TherapistDashboard = () => {
 
                       <div>
                         <div className="flex items-center gap-2 mb-3">
-                          <MessageCircle className="w-4 h-4 text-indigo-500" />
+                          <MessageCircle className="w-4 h-4 text-stone-500" />
                           <h4 className={`font-medium ${textPrimary} text-sm`}>Discussion Topics</h4>
                         </div>
                         <ul className="space-y-2">
                           {module.topics.map((topic, i) => (
                             <li key={i} className={`text-sm ${textSecondary} flex items-start gap-2`}>
-                              <span className="text-purple-400 mt-0.5 flex-shrink-0">&ldquo;</span>
+                              <span className="text-amber-400 mt-0.5 flex-shrink-0">&ldquo;</span>
                               <span className="italic">{topic}</span>
-                              <span className="text-purple-400 mt-0.5 flex-shrink-0">&rdquo;</span>
+                              <span className="text-amber-400 mt-0.5 flex-shrink-0">&rdquo;</span>
                             </li>
                           ))}
                         </ul>
@@ -1683,9 +1683,9 @@ const TherapistDashboard = () => {
                       </div>
                     </div>
 
-                    <div className={`mt-5 p-4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-purple-50'} border ${isDark ? 'border-slate-600' : 'border-purple-100'}`}>
+                    <div className={`mt-5 p-4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-amber-50'} border ${isDark ? 'border-slate-600' : 'border-amber-100'}`}>
                       <div className="flex items-center gap-2 mb-2">
-                        <BookOpen className="w-4 h-4 text-purple-500" />
+                        <BookOpen className="w-4 h-4 text-amber-500" />
                         <h4 className={`font-medium ${textPrimary} text-sm`}>Homework Assignment</h4>
                       </div>
                       <p className={`text-sm ${textSecondary}`}>{module.homework}</p>
@@ -1701,7 +1701,7 @@ const TherapistDashboard = () => {
       {activeTab === 'insights' && (
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
               <Eye className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -1715,7 +1715,7 @@ const TherapistDashboard = () => {
             <select
               value={selectedInsightClient}
               onChange={(e) => setSelectedInsightClient(e.target.value)}
-              className={`w-full sm:w-80 px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+              className={`w-full sm:w-80 px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none`}
             >
               <option value="">Choose a client...</option>
               {clients.map(c => (
@@ -1734,7 +1734,7 @@ const TherapistDashboard = () => {
 
           {selectedInsightClient && insightsLoading && (
             <div className="flex items-center justify-center py-12">
-              <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
 
@@ -1755,14 +1755,14 @@ const TherapistDashboard = () => {
                 {(assessment || personalization) && (
                   <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
                     <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-                      <Sparkles className="w-5 h-5 text-purple-500" />
+                      <Sparkles className="w-5 h-5 text-amber-500" />
                       How Modules Are Personalized for {client?.name}
                     </h3>
 
                     {assessment && (
                       <div className="mb-6">
                         <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
-                          <Target className="w-4 h-4 text-indigo-500" />
+                          <Target className="w-4 h-4 text-stone-500" />
                           Wound Assessment Scores
                         </h4>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
@@ -1776,7 +1776,7 @@ const TherapistDashboard = () => {
                                 <div
                                   className={`h-full rounded-full transition-all ${
                                     w.color === 'blue' ? 'bg-blue-500' :
-                                    w.color === 'purple' ? 'bg-purple-500' :
+                                    w.color === 'purple' ? 'bg-amber-500' :
                                     w.color === 'amber' ? 'bg-amber-500' : 'bg-red-500'
                                   }`}
                                   style={{ width: `${(w.score / maxScore) * 100}%` }}
@@ -1788,7 +1788,7 @@ const TherapistDashboard = () => {
                             </div>
                           ))}
                         </div>
-                        <div className={`p-3 rounded-lg ${isDark ? 'bg-indigo-900/20 border-indigo-800' : 'bg-indigo-50 border-indigo-100'} border`}>
+                        <div className={`p-3 rounded-lg ${isDark ? 'bg-indigo-900/20 border-indigo-800' : 'bg-stone-50 border-stone-100'} border`}>
                           <p className={`text-sm ${textSecondary}`}>
                             <span className="font-medium">Primary wound:</span>{' '}
                             <span className={`font-semibold ${textPrimary}`}>{assessment.primary_wound || woundScores[0]?.type || 'Not assessed'}</span>
@@ -1812,7 +1812,7 @@ const TherapistDashboard = () => {
                             {personalization.personalizedModules.map((mod, idx) => (
                               <div key={mod.id || idx} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
                                 <div className="flex items-start gap-3">
-                                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
                                     {idx + 1}
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -1821,7 +1821,7 @@ const TherapistDashboard = () => {
                                       <div className="flex items-center gap-2 mt-1">
                                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                                           mod.personalizedContent.woundFocus.toLowerCase().includes('abandon') ? 'bg-blue-100 text-blue-700' :
-                                          mod.personalizedContent.woundFocus.toLowerCase().includes('shame') ? 'bg-purple-100 text-purple-700' :
+                                          mod.personalizedContent.woundFocus.toLowerCase().includes('shame') ? 'bg-amber-100 text-amber-700' :
                                           mod.personalizedContent.woundFocus.toLowerCase().includes('neglect') ? 'bg-amber-100 text-amber-700' :
                                           'bg-red-100 text-red-700'
                                         }`}>
@@ -1848,7 +1848,7 @@ const TherapistDashboard = () => {
                                         <ul className="space-y-1">
                                           {mod.personalizedContent.activities.map((act, ai) => (
                                             <li key={ai} className={`text-xs ${textMuted} flex items-start gap-1.5`}>
-                                              <Activity className="w-3 h-3 text-purple-500 mt-0.5 flex-shrink-0" />
+                                              <Activity className="w-3 h-3 text-amber-500 mt-0.5 flex-shrink-0" />
                                               {act}
                                             </li>
                                           ))}
@@ -1877,7 +1877,7 @@ const TherapistDashboard = () => {
                                   <div className="mt-2 flex flex-wrap gap-1.5">
                                     {personalization.woundRanking.map((wr, i) => (
                                       <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${
-                                        i === 0 ? 'bg-purple-100 text-purple-700' :
+                                        i === 0 ? 'bg-amber-100 text-amber-700' :
                                         i === 1 ? 'bg-blue-100 text-blue-700' :
                                         'bg-gray-100 text-gray-600'
                                       }`}>
@@ -1917,7 +1917,7 @@ const TherapistDashboard = () => {
 
                 <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
                   <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-                    <MessageCircle className="w-5 h-5 text-purple-500" />
+                    <MessageCircle className="w-5 h-5 text-amber-500" />
                     Recent Module Answers
                   </h3>
                   {clientInsights.recentAnswers.length === 0 ? (
@@ -1930,7 +1930,7 @@ const TherapistDashboard = () => {
                       {clientInsights.recentAnswers.map((item, i) => (
                         <div key={i} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{item.module}</span>
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{item.module}</span>
                           </div>
                           <p className={`text-sm font-medium ${textPrimary} mb-2`}>{item.question}</p>
                           <p className={`text-sm ${textSecondary} italic leading-relaxed`}>"{item.answer}"</p>
@@ -1978,7 +1978,7 @@ const TherapistDashboard = () => {
                   <ul className="space-y-2.5">
                     {clientInsights.sessionPrep.map((point, i) => (
                       <li key={i} className={`flex items-start gap-3 text-sm ${textSecondary}`}>
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0 mt-0.5">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white text-xs font-medium flex-shrink-0 mt-0.5">
                           {i + 1}
                         </div>
                         <span className="leading-relaxed">{point}</span>
@@ -1989,7 +1989,7 @@ const TherapistDashboard = () => {
 
                 <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
                   <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-                    <FileText className="w-5 h-5 text-purple-500" />
+                    <FileText className="w-5 h-5 text-amber-500" />
                     Therapist Feedback
                   </h3>
                   <p className={`text-sm ${textSecondary} mb-3`}>
@@ -2000,7 +2000,7 @@ const TherapistDashboard = () => {
                     onChange={(e) => handleFeedbackChange(selectedInsightClient, e.target.value)}
                     rows={5}
                     placeholder={`Add your notes and feedback for ${client?.name}...`}
-                    className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none resize-none`}
+                    className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none resize-none`}
                   />
                   <p className={`text-xs ${textMuted} mt-2 flex items-center gap-1`}>
                     <CheckCircle className="w-3 h-3" />
@@ -2016,7 +2016,7 @@ const TherapistDashboard = () => {
       {activeTab === 'co-therapy' && (
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-rose-600 flex items-center justify-center">
               <Heart className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -2032,7 +2032,7 @@ const TherapistDashboard = () => {
             <div className="mb-4">
               <label className={`block text-sm font-medium ${textSecondary} mb-2`}>Select Client</label>
               <select
-                className={`w-full sm:w-80 px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+                className={`w-full sm:w-80 px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none`}
                 defaultValue=""
                 id="co-therapy-client-select"
               >
@@ -2056,7 +2056,7 @@ const TherapistDashboard = () => {
                   alert('Please select a client first');
                 }
               }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-lg font-medium hover:from-pink-600 hover:to-rose-700 transition-all shadow-md"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-rose-600 text-white rounded-lg font-medium hover:from-emerald-600 hover:to-rose-700 transition-all shadow-md"
             >
               <Play className="w-4 h-4" />
               Launch Co-Therapy Session
@@ -2077,7 +2077,7 @@ const TherapistDashboard = () => {
             ].map((activity, i) => (
               <div key={i} className={`${cardBg} rounded-xl border ${cardBorder} p-4 transition-all hover:shadow-md`}>
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-rose-600 flex items-center justify-center text-white flex-shrink-0">
                     <Heart className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -2088,7 +2088,7 @@ const TherapistDashboard = () => {
                         <Clock className="w-3 h-3" />
                         {activity.duration}
                       </span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{activity.category}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{activity.category}</span>
                     </div>
                   </div>
                 </div>

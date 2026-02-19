@@ -99,7 +99,7 @@ const PersonalizationModal = ({
 
         <div className="p-8">
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-20 h-20 bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Sparkles className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -112,19 +112,19 @@ const PersonalizationModal = ({
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-12 h-12 text-purple-600 animate-spin mb-4" />
+              <Loader2 className="w-12 h-12 text-amber-600 animate-spin mb-4" />
               <p className="text-gray-600">Creating your personalized experience...</p>
             </div>
           ) : personalization ? (
             <div className="space-y-6">
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+              <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-2xl p-6 border border-amber-100">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <Heart className="w-6 h-6 text-purple-600" />
+                  <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Heart className="w-6 h-6 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-purple-900 mb-2">Your Wound Profile</h3>
-                    <p className="text-purple-800 leading-relaxed">
+                    <h3 className="font-bold text-amber-900 mb-2">Your Wound Profile</h3>
+                    <p className="text-amber-800 leading-relaxed">
                       {personalization.summary}
                     </p>
                   </div>
@@ -170,26 +170,26 @@ const PersonalizationModal = ({
                 <h3 className="font-bold text-gray-900 mb-4">What's Been Personalized For You:</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-purple-600" />
+                    <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-amber-600" />
                     </div>
                     <span className="text-gray-700">Module content adapted to your wounds</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-purple-600" />
+                    <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-amber-600" />
                     </div>
                     <span className="text-gray-700">Exercises targeted to your needs</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-purple-600" />
+                    <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-amber-600" />
                     </div>
                     <span className="text-gray-700">Healing goals specific to you</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-purple-600" />
+                    <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <CheckCircle className="w-4 h-4 text-amber-600" />
                     </div>
                     <span className="text-gray-700">Timeline based on intensity level</span>
                   </div>
@@ -210,7 +210,7 @@ const PersonalizationModal = ({
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
             <button
               onClick={onStartJourney}
-              className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-4 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 flex items-center justify-center gap-2"
             >
               Begin Your Journey
               <ArrowRight className="w-5 h-5" />

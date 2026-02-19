@@ -17,13 +17,13 @@ const PART_TYPES = [
     name: 'Exile',
     subtitle: 'Inner Child',
     icon: Heart,
-    color: 'text-pink-500',
-    bgColor: 'bg-pink-100',
-    darkBgColor: 'bg-pink-900/30',
-    borderColor: 'border-pink-300',
-    darkBorderColor: 'border-pink-700/40',
-    bubbleColor: 'bg-pink-50',
-    darkBubbleColor: 'bg-pink-900/20',
+    color: 'text-emerald-500',
+    bgColor: 'bg-emerald-100',
+    darkBgColor: 'bg-emerald-900/30',
+    borderColor: 'border-emerald-300',
+    darkBorderColor: 'border-emerald-700/40',
+    bubbleColor: 'bg-emerald-50',
+    darkBubbleColor: 'bg-emerald-900/20',
     systemPrompt: 'You are roleplaying as a user\'s wounded inner child part in IFS therapy. Speak from the perspective of a young, vulnerable part carrying pain. Be gentle, scared, and honest about feelings. Use simple, child-like language.',
     suggestedPrompts: [
       'What are you feeling right now?',
@@ -95,13 +95,13 @@ const PART_TYPES = [
     name: 'Self',
     subtitle: 'Compassionate Observer',
     icon: Sparkles,
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-100',
-    darkBgColor: 'bg-purple-900/30',
-    borderColor: 'border-purple-300',
-    darkBorderColor: 'border-purple-700/40',
-    bubbleColor: 'bg-purple-50',
-    darkBubbleColor: 'bg-purple-900/20',
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-100',
+    darkBgColor: 'bg-amber-900/30',
+    borderColor: 'border-amber-300',
+    darkBorderColor: 'border-amber-700/40',
+    bubbleColor: 'bg-amber-50',
+    darkBubbleColor: 'bg-amber-900/20',
     systemPrompt: "You are the user's Self - the compassionate, curious, calm, and connected core. You embody the 8 C's of Self: Compassion, Curiosity, Calm, Confidence, Courage, Creativity, Clarity, Connectedness. Guide the user with wisdom.",
     suggestedPrompts: [
       'Help me understand my parts better',
@@ -266,8 +266,8 @@ export default function PartsDialogue() {
   return (
     <div className={`max-w-2xl mx-auto px-4 py-6 flex flex-col h-[calc(100vh-8rem)] ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>
       <div className="mb-4">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-purple-500" />
+        <h1 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-emerald-600 bg-clip-text text-transparent flex items-center gap-2">
+          <MessageSquare className="w-5 h-5 text-amber-500" />
           Parts Dialogue
         </h1>
         <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
@@ -326,7 +326,7 @@ export default function PartsDialogue() {
                   className={`px-3 py-1.5 rounded-full text-xs transition-all ${
                     isDark
                       ? 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'
-                      : 'bg-white text-gray-600 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
+                      : 'bg-white text-gray-600 hover:bg-amber-50 hover:text-amber-600 border border-gray-200'
                   }`}
                 >
                   {prompt}
@@ -349,7 +349,7 @@ export default function PartsDialogue() {
                   )}
                   <div className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-purple-600 text-white rounded-br-md'
+                      ? 'bg-amber-600 text-white rounded-br-md'
                       : isDark
                         ? `${selectedPart.darkBubbleColor} border ${selectedPart.darkBorderColor} text-slate-200 rounded-bl-md`
                         : `${selectedPart.bubbleColor} border ${selectedPart.borderColor} text-gray-700 rounded-bl-md`
@@ -390,7 +390,7 @@ export default function PartsDialogue() {
               className={`px-3 py-1 rounded-full text-[11px] whitespace-nowrap transition-all ${
                 isDark
                   ? 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700'
-                  : 'bg-white text-gray-500 hover:bg-purple-50 hover:text-purple-600 border border-gray-200'
+                  : 'bg-white text-gray-500 hover:bg-amber-50 hover:text-amber-600 border border-gray-200'
               } disabled:opacity-50`}
             >
               {prompt}
@@ -423,7 +423,7 @@ export default function PartsDialogue() {
             disabled={!inputValue.trim() || isLoading}
             className={`p-2.5 mr-1 rounded-lg transition-all ${
               inputValue.trim() && !isLoading
-                ? 'bg-purple-600 text-white hover:bg-purple-700'
+                ? 'bg-amber-600 text-white hover:bg-amber-700'
                 : isDark ? 'text-slate-600' : 'text-gray-300'
             } disabled:cursor-not-allowed`}
           >

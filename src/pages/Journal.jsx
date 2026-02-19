@@ -88,6 +88,7 @@ const Journal = () => {
   const [savedMessage, setSavedMessage] = useState('');
   const textAreaRef = useRef(null);
   const { theme } = useTheme();
+  const { awardXP } = useData();
 
   const journalPrompts = [
     {
@@ -245,6 +246,7 @@ const Journal = () => {
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
     
+    if (awardXP) awardXP('journal_entry', 25);
     setSavedMessage('Entry saved successfully!');
     setEntryTitle('');
     setEntryContent('');
@@ -309,7 +311,7 @@ const Journal = () => {
   const subtleBgHover = theme.isDark ? 'hover:bg-slate-600' : 'hover:bg-gray-200';
   const modalBg = theme.isDark ? 'bg-slate-800' : 'bg-white';
   const promptBg = theme.isDark ? 'bg-slate-700' : 'bg-gray-50';
-  const promptHover = theme.isDark ? 'hover:bg-slate-600' : 'hover:bg-purple-50';
+  const promptHover = theme.isDark ? 'hover:bg-slate-600' : 'hover:bg-amber-50';
 
   if (isWriting) {
     return (
@@ -330,7 +332,7 @@ const Journal = () => {
               )}
               <button
                 onClick={handleSaveEntry}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white px-6 py-2 rounded-xl font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300"
               >
                 Save Entry
               </button>
@@ -358,7 +360,7 @@ const Journal = () => {
                           onClick={() => setEntryMood(mood.value)}
                           className={`text-2xl p-2 rounded-lg transition-all ${
                             entryMood === mood.value 
-                              ? `${subtleBg} ring-2 ring-purple-500` 
+                              ? `${subtleBg} ring-2 ring-amber-500` 
                               : `${subtleBgHover}`
                           }`}
                         >
@@ -375,7 +377,7 @@ const Journal = () => {
 
                 <button
                   onClick={() => setShowPrompts(!showPrompts)}
-                  className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 transition-colors"
+                  className="flex items-center space-x-2 text-amber-600 hover:text-amber-700 transition-colors"
                 >
                   <Lightbulb className="w-4 h-4" />
                   <span className="text-sm">Get Prompts</span>
@@ -400,12 +402,12 @@ const Journal = () => {
                 {entryTags.map((tag, index) => (
                   <span
                     key={index}
-                    className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm flex items-center"
+                    className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm flex items-center"
                   >
                     {tag}
                     <button
                       onClick={() => setEntryTags(entryTags.filter(t => t !== tag))}
-                      className="ml-2 text-purple-500 hover:text-purple-700"
+                      className="ml-2 text-amber-500 hover:text-amber-700"
                     >
                       ×
                     </button>
@@ -445,8 +447,8 @@ const Journal = () => {
                     return (
                       <div key={category.category} className="mb-6">
                         <div className="flex items-center space-x-2 mb-4">
-                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <Icon className="w-5 h-5 text-purple-600" />
+                          <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                            <Icon className="w-5 h-5 text-amber-600" />
                           </div>
                           <h4 className={`font-bold ${textPrimary}`}>{category.title}</h4>
                         </div>
@@ -522,7 +524,7 @@ const Journal = () => {
                   {selectedEntry.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm"
+                      className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm"
                     >
                       #{tag}
                     </span>
@@ -544,14 +546,14 @@ const Journal = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+      <div className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">
                 Healing Journal
               </h1>
-              <p className="text-xl text-purple-100">
+              <p className="text-xl text-amber-100">
                 A sacred space to document your inner journey and insights
               </p>
             </div>
@@ -569,7 +571,7 @@ const Journal = () => {
           <div className={`${cardBg} rounded-2xl shadow-lg p-6`}>
             <div className="flex items-center justify-between mb-2">
               <span className={textSecondary}>Total Entries</span>
-              <BookOpen className="w-5 h-5 text-purple-600" />
+              <BookOpen className="w-5 h-5 text-amber-600" />
             </div>
             <div className={`text-2xl font-bold ${textPrimary}`}>{entries.length}</div>
           </div>
@@ -611,14 +613,14 @@ const Journal = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search entries..."
-                  className={`w-full pl-10 pr-4 py-2 border ${inputBg} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                  className={`w-full pl-10 pr-4 py-2 border ${inputBg} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent`}
                 />
               </div>
               
               <select
                 value={selectedMood}
                 onChange={(e) => setSelectedMood(e.target.value)}
-                className={`px-4 py-2 border ${inputBg} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                className={`px-4 py-2 border ${inputBg} rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent`}
               >
                 <option value="all">All Moods</option>
                 {moods.map((mood) => (
@@ -631,7 +633,7 @@ const Journal = () => {
 
             <button
               onClick={() => setIsWriting(true)}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center"
+              className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center"
             >
               <Plus className="w-5 h-5 mr-2" />
               New Entry
@@ -658,7 +660,7 @@ const Journal = () => {
               </p>
               <button
                 onClick={() => setIsWriting(true)}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300"
               >
                 Write First Entry
               </button>
@@ -673,10 +675,10 @@ const Journal = () => {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <span className="text-2xl">{getMoodEmoji(entry.mood)}</span>
-                    <Eye className={`w-5 h-5 ${textTertiary} group-hover:text-purple-600 transition-colors`} />
+                    <Eye className={`w-5 h-5 ${textTertiary} group-hover:text-amber-600 transition-colors`} />
                   </div>
                   
-                  <h3 className={`text-lg font-bold ${textPrimary} mb-2 group-hover:text-purple-600 transition-colors`}>
+                  <h3 className={`text-lg font-bold ${textPrimary} mb-2 group-hover:text-amber-600 transition-colors`}>
                     {entry.title}
                   </h3>
                   
@@ -700,7 +702,7 @@ const Journal = () => {
                       {entry.tags.slice(0, 3).map((tag, index) => (
                         <span
                           key={index}
-                          className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs"
+                          className="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs"
                         >
                           #{tag}
                         </span>

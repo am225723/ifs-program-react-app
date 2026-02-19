@@ -115,7 +115,7 @@ export const getWoundCustomizations = (woundType) => {
         'Claim your space in the world'
       ],
       innerChildMessage: 'You matter. Your needs are important and valid',
-      color: 'from-purple-400 to-purple-600'
+      color: 'from-amber-400 to-amber-600'
     },
     [WOUND_TYPES.BETRAYAL]: {
       title: 'Betrayal/Fear Wound',

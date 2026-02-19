@@ -6,7 +6,7 @@ const CheatSheet = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-amber-600 to-emerald-600 bg-clip-text text-transparent">
             IFS Cheat Sheet
           </h1>
           <p className="text-xl text-gray-600">
@@ -15,9 +15,9 @@ const CheatSheet = () => {
         </div>
 
         {/* Internal Family Systems Overview */}
-        <div className="card mb-8 bg-gradient-to-br from-pink-50 to-red-50">
+        <div className="card mb-8 bg-gradient-to-br from-emerald-50 to-red-50">
           <div className="flex items-center mb-4">
-            <Users className="w-8 h-8 text-pink-600 mr-3" />
+            <Users className="w-8 h-8 text-emerald-600 mr-3" />
             <h2 className="text-3xl font-bold text-gray-800">Internal Family Systems (IFS)</h2>
           </div>
           <p className="text-lg text-gray-700 leading-relaxed">
@@ -55,10 +55,10 @@ const CheatSheet = () => {
               </div>
             </div>
 
-            <div className="border-l-4 border-purple-500 pl-6">
-              <h3 className="text-2xl font-bold text-purple-700 mb-2">Vulnerable Parts</h3>
+            <div className="border-l-4 border-amber-500 pl-6">
+              <h3 className="text-2xl font-bold text-amber-700 mb-2">Vulnerable Parts</h3>
               <div className="mt-3">
-                <h4 className="text-xl font-semibold text-purple-600">Exiles</h4>
+                <h4 className="text-xl font-semibold text-amber-600">Exiles</h4>
                 <p className="text-gray-700">
                   Carry pain, trauma, and vulnerability, shielded by protective parts.
                 </p>
@@ -68,32 +68,32 @@ const CheatSheet = () => {
         </div>
 
         {/* Therapeutic Techniques */}
-        <div className="card mb-8 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="card mb-8 bg-gradient-to-br from-blue-50 to-amber-50">
           <div className="flex items-center mb-4">
-            <Lightbulb className="w-8 h-8 text-purple-600 mr-3" />
+            <Lightbulb className="w-8 h-8 text-amber-600 mr-3" />
             <h2 className="text-3xl font-bold text-gray-800">Therapeutic Techniques</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold text-purple-700 mb-2">Parts Mapping</h3>
+              <h3 className="text-xl font-bold text-amber-700 mb-2">Parts Mapping</h3>
               <p className="text-gray-700">
                 Clarify the internal system, identifying Part roles and dynamics.
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold text-purple-700 mb-2">Dialogue with Parts</h3>
+              <h3 className="text-xl font-bold text-amber-700 mb-2">Dialogue with Parts</h3>
               <p className="text-gray-700">
                 Communicate with Parts to explore their intentions and histories.
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold text-purple-700 mb-2">Self-Compassion</h3>
+              <h3 className="text-xl font-bold text-amber-700 mb-2">Self-Compassion</h3>
               <p className="text-gray-700">
                 Foster the Self's compassionate approach toward all Parts.
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-bold text-purple-700 mb-2">Creative Imagery</h3>
+              <h3 className="text-xl font-bold text-amber-700 mb-2">Creative Imagery</h3>
               <p className="text-gray-700">
                 Utilize visualization to promote healing among Parts.
               </p>
@@ -164,12 +164,12 @@ const CheatSheet = () => {
         </div>
 
         {/* 6 F's Approach */}
-        <div className="card bg-gradient-to-br from-purple-600 to-pink-600 text-white">
+        <div className="card bg-gradient-to-br from-amber-600 to-emerald-600 text-white">
           <div className="flex items-center mb-4">
             <Map className="w-8 h-8 mr-3" />
             <h2 className="text-3xl font-bold">6 F's Approach</h2>
           </div>
-          <p className="text-lg mb-6 text-purple-100">
+          <p className="text-lg mb-6 text-amber-100">
             The 6 F's Approach entails finding a part within, focusing on it, fleshing out its details and emotions, 
             feeling and accepting its impact, befriending it to understand its intentions, and addressing its fears 
             about role changes, facilitating a deep engagement with your inner self.

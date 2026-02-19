@@ -21,7 +21,7 @@ import { clientAuth } from '../lib/supabasePersonalization';
 
 const woundColors = {
   abandonment: { bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-700', fill: 'bg-blue-500' },
-  shame: { bg: 'bg-purple-100', border: 'border-purple-400', text: 'text-purple-700', fill: 'bg-purple-500' },
+  shame: { bg: 'bg-amber-100', border: 'border-amber-400', text: 'text-amber-700', fill: 'bg-amber-500' },
   neglect: { bg: 'bg-amber-100', border: 'border-amber-400', text: 'text-amber-700', fill: 'bg-amber-500' },
   betrayal: { bg: 'bg-red-100', border: 'border-red-400', text: 'text-red-700', fill: 'bg-red-500' }
 };
@@ -190,7 +190,7 @@ const Profile = ({ client }) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-3 text-purple-600">
+        <div className="flex items-center gap-3 text-amber-600">
           <RefreshCw className="w-6 h-6 animate-spin" />
           <span className="text-lg">Loading your profile...</span>
         </div>
@@ -219,7 +219,7 @@ const Profile = ({ client }) => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <button
           onClick={() => navigate('/')}
-          className="no-print flex items-center gap-2 text-purple-600 hover:text-purple-800 mb-6 transition-colors"
+          className="no-print flex items-center gap-2 text-amber-600 hover:text-amber-800 mb-6 transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           Back to Home
@@ -227,14 +227,14 @@ const Profile = ({ client }) => {
 
         <div ref={printRef} className="print-area">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-600 px-4 sm:px-8 py-6 text-white">
+            <div className="bg-gradient-to-r from-amber-600 to-amber-600 px-4 sm:px-8 py-6 text-white">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
                   <User className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold">{client?.name || 'Your Profile'}</h1>
-                  <p className="text-purple-100">IFS Healing Journey</p>
+                  <p className="text-amber-100">IFS Healing Journey</p>
                 </div>
               </div>
             </div>
@@ -242,7 +242,7 @@ const Profile = ({ client }) => {
             <div className="p-4 sm:p-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-pink-500" />
+                  <Heart className="w-5 h-5 text-emerald-500" />
                   Wound Assessment Results
                 </h2>
                 <div className="no-print flex gap-2">
@@ -255,7 +255,7 @@ const Profile = ({ client }) => {
                   </button>
                   <button
                     onClick={handleDownloadPDF}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors text-sm"
                   >
                     <Download className="w-4 h-4" />
                     <span>Save PDF</span>
@@ -270,7 +270,7 @@ const Profile = ({ client }) => {
                   <p className="text-gray-500 mb-4">You haven't completed the wound assessment yet.</p>
                   <button
                     onClick={() => navigate('/assessments')}
-                    className="no-print px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="no-print px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
                   >
                     Take Assessment
                   </button>
@@ -313,7 +313,7 @@ const Profile = ({ client }) => {
                   </div>
 
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-indigo-500" />
+                    <TrendingUp className="w-5 h-5 text-stone-500" />
                     Detailed Scores
                   </h3>
 
@@ -344,10 +344,10 @@ const Profile = ({ client }) => {
                     })}
                   </div>
 
-                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-200">
-                    <h3 className="font-semibold text-purple-800 mb-3">What This Means For Your Healing</h3>
+                  <div className="bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-6 border border-amber-200">
+                    <h3 className="font-semibold text-amber-800 mb-3">What This Means For Your Healing</h3>
                     <p className="text-gray-700 leading-relaxed">
-                      Your assessment reveals that <strong className="text-purple-700">{assessment.primary_wound}</strong> is 
+                      Your assessment reveals that <strong className="text-amber-700">{assessment.primary_wound}</strong> is 
                       your primary area for healing work. This doesn't define you—it simply shows where your inner child 
                       may need the most attention and compassion. Your curriculum has been personalized to address these 
                       patterns with targeted exercises and IFS techniques.
@@ -365,7 +365,7 @@ const Profile = ({ client }) => {
                 className="w-full px-8 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
               >
                 <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-indigo-500" />
+                  <FileText className="w-5 h-5 text-stone-500" />
                   Assessment History ({allAssessments.length} total)
                 </h2>
                 {showHistory ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -377,7 +377,7 @@ const Profile = ({ client }) => {
                     {allAssessments.map((a, index) => (
                       <div 
                         key={a.id || index}
-                        className={`p-4 rounded-lg border ${index === 0 ? 'bg-purple-50 border-purple-200' : 'bg-gray-50 border-gray-200'}`}
+                        className={`p-4 rounded-lg border ${index === 0 ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}
                       >
                         <div className="flex justify-between items-center">
                           <div>
@@ -385,7 +385,7 @@ const Profile = ({ client }) => {
                               {formatDate(a.assessment_date || a.created_at)}
                             </span>
                             {index === 0 && (
-                              <span className="ml-2 text-xs bg-purple-600 text-white px-2 py-0.5 rounded-full">
+                              <span className="ml-2 text-xs bg-amber-600 text-white px-2 py-0.5 rounded-full">
                                 Current
                               </span>
                             )}

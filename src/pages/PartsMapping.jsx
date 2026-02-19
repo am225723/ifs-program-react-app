@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { 
   Brain, 
   Heart, 
@@ -15,6 +15,7 @@ import {
   Star
 } from 'lucide-react';
 import { useParts } from '../contexts/PartsContext';
+import { useData } from '../contexts/DataContext';
 
 const AddPartModal = ({ partType, onSave, onClose }) => {
   const [formData, setFormData] = useState({
@@ -47,7 +48,7 @@ const AddPartModal = ({ partType, onSave, onClose }) => {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               placeholder={`e.g., ${partType?.examples?.[0] || 'Name'}`}
             />
           </div>
@@ -56,7 +57,7 @@ const AddPartModal = ({ partType, onSave, onClose }) => {
             <textarea
               value={formData.role}
               onChange={(e) => setFormData({...formData, role: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               rows={2}
               placeholder="What does this part do for you?"
             />
@@ -66,7 +67,7 @@ const AddPartModal = ({ partType, onSave, onClose }) => {
             <textarea
               value={formData.feelings}
               onChange={(e) => setFormData({...formData, feelings: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               rows={2}
               placeholder="What feelings does this part carry?"
             />
@@ -76,7 +77,7 @@ const AddPartModal = ({ partType, onSave, onClose }) => {
             <textarea
               value={formData.beliefs}
               onChange={(e) => setFormData({...formData, beliefs: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               rows={2}
               placeholder="What does this part believe?"
             />
@@ -86,7 +87,7 @@ const AddPartModal = ({ partType, onSave, onClose }) => {
             <textarea
               value={formData.triggers}
               onChange={(e) => setFormData({...formData, triggers: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               rows={2}
               placeholder="What activates this part?"
             />
@@ -94,7 +95,7 @@ const AddPartModal = ({ partType, onSave, onClose }) => {
           <button
             onClick={handleSubmit}
             disabled={!formData.name.trim()}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 disabled:opacity-50"
+            className="w-full py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-amber-700 hover:to-emerald-700 disabled:opacity-50"
           >
             Add Part
           </button>
@@ -130,7 +131,7 @@ const EditPartModal = ({ part, partType, onSave, onClose, onDelete }) => {
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
             />
           </div>
           <div>
@@ -138,7 +139,7 @@ const EditPartModal = ({ part, partType, onSave, onClose, onDelete }) => {
             <textarea
               value={formData.role}
               onChange={(e) => setFormData({...formData, role: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               rows={2}
             />
           </div>
@@ -147,14 +148,14 @@ const EditPartModal = ({ part, partType, onSave, onClose, onDelete }) => {
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({...formData, notes: e.target.value})}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               rows={2}
             />
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => onSave({ ...part, ...formData })}
-              className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold"
+              className="flex-1 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-semibold"
             >
               Save Changes
             </button>
@@ -185,7 +186,7 @@ const PartDetailModal = ({ part, partType, onClose, onEdit }) => {
           <div className={`inline-block px-3 py-1 rounded-full text-sm text-white capitalize bg-gradient-to-r ${
             part.type === 'manager' ? 'from-blue-400 to-blue-600' :
             part.type === 'firefighter' ? 'from-red-400 to-red-600' :
-            'from-purple-400 to-purple-600'
+            'from-amber-400 to-amber-600'
           }`}>
             {part.type}
           </div>
@@ -197,7 +198,7 @@ const PartDetailModal = ({ part, partType, onClose, onEdit }) => {
         </div>
         <button
           onClick={onEdit}
-          className="mt-6 w-full py-3 bg-purple-100 text-purple-700 rounded-xl font-semibold hover:bg-purple-200"
+          className="mt-6 w-full py-3 bg-amber-100 text-amber-700 rounded-xl font-semibold hover:bg-amber-200"
         >
           <Edit3 className="w-4 h-4 inline mr-2" />
           Edit Part
@@ -247,7 +248,7 @@ const PartsMapping = () => {
       type: 'exile',
       title: 'Exile Parts',
       description: 'Young parts holding pain, fear, or shame',
-      color: 'from-purple-400 to-purple-600',
+      color: 'from-amber-400 to-amber-600',
       icon: Heart,
       examples: ['Abandoned Child', 'Scared Child', 'Ashamed Child', 'Lonely Child', 'Hurt Child'],
       questions: [
@@ -258,12 +259,15 @@ const PartsMapping = () => {
     }
   ];
 
+  const { awardXP } = useData();
+
   const handleAddPart = (partData) => {
     addPart({
       type: currentPartType,
       ...partData,
       notes: partData.role || ''
     });
+    if (awardXP) awardXP('parts_mapped', 20);
     setShowAddPart(false);
     setCurrentPartType('');
   };
@@ -288,7 +292,7 @@ const PartsMapping = () => {
       <div className="min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center mb-12">
-            <div className="w-24 h-24 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-24 h-24 bg-gradient-to-r from-amber-600 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <Brain className="w-12 h-12 text-white" />
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -352,7 +356,7 @@ const PartsMapping = () => {
               <h3 className="text-lg font-bold text-gray-900 mb-4">Your Current Parts Map</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">{nonSelfParts.length}</div>
+                  <div className="text-2xl font-bold text-amber-600">{nonSelfParts.length}</div>
                   <div className="text-sm text-gray-600">Total Parts</div>
                 </div>
                 <div className="text-center">
@@ -364,7 +368,7 @@ const PartsMapping = () => {
                   <div className="text-sm text-gray-600">Firefighters</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">{getPartsByType('exile').length}</div>
+                  <div className="text-2xl font-bold text-amber-600">{getPartsByType('exile').length}</div>
                   <div className="text-sm text-gray-600">Exiles</div>
                 </div>
               </div>
@@ -374,7 +378,7 @@ const PartsMapping = () => {
           <div className="text-center">
             <button
               onClick={() => setStep(2)}
-              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-2xl font-bold text-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-2xl font-bold text-xl hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
             >
               Begin Mapping
               <ArrowRight className="ml-2 w-6 h-6" />
@@ -427,11 +431,11 @@ const PartsMapping = () => {
                   key={partType.type}
                   onClick={() => setCurrentPartType(partType.type)}
                   className={`relative bg-white rounded-2xl shadow-lg p-8 cursor-pointer transition-all duration-300 ${
-                    isSelected ? 'ring-4 ring-purple-600 shadow-xl' : 'hover:shadow-xl'
+                    isSelected ? 'ring-4 ring-amber-600 shadow-xl' : 'hover:shadow-xl'
                   }`}
                 >
                   {isSelected && (
-                    <div className="absolute top-4 right-4 w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                    <div className="absolute top-4 right-4 w-6 h-6 bg-amber-600 rounded-full flex items-center justify-center">
                       <div className="w-3 h-3 bg-white rounded-full"></div>
                     </div>
                   )}
@@ -465,7 +469,7 @@ const PartsMapping = () => {
                     <div className="text-sm font-semibold text-gray-700">Guiding Questions:</div>
                     {partType.questions.map((question, i) => (
                       <div key={i} className="text-sm text-gray-600 flex items-start">
-                        <span className="text-purple-600 mr-2">•</span>
+                        <span className="text-amber-600 mr-2">•</span>
                         {question}
                       </div>
                     ))}
@@ -479,7 +483,7 @@ const PartsMapping = () => {
             {currentPartType && (
               <button
                 onClick={() => setShowAddPart(true)}
-                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300"
               >
                 <Plus className="mr-2 w-5 h-5" />
                 Add {partTypes.find(pt => pt.type === currentPartType)?.title.slice(0, -1)} Part
@@ -512,7 +516,7 @@ const PartsMapping = () => {
                       <div className={`w-3 h-3 rounded-full ${
                         part.type === 'manager' ? 'bg-blue-500' :
                         part.type === 'firefighter' ? 'bg-red-500' :
-                        'bg-purple-500'
+                        'bg-amber-500'
                       }`}></div>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">{part.role}</p>
@@ -525,7 +529,7 @@ const PartsMapping = () => {
                           e.stopPropagation();
                           setEditingPart(part);
                         }}
-                        className="text-purple-600 hover:text-purple-700"
+                        className="text-amber-600 hover:text-amber-700"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
@@ -587,7 +591,7 @@ const PartsMapping = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => setStep(2)}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                className="bg-amber-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-700 transition-colors"
               >
                 Add More Parts
               </button>
@@ -627,7 +631,7 @@ const PartsMapping = () => {
                 
                 const colorClass = part.type === 'manager' ? 'from-blue-400 to-blue-600' :
                                  part.type === 'firefighter' ? 'from-red-400 to-red-600' :
-                                 'from-purple-400 to-purple-600';
+                                 'from-amber-400 to-amber-600';
                 
                 return (
                   <div
@@ -661,7 +665,7 @@ const PartsMapping = () => {
                     <Icon className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{partType.title}</h3>
-                  <div className="text-3xl font-bold text-purple-600 mb-4">{typeParts.length}</div>
+                  <div className="text-3xl font-bold text-amber-600 mb-4">{typeParts.length}</div>
                   
                   <div className="space-y-3">
                     {typeParts.map((part) => (
@@ -683,9 +687,9 @@ const PartsMapping = () => {
             })}
           </div>
 
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white text-center">
+          <div className="bg-gradient-to-r from-amber-600 to-emerald-600 rounded-2xl p-8 text-white text-center">
             <h3 className="text-2xl font-bold mb-4">What's Next?</h3>
-            <p className="text-lg text-purple-100 mb-6 max-w-2xl mx-auto">
+            <p className="text-lg text-amber-100 mb-6 max-w-2xl mx-auto">
               Now that you've mapped your parts, visit the Parts Visualization Studio to arrange them visually 
               and explore the relationships between them.
             </p>

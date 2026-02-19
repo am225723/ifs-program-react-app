@@ -13,7 +13,7 @@ const moodOptions = [
   { value: 4, label: 'Good', icon: Smile, color: 'text-green-500', bg: 'bg-green-100', darkBg: 'bg-green-900/30', ring: 'ring-green-400' },
   { value: 3, label: 'Okay', icon: CloudSun, color: 'text-blue-500', bg: 'bg-blue-100', darkBg: 'bg-blue-900/30', ring: 'ring-blue-400' },
   { value: 2, label: 'Low', icon: Cloud, color: 'text-gray-500', bg: 'bg-gray-100', darkBg: 'bg-gray-700/30', ring: 'ring-gray-400' },
-  { value: 1, label: 'Struggling', icon: CloudRain, color: 'text-indigo-500', bg: 'bg-indigo-100', darkBg: 'bg-indigo-900/30', ring: 'ring-indigo-400' },
+  { value: 1, label: 'Struggling', icon: CloudRain, color: 'text-stone-500', bg: 'bg-stone-100', darkBg: 'bg-indigo-900/30', ring: 'ring-indigo-400' },
 ];
 
 const emotionTags = ['Calm', 'Anxious', 'Hopeful', 'Sad', 'Angry', 'Grateful', 'Peaceful', 'Overwhelmed'];
@@ -147,7 +147,7 @@ export default function MoodTracker() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
       <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-orange-500 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-orange-500 flex items-center justify-center">
           <Heart className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -224,7 +224,7 @@ export default function MoodTracker() {
                   onClick={() => toggleEmotion(emotion)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
                     selected
-                      ? isDark ? 'bg-purple-900/40 text-purple-300 border-purple-600' : 'bg-purple-100 text-purple-700 border-purple-300'
+                      ? isDark ? 'bg-amber-900/40 text-amber-300 border-amber-600' : 'bg-amber-100 text-amber-700 border-amber-300'
                       : isDark ? 'bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100'
                   }`}
                 >
@@ -242,7 +242,7 @@ export default function MoodTracker() {
             onChange={(e) => setNotes(e.target.value)}
             placeholder="What's on your mind today..."
             rows={3}
-            className={`w-full rounded-xl px-4 py-3 text-sm border resize-none focus:outline-none focus:ring-2 focus:ring-purple-400 ${
+            className={`w-full rounded-xl px-4 py-3 text-sm border resize-none focus:outline-none focus:ring-2 focus:ring-amber-400 ${
               isDark ? 'bg-slate-700/50 border-slate-600 text-white placeholder-slate-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
             }`}
           />
@@ -253,7 +253,7 @@ export default function MoodTracker() {
           disabled={mood === null}
           className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
             mood !== null
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 shadow-lg'
+              ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-white hover:from-amber-600 hover:to-emerald-600 shadow-lg'
               : isDark ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
           }`}
         >
@@ -272,7 +272,7 @@ export default function MoodTracker() {
               onClick={() => setViewRange('7')}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                 viewRange === '7'
-                  ? isDark ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700'
+                  ? isDark ? 'bg-amber-900/40 text-amber-300' : 'bg-amber-100 text-amber-700'
                   : isDark ? 'text-slate-400 hover:bg-slate-700' : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
@@ -282,7 +282,7 @@ export default function MoodTracker() {
               onClick={() => setViewRange('30')}
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
                 viewRange === '30'
-                  ? isDark ? 'bg-purple-900/40 text-purple-300' : 'bg-purple-100 text-purple-700'
+                  ? isDark ? 'bg-amber-900/40 text-amber-300' : 'bg-amber-100 text-amber-700'
                   : isDark ? 'text-slate-400 hover:bg-slate-700' : 'text-gray-500 hover:bg-gray-100'
               }`}
             >
@@ -355,7 +355,7 @@ export default function MoodTracker() {
             <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-gray-500'} mb-1`}>Most Common Emotions</p>
             <div className="flex gap-2">
               {topEmotions.map(em => (
-                <span key={em} className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>{em}</span>
+                <span key={em} className={`text-xs px-2 py-1 rounded-full ${isDark ? 'bg-amber-900/30 text-amber-300' : 'bg-amber-100 text-amber-700'}`}>{em}</span>
               ))}
             </div>
           </div>
@@ -409,14 +409,14 @@ export default function MoodTracker() {
       {mood !== null && currentMoodConnection && (
         <div className={`rounded-2xl p-5 border shadow-sm ${isDark ? 'bg-slate-800/60 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
           <h2 className={`text-lg font-semibold mb-3 flex items-center gap-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            <Heart className="w-5 h-5 text-pink-500" /> Parts Connection
+            <Heart className="w-5 h-5 text-emerald-500" /> Parts Connection
           </h2>
-          <div className={`p-4 rounded-xl flex items-start gap-3 ${isDark ? 'bg-purple-900/20 border border-purple-800' : 'bg-purple-50 border border-purple-200'}`}>
+          <div className={`p-4 rounded-xl flex items-start gap-3 ${isDark ? 'bg-amber-900/20 border border-amber-800' : 'bg-amber-50 border border-amber-200'}`}>
             {(() => {
               const ConnIcon = currentMoodConnection.icon;
-              return <ConnIcon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />;
+              return <ConnIcon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />;
             })()}
-            <p className={`text-sm ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>{currentMoodConnection.message}</p>
+            <p className={`text-sm ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>{currentMoodConnection.message}</p>
           </div>
         </div>
       )}

@@ -369,7 +369,7 @@ export default function CoTherapySession() {
           <Heart className={`w-12 h-12 mx-auto mb-4 ${textMuted}`} />
           <h2 className={`text-xl font-semibold ${textPrimary} mb-2`}>No Client Selected</h2>
           <p className={`${textSecondary} mb-4`}>Please select a client from the Therapist Dashboard to begin a co-therapy session.</p>
-          <button onClick={() => navigate('/therapist-dashboard')} className="px-5 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors">
+          <button onClick={() => navigate('/therapist-dashboard')} className="px-5 py-2.5 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-colors">
             Go to Dashboard
           </button>
         </div>
@@ -389,15 +389,15 @@ export default function CoTherapySession() {
           <button onClick={() => { if (confirm('End this activity? Notes will be lost unless you complete it.')) { setActiveActivity(null); setActiveStep(0); }}} className={`flex items-center gap-2 ${textSecondary} hover:text-red-500 transition-colors text-sm`}>
             <ArrowLeft className="w-4 h-4" /> Exit Activity
           </button>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${isDark ? 'bg-pink-900/30' : 'bg-pink-50'} border ${isDark ? 'border-pink-800' : 'border-pink-200'}`}>
-            <Heart className="w-4 h-4 text-pink-500" />
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'} border ${isDark ? 'border-emerald-800' : 'border-emerald-200'}`}>
+            <Heart className="w-4 h-4 text-emerald-500" />
             <span className={`text-sm font-medium ${textPrimary}`}>Co-Therapy with {selectedClientName}</span>
           </div>
         </div>
 
         <div className={`${cardBg} rounded-xl border ${cardBorder} p-5 mb-4`}>
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-rose-600 flex items-center justify-center">
               <ActivityIcon className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -416,7 +416,7 @@ export default function CoTherapySession() {
           </div>
 
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-4">
-            <div className="h-full bg-gradient-to-r from-pink-500 to-rose-600 rounded-full transition-all" style={{ width: `${((activeStep + 1) / totalSteps) * 100}%` }} />
+            <div className="h-full bg-gradient-to-r from-emerald-500 to-rose-600 rounded-full transition-all" style={{ width: `${((activeStep + 1) / totalSteps) * 100}%` }} />
           </div>
         </div>
 
@@ -424,10 +424,10 @@ export default function CoTherapySession() {
           <div className="space-y-4">
             <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
               <h3 className={`font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
-                <BookOpen className="w-4 h-4 text-purple-500" />
+                <BookOpen className="w-4 h-4 text-amber-500" />
                 Client Instructions
               </h3>
-              <div className={`p-4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-purple-50'} border ${isDark ? 'border-slate-600' : 'border-purple-100'}`}>
+              <div className={`p-4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-amber-50'} border ${isDark ? 'border-slate-600' : 'border-amber-100'}`}>
                 <p className={`text-sm ${textPrimary} leading-relaxed`}>{step.instruction}</p>
               </div>
             </div>
@@ -459,7 +459,7 @@ export default function CoTherapySession() {
                 onChange={(e) => setTherapistNotes(prev => ({ ...prev, [activeStep]: e.target.value }))}
                 rows={3}
                 placeholder="Record your observations, client responses, clinical notes..."
-                className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none resize-none text-sm`}
+                className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none resize-none text-sm`}
               />
             </div>
           </div>
@@ -467,7 +467,7 @@ export default function CoTherapySession() {
           <div className="space-y-4">
             <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
               <h3 className={`font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
-                <Eye className="w-4 h-4 text-indigo-500" />
+                <Eye className="w-4 h-4 text-stone-500" />
                 Clinical Observation Checklist
               </h3>
               <div className="space-y-3">
@@ -479,7 +479,7 @@ export default function CoTherapySession() {
                       value={observationNotes[`${activeStep}-${i}`] || ''}
                       onChange={(e) => setObservationNotes(prev => ({ ...prev, [`${activeStep}-${i}`]: e.target.value }))}
                       placeholder="..."
-                      className={`w-full px-3 py-2 rounded-lg border ${inputBg} focus:ring-2 focus:ring-indigo-500 outline-none text-sm`}
+                      className={`w-full px-3 py-2 rounded-lg border ${inputBg} focus:ring-2 focus:ring-stone-500 outline-none text-sm`}
                     />
                   </div>
                 ))}
@@ -525,13 +525,13 @@ export default function CoTherapySession() {
           <div className="flex gap-1.5">
             {Array.from({ length: totalSteps }).map((_, i) => (
               <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${
-                i === activeStep ? 'bg-pink-500 scale-125' : i < activeStep ? 'bg-pink-300' : isDark ? 'bg-slate-600' : 'bg-gray-300'
+                i === activeStep ? 'bg-emerald-500 scale-125' : i < activeStep ? 'bg-emerald-300' : isDark ? 'bg-slate-600' : 'bg-gray-300'
               }`} />
             ))}
           </div>
 
           {activeStep < totalSteps - 1 ? (
-            <button onClick={nextStep} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-lg text-sm font-medium hover:from-pink-600 hover:to-rose-700 transition-all">
+            <button onClick={nextStep} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-rose-600 text-white rounded-lg text-sm font-medium hover:from-emerald-600 hover:to-rose-700 transition-all">
               Next Step <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
@@ -556,19 +556,19 @@ export default function CoTherapySession() {
 
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-rose-600 flex items-center justify-center">
             <Heart className="w-5 h-5 text-white" />
           </div>
           <div>
             <h1 className={`text-2xl font-bold ${textPrimary}`}>Co-Therapy Session</h1>
-            <p className={`text-sm ${textSecondary}`}>Guiding therapy activities with <span className="font-semibold text-pink-500">{selectedClientName}</span></p>
+            <p className={`text-sm ${textSecondary}`}>Guiding therapy activities with <span className="font-semibold text-emerald-500">{selectedClientName}</span></p>
           </div>
         </div>
       </div>
 
       <div className={`${cardBg} rounded-xl border ${cardBorder} p-5 mb-6`}>
         <div className="flex items-center gap-2 mb-3">
-          <AlertCircle className="w-4 h-4 text-purple-500" />
+          <AlertCircle className="w-4 h-4 text-amber-500" />
           <h3 className={`font-semibold ${textPrimary} text-sm`}>Session Guide</h3>
         </div>
         <p className={`text-sm ${textSecondary} leading-relaxed`}>
@@ -587,7 +587,7 @@ export default function CoTherapySession() {
             onClick={() => setSelectedCategory(cat.id)}
             className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
               selectedCategory === cat.id
-                ? 'bg-pink-600 text-white shadow-md'
+                ? 'bg-emerald-600 text-white shadow-md'
                 : `${cardBg} ${textSecondary} border ${cardBorder} ${isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-50'}`
             }`}
           >
@@ -603,7 +603,7 @@ export default function CoTherapySession() {
           return (
             <div key={activity.id} className={`${cardBg} rounded-xl border ${cardBorder} p-5 transition-all hover:shadow-lg ${isCompleted ? 'ring-2 ring-emerald-400' : ''}`}>
               <div className="flex items-start gap-3 mb-3">
-                <div className={`w-10 h-10 rounded-lg ${isCompleted ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-pink-500 to-rose-600'} flex items-center justify-center flex-shrink-0`}>
+                <div className={`w-10 h-10 rounded-lg ${isCompleted ? 'bg-gradient-to-br from-emerald-500 to-teal-600' : 'bg-gradient-to-br from-emerald-500 to-rose-600'} flex items-center justify-center flex-shrink-0`}>
                   {isCompleted ? <CheckCircle className="w-5 h-5 text-white" /> : <ActivityIcon className="w-5 h-5 text-white" />}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -613,7 +613,7 @@ export default function CoTherapySession() {
                       <Clock className="w-3 h-3" />
                       {activity.duration}
                     </span>
-                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${isDark ? 'bg-purple-900/30 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${isDark ? 'bg-amber-900/30 text-amber-300' : 'bg-amber-100 text-amber-700'}`}>
                       {activity.steps.length} steps
                     </span>
                   </div>
@@ -633,7 +633,7 @@ export default function CoTherapySession() {
                 className={`w-full py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
                   isCompleted
                     ? `border ${cardBorder} ${textSecondary} ${isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-50'}`
-                    : 'bg-gradient-to-r from-pink-500 to-rose-600 text-white hover:from-pink-600 hover:to-rose-700 shadow-sm'
+                    : 'bg-gradient-to-r from-emerald-500 to-rose-600 text-white hover:from-emerald-600 hover:to-rose-700 shadow-sm'
                 }`}
               >
                 {isCompleted ? <><Eye className="w-4 h-4" /> Do Again</> : <><Play className="w-4 h-4" /> Start Together</>}

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useParts } from '../contexts/PartsContext';
+import { useData } from '../contexts/DataContext';
 import { supabase } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 
@@ -40,8 +41,8 @@ const assessmentDefinitions = [
     title: 'IFS Wound Assessment',
     subtitle: 'Discover which inner child wounds may be affecting you',
     icon: Heart,
-    gradient: 'from-rose-500 to-pink-600',
-    lightBg: 'from-rose-50 to-pink-50',
+    gradient: 'from-rose-500 to-emerald-600',
+    lightBg: 'from-rose-50 to-emerald-50',
     categories: {
       abandonment: { label: 'Abandonment', icon: Users, color: '#6366F1', description: 'Fear of being left or forgotten, difficulty trusting others will stay' },
       shame: { label: 'Shame', icon: Eye, color: '#EC4899', description: 'Deep sense of being flawed or defective, hiding your true self' },
@@ -77,8 +78,8 @@ const assessmentDefinitions = [
     title: 'Identify Your Protective Parts',
     subtitle: 'Learn which protective parts are most active in your system',
     icon: Shield,
-    gradient: 'from-blue-500 to-indigo-600',
-    lightBg: 'from-blue-50 to-indigo-50',
+    gradient: 'from-blue-500 to-amber-600',
+    lightBg: 'from-blue-50 to-stone-50',
     categories: {
       manager: { label: 'Manager Parts', icon: Shield, color: '#3B82F6', description: 'Proactive protectors that try to prevent pain through control, planning, and perfectionism' },
       firefighter: { label: 'Firefighter Parts', icon: Flame, color: '#F59E0B', description: 'Reactive protectors that numb or distract when pain surfaces through impulsive behaviors' },
@@ -174,6 +175,7 @@ function getIdentifiedParts(results) {
 export default function Assessments() {
   const { theme, getAnimationClass } = useTheme();
   const { parts, addPart, saveToSupabase } = useParts();
+  const { awardXP } = useData();
   const [activeAssessment, setActiveAssessment] = useState(null);
   const [answers, setAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
@@ -301,6 +303,7 @@ export default function Assessments() {
   const handleSubmit = async () => {
     const results = calculateResults(activeAssessment);
     await saveResults(activeAssessment, results);
+    if (awardXP) awardXP('assessment_complete', 50);
     setShowResults(true);
   };
 
@@ -365,7 +368,7 @@ export default function Assessments() {
   if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center`}>
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
       </div>
     );
   }
@@ -419,12 +422,12 @@ export default function Assessments() {
                             {category.label}
                           </span>
                           {index === 0 && (
-                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium">
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
                               Primary
                             </span>
                           )}
                           {index === 1 && (
-                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-medium">
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-stone-100 text-amber-700 font-medium">
                               Secondary
                             </span>
                           )}
@@ -488,7 +491,7 @@ export default function Assessments() {
             const typeColors = {
               manager: { bg: 'from-blue-500 to-blue-600', light: theme.isDark ? 'bg-blue-900/30 border-blue-800' : 'bg-blue-50 border-blue-200', text: theme.isDark ? 'text-blue-300' : 'text-blue-700', badge: 'bg-blue-100 text-blue-700' },
               firefighter: { bg: 'from-amber-500 to-orange-600', light: theme.isDark ? 'bg-amber-900/30 border-amber-800' : 'bg-amber-50 border-amber-200', text: theme.isDark ? 'text-amber-300' : 'text-amber-700', badge: 'bg-amber-100 text-amber-700' },
-              exile: { bg: 'from-pink-500 to-rose-600', light: theme.isDark ? 'bg-pink-900/30 border-pink-800' : 'bg-pink-50 border-pink-200', text: theme.isDark ? 'text-pink-300' : 'text-pink-700', badge: 'bg-pink-100 text-pink-700' }
+              exile: { bg: 'from-emerald-500 to-rose-600', light: theme.isDark ? 'bg-emerald-900/30 border-emerald-800' : 'bg-emerald-50 border-emerald-200', text: theme.isDark ? 'text-emerald-300' : 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700' }
             };
             const typeLabels = { manager: 'Manager', firefighter: 'Firefighter', exile: 'Exile' };
             const typeIcons = { manager: Shield, firefighter: Flame, exile: Heart };
@@ -519,7 +522,7 @@ export default function Assessments() {
                     </button>
                     <Link
                       to="/parts-studio"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-emerald-600 text-white text-sm font-medium hover:from-amber-700 hover:to-emerald-700 transition-all"
                     >
                       <MapPin className="w-4 h-4" />
                       View Parts Map
@@ -578,7 +581,7 @@ export default function Assessments() {
                                       ? 'bg-green-100 text-green-700 cursor-default'
                                       : isAdded === 'exists'
                                       ? (theme.isDark ? 'bg-slate-700 text-slate-400' : 'bg-gray-100 text-gray-500') + ' cursor-default'
-                                      : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-sm'
+                                      : 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white hover:from-amber-700 hover:to-emerald-700 shadow-sm'
                                   }`}
                                 >
                                   {isAdded === 'added' ? (
@@ -598,8 +601,8 @@ export default function Assessments() {
                   );
                 })}
 
-                <div className={`mt-6 p-4 rounded-xl ${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-purple-50 border-purple-100'} border`}>
-                  <p className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-purple-700'}`}>
+                <div className={`mt-6 p-4 rounded-xl ${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-amber-50 border-amber-100'} border`}>
+                  <p className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-amber-700'}`}>
                     <strong>Next Step:</strong> After adding parts to your map, visit the <Link to="/parts-studio" className="underline font-medium">Parts Visualization Studio</Link> to explore how these parts relate to each other and to your Self energy. You can also discuss these identified parts with your therapist using the <Link to="/therapy" className="underline font-medium">Therapy Integration</Link> activities.
                   </p>
                 </div>
@@ -617,7 +620,7 @@ export default function Assessments() {
             </button>
             <button
               onClick={() => { setActiveAssessment(null); setShowResults(false); setAnswers({}); }}
-              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-pink-700"
+              className="px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-medium hover:from-amber-700 hover:to-emerald-700"
             >
               View All Assessments
             </button>
@@ -661,7 +664,7 @@ export default function Assessments() {
             <div className="flex items-center gap-3">
               <div className={`flex-1 h-2 rounded-full ${theme.isDark ? 'bg-slate-700' : 'bg-gray-200'}`}>
                 <div
-                  className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
+                  className="h-2 rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-300"
                   style={{ width: `${(totalAnswered / totalQuestions) * 100}%` }}
                 />
               </div>
@@ -680,7 +683,7 @@ export default function Assessments() {
               <div key={question.id} className={`${theme.cardBg} rounded-xl shadow-sm p-5 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
                 <div className="flex items-start gap-3 mb-4">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                    answers[question.id] ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white' : (theme.isDark ? 'bg-slate-700 text-slate-400' : 'bg-gray-100 text-gray-400')
+                    answers[question.id] ? 'bg-gradient-to-br from-amber-500 to-emerald-500 text-white' : (theme.isDark ? 'bg-slate-700 text-slate-400' : 'bg-gray-100 text-gray-400')
                   }`}>
                     <span className="text-sm font-bold">{index + 1}</span>
                   </div>
@@ -693,7 +696,7 @@ export default function Assessments() {
                       onClick={() => setAnswers(prev => ({ ...prev, [question.id]: value }))}
                       className={`flex-1 py-2 px-1 rounded-lg text-xs font-medium transition-all ${
                         answers[question.id] === value
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                          ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-white shadow-md'
                           : theme.isDark
                             ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -724,7 +727,7 @@ export default function Assessments() {
               disabled={!allAnswered || saving}
               className={`px-8 py-3 rounded-xl font-medium transition-all ${
                 allAnswered
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg'
+                  ? 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white hover:from-amber-700 hover:to-emerald-700 shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
@@ -748,7 +751,7 @@ export default function Assessments() {
         </Link>
 
         <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <CheckCircle className="w-10 h-10 text-white" />
           </div>
           <h1 className={`text-4xl font-bold mb-3 ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>

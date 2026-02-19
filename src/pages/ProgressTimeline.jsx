@@ -11,8 +11,8 @@ import { supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 
 const milestoneTypes = {
-  module: { label: 'Module', color: 'purple', icon: BookOpen, bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-300', dot: 'bg-purple-500', darkBg: 'bg-purple-900/30', darkText: 'text-purple-300', darkBorder: 'border-purple-700' },
-  assessment: { label: 'Assessment', color: 'pink', icon: Target, bg: 'bg-pink-100', text: 'text-pink-700', border: 'border-pink-300', dot: 'bg-pink-500', darkBg: 'bg-pink-900/30', darkText: 'text-pink-300', darkBorder: 'border-pink-700' },
+  module: { label: 'Module', color: 'amber', icon: BookOpen, bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300', dot: 'bg-amber-500', darkBg: 'bg-amber-900/30', darkText: 'text-amber-300', darkBorder: 'border-amber-700' },
+  assessment: { label: 'Assessment', color: 'emerald', icon: Target, bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-300', dot: 'bg-emerald-500', darkBg: 'bg-emerald-900/30', darkText: 'text-emerald-300', darkBorder: 'border-emerald-700' },
   journal: { label: 'Journal', color: 'blue', icon: Heart, bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300', dot: 'bg-blue-500', darkBg: 'bg-blue-900/30', darkText: 'text-blue-300', darkBorder: 'border-blue-700' },
   exercise: { label: 'Exercise', color: 'green', icon: Activity, bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-300', dot: 'bg-green-500', darkBg: 'bg-green-900/30', darkText: 'text-green-300', darkBorder: 'border-green-700' },
   badge: { label: 'Badge', color: 'gold', icon: Award, bg: 'bg-yellow-100', text: 'text-yellow-700', border: 'border-yellow-300', dot: 'bg-yellow-500', darkBg: 'bg-yellow-900/30', darkText: 'text-yellow-300', darkBorder: 'border-yellow-700' },
@@ -102,8 +102,8 @@ export default function ProgressTimeline() {
   };
 
   const statCards = [
-    { label: 'Days on Journey', value: stats.daysOnJourney, icon: Calendar, color: 'from-purple-500 to-pink-500' },
-    { label: 'Modules Completed', value: stats.modulesCompleted, icon: BookOpen, color: 'from-purple-500 to-indigo-500' },
+    { label: 'Days on Journey', value: stats.daysOnJourney, icon: Calendar, color: 'from-amber-500 to-emerald-500' },
+    { label: 'Modules Completed', value: stats.modulesCompleted, icon: BookOpen, color: 'from-amber-500 to-stone-500' },
     { label: 'Exercises Done', value: stats.exercisesDone, icon: Activity, color: 'from-green-500 to-emerald-500' },
     { label: 'Journal Entries', value: stats.journalEntries, icon: Heart, color: 'from-blue-500 to-cyan-500' },
   ];
@@ -112,7 +112,7 @@ export default function ProgressTimeline() {
     <div className="max-w-2xl mx-auto px-4 py-6">
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-emerald-500 flex items-center justify-center">
             <TrendingUp className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -205,7 +205,7 @@ export default function ProgressTimeline() {
                   {isExpanded && milestone.details && (
                     <div className={`mt-3 pt-3 border-t text-sm ${isDark ? 'border-slate-700 text-slate-300' : 'border-gray-100 text-gray-600'}`}>
                       <div className="flex items-start gap-2">
-                        <Sparkles className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDark ? 'text-purple-400' : 'text-purple-500'}`} />
+                        <Sparkles className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDark ? 'text-amber-400' : 'text-amber-500'}`} />
                         <p>{milestone.details}</p>
                       </div>
                     </div>

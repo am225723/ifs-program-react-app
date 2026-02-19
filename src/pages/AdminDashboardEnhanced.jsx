@@ -41,7 +41,7 @@ const getWoundColor = (wound) => {
   const colors = {
     abandonment: 'bg-blue-100 text-blue-700',
     shame: 'bg-gray-100 text-gray-700',
-    neglect: 'bg-purple-100 text-purple-700',
+    neglect: 'bg-amber-100 text-amber-700',
     betrayal: 'bg-red-100 text-red-700'
   };
   return colors[wound] || 'bg-gray-100 text-gray-700';
@@ -261,13 +261,13 @@ const AdminDashboardEnhanced = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <Link to="/" className="inline-flex items-center text-sm text-purple-600 hover:text-purple-800 mb-2">
+              <Link to="/" className="inline-flex items-center text-sm text-amber-600 hover:text-amber-800 mb-2">
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 Back to Home
               </Link>
               <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
               <p className="text-gray-600 mt-1">Manage clients and monitor progress</p>
-              <Link to="/therapist-dashboard" className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800 mt-1 font-medium">
+              <Link to="/therapist-dashboard" className="inline-flex items-center text-sm text-amber-600 hover:text-indigo-800 mt-1 font-medium">
                 <BookOpen className="w-4 h-4 mr-1" />
                 Go to Therapist Dashboard (Lesson Plans & Client Insights)
               </Link>
@@ -282,7 +282,7 @@ const AdminDashboardEnhanced = () => {
               </button>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 shadow-lg"
+                className="flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 shadow-lg"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 New Client
@@ -300,8 +300,8 @@ const AdminDashboardEnhanced = () => {
                 <p className="text-gray-600 text-sm font-medium">Total Clients</p>
                 <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalClients}</p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                <Users className="w-6 h-6 text-amber-600" />
               </div>
             </div>
           </div>
@@ -348,7 +348,7 @@ const AdminDashboardEnhanced = () => {
             onClick={() => setActiveTab('clients')}
             className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
               activeTab === 'clients'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                ? 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -359,7 +359,7 @@ const AdminDashboardEnhanced = () => {
             onClick={() => setActiveTab('therapy')}
             className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
               activeTab === 'therapy'
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                ? 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white shadow-lg'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -379,14 +379,14 @@ const AdminDashboardEnhanced = () => {
                     placeholder="Search clients by name or email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   />
                 </div>
                 <div className="flex gap-2">
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   >
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
@@ -434,7 +434,7 @@ const AdminDashboardEnhanced = () => {
                       <tr>
                         <td colSpan="6" className="px-6 py-12 text-center">
                           <div className="flex flex-col items-center justify-center">
-                            <Loader2 className="w-8 h-8 text-purple-600 animate-spin mb-3" />
+                            <Loader2 className="w-8 h-8 text-amber-600 animate-spin mb-3" />
                             <span className="text-gray-500">Loading clients...</span>
                           </div>
                         </td>
@@ -476,7 +476,7 @@ const AdminDashboardEnhanced = () => {
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                               <div
-                                className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+                                className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-300"
                                 style={{ width: `${client.progress}%` }}
                               />
                             </div>
@@ -515,7 +515,7 @@ const AdminDashboardEnhanced = () => {
                             </button>
                             <button
                               onClick={() => setAnalyticsClient(client)}
-                              className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                              className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                               title="View Analytics"
                             >
                               <BarChart3 className="w-4 h-4" />
@@ -592,7 +592,7 @@ const TherapyIntegrationTab = ({ data, loading, onRefresh }) => {
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-        <Loader2 className="w-8 h-8 text-purple-600 animate-spin mx-auto mb-3" />
+        <Loader2 className="w-8 h-8 text-amber-600 animate-spin mx-auto mb-3" />
         <span className="text-gray-500">Loading therapy activity data...</span>
       </div>
     );
@@ -702,7 +702,7 @@ const EditClientModal = ({ client, onClose, onSave }) => {
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
 
@@ -712,7 +712,7 @@ const EditClientModal = ({ client, onClose, onSave }) => {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
 
@@ -721,7 +721,7 @@ const EditClientModal = ({ client, onClose, onSave }) => {
             <select
               value={formData.status}
               onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -739,7 +739,7 @@ const EditClientModal = ({ client, onClose, onSave }) => {
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
             >
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
             </button>
@@ -814,21 +814,21 @@ const ClientAnalyticsModal = ({ client, onClose }) => {
         <div className="p-8">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-purple-600 animate-spin mb-3" />
+              <Loader2 className="w-8 h-8 text-amber-600 animate-spin mb-3" />
               <span className="text-gray-500">Loading analytics...</span>
             </div>
           ) : analytics ? (
             <div className="space-y-8">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-purple-50 rounded-xl p-4 text-center">
-                  <BookOpen className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-purple-700">{analytics.journalCount}</div>
-                  <div className="text-xs text-purple-600">Journal Entries</div>
+                <div className="bg-amber-50 rounded-xl p-4 text-center">
+                  <BookOpen className="w-6 h-6 text-amber-600 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-amber-700">{analytics.journalCount}</div>
+                  <div className="text-xs text-amber-600">Journal Entries</div>
                 </div>
-                <div className="bg-pink-50 rounded-xl p-4 text-center">
-                  <Heart className="w-6 h-6 text-pink-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-pink-700">{analytics.moodEntries.length}</div>
-                  <div className="text-xs text-pink-600">Mood Entries</div>
+                <div className="bg-emerald-50 rounded-xl p-4 text-center">
+                  <Heart className="w-6 h-6 text-emerald-600 mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-emerald-700">{analytics.moodEntries.length}</div>
+                  <div className="text-xs text-emerald-600">Mood Entries</div>
                 </div>
                 <div className="bg-blue-50 rounded-xl p-4 text-center">
                   <Dumbbell className="w-6 h-6 text-blue-600 mx-auto mb-2" />
@@ -844,7 +844,7 @@ const ClientAnalyticsModal = ({ client, onClose }) => {
 
               <div className="bg-white border border-gray-200 rounded-xl p-6">
                 <h4 className="font-bold text-gray-900 mb-4 flex items-center">
-                  <ClipboardList className="w-5 h-5 mr-2 text-purple-600" />
+                  <ClipboardList className="w-5 h-5 mr-2 text-amber-600" />
                   Assessment Results ({analytics.assessments.length})
                 </h4>
                 {analytics.assessments.length === 0 ? (
@@ -875,7 +875,7 @@ const ClientAnalyticsModal = ({ client, onClose }) => {
 
               <div className="bg-white border border-gray-200 rounded-xl p-6">
                 <h4 className="font-bold text-gray-900 mb-4 flex items-center">
-                  <BookOpen className="w-5 h-5 mr-2 text-purple-600" />
+                  <BookOpen className="w-5 h-5 mr-2 text-amber-600" />
                   Recent Journal Entries
                 </h4>
                 {analytics.recentJournals.length === 0 ? (
@@ -890,7 +890,7 @@ const ClientAnalyticsModal = ({ client, onClose }) => {
                             {j.created_at ? new Date(j.created_at).toLocaleDateString() : '—'}
                           </span>
                         </div>
-                        {j.mood && <span className="text-xs text-purple-600">Mood: {j.mood}</span>}
+                        {j.mood && <span className="text-xs text-amber-600">Mood: {j.mood}</span>}
                         <p className="text-xs text-gray-600 mt-1 line-clamp-2">{j.content}</p>
                       </div>
                     ))}
@@ -900,7 +900,7 @@ const ClientAnalyticsModal = ({ client, onClose }) => {
 
               <div className="bg-white border border-gray-200 rounded-xl p-6">
                 <h4 className="font-bold text-gray-900 mb-4 flex items-center">
-                  <Heart className="w-5 h-5 mr-2 text-pink-600" />
+                  <Heart className="w-5 h-5 mr-2 text-emerald-600" />
                   Mood Summary
                 </h4>
                 {analytics.moodEntries.length === 0 ? (
@@ -950,7 +950,7 @@ const ClientAnalyticsModal = ({ client, onClose }) => {
 
               <div className="bg-white border border-gray-200 rounded-xl p-6">
                 <h4 className="font-bold text-gray-900 mb-4 flex items-center">
-                  <Layers className="w-5 h-5 mr-2 text-purple-600" />
+                  <Layers className="w-5 h-5 mr-2 text-amber-600" />
                   Module Progress Breakdown
                 </h4>
                 {Object.keys(analytics.moduleProgress).length === 0 ? (
@@ -965,7 +965,7 @@ const ClientAnalyticsModal = ({ client, onClose }) => {
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
-                            className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+                            className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${data.total > 0 ? Math.round((data.completed / data.total) * 100) : 0}%` }}
                           />
                         </div>
@@ -1040,7 +1040,7 @@ const CreateClientModal = ({ onClose, onCreate }) => {
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               placeholder="John Doe"
             />
           </div>
@@ -1053,7 +1053,7 @@ const CreateClientModal = ({ onClose, onCreate }) => {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               placeholder="john@example.com"
             />
           </div>
@@ -1066,7 +1066,7 @@ const CreateClientModal = ({ onClose, onCreate }) => {
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               placeholder="555-0123"
             />
           </div>
@@ -1079,7 +1079,7 @@ const CreateClientModal = ({ onClose, onCreate }) => {
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               placeholder="Initial consultation notes..."
             />
           </div>
@@ -1094,7 +1094,7 @@ const CreateClientModal = ({ onClose, onCreate }) => {
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300"
             >
               Create Client
             </button>
@@ -1120,7 +1120,7 @@ const ClientDetailsModal = ({ client, onClose }) => {
         </div>
 
         <div className="p-8">
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-6">
+          <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-xl p-6 mb-6">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">{client.name}</h3>
@@ -1144,7 +1144,7 @@ const ClientDetailsModal = ({ client, onClose }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="bg-white border border-gray-200 rounded-xl p-6">
               <div className="text-sm text-gray-600 mb-2">Overall Progress</div>
-              <div className="text-3xl font-bold text-purple-600">{client.progress}%</div>
+              <div className="text-3xl font-bold text-amber-600">{client.progress}%</div>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-6">
               <div className="text-sm text-gray-600 mb-2">Modules Completed</div>
@@ -1167,7 +1167,7 @@ const ClientDetailsModal = ({ client, onClose }) => {
                   <div className="flex items-center gap-3">
                     <div className="w-32 bg-gray-200 rounded-full h-2">
                       <div
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full"
+                        className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full"
                         style={{ width: `${moduleNum <= client.modulesCompleted ? 100 : 0}%` }}
                       />
                     </div>
@@ -1181,7 +1181,7 @@ const ClientDetailsModal = ({ client, onClose }) => {
           </div>
 
           <div className="flex gap-3">
-            <button className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+            <button className="flex-1 px-6 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors">
               View Full Report
             </button>
             <button className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">

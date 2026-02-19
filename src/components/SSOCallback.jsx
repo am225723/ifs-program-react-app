@@ -91,14 +91,14 @@ export default function SSOCallback({ onLogin }) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-purple-100/60 to-indigo-100/50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-100 via-amber-100/60 to-stone-100/50 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
           <div className="text-5xl mb-4">&#9888;&#65039;</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Login Failed</h2>
           <p className="text-gray-500 mb-6">{error}</p>
           <a
             href="/"
-            className="inline-block py-3 px-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+            className="inline-block py-3 px-8 bg-gradient-to-r from-amber-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-amber-700 hover:to-emerald-700 transition-all duration-300"
           >
             Go to Login
           </a>
@@ -108,9 +108,9 @@ export default function SSOCallback({ onLogin }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-purple-100/60 to-indigo-100/50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-amber-100/60 to-stone-100/50 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
-        <div className="w-12 h-12 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-6"></div>
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-amber-600 rounded-full animate-spin mx-auto mb-6"></div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">{status}</h2>
         <p className="text-gray-500">Please wait...</p>
       </div>

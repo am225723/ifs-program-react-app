@@ -156,7 +156,7 @@ const Curriculum = () => {
           'Reparenting skills',
           'Emotional release techniques'
         ],
-        color: 'from-pink-400 to-pink-600',
+        color: 'from-emerald-400 to-emerald-600',
         icon: Heart,
         level: 'Intermediate'
       },
@@ -222,7 +222,7 @@ const Curriculum = () => {
           'Unblending mastery',
           'Internal system harmony'
         ],
-        color: 'from-purple-400 to-purple-600',
+        color: 'from-amber-400 to-amber-600',
         icon: Shield,
         level: 'Advanced'
       },
@@ -366,7 +366,7 @@ const Curriculum = () => {
                         onClick={() => handleLessonClick(selectedModule, index)}
                         className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${
                           isCurrent
-                            ? 'bg-purple-100 border-2 border-purple-300'
+                            ? 'bg-amber-100 border-2 border-amber-300'
                             : isCompleted
                             ? 'bg-green-50 border-2 border-green-200'
                             : 'bg-gray-50 border-2 border-gray-200 hover:border-gray-300'
@@ -377,7 +377,7 @@ const Curriculum = () => {
                             {isCompleted ? (
                               <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
                             ) : isCurrent ? (
-                              <Play className="w-5 h-5 text-purple-600 mr-3" />
+                              <Play className="w-5 h-5 text-amber-600 mr-3" />
                             ) : (
                               <div className="w-5 h-5 border-2 border-gray-300 rounded-full mr-3" />
                             )}
@@ -406,7 +406,7 @@ const Curriculum = () => {
                       <div className="flex items-center space-x-3">
                         <div className={`px-3 py-1 rounded-full text-xs font-medium ${
                           currentLessonData.type === 'video' ? 'bg-blue-100 text-blue-700' :
-                          currentLessonData.type === 'meditation' ? 'bg-purple-100 text-purple-700' :
+                          currentLessonData.type === 'meditation' ? 'bg-amber-100 text-amber-700' :
                           currentLessonData.type === 'interactive' ? 'bg-green-100 text-green-700' :
                           currentLessonData.type === 'practice' ? 'bg-orange-100 text-orange-700' :
                           'bg-gray-100 text-gray-700'
@@ -427,7 +427,7 @@ const Curriculum = () => {
                   {/* Interactive Content based on type */}
                   <div className={`mb-8 rounded-2xl p-8 ${
                     currentLessonData.type === 'video' ? 'bg-blue-50' :
-                    currentLessonData.type === 'meditation' ? 'bg-purple-50' :
+                    currentLessonData.type === 'meditation' ? 'bg-amber-50' :
                     currentLessonData.type === 'interactive' ? 'bg-green-50' :
                     currentLessonData.type === 'practice' ? 'bg-orange-50' :
                     'bg-gray-50'
@@ -443,12 +443,12 @@ const Curriculum = () => {
                     
                     {currentLessonData.type === 'meditation' && (
                       <div className="text-center">
-                        <div className="w-32 h-32 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                        <div className="w-32 h-32 bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
                           <Brain className="w-16 h-16 text-white" />
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-4">Guided Meditation</h3>
                         <p className="text-gray-600 mb-6">Find a comfortable position and press play when ready</p>
-                        <button className="bg-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-purple-700 transition-colors">
+                        <button className="bg-amber-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-amber-700 transition-colors">
                           Start Meditation
                         </button>
                       </div>
@@ -473,13 +473,13 @@ const Curriculum = () => {
                       <h3 className="text-xl font-bold text-gray-900 mb-4">Practice Exercises</h3>
                       <div className="space-y-3">
                         {currentLessonData.exercises.map((exercise, index) => (
-                          <div key={index} className="border border-gray-200 rounded-xl p-4 hover:border-purple-300 transition-colors">
+                          <div key={index} className="border border-gray-200 rounded-xl p-4 hover:border-amber-300 transition-colors">
                             <div className="flex items-center justify-between">
                               <div>
                                 <h4 className="font-semibold text-gray-900">{exercise}</h4>
                                 <p className="text-sm text-gray-600">Complete this exercise to deepen your understanding</p>
                               </div>
-                              <button className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg font-medium hover:bg-purple-200 transition-colors">
+                              <button className="bg-amber-100 text-amber-700 px-4 py-2 rounded-lg font-medium hover:bg-amber-200 transition-colors">
                                 Start
                               </button>
                             </div>
@@ -504,7 +504,7 @@ const Curriculum = () => {
                         <div
                           key={i}
                           className={`w-2 h-2 rounded-full ${
-                            i === currentLesson ? 'bg-purple-600' : 'bg-gray-300'
+                            i === currentLesson ? 'bg-amber-600' : 'bg-gray-300'
                           }`}
                         />
                       ))}
@@ -525,7 +525,7 @@ const Curriculum = () => {
                           setShowModuleDetail(false);
                         }
                       }}
-                      className="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+                      className="flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-medium hover:from-amber-700 hover:to-emerald-700 transition-all duration-300"
                     >
                       {currentLesson < module.lessons.length - 1 ? (
                         <>
@@ -562,13 +562,13 @@ const Curriculum = () => {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+      <div className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Healing Curriculum
             </h1>
-            <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+            <p className="text-xl text-amber-100 max-w-3xl mx-auto">
               A step-by-step journey through Inner Child healing using Internal Family Systems
             </p>
           </div>
@@ -582,7 +582,7 @@ const Curriculum = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Progress</h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">{completedModules.length}</div>
+                <div className="text-3xl font-bold text-amber-600">{completedModules.length}</div>
                 <div className="text-gray-600">Modules Completed</div>
               </div>
               <div className="text-center">
@@ -670,7 +670,7 @@ const Curriculum = () => {
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                       module.level === 'Beginner' ? 'bg-green-100 text-green-700' :
                       module.level === 'Intermediate' ? 'bg-blue-100 text-blue-700' :
-                      'bg-purple-100 text-purple-700'
+                      'bg-amber-100 text-amber-700'
                     }`}>
                       {module.level}
                     </span>
@@ -681,7 +681,7 @@ const Curriculum = () => {
                     <div className="mb-4">
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-500"
+                          className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-500"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
@@ -718,7 +718,7 @@ const Curriculum = () => {
                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         : progress === 100
                         ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                        : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                        : 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white hover:from-amber-700 hover:to-emerald-700'
                     }`}
                   >
                     {progress === 100 ? 'Review Module' :
@@ -754,7 +754,7 @@ const Curriculum = () => {
                     isCompleted 
                       ? 'bg-green-500 border-green-600 text-white' 
                       : isUnlocked
-                      ? 'bg-purple-600 border-purple-700 text-white'
+                      ? 'bg-amber-600 border-amber-700 text-white'
                       : 'bg-gray-300 border-gray-400 text-gray-600'
                   }`}>
                     {isCompleted ? (

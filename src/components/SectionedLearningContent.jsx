@@ -144,8 +144,8 @@ const SectionedLearningContent = ({
   const renderContentSection = (section) => (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-          <BookOpen className="w-5 h-5 text-purple-600" />
+        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+          <BookOpen className="w-5 h-5 text-amber-600" />
         </div>
         <div>
           <h3 className="text-xl font-bold text-gray-900">{stepData.title}</h3>
@@ -188,8 +188,8 @@ const SectionedLearningContent = ({
   const renderBulletsSection = (section) => (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-          <Lightbulb className="w-5 h-5 text-purple-600" />
+        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+          <Lightbulb className="w-5 h-5 text-amber-600" />
         </div>
         <div>
           <h3 className="text-xl font-bold text-gray-900">Key Points</h3>
@@ -197,14 +197,14 @@ const SectionedLearningContent = ({
         </div>
       </div>
 
-      <div className="bg-purple-50 rounded-2xl p-6 border border-purple-100">
+      <div className="bg-amber-50 rounded-2xl p-6 border border-amber-100">
         <ul className="space-y-4">
           {section.bullets.map((bullet, index) => (
             <li key={index} className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-purple-700 text-sm font-bold">{index + 1}</span>
+              <div className="w-6 h-6 bg-amber-200 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-amber-700 text-sm font-bold">{index + 1}</span>
               </div>
-              <span className="text-purple-900 leading-relaxed">{bullet}</span>
+              <span className="text-amber-900 leading-relaxed">{bullet}</span>
             </li>
           ))}
         </ul>
@@ -216,7 +216,7 @@ const SectionedLearningContent = ({
           <h4 className="font-semibold text-gray-900">Which point resonates most with you?</h4>
         </div>
         <textarea
-          className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-purple-400 resize-none"
+          className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-amber-400 resize-none"
           rows={3}
           placeholder="Share which key point stands out to you and why..."
           value={sectionAnswers[`bullets-reflection`] || ''}
@@ -249,7 +249,7 @@ const SectionedLearningContent = ({
         </ul>
       </div>
 
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-50 to-stone-50 rounded-2xl p-6 border border-blue-200">
         <h4 className="font-semibold text-blue-900 mb-3">How will you apply this?</h4>
         <p className="text-blue-700 text-sm mb-4">Think about one specific way you can apply these takeaways in your daily life</p>
         <textarea
@@ -319,7 +319,7 @@ const SectionedLearningContent = ({
               onClick={() => setCurrentSection(index)}
               className={`w-3 h-3 rounded-full transition-all ${
                 index === currentSection 
-                  ? 'bg-purple-600 w-8' 
+                  ? 'bg-amber-600 w-8' 
                   : completedSections.includes(index)
                     ? 'bg-green-500'
                     : 'bg-gray-300 hover:bg-gray-400'
@@ -350,7 +350,7 @@ const SectionedLearningContent = ({
 
         <button
           onClick={handleNextSection}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all"
         >
           {isLastSection ? 'Complete & Continue' : 'Next Section'}
           <ChevronRight className="w-4 h-4" />

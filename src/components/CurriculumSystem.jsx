@@ -81,9 +81,9 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
       id: 'parts_system', 
       title: 'Inner Child & Parts', 
       icon: Users, 
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200'
+      color: 'from-amber-500 to-amber-600',
+      bgColor: 'bg-amber-50',
+      borderColor: 'border-amber-200'
     },
     { 
       id: 'self_leadership', 
@@ -105,9 +105,9 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
       id: 'unburdening', 
       title: 'Deep Healing', 
       icon: Lightbulb, 
-      color: 'from-pink-500 to-pink-600',
-      bgColor: 'bg-pink-50',
-      borderColor: 'border-pink-200'
+      color: 'from-emerald-500 to-emerald-600',
+      bgColor: 'bg-emerald-50',
+      borderColor: 'border-emerald-200'
     },
     { 
       id: 'integration', 
@@ -185,20 +185,20 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   }, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50 to-blue-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-emerald-600 bg-clip-text text-transparent">
                 Inner Child Healing Journey
               </h1>
               <p className="text-gray-600 mt-2">
                 {isPersonalized ? (
                   <>
                     <span className="flex items-center">
-                      <Sparkles className="w-4 h-4 mr-1 text-purple-600" />
+                      <Sparkles className="w-4 h-4 mr-1 text-amber-600" />
                       Personalized curriculum for your {personalizedCurriculum?.primaryWound ? aiCurriculumPersonalizer.woundProfiles[personalizedCurriculum.primaryWound]?.name : 'specific wound pattern'}
                     </span>
                   </>
@@ -211,7 +211,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
               <Link
                 to={`/curriculum/module/${nextModule.id}`}
                 onClick={() => handleModuleSelect(nextModule)}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
+                className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
               >
                 <Play className="w-5 h-5" />
                 <span>Continue Learning</span>
@@ -223,11 +223,11 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
 
       {/* Personalization Banner */}
       {isPersonalized && personalizedCurriculum && (
-        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200">
+        <div className="bg-gradient-to-r from-amber-50 to-emerald-50 border-b border-amber-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-amber-600 to-emerald-600 rounded-lg flex items-center justify-center">
                   <Brain className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -262,7 +262,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
             <div className="text-2xl font-bold text-gray-900">{progressPercentage}%</div>
             <div className="mt-2 bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -274,14 +274,14 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Inner Child Focus</span>
-              <Heart className="w-5 h-5 text-pink-500" />
+              <Heart className="w-5 h-5 text-emerald-500" />
             </div>
             <div className="text-2xl font-bold text-gray-900">
               {innerChildCompleted}/{innerChildModules.length}
             </div>
             <div className="mt-2 bg-gray-200 rounded-full h-2">
               <div 
-                className="bg-gradient-to-r from-pink-600 to-purple-600 h-2 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-emerald-600 to-amber-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${(innerChildCompleted / innerChildModules.length) * 100}%` }}
               />
             </div>
@@ -315,7 +315,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
 
         {/* Next Module Recommendation */}
         {nextModule && (
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 mb-8 text-white">
+          <div className="bg-gradient-to-r from-amber-600 to-emerald-600 rounded-xl p-6 mb-8 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
@@ -324,11 +324,11 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold">Next Recommended</h3>
-                    <p className="text-purple-100">Continue your healing journey</p>
+                    <p className="text-amber-100">Continue your healing journey</p>
                   </div>
                 </div>
                 <h4 className="text-2xl font-bold mt-3">{nextModule.title}</h4>
-                <p className="text-purple-100 mt-1">{nextModule.description}</p>
+                <p className="text-amber-100 mt-1">{nextModule.description}</p>
                 <div className="flex items-center space-x-4 mt-3 text-sm">
                   <span className="flex items-center space-x-1">
                     <Clock className="w-4 h-4" />
@@ -345,7 +345,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
               <Link
                 to={`/curriculum/module/${nextModule.id}`}
                 onClick={() => handleModuleSelect(nextModule)}
-                className="bg-white text-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-colors flex items-center space-x-2"
+                className="bg-white text-amber-600 px-6 py-3 rounded-lg font-semibold hover:bg-amber-50 transition-colors flex items-center space-x-2"
               >
                 <span>Start Module</span>
                 <ChevronRight className="w-5 h-5" />
@@ -427,7 +427,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                                   disabled={status === 'locked'}
                                   className={`text-left flex-1 ${
                                     status === 'available' || status === 'completed'
-                                      ? 'hover:text-purple-600 transition-colors'
+                                      ? 'hover:text-amber-600 transition-colors'
                                       : 'cursor-not-allowed'
                                   }`}
                                 >
@@ -436,7 +436,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                                   
                                   {/* Show personalized content if available */}
                                   {module.personalizedContent && (
-                                    <div className="mt-2 p-2 bg-purple-50 rounded text-xs text-purple-700">
+                                    <div className="mt-2 p-2 bg-amber-50 rounded text-xs text-amber-700">
                                       <div className="flex items-center space-x-1 mb-1">
                                         <Sparkles className="w-3 h-3" />
                                         <span className="font-medium">Personalized for you:</span>
@@ -475,7 +475,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                                 <Link
                                   to={`/curriculum/module/${module.id}`}
                                   onClick={() => handleModuleSelect(module)}
-                                  className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+                                  className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
                                 >
                                   Start
                                 </Link>
@@ -498,7 +498,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
         </div>
 
         {/* Learning Journey Tips */}
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+        <div className="mt-8 bg-gradient-to-r from-blue-50 to-amber-50 rounded-xl p-6 border border-blue-100">
           <h3 className="text-lg font-bold text-gray-900 mb-3">💡 Learning Journey Tips</h3>
           <ul className="space-y-2 text-sm text-gray-700">
             <li className="flex items-start space-x-2">

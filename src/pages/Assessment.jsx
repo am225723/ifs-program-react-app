@@ -255,11 +255,11 @@ const Assessment = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center shadow-xl">
+              <div className="w-20 h-20 bg-gradient-to-br from-stone-500 to-amber-500 rounded-full flex items-center justify-center shadow-xl">
                 <CheckCircle className="w-12 h-12 text-white" />
               </div>
             </div>
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-amber-600 to-amber-600 bg-clip-text text-transparent">
               Self-Assessment Tools
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -268,7 +268,7 @@ const Assessment = () => {
           </div>
 
           {/* Introduction */}
-          <div className="card mb-12 bg-gradient-to-br from-indigo-50 to-purple-50">
+          <div className="card mb-12 bg-gradient-to-br from-stone-50 to-amber-50">
             <h2 className="text-3xl font-bold text-gray-800 mb-4">About These Assessments</h2>
             <div className="space-y-3 text-gray-700">
               <p className="text-lg">
@@ -293,12 +293,12 @@ const Assessment = () => {
                 className="card hover:scale-105 transform transition-all duration-300 cursor-pointer"
                 onClick={() => startQuiz(quiz.id)}
               >
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-stone-500 to-amber-500 rounded-xl flex items-center justify-center mb-4">
                   <CheckCircle className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">{quiz.title}</h3>
                 <p className="text-gray-600 mb-4">{quiz.description}</p>
-                <div className="flex items-center text-purple-600 font-semibold">
+                <div className="flex items-center text-amber-600 font-semibold">
                   <span>{quiz.questions.length} questions</span>
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </div>
@@ -319,7 +319,7 @@ const Assessment = () => {
         {!showResults ? (
           <>
             {/* Quiz Header */}
-            <div className="card mb-8 bg-gradient-to-br from-indigo-50 to-purple-50">
+            <div className="card mb-8 bg-gradient-to-br from-stone-50 to-amber-50">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-3xl font-bold text-gray-800">{quiz.title}</h2>
                 <button
@@ -334,7 +334,7 @@ const Assessment = () => {
                 <span>Progress: {Object.keys(answers).length} / {quiz.questions.length}</span>
                 <div className="flex-1 bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-amber-600 to-amber-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${(Object.keys(answers).length / quiz.questions.length) * 100}%` }}
                   />
                 </div>
@@ -346,7 +346,7 @@ const Assessment = () => {
               {quiz.questions.map((question, index) => (
                 <div key={question.id} className="card">
                   <div className="flex items-start space-x-4 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                    <div className="w-10 h-10 bg-gradient-to-br from-stone-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
                       {index + 1}
                     </div>
                     <p className="text-lg text-gray-800 font-medium">{question.question}</p>
@@ -357,7 +357,7 @@ const Assessment = () => {
                         key={value}
                         className={`flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all ${
                           answers[question.id] === value
-                            ? 'bg-gradient-to-r from-indigo-100 to-purple-100 border-2 border-indigo-400'
+                            ? 'bg-gradient-to-r from-stone-100 to-amber-100 border-2 border-indigo-400'
                             : 'bg-gray-50 hover:bg-gray-100 border-2 border-gray-200'
                         }`}
                       >
@@ -370,7 +370,7 @@ const Assessment = () => {
                           className="hidden"
                         />
                         {answers[question.id] === value ? (
-                          <CheckCircle className="w-6 h-6 text-indigo-600" />
+                          <CheckCircle className="w-6 h-6 text-amber-600" />
                         ) : (
                           <Circle className="w-6 h-6 text-gray-400" />
                         )}
@@ -396,7 +396,7 @@ const Assessment = () => {
                 disabled={!allAnswered}
                 className={`px-8 py-4 rounded-lg font-semibold transition-all shadow-lg ${
                   allAnswered
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700'
+                    ? 'bg-gradient-to-r from-amber-600 to-amber-600 text-white hover:from-amber-700 hover:to-amber-700'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
               >
@@ -407,7 +407,7 @@ const Assessment = () => {
         ) : (
           <>
             {/* Results */}
-            <div className="card mb-8 bg-gradient-to-br from-indigo-50 to-purple-50">
+            <div className="card mb-8 bg-gradient-to-br from-stone-50 to-amber-50">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Results</h2>
               <p className="text-lg text-gray-700">
                 Based on your responses, here are your top areas of focus:
@@ -419,7 +419,7 @@ const Assessment = () => {
                 <div key={category} className="card">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                      <div className="w-12 h-12 bg-gradient-to-br from-stone-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
                         {index + 1}
                       </div>
                       <h3 className="text-2xl font-bold text-gray-800 capitalize">{category.replace('-', ' ')}</h3>
@@ -441,13 +441,13 @@ const Assessment = () => {
               ))}
             </div>
 
-            <div className="card bg-gradient-to-br from-purple-600 to-pink-600 text-white mb-8">
+            <div className="card bg-gradient-to-br from-amber-600 to-emerald-600 text-white mb-8">
               <h3 className="text-2xl font-bold mb-4">What These Results Mean</h3>
-              <p className="text-lg leading-relaxed text-purple-100 mb-4">
+              <p className="text-lg leading-relaxed text-amber-100 mb-4">
                 These results highlight areas where you may benefit from focused IFS work. Remember, there's no 
                 "good" or "bad" score—this is simply information to guide your healing journey.
               </p>
-              <p className="text-lg leading-relaxed text-purple-100">
+              <p className="text-lg leading-relaxed text-amber-100">
                 Consider exploring the parts related to your highest scores. What are they trying to protect you from? 
                 What do they need from you? Approach them with curiosity and compassion.
               </p>
@@ -456,13 +456,13 @@ const Assessment = () => {
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => setShowResults(false)}
-                className="px-8 py-4 bg-white text-purple-600 border-2 border-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-all"
+                className="px-8 py-4 bg-white text-amber-600 border-2 border-amber-600 rounded-lg font-semibold hover:bg-amber-50 transition-all"
               >
                 Review Answers
               </button>
               <button
                 onClick={() => setCurrentQuiz(null)}
-                className="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg"
+                className="px-8 py-4 bg-gradient-to-r from-amber-600 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-amber-700 transition-all shadow-lg"
               >
                 Take Another Assessment
               </button>

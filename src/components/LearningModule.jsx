@@ -209,7 +209,7 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-amber-500 rounded-lg flex items-center justify-center">
             <BookOpen className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -241,12 +241,12 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
         )}
 
         {data.keyTakeaways && data.keyTakeaways.length > 0 && (
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-100">
+          <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-lg p-6 border border-amber-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">💡 Key Takeaways:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {data.keyTakeaways.map((takeaway, index) => (
                 <div key={index} className="flex items-start space-x-3">
-                  <Lightbulb className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                  <Lightbulb className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700 text-sm">{takeaway}</span>
                 </div>
               ))}
@@ -338,10 +338,10 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
         )}
 
         {data.interactiveElements && data.interactiveElements.includes('guided-meditation') && (
-          <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-6 border border-purple-200">
+          <div className="bg-gradient-to-r from-amber-100 to-emerald-100 rounded-lg p-6 border border-amber-200">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">🧘‍♀️ Guided Meditation</h3>
             <div className="flex items-center space-x-4">
-              <button className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center space-x-2">
+              <button className="bg-amber-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-amber-700 transition-colors flex items-center space-x-2">
                 <Play className="w-5 h-5" />
                 <span>Start Meditation</span>
               </button>
@@ -410,7 +410,7 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
         )}
 
         {data.achievement && (
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white text-center">
+          <div className="bg-gradient-to-r from-amber-600 to-emerald-600 rounded-lg p-6 text-white text-center">
             <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
               <Award className="w-8 h-8" />
             </div>
@@ -447,14 +447,14 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
         <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-8">
             <div className="text-center mb-6">
-              <div className="w-24 h-24 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-24 h-24 bg-gradient-to-r from-amber-600 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Award className="w-12 h-12 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Certificate of Completion</h2>
               <p className="text-lg text-gray-600">Inner Child Healing Journey</p>
             </div>
             
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 mb-6">
+            <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-lg p-6 mb-6">
               <h3 className="text-xl font-bold text-gray-900 mb-3">{module.title}</h3>
               <p className="text-gray-700 mb-4">{module.description}</p>
               <div className="flex items-center justify-between text-sm text-gray-600">
@@ -475,7 +475,7 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
                   window.print();
                   setShowCertificate(false);
                 }}
-                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                className="bg-amber-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-amber-700 transition-colors"
               >
                 Print Certificate
               </button>
@@ -490,7 +490,7 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading module...</p>
         </div>
       </div>
@@ -498,7 +498,7 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50 to-blue-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -543,7 +543,7 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
           {/* Progress Bar */}
           <div className="mt-4 bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-500"
+              className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-500"
               style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
             />
           </div>
@@ -600,7 +600,7 @@ const LearningModule = ({ module, onComplete, onBack, userProgress = {} }) => {
             onClick={nextStep}
             className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 shadow-lg ${
               isCurrentStepComplete()
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                ? 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white hover:from-amber-700 hover:to-emerald-700'
                 : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed'
             }`}
           >

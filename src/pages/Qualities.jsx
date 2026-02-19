@@ -41,7 +41,7 @@ const Qualities = () => {
               onClick={() => setActiveTab('5ps')}
               className={`px-8 py-3 rounded-full font-semibold transition-all duration-300 ${
                 activeTab === '5ps'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-white shadow-md'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -96,7 +96,7 @@ const Qualities = () => {
         {/* 5 P's Content */}
         {activeTab === '5ps' && (
           <div className="space-y-8">
-            <div className="card bg-gradient-to-br from-purple-50 to-pink-50">
+            <div className="card bg-gradient-to-br from-amber-50 to-emerald-50">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">The 5 P's of the Self</h2>
               <p className="text-lg text-gray-700 leading-relaxed">
                 The 5 P's—<strong>patience, persistence, presence, playfulness, and peace</strong>—strengthen the Self's 
@@ -108,8 +108,8 @@ const Qualities = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {fivePs.map((quality, index) => {
                 const colors = [
-                  'from-purple-400 to-purple-600',
-                  'from-pink-400 to-pink-600',
+                  'from-amber-400 to-amber-600',
+                  'from-emerald-400 to-emerald-600',
                   'from-rose-400 to-rose-600',
                   'from-fuchsia-400 to-fuchsia-600',
                   'from-violet-400 to-violet-600'
@@ -133,14 +133,14 @@ const Qualities = () => {
               })}
             </div>
 
-            <div className="card bg-gradient-to-br from-purple-600 to-pink-600 text-white">
+            <div className="card bg-gradient-to-br from-amber-600 to-emerald-600 text-white">
               <h3 className="text-2xl font-bold mb-4">Cultivating the 5 P's</h3>
-              <p className="text-lg leading-relaxed text-purple-100 mb-4">
+              <p className="text-lg leading-relaxed text-amber-100 mb-4">
                 The 5 P's are practices that strengthen your Self-leadership over time. They're not about perfection—
                 they're about progress. Each time you choose patience over reactivity, persistence over giving up, 
                 or presence over distraction, you're building your capacity for Self-led living.
               </p>
-              <p className="text-lg leading-relaxed text-purple-100">
+              <p className="text-lg leading-relaxed text-amber-100">
                 These qualities work together with the 8 C's to create a solid foundation for healing and growth. 
                 When you embody these qualities, your parts feel safe enough to trust your leadership.
               </p>

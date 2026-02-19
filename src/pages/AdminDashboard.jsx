@@ -53,7 +53,7 @@ const AdminDashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-r from-amber-600 to-emerald-600 rounded-lg flex items-center justify-center">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -97,8 +97,8 @@ const AdminDashboard = () => {
 
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-amber-600" />
               </div>
               <span className="text-sm font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">+15%</span>
             </div>
@@ -124,7 +124,7 @@ const AdminDashboard = () => {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Recent Activity</h2>
-                <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                <button className="text-amber-600 hover:text-amber-700 text-sm font-medium">
                   View All
                 </button>
               </div>
@@ -135,12 +135,12 @@ const AdminDashboard = () => {
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                       activity.type === 'completion' ? 'bg-green-100' :
                       activity.type === 'start' ? 'bg-blue-100' :
-                      activity.type === 'achievement' ? 'bg-yellow-100' : 'bg-purple-100'
+                      activity.type === 'achievement' ? 'bg-yellow-100' : 'bg-amber-100'
                     }`}>
                       {activity.type === 'completion' ? <Target className="w-5 h-5 text-green-600" /> :
                        activity.type === 'start' ? <BookOpen className="w-5 h-5 text-blue-600" /> :
                        activity.type === 'achievement' ? <Award className="w-5 h-5 text-yellow-600" /> : 
-                       <Heart className="w-5 h-5 text-purple-600" />}
+                       <Heart className="w-5 h-5 text-amber-600" />}
                     </div>
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{activity.user}</p>
@@ -162,10 +162,10 @@ const AdminDashboard = () => {
               
               <div className="space-y-4">
                 {popularModules.map((module, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors">
+                  <div key={index} className="border border-gray-200 rounded-lg p-4 hover:border-amber-300 transition-colors">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-medium text-gray-900">{module.name}</h3>
-                      <span className="text-sm font-medium text-purple-600">{module.completionRate}%</span>
+                      <span className="text-sm font-medium text-amber-600">{module.completionRate}%</span>
                     </div>
                     <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
                       <span>{module.users} users</span>
@@ -173,7 +173,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-500"
+                        className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-500"
                         style={{ width: `${module.completionRate}%` }}
                       />
                     </div>
@@ -190,14 +190,14 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link
               to="/curriculum"
-              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md hover:border-purple-300 transition-all group"
+              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md hover:border-amber-300 transition-all group"
             >
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <BookOpen className="w-6 h-6 text-purple-600" />
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <BookOpen className="w-6 h-6 text-amber-600" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Manage Curriculum</h3>
               <p className="text-sm text-gray-600 mb-3">Update modules and content</p>
-              <div className="flex items-center text-purple-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center text-amber-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                 <span>Manage</span>
                 <ArrowRight className="ml-1 w-4 h-4" />
               </div>
@@ -205,38 +205,38 @@ const AdminDashboard = () => {
 
             <Link
               to="/assessment"
-              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md hover:border-purple-300 transition-all group"
+              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md hover:border-amber-300 transition-all group"
             >
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Brain className="w-6 h-6 text-blue-600" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">View Assessments</h3>
               <p className="text-sm text-gray-600 mb-3">Review user assessments</p>
-              <div className="flex items-center text-purple-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center text-amber-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                 <span>View</span>
                 <ArrowRight className="ml-1 w-4 h-4" />
               </div>
             </Link>
 
-            <button className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md hover:border-purple-300 transition-all group text-left">
+            <button className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md hover:border-amber-300 transition-all group text-left">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Users className="w-6 h-6 text-green-600" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">User Management</h3>
               <p className="text-sm text-gray-600 mb-3">Manage user accounts</p>
-              <div className="flex items-center text-purple-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center text-amber-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                 <span>Manage</span>
                 <ArrowRight className="ml-1 w-4 h-4" />
               </div>
             </button>
 
-            <button className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md hover:border-purple-300 transition-all group text-left">
+            <button className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md hover:border-amber-300 transition-all group text-left">
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Settings className="w-6 h-6 text-orange-600" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Settings</h3>
               <p className="text-sm text-gray-600 mb-3">Platform configuration</p>
-              <div className="flex items-center text-purple-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center text-amber-600 font-medium text-sm opacity-0 group-hover:opacity-100 transition-opacity">
                 <span>Configure</span>
                 <ArrowRight className="ml-1 w-4 h-4" />
               </div>

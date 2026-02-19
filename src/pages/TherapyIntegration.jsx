@@ -871,7 +871,7 @@ ${s.therapistNotes || 'N/A'}
                           <div className="flex items-center gap-2 mt-1">
                             <span className={`text-xs px-2 py-0.5 rounded-full ${
                               catInfo.color === 'blue' ? (theme.isDark ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-700') :
-                              catInfo.color === 'purple' ? (theme.isDark ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700') :
+                              catInfo.color === 'purple' ? (theme.isDark ? 'bg-amber-900/50 text-amber-300' : 'bg-amber-100 text-amber-700') :
                               catInfo.color === 'green' ? (theme.isDark ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-700') :
                               (theme.isDark ? 'bg-amber-900/50 text-amber-300' : 'bg-amber-100 text-amber-700')
                             }`}>

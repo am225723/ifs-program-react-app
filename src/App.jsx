@@ -53,7 +53,7 @@ function BottomNav() {
     blue: { active: 'text-blue-600', bg: 'bg-blue-100' },
     emerald: { active: 'text-emerald-600', bg: 'bg-emerald-100' },
     amber: { active: 'text-amber-600', bg: 'bg-amber-100' },
-    purple: { active: 'text-purple-600', bg: 'bg-purple-100' },
+    purple: { active: 'text-amber-600', bg: 'bg-amber-100' },
     indigo: { active: 'text-indigo-400', bg: 'bg-indigo-900' },
   };
   const accent = accentMap[theme.accent] || accentMap.amber;

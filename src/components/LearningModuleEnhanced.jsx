@@ -106,7 +106,7 @@ const VoiceRecorder = ({ onRecordingComplete, label }) => {
   const formatRecTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 
   return (
-    <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-4 border border-red-200">
+    <div className="bg-gradient-to-r from-red-50 to-emerald-50 rounded-xl p-4 border border-red-200">
       <div className="flex items-center gap-2 mb-3">
         <Activity className="w-4 h-4 text-red-500" />
         <span className="text-sm font-medium text-gray-700">{label || 'Voice Recording'}</span>
@@ -171,7 +171,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     saveModuleProgress, 
     getModuleProgress, 
     saveInteractiveData, 
-    getInteractiveData 
+    getInteractiveData,
+    awardXP
   } = useData();
 
   const steps = module.steps || [];
@@ -376,6 +377,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
       completedAt: new Date().toISOString()
     });
     
+    if (awardXP) awardXP('module_complete', 100);
+    
     if (onComplete) {
       onComplete(module);
     }
@@ -423,7 +426,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-amber-500 rounded-lg flex items-center justify-center">
             <BookOpen className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -455,12 +458,12 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
         )}
 
         {data.keyTakeaways && data.keyTakeaways.length > 0 && (
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 border border-purple-100">
+          <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-lg p-6 border border-amber-100">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">🧠 Key Takeaways:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {data.keyTakeaways.map((takeaway, index) => (
                 <div key={index} className="flex items-start space-x-3">
-                  <Lightbulb className="w-5 h-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                  <Lightbulb className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700 text-sm">{takeaway}</span>
                 </div>
               ))}
@@ -603,7 +606,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     ];
 
     return (
-      <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-lg p-6 border border-blue-200">
+      <div className="bg-gradient-to-r from-blue-100 to-amber-100 rounded-lg p-6 border border-blue-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">🩹 Wound Identification</h3>
         <p className="text-gray-700 mb-4">Select the wounds that resonate with your experience (0-5 intensity):</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -613,7 +616,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input 
                     type="checkbox" 
-                    className="w-4 h-4 text-purple-600"
+                    className="w-4 h-4 text-amber-600"
                     checked={interactiveData[`wound-${wound}`]?.selected || false}
                     onChange={(e) => handleInteractiveChange(`wound-${wound}`, {
                       ...interactiveData[`wound-${wound}`],
@@ -654,14 +657,14 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
   // Belief Mapper Component
   const renderBeliefMapper = () => {
     return (
-      <div className="bg-gradient-to-r from-pink-100 to-orange-100 rounded-lg p-6 border border-pink-200">
+      <div className="bg-gradient-to-r from-emerald-100 to-orange-100 rounded-lg p-6 border border-emerald-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">🧠 Belief Mapping</h3>
         <p className="text-gray-700 mb-4">What beliefs did you form from these experiences?</p>
         <div className="space-y-3">
           <textarea 
             value={interactiveData['beliefs'] || ''}
             onChange={(e) => handleInteractiveChange('beliefs', e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             placeholder="Examples: 'I'm unlovable,' 'I'm not good enough,' 'I must be perfect,' 'I can't trust anyone'..."
             rows={4}
           />
@@ -675,7 +678,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                     const current = interactiveData['beliefs'] || '';
                     handleInteractiveChange('beliefs', current + (current ? ', ' : '') + belief);
                   }}
-                  className="text-xs bg-white px-2 py-1 rounded border border-gray-300 hover:bg-pink-50"
+                  className="text-xs bg-white px-2 py-1 rounded border border-gray-300 hover:bg-emerald-50"
                 >
                   + {belief}
                 </button>
@@ -742,12 +745,12 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     ];
 
     return (
-      <div className="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-lg p-6 border border-purple-200">
+      <div className="bg-gradient-to-r from-amber-100 to-stone-100 rounded-lg p-6 border border-amber-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">🔮 6 F's Protocol Guide</h3>
         <div className="space-y-4">
           {steps.map((step, index) => (
             <div key={step.name} className="flex items-start space-x-3 p-4 bg-white rounded-lg border border-gray-200">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-stone-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                 {index + 1}
               </div>
               <div className="flex-1">
@@ -757,7 +760,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                   value={interactiveData[`6fs-${step.name.toLowerCase()}`] || ''}
                   onChange={(e) => handleInteractiveChange(`6fs-${step.name.toLowerCase()}`, e.target.value)}
                   placeholder={`Notes for ${step.name} step...`}
-                  className="mt-2 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="mt-2 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   rows={2}
                 />
               </div>
@@ -850,7 +853,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     };
 
     return (
-      <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-6 border border-purple-200">
+      <div className="bg-gradient-to-r from-amber-100 to-emerald-100 rounded-xl p-6 border border-amber-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Guided Meditation</h3>
 
         {hasSteps ? (
@@ -860,8 +863,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                 meditationActive
                   ? isBreathingStep
                     ? 'bg-gradient-to-r from-blue-400 to-teal-400 animate-pulse scale-110'
-                    : 'bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse'
-                  : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                    : 'bg-gradient-to-r from-amber-500 to-emerald-500 animate-pulse'
+                  : 'bg-gradient-to-r from-amber-500 to-emerald-500'
               }`}>
                 {meditationActive ? (
                   isBreathingStep ? <Brain className="w-12 h-12 text-white" /> : <Pause className="w-12 h-12 text-white" />
@@ -879,7 +882,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
 
             <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
               <div
-                className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${((meditationStepIndex + (meditationActive ? meditationStepTimer / stepPauseDuration : 0)) / meditationSteps.length) * 100}%` }}
               />
             </div>
@@ -895,14 +898,14 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
 
             {pauseMatch && meditationActive && (
               <div className="text-center mb-4">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium animate-pulse">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 text-amber-700 rounded-full text-sm font-medium animate-pulse">
                   <Clock className="w-4 h-4" />
                   Pause - {stepPauseDuration - meditationStepTimer}s remaining
                 </div>
               </div>
             )}
 
-            <div className="bg-white rounded-xl p-6 mb-6 border border-purple-200 min-h-[120px]">
+            <div className="bg-white rounded-xl p-6 mb-6 border border-amber-200 min-h-[120px]">
               <p className="text-gray-800 text-lg leading-relaxed italic">
                 {currentMedStep ? currentMedStep.replace(/\[(?:Pause|Allow)\s+(?:for\s+)?(\d+)\s+seconds?(?:\s+of\s+silence)?\]/gi, '').trim() : ''}
               </p>
@@ -920,7 +923,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
               </button>
               <button
                 onClick={handleMeditationPlayPause}
-                className="px-8 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+                className="px-8 py-3 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 transition-colors flex items-center gap-2"
               >
                 {meditationCompleted ? (
                   <><RotateCcw className="w-5 h-5" /><span>Restart</span></>
@@ -955,7 +958,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                     onClick={() => goToMeditationStep(idx)}
                     className={`w-full text-left p-3 rounded-lg text-sm transition-all ${
                       idx === meditationStepIndex
-                        ? 'bg-purple-100 border-2 border-purple-300 text-purple-900'
+                        ? 'bg-amber-100 border-2 border-amber-300 text-amber-900'
                         : idx < meditationStepIndex
                         ? 'bg-green-50 border border-green-200 text-green-800'
                         : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
@@ -963,7 +966,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                   >
                     <div className="flex items-start gap-2">
                       <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                        idx === meditationStepIndex ? 'bg-purple-600 text-white' : idx < meditationStepIndex ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
+                        idx === meditationStepIndex ? 'bg-amber-600 text-white' : idx < meditationStepIndex ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-600'
                       }`}>
                         {idx < meditationStepIndex ? '✓' : idx + 1}
                       </span>
@@ -976,13 +979,13 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
           </div>
         ) : (
           <div className="text-center">
-            <div className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-24 h-24 bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
               {meditationActive ? <Pause className="w-12 h-12 text-white" /> : <Play className="w-12 h-12 text-white" />}
             </div>
             <div className="text-2xl font-bold text-gray-900 mb-4">{meditationActive ? formatTime(meditationTimer) : 'Ready to begin'}</div>
             <button
               onClick={() => setMeditationActive(!meditationActive)}
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2 mx-auto"
+              className="bg-amber-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-amber-700 transition-colors flex items-center gap-2 mx-auto"
             >
               {meditationActive ? <><Pause className="w-5 h-5" /><span>Pause</span></> : <><Play className="w-5 h-5" /><span>Start Meditation</span></>}
             </button>
@@ -999,8 +1002,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
       { name: 'Joy', color: 'bg-yellow-400' },
       { name: 'Sadness', color: 'bg-blue-400' },
       { name: 'Anger', color: 'bg-red-400' },
-      { name: 'Fear', color: 'bg-purple-400' },
-      { name: 'Shame', color: 'bg-pink-400' },
+      { name: 'Fear', color: 'bg-amber-400' },
+      { name: 'Shame', color: 'bg-emerald-400' },
       { name: 'Love', color: 'bg-green-400' }
     ];
 
@@ -1068,7 +1071,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     const selfCs = ['Curiosity', 'Compassion', 'Calm', 'Clarity', 'Confidence', 'Courage', 'Creativity', 'Connectedness'];
     
     return (
-      <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-6 border border-indigo-200">
+      <div className="bg-gradient-to-r from-stone-100 to-amber-100 rounded-lg p-6 border border-indigo-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">✨ Self Energy Meter</h3>
         <p className="text-gray-700 mb-4">How present are these qualities right now?</p>
         <div className="space-y-3">
@@ -1099,7 +1102,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     ];
 
     return (
-      <div className="bg-gradient-to-r from-red-100 to-pink-100 rounded-lg p-6 border border-red-200">
+      <div className="bg-gradient-to-r from-red-100 to-emerald-100 rounded-lg p-6 border border-red-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">🔄 Pattern Identifier</h3>
         <p className="text-gray-700 mb-4">Which protective patterns do you notice?</p>
         <div className="grid grid-cols-2 gap-3">
@@ -1226,7 +1229,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     const progress = ((currentVizStep + 1) / steps.length) * 100;
 
     return (
-      <div className="bg-gradient-to-r from-violet-100 to-indigo-100 rounded-lg p-6 border border-violet-200">
+      <div className="bg-gradient-to-r from-violet-100 to-stone-100 rounded-lg p-6 border border-violet-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <Eye className="w-5 h-5 text-violet-600" />
           <span>Guided Visualization</span>
@@ -1578,7 +1581,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     const average = ratings.reduce((sum, r) => sum + r.value, 0) / ratings.length;
 
     return (
-      <div className="bg-gradient-to-r from-rose-100 to-pink-100 rounded-lg p-6 border border-rose-200">
+      <div className="bg-gradient-to-r from-rose-100 to-emerald-100 rounded-lg p-6 border border-rose-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
           <SlidersHorizontal className="w-5 h-5 text-rose-600" />
           <span>Self-Assessment Scale</span>
@@ -1727,13 +1730,13 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     };
 
     return (
-      <div className="bg-gradient-to-r from-violet-100 to-purple-100 rounded-lg p-6 border border-violet-200">
+      <div className="bg-gradient-to-r from-violet-100 to-amber-100 rounded-lg p-6 border border-violet-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">📊 Rank Self Qualities</h3>
         <p className="text-gray-700 mb-4">Rank these Self qualities by how strongly you feel them right now. Use the arrows to reorder — #1 is the strongest.</p>
         <div className="space-y-2">
           {items.map((item, index) => (
             <div key={item} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-violet-200 hover:shadow-sm transition-shadow">
-              <div className="w-8 h-8 bg-gradient-to-r from-violet-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              <div className="w-8 h-8 bg-gradient-to-r from-violet-500 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                 {index + 1}
               </div>
               <span className="flex-1 font-medium text-gray-800">{item}</span>
@@ -1899,7 +1902,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
       { primary: 'Joy', color: 'bg-yellow-400', hoverColor: 'hover:bg-yellow-100', borderColor: 'border-yellow-300', secondary: ['Happy', 'Grateful', 'Playful', 'Content', 'Proud'] },
       { primary: 'Sadness', color: 'bg-blue-400', hoverColor: 'hover:bg-blue-100', borderColor: 'border-blue-300', secondary: ['Lonely', 'Grieving', 'Disappointed', 'Hopeless', 'Melancholy'] },
       { primary: 'Anger', color: 'bg-red-400', hoverColor: 'hover:bg-red-100', borderColor: 'border-red-300', secondary: ['Frustrated', 'Resentful', 'Irritated', 'Bitter', 'Enraged'] },
-      { primary: 'Fear', color: 'bg-purple-400', hoverColor: 'hover:bg-purple-100', borderColor: 'border-purple-300', secondary: ['Anxious', 'Insecure', 'Overwhelmed', 'Panicked', 'Vulnerable'] },
+      { primary: 'Fear', color: 'bg-amber-400', hoverColor: 'hover:bg-amber-100', borderColor: 'border-amber-300', secondary: ['Anxious', 'Insecure', 'Overwhelmed', 'Panicked', 'Vulnerable'] },
       { primary: 'Surprise', color: 'bg-orange-400', hoverColor: 'hover:bg-orange-100', borderColor: 'border-orange-300', secondary: ['Amazed', 'Confused', 'Shocked', 'Startled', 'Awestruck'] },
       { primary: 'Disgust', color: 'bg-green-400', hoverColor: 'hover:bg-green-100', borderColor: 'border-green-300', secondary: ['Ashamed', 'Contemptuous', 'Repulsed', 'Self-loathing', 'Judgmental'] }
     ];
@@ -1914,7 +1917,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     };
 
     return (
-      <div className="bg-gradient-to-r from-pink-100 to-rose-100 rounded-lg p-6 border border-pink-200">
+      <div className="bg-gradient-to-r from-emerald-100 to-rose-100 rounded-lg p-6 border border-emerald-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">🎡 Emotion Wheel</h3>
         <p className="text-gray-700 mb-4">Click on the emotions you're currently experiencing. Explore both primary and secondary emotions.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1948,14 +1951,14 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
           ))}
         </div>
         {selectedEmotions.length > 0 && (
-          <div className="mt-4 p-4 bg-white rounded-lg border border-pink-200">
+          <div className="mt-4 p-4 bg-white rounded-lg border border-emerald-200">
             <h4 className="text-sm font-semibold text-gray-700 mb-2">Currently feeling:</h4>
             <div className="flex flex-wrap gap-2">
               {selectedEmotions.map((emotion) => (
                 <span
                   key={emotion}
                   onClick={() => toggleEmotion(emotion)}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-pink-200 to-rose-200 text-pink-800 rounded-full text-sm font-medium cursor-pointer hover:from-pink-300 hover:to-rose-300"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-emerald-200 to-rose-200 text-emerald-800 rounded-full text-sm font-medium cursor-pointer hover:from-emerald-300 hover:to-rose-300"
                 >
                   {emotion}
                   <X className="w-3 h-3" />
@@ -2027,9 +2030,9 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     const dialogueResponses = interactiveData['dialogue-responses'] || {};
 
     return (
-      <div className="bg-gradient-to-r from-indigo-100 to-violet-100 rounded-lg p-6 border border-indigo-200">
+      <div className="bg-gradient-to-r from-stone-100 to-violet-100 rounded-lg p-6 border border-indigo-200">
         <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-indigo-600" /> Parts Dialogue Simulation
+          <MessageSquare className="w-5 h-5 text-amber-600" /> Parts Dialogue Simulation
         </h3>
         <p className="text-gray-700 mb-4">Have a compassionate dialogue between your Self and a part. Self's prompts are provided — you write the part's responses.</p>
         <div className="mb-4">
@@ -2050,7 +2053,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
               return (
                 <div key={index} className="space-y-3">
                   <div className="flex justify-start">
-                    <div className="max-w-[80%] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm">
+                    <div className="max-w-[80%] bg-gradient-to-r from-amber-500 to-stone-500 text-white px-4 py-3 rounded-2xl rounded-bl-sm shadow-sm">
                       <p className="text-xs font-semibold mb-1 opacity-80">Self</p>
                       <p className="text-sm">{prompt}</p>
                     </div>
@@ -2144,7 +2147,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
         )}
 
         {data.achievement && (
-          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white text-center">
+          <div className="bg-gradient-to-r from-amber-600 to-emerald-600 rounded-lg p-6 text-white text-center">
             <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-3">
               <Award className="w-8 h-8" />
             </div>
@@ -2189,14 +2192,14 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
         <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           <div className="p-8">
             <div className="text-center mb-6">
-              <div className="w-24 h-24 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-24 h-24 bg-gradient-to-r from-amber-600 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Award className="w-12 h-12 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">Certificate of Completion</h2>
               <p className="text-lg text-gray-600">Inner Child Healing Journey</p>
             </div>
             
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-6 mb-6">
+            <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-lg p-6 mb-6">
               <h3 className="text-xl font-bold text-gray-900 mb-3">{module.title}</h3>
               <p className="text-gray-700 mb-4">{module.description}</p>
               <div className="flex items-center justify-between text-sm text-gray-600">
@@ -2204,8 +2207,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                 <span>Duration: {module.estimatedMinutes} minutes</span>
               </div>
               {completedSteps.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-purple-200">
-                  <p className="text-sm text-purple-700">
+                <div className="mt-4 pt-4 border-t border-amber-200">
+                  <p className="text-sm text-amber-700">
                     <strong>Progress:</strong> {completedSteps.length} of {steps.length} steps completed
                   </p>
                 </div>
@@ -2224,7 +2227,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                   window.print();
                   setShowCertificate(false);
                 }}
-                className="bg-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                className="bg-amber-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-amber-700 transition-colors"
               >
                 Print Certificate
               </button>
@@ -2239,7 +2242,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading module...</p>
         </div>
       </div>
@@ -2250,7 +2253,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading from database...</p>
         </div>
       </div>
@@ -2258,7 +2261,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50 to-blue-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -2303,7 +2306,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
           {/* Progress Bar */}
           <div className="mt-4 bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-500"
+              className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-500"
               style={{ width: `${((currentStepIndex + 1) / steps.length) * 100}%` }}
             />
           </div>
@@ -2360,7 +2363,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
             onClick={nextStep}
             className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2 shadow-lg ${
               isCurrentStepComplete()
-                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                ? 'bg-gradient-to-r from-amber-600 to-emerald-600 text-white hover:from-amber-700 hover:to-emerald-700'
                 : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white cursor-not-allowed'
             }`}
           >

@@ -33,10 +33,10 @@ const TokenLogin = ({ onLogin, onSwitchToPIN }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50 to-stone-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gradient-to-r from-amber-600 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
             </svg>
@@ -60,7 +60,7 @@ const TokenLogin = ({ onLogin, onSwitchToPIN }) => {
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="Enter your token"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all duration-200"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all duration-200"
               disabled={isLoading}
               autoFocus
             />
@@ -78,7 +78,7 @@ const TokenLogin = ({ onLogin, onSwitchToPIN }) => {
             className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 ${
               isLoading || !token.trim()
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
+                : 'bg-gradient-to-r from-amber-600 to-emerald-600 hover:from-amber-700 hover:to-emerald-700 shadow-lg hover:shadow-xl'
             }`}
           >
             {isLoading ? (
@@ -95,7 +95,7 @@ const TokenLogin = ({ onLogin, onSwitchToPIN }) => {
         <div className="mt-6 text-center">
           <button
             onClick={onSwitchToPIN}
-            className="text-purple-600 hover:text-purple-700 text-sm font-semibold transition-colors duration-200"
+            className="text-amber-600 hover:text-amber-700 text-sm font-semibold transition-colors duration-200"
           >
             ← Back to PIN Login
           </button>

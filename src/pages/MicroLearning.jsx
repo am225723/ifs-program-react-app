@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Play, Check, ChevronRight, Heart, Sparkles, Wind, Sun, Moon, RefreshCw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useData } from '../contexts/DataContext';
 import { supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 
@@ -106,6 +107,7 @@ const microExercises = [
 
 export default function MicroLearning() {
   const { theme, getAnimationClass } = useTheme();
+  const { awardXP } = useData();
   const [activeExercise, setActiveExercise] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -167,6 +169,7 @@ export default function MicroLearning() {
           data: { completedAt: new Date().toISOString() }
         });
       }
+      if (awardXP) awardXP('exercise_complete', 30);
     }
   };
 
