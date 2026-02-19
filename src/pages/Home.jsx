@@ -148,6 +148,11 @@ const Home = ({ clientId, client }) => {
         exercises: ['Trust Building Practice', 'Boundary Setting Exercise'],
         modules: ['Module 2: Trust Recovery', 'Module 4: Healthy Boundaries'],
         affirmation: "I am safe to trust myself and choose trustworthy people."
+      },
+      rejection: {
+        exercises: ['Belonging Meditation', 'Self-Worth Affirmation Practice'],
+        modules: ['Module 2: Rejection Healing', 'Module 4: Authentic Expression'],
+        affirmation: "I belong here. I am wanted and valued exactly as I am."
       }
     };
     return recommendations[wound] || recommendations.abandonment;

@@ -50,27 +50,39 @@ const assessmentDefinitions = [
       betrayal: { label: 'Betrayal', icon: Shield, color: '#F59E0B', description: 'Difficulty trusting after broken promises or violated boundaries' },
       rejection: { label: 'Rejection', icon: AlertTriangle, color: '#EF4444', description: 'Fear of being pushed away or not being good enough' }
     },
+    protectorQuestions: [
+      { category: 'abandonment', text: 'Do you have a part that tries to be a "people pleaser" or "caretaker" to ensure no one leaves you?', protectorType: 'People-pleaser managers' },
+      { category: 'shame', text: 'Do you have a part that is a harsh "Inner Critic" or a "Perfectionist" trying to hide your flaws?', protectorType: 'Inner Critic / Perfectionist managers' },
+      { category: 'neglect', text: 'Do you have a part that withdraws, dissociates, or "numbs out" to avoid needing anything?', protectorType: 'Withdrawal / Numbing protectors' },
+      { category: 'betrayal', text: 'Do you have a part that is aggressive, controlling, or extremely suspicious to keep you safe?', protectorType: 'Controller / Hypervigilant managers' },
+      { category: 'rejection', text: 'Do you have a part that avoids social situations or hides your true self to prevent being judged?', protectorType: 'Avoidance / Hiding managers' }
+    ],
     questions: [
       { id: 1, text: 'I often feel anxious when people get too close to me emotionally.', category: 'abandonment' },
-      { id: 2, text: 'I feel like I have to hide parts of myself to be accepted.', category: 'shame' },
-      { id: 3, text: 'I struggle to ask for help, even when I really need it.', category: 'neglect' },
-      { id: 4, text: 'I have difficulty trusting people, even those close to me.', category: 'betrayal' },
-      { id: 5, text: 'I am extremely hard on myself when I make mistakes.', category: 'shame' },
-      { id: 6, text: 'I feel uncomfortable being the center of attention.', category: 'rejection' },
-      { id: 7, text: 'I feel like my needs don\'t matter as much as others\'.', category: 'neglect' },
-      { id: 8, text: 'I avoid getting too attached to people or things.', category: 'abandonment' },
-      { id: 9, text: 'I often feel like my emotions are "too much" or inappropriate.', category: 'shame' },
-      { id: 10, text: 'I find it hard to set boundaries with people.', category: 'betrayal' },
-      { id: 11, text: 'I worry that if people really knew me, they would leave.', category: 'abandonment' },
-      { id: 12, text: 'I feel empty or numb much of the time.', category: 'neglect' },
-      { id: 13, text: 'I constantly seek reassurance from others.', category: 'rejection' },
-      { id: 14, text: 'I feel a deep sense of unworthiness.', category: 'shame' },
-      { id: 15, text: 'I become hypervigilant in relationships, watching for signs of trouble.', category: 'betrayal' },
-      { id: 16, text: 'I struggle to identify or express my own needs.', category: 'neglect' },
-      { id: 17, text: 'I cling to relationships even when they are unhealthy.', category: 'abandonment' },
-      { id: 18, text: 'I feel I need to earn love through achievement or caretaking.', category: 'rejection' },
-      { id: 19, text: 'I feel uncomfortable receiving compliments or praise.', category: 'shame' },
-      { id: 20, text: 'I test people to see if they will stay or abandon me.', category: 'betrayal' }
+      { id: 2, text: 'When I am alone, I feel a deep, hollow sense of panic or emptiness.', category: 'abandonment' },
+      { id: 3, text: 'I cling to relationships even when they are unhealthy, because being alone feels worse.', category: 'abandonment' },
+      { id: 4, text: 'I frequently scan others\' faces or tones for signs that they are pulling away from me.', category: 'abandonment' },
+      { id: 5, text: 'I worry that if people really knew me, they would leave.', category: 'abandonment' },
+      { id: 6, text: 'I feel fundamentally flawed, as if there is something wrong with me at my core.', category: 'shame' },
+      { id: 7, text: 'I am extremely hard on myself when I make mistakes \u2014 I don\u2019t just feel guilt, I feel shame.', category: 'shame' },
+      { id: 8, text: 'I feel like I have to hide parts of myself to be accepted.', category: 'shame' },
+      { id: 9, text: 'I constantly apologize, even for taking up space or having basic needs.', category: 'shame' },
+      { id: 10, text: 'I feel uncomfortable receiving compliments; a part of me believes they are fake or undeserved.', category: 'shame' },
+      { id: 11, text: 'I struggle to ask for help, even when I really need it.', category: 'neglect' },
+      { id: 12, text: 'I feel like my needs don\u2019t matter as much as others\'.', category: 'neglect' },
+      { id: 13, text: 'I struggle to identify what I want or need; I am much better at knowing what others need.', category: 'neglect' },
+      { id: 14, text: 'I often feel like I am on the outside looking in, disconnected from the warmth others share.', category: 'neglect' },
+      { id: 15, text: 'I feel empty or numb much of the time.', category: 'neglect' },
+      { id: 16, text: 'I find it nearly impossible to trust that people are who they say they are.', category: 'betrayal' },
+      { id: 17, text: 'I become hypervigilant in relationships, always waiting for the "other shoe to drop."', category: 'betrayal' },
+      { id: 18, text: 'Vulnerability feels dangerous; showing emotion feels like handing someone a weapon.', category: 'betrayal' },
+      { id: 19, text: 'I need to be in control of my environment at all times to feel safe.', category: 'betrayal' },
+      { id: 20, text: 'I find it hard to set boundaries, or I set them too rigidly to protect myself.', category: 'betrayal' },
+      { id: 21, text: 'I feel uncomfortable being the center of attention.', category: 'rejection' },
+      { id: 22, text: 'I constantly seek reassurance from others that I am wanted or valued.', category: 'rejection' },
+      { id: 23, text: 'I feel I need to earn love through achievement or caretaking.', category: 'rejection' },
+      { id: 24, text: 'I avoid getting too attached to people or things because I expect to be pushed away.', category: 'rejection' },
+      { id: 25, text: 'I feel a deep sense of unworthiness, as if I am not good enough to be chosen.', category: 'rejection' }
     ]
   },
   {
@@ -183,6 +195,7 @@ export default function Assessments() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [addedParts, setAddedParts] = useState({});
+  const [protectorAnswers, setProtectorAnswers] = useState({});
 
   useEffect(() => {
     loadSavedResults();
@@ -242,11 +255,24 @@ export default function Assessments() {
     const sorted = Object.entries(categoryScores)
       .sort((a, b) => b[1].average - a[1].average);
 
+    const protectorPatterns = {};
+    if (assessment.protectorQuestions) {
+      assessment.protectorQuestions.forEach(pq => {
+        if (protectorAnswers[pq.category]) {
+          protectorPatterns[pq.category] = {
+            answer: protectorAnswers[pq.category],
+            protectorType: pq.protectorType
+          };
+        }
+      });
+    }
+
     return {
       scores: categoryScores,
       ranked: sorted,
       primary: sorted[0]?.[0],
       secondary: sorted[1]?.[0],
+      protectorPatterns,
       completedAt: new Date().toISOString(),
       answers: { ...answers }
     };
@@ -282,9 +308,11 @@ export default function Assessments() {
               shame_score: results.scores.shame?.average || 0,
               neglect_score: results.scores.neglect?.average || 0,
               betrayal_score: results.scores.betrayal?.average || 0,
+              rejection_score: results.scores.rejection?.average || 0,
               primary_wound: results.primary,
               secondary_wound: results.secondary,
-              responses: results.answers,
+              answers: results.answers,
+              personalization_data: { protectorPatterns: results.protectorPatterns || {} },
               created_at: new Date().toISOString()
             });
         }
@@ -310,6 +338,7 @@ export default function Assessments() {
   const handleRetake = (assessmentId) => {
     setActiveAssessment(assessmentId);
     setAnswers({});
+    setProtectorAnswers({});
     setShowResults(false);
   };
 
@@ -466,6 +495,28 @@ export default function Assessments() {
                 <p>Your results highlight which inner child wounds may be most active in your life right now. Higher scores indicate areas where protective patterns have formed around early experiences.</p>
                 <p>Your <strong>primary wound</strong> ({assessment.categories[results.primary]?.label}) is likely a core theme in your healing journey. Many of your protective parts may have formed in response to this wound.</p>
                 <p>Remember: These wounds are not permanent. With IFS work, you can unburden the exiles carrying these wounds and transform the protective parts guarding them.</p>
+              </div>
+            )}
+            {activeAssessment === 'wounds' && results.protectorPatterns && Object.keys(results.protectorPatterns).some(k => results.protectorPatterns[k]?.answer === 'Yes') && (
+              <div className={`mt-6 p-5 rounded-xl ${theme.isDark ? 'bg-amber-900/20 border border-amber-800/30' : 'bg-amber-50 border border-amber-200'}`}>
+                <h4 className={`font-bold mb-3 flex items-center gap-2 ${theme.isDark ? 'text-amber-400' : 'text-amber-800'}`}>
+                  <Shield className="w-5 h-5" />
+                  Your Protector Patterns
+                </h4>
+                <div className="space-y-2">
+                  {Object.entries(results.protectorPatterns)
+                    .filter(([_, val]) => val.answer === 'Yes')
+                    .map(([category, val]) => (
+                      <div key={category} className={`flex items-center gap-2 text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-700'}`}>
+                        <CheckCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                        <span><strong>{assessment.categories[category]?.label}:</strong> {val.protectorType}</span>
+                      </div>
+                    ))
+                  }
+                </div>
+                <p className={`text-xs mt-3 ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                  These protector parts formed to keep you safe from the wounds they guard. In IFS, we approach them with gratitude before asking them to step back.
+                </p>
               </div>
             )}
             {activeAssessment === 'parts' && (
@@ -714,9 +765,50 @@ export default function Assessments() {
             ))}
           </div>
 
+          {assessment.protectorQuestions && allAnswered && (
+            <div className={`${theme.cardBg} rounded-2xl p-6 mb-8 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'}`}>
+              <h3 className={`text-lg font-bold mb-2 ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+                <Shield className="w-5 h-5 inline mr-2 text-amber-600" />
+                Protector Check (Optional)
+              </h3>
+              <p className={`text-sm mb-4 ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                In IFS, protective parts form in response to wounds. These optional questions help identify which protector patterns may be active in your system.
+              </p>
+              <div className="space-y-4">
+                {assessment.protectorQuestions.map((pq) => (
+                  <div key={pq.category} className={`p-4 rounded-xl ${theme.isDark ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                    <p className={`font-medium mb-3 ${theme.isDark ? 'text-white' : 'text-gray-800'}`}>{pq.text}</p>
+                    <div className="flex gap-3">
+                      {['Yes', 'No'].map(val => (
+                        <button
+                          key={val}
+                          onClick={() => setProtectorAnswers(prev => ({ ...prev, [pq.category]: val }))}
+                          className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+                            protectorAnswers[pq.category] === val
+                              ? 'bg-amber-600 text-white shadow-md'
+                              : theme.isDark
+                                ? 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                          }`}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                    </div>
+                    {protectorAnswers[pq.category] === 'Yes' && (
+                      <p className={`mt-2 text-xs ${theme.isDark ? 'text-amber-400' : 'text-amber-700'}`}>
+                        Protector pattern: {pq.protectorType}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-center gap-4 pb-8">
             <button
-              onClick={() => setAnswers({})}
+              onClick={() => { setAnswers({}); setProtectorAnswers({}); }}
               className={`px-6 py-3 rounded-xl font-medium ${theme.isDark ? 'bg-slate-700 text-white' : 'bg-white text-gray-700'} border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'}`}
             >
               <RotateCcw className="w-4 h-4 inline mr-2" />
@@ -780,7 +872,7 @@ export default function Assessments() {
                 <div className="p-6">
                   <div className={`flex items-center gap-2 mb-4 text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
                     <Clock className="w-4 h-4" />
-                    <span>{assessment.questions.length} questions · ~5 min</span>
+                    <span>{assessment.questions.length} questions{assessment.protectorQuestions ? ` + ${assessment.protectorQuestions.length} optional` : ''} · ~{assessment.questions.length > 20 ? '8' : '5'} min</span>
                   </div>
 
                   {hasResults && (

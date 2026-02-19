@@ -55,6 +55,19 @@ class AICurriculumPersonalizer {
           "Practice healthy vulnerability",
           "Heal trauma responses"
         ]
+      },
+      rejection: {
+        name: "Rejection (Unwanted Child)",
+        focus: ["belonging work", "self-worth cultivation", "authentic expression", "social confidence"],
+        activities: ["belonging meditation", "worthiness affirmations", "authentic expression exercises"],
+        modules: ["inner-child-connection", "self-worth-building", "authentic-expression"],
+        healingGoals: [
+          "Cultivate sense of belonging",
+          "Build unconditional self-worth",
+          "Express authentic self safely",
+          "Release need to earn love",
+          "Heal fear of rejection"
+        ]
       }
     };
   }
@@ -362,6 +375,11 @@ class AICurriculumPersonalizer {
         'inner-child-connection': 'Connecting with Your Terrified Child',
         'safety-regulation': 'Establishing Internal Safety',
         'trust-rebuilding': 'Rebuilding Trust Capacity'
+      },
+      rejection: {
+        'inner-child-connection': 'Meeting Your Unwanted Child',
+        'self-worth-building': 'Building Unconditional Self-Worth',
+        'authentic-expression': 'Expressing Your Authentic Self'
       }
     };
     return titles[woundId]?.[moduleId] || 'Personalized Healing Module';
@@ -388,6 +406,11 @@ class AICurriculumPersonalizer {
         'inner-child-connection': 'Create safety for the part of you that has been hurt by betrayal.',
         'safety-regulation': 'Learn techniques to regulate fear and create internal safety.',
         'trust-rebuilding': 'Gradually rebuild your capacity to trust yourself and others.'
+      },
+      rejection: {
+        'inner-child-connection': 'Gently meet the part of you that fears being pushed away and offer it belonging.',
+        'self-worth-building': 'Cultivate an unshakable sense of your own worth and value.',
+        'authentic-expression': 'Learn to express your true self without fear of judgment.'
       }
     };
     return descriptions[woundId]?.[moduleId] || 'Personalized healing module for your specific wound pattern.';
@@ -403,7 +426,9 @@ class AICurriculumPersonalizer {
       'needs-identification': 25,
       'self-advocacy-skills': 35,
       'safety-regulation': 30,
-      'trust-rebuilding': 35
+      'trust-rebuilding': 35,
+      'self-worth-building': 30,
+      'authentic-expression': 35
     };
     return baseTimes[moduleId] || 30;
   }
@@ -422,7 +447,8 @@ class AICurriculumPersonalizer {
       abandonment: ["Gentle attachment exercises", "Safety building", "Gradual independence work"],
       shame: ["Compassion-focused practices", "Inner critic transformation", "Worthiness building"],
       neglect: ["Needs identification", "Self-care practices", "Visibility exercises"],
-      betrayal: ["Safety protocols", "Trust building", "Fear regulation"]
+      betrayal: ["Safety protocols", "Trust building", "Fear regulation"],
+      rejection: ["Belonging exercises", "Self-worth affirmations", "Authentic expression practice"]
     };
     return adaptations[woundId] || ["Standard healing exercises"];
   }
@@ -452,7 +478,8 @@ class AICurriculumPersonalizer {
       abandonment: ["grounding", "attachment", "safety", "boundary"],
       shame: ["compassion", "inner critic", "worthiness", "self-acceptance"],
       neglect: ["needs identification", "self-care", "expression", "advocacy"],
-      betrayal: ["safety", "trust", "fear regulation", "vulnerability"]
+      betrayal: ["safety", "trust", "fear regulation", "vulnerability"],
+      rejection: ["belonging", "self-worth", "authentic expression", "social confidence"]
     };
     return types[woundId] || ["general healing"];
   }
@@ -462,7 +489,8 @@ class AICurriculumPersonalizer {
       abandonment: "May trigger fears of being alone - ensure support is available",
       shame: "May bring up difficult emotions - practice extra self-compassion",
       neglect: "May feel overwhelming at first - start small and build gradually",
-      betrayal: "May activate fear responses - maintain safety protocols"
+      betrayal: "May activate fear responses - maintain safety protocols",
+      rejection: "May trigger feelings of not belonging - remind yourself you are welcome here"
     };
     return warnings[woundId] || "Proceed with self-awareness and compassion";
   }
@@ -483,7 +511,8 @@ class AICurriculumPersonalizer {
       abandonment: ["Advanced attachment work", "Deep safety protocols", "Complex trauma integration"],
       shame: ["Deep shame release", "Inner critic transformation", "Core worthiness work"],
       neglect: ["Advanced needs work", "Deep self-advocacy", "Expression therapy"],
-      betrayal: ["Advanced trauma release", "Deep trust building", "Complex fear regulation"]
+      betrayal: ["Advanced trauma release", "Deep trust building", "Complex fear regulation"],
+      rejection: ["Deep belonging work", "Core worth reclamation", "Authentic self integration"]
     };
     return techniques[woundId] || ["Advanced healing techniques"];
   }
@@ -493,7 +522,8 @@ class AICurriculumPersonalizer {
       abandonment: "Daily attachment check-ins, weekly self-soothing practice",
       shame: "Daily compassion practice, weekly inner critic dialogue",
       neglect: "Daily needs check, weekly self-care routine",
-      betrayal: "Daily safety check, weekly trust practice"
+      betrayal: "Daily safety check, weekly trust practice",
+      rejection: "Daily belonging affirmations, weekly authentic expression practice"
     };
     return practices[woundId] || "Daily healing practice";
   }

@@ -15,7 +15,8 @@ const woundColorMap = {
   abandonment: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
   shame: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
   neglect: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
-  betrayal: { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' }
+  betrayal: { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' },
+  rejection: { bg: 'bg-rose-100', text: 'text-rose-700', dot: 'bg-rose-500' }
 };
 
 const riskColors = {
