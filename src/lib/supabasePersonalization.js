@@ -176,6 +176,9 @@ export const clientAuth = {
    * @returns {Promise<Object|null>} Authentication result if token found, null otherwise
    */
   async handleTokenFromURL() {
+    if (window.location.pathname === '/sso/callback') {
+      return null;
+    }
     const token = tokenAuth.extractTokenFromURL();
     
     if (!token) {

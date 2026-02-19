@@ -76,7 +76,7 @@ class TokenAuth {
   cleanTokenFromURL() {
     const url = new URL(window.location);
     url.searchParams.delete('token');
-    const cleanURL = url.toString();
+    const cleanURL = url.pathname + url.search + url.hash;
     window.history.replaceState({}, document.title, cleanURL);
   }
 
