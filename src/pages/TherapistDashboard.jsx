@@ -144,7 +144,7 @@ const TherapistDashboard = () => {
   const [clientActivities, setClientActivities] = useState({});
 
   const [activeAction, setActiveAction] = useState(null);
-  const [newClientForm, setNewClientForm] = useState({ name: '', email: '', phone: '' });
+  const [newClientForm, setNewClientForm] = useState({ name: '', email: '', phone: '', pin: '' });
   const [newClientResult, setNewClientResult] = useState(null);
   const [newClientLoading, setNewClientLoading] = useState(false);
   const [reminderForm, setReminderForm] = useState({ clientId: '', type: 'session', message: '' });
@@ -481,11 +481,32 @@ const TherapistDashboard = () => {
     if (!newClientForm.name.trim()) return;
     setNewClientLoading(true);
     try {
-      const pin = await generateUniquePIN();
-      if (!pin) {
-        setNewClientResult({ error: 'Could not generate a unique PIN. Please try again.' });
-        setNewClientLoading(false);
-        return;
+      let pin;
+      if (newClientForm.pin.trim()) {
+        const customPin = newClientForm.pin.trim();
+        if (!/^\d{6}$/.test(customPin)) {
+          setNewClientResult({ error: 'PIN must be exactly 6 digits.' });
+          setNewClientLoading(false);
+          return;
+        }
+        const { data: existing } = await supabase
+          .from('ifs_clients')
+          .select('id')
+          .eq('pin', customPin)
+          .limit(1);
+        if (existing && existing.length > 0) {
+          setNewClientResult({ error: 'That PIN is already in use. Please choose a different one.' });
+          setNewClientLoading(false);
+          return;
+        }
+        pin = customPin;
+      } else {
+        pin = await generateUniquePIN();
+        if (!pin) {
+          setNewClientResult({ error: 'Could not generate a unique PIN. Please try again.' });
+          setNewClientLoading(false);
+          return;
+        }
       }
       const { data, error } = await supabase
         .from('ifs_clients')
@@ -1175,7 +1196,7 @@ const TherapistDashboard = () => {
                     onClick={() => {
                       setActiveAction(action.id);
                       if (action.id === 'create-client') {
-                        setNewClientForm({ name: '', email: '', phone: '' });
+                        setNewClientForm({ name: '', email: '', phone: '', pin: '' });
                         setNewClientResult(null);
                       }
                       if (action.id === 'send-reminder') {
@@ -1214,7 +1235,7 @@ const TherapistDashboard = () => {
                     </div>
                     <div>
                       <h2 className={`text-lg font-semibold ${textPrimary}`}>Create New Client</h2>
-                      <p className={`text-sm ${textSecondary}`}>A unique 6-digit PIN will be generated automatically</p>
+                      <p className={`text-sm ${textSecondary}`}>Choose a PIN or leave it blank to auto-generate one</p>
                     </div>
                   </div>
 
@@ -1239,7 +1260,7 @@ const TherapistDashboard = () => {
                         </div>
                       </div>
                       <button
-                        onClick={() => { setNewClientResult(null); setNewClientForm({ name: '', email: '', phone: '' }); }}
+                        onClick={() => { setNewClientResult(null); setNewClientForm({ name: '', email: '', phone: '', pin: '' }); }}
                         className="w-full py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         Create Another Client
@@ -1256,6 +1277,22 @@ const TherapistDashboard = () => {
                           placeholder="Enter client's full name"
                           className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-blue-500 outline-none`}
                         />
+                      </div>
+                      <div>
+                        <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>PIN Number *</label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          value={newClientForm.pin}
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            setNewClientForm(prev => ({ ...prev, pin: val }));
+                          }}
+                          placeholder="Enter 6-digit PIN"
+                          className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-blue-500 outline-none font-mono text-lg tracking-widest`}
+                        />
+                        <p className={`text-xs ${textMuted} mt-1`}>Choose a 6-digit PIN for this client to use when logging in. Leave blank to auto-generate one.</p>
                       </div>
                       <div>
                         <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Email (optional)</label>
@@ -1288,9 +1325,9 @@ const TherapistDashboard = () => {
                         className="w-full py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
                         {newClientLoading ? (
-                          <><RefreshCw className="w-4 h-4 animate-spin" /> Generating PIN...</>
+                          <><RefreshCw className="w-4 h-4 animate-spin" /> Creating Client...</>
                         ) : (
-                          <><Plus className="w-4 h-4" /> Create Client & Generate PIN</>
+                          <><Plus className="w-4 h-4" /> Create Client</>
                         )}
                       </button>
                     </div>
