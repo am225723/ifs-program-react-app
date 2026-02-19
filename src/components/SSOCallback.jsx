@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 
 function base64UrlDecode(str) {
   str = str.replace(/-/g, '+').replace(/_/g, '/');
@@ -38,14 +37,28 @@ async function verifyJWT(token, secret) {
   return payload;
 }
 
+function extractSSOToken() {
+  const searchParams = new URLSearchParams(window.location.search);
+  const fromSearch = searchParams.get('sso_token');
+  if (fromSearch) return fromSearch;
+
+  const fullPath = window.location.pathname + window.location.search + window.location.hash;
+  const match = fullPath.match(/[?&%3F]sso_token[=]([^&%26#]+)/i) ||
+                decodeURIComponent(fullPath).match(/[?&]sso_token=([^&#]+)/);
+  if (match) return decodeURIComponent(match[1]);
+
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  return hashParams.get('sso_token');
+}
+
 export default function SSOCallback({ onLogin }) {
-  const [searchParams] = useSearchParams();
   const [status, setStatus] = useState('Verifying your login...');
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const handleSSO = async () => {
-      const token = searchParams.get('sso_token');
+      const token = extractSSOToken();
+      console.log('SSO token extracted:', token ? 'found' : 'not found');
       if (!token) {
         setError('No SSO token provided');
         return;
@@ -74,7 +87,7 @@ export default function SSOCallback({ onLogin }) {
     };
 
     handleSSO();
-  }, [searchParams, onLogin]);
+  }, [onLogin]);
 
   if (error) {
     return (

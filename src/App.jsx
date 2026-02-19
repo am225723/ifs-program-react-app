@@ -151,11 +151,15 @@ function App() {
 
 function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout }) {
   const { theme } = useTheme();
+  const location = useLocation();
   const bgClass = isAuthenticated ? `bg-gradient-to-br ${theme.primary}` : '';
 
   return (
     <div className={`min-h-screen ${bgClass}`}>
       {!isAuthenticated ? (
+        location.pathname.startsWith('/sso/callback') ? (
+          <SSOCallback onLogin={handleLogin} />
+        ) : (
         <Routes>
           <Route path="/" element={<ClientPINLogin onLogin={handleLogin} />} />
           <Route path="/sso/callback" element={<SSOCallback onLogin={handleLogin} />} />
@@ -164,6 +168,7 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
           <Route path="/auth-debug" element={<AuthDebug />} />
           <Route path="*" element={<ClientPINLogin onLogin={handleLogin} />} />
         </Routes>
+        )
       ) : (
         <>
           <header className={`sticky top-0 z-50 backdrop-blur-lg border-b shadow-sm ${theme.isDark ? 'bg-slate-900/80 border-slate-700/50' : 'bg-white/80 border-gray-200/50'}`}>

@@ -4,6 +4,8 @@
 This is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It features PIN-based authentication, personalized curriculum delivery based on child wound assessment results, and comprehensive healing exercises.
 
 ## Recent Changes (February 2026)
+- Fixed SSO callback routing: Replit proxy URL-encodes query params into pathname (`/sso/callback%3Fsso_token=X`), so App.jsx now checks `location.pathname.startsWith('/sso/callback')` before Routes to bypass React Router matching; SSOCallback uses `extractSSOToken()` to parse token from encoded paths
+- tokenAuth.js `cleanTokenFromURL` uses `startsWith` instead of strict equality for SSO path check
 - Fixed dark mode text visibility: Home page cards (Recommendations, Assessments, Healing Tools, IFS Principles) now use dark backgrounds in dark mode instead of invisible light text on light bg
 - Journal entries now save to Supabase (ifs_journal_entries table) with localStorage fallback
 - Journal streak calculation is real (counts consecutive days with entries from today backward)
