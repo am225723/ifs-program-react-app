@@ -5,7 +5,8 @@ import {
   Clock, CheckCircle, AlertTriangle, Activity, Heart, Shield,
   ChevronRight, Search, Filter, Plus, Eye, BarChart3, Sparkles,
   BookOpen, ChevronDown, ChevronUp, MessageCircle, Flag, Lightbulb,
-  Play, Target, X, Copy, Download, ArrowLeft, RefreshCw
+  Play, Target, X, Copy, Download, ArrowLeft, RefreshCw,
+  Award, Flame, Star, Zap, Trophy, Crown, Gem
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
@@ -53,6 +54,13 @@ const sessionPrepByWound = {
     'Validate the neglect experience without pushing',
     'Consider grounding exercises before parts work',
     'Build rapport before deeper wound exploration'
+  ],
+  rejection: [
+    'Validate belonging — rejection wounds create deep "unwanted" feelings',
+    'Watch for people-pleasing protectors trying to earn acceptance',
+    'Explore fear of authentic self-expression gently',
+    'Address the exile that believes they are inherently unwanted',
+    'Build unconditional self-worth separate from others\' approval'
   ]
 };
 
@@ -143,6 +151,7 @@ const TherapistDashboard = () => {
   const [clientInsights, setClientInsights] = useState(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [clientActivities, setClientActivities] = useState({});
+  const [clientGamification, setClientGamification] = useState({});
 
   const [activeAction, setActiveAction] = useState(null);
   const [newClientForm, setNewClientForm] = useState({ name: '', email: '', phone: '', pin: '' });
@@ -182,7 +191,8 @@ const TherapistDashboard = () => {
         { data: assessments },
         { data: progressRows },
         { data: journalRows },
-        { data: activityRows }
+        { data: activityRows },
+        { data: gamificationRows }
       ] = await Promise.all([
         supabase
           .from('ifs_assessment_results')
@@ -201,6 +211,10 @@ const TherapistDashboard = () => {
         supabase
           .from('ifs_therapy_activity_progress')
           .select('id, client_id, activity_id, completed')
+          .in('client_id', clientIds),
+        supabase
+          .from('ifs_gamification')
+          .select('client_id, xp, level, badges, streak_current, streak_longest, last_login_date')
           .in('client_id', clientIds)
       ]);
 
@@ -229,6 +243,12 @@ const TherapistDashboard = () => {
       });
       setClientActivities(activitiesByClient);
 
+      const gamificationByClient = {};
+      (gamificationRows || []).forEach(g => {
+        gamificationByClient[g.client_id] = g;
+      });
+      setClientGamification(gamificationByClient);
+
       const enrichedClients = clientList.map(c => {
         const clientAssessments = assessmentsByClient[c.id] || [];
         const latestAssessment = clientAssessments[0];
@@ -243,6 +263,7 @@ const TherapistDashboard = () => {
         const modulesCompleted = completedModules.size;
         const progress = TOTAL_MODULES > 0 ? Math.round((modulesCompleted / TOTAL_MODULES) * 100) : 0;
 
+        const gamData = gamificationByClient[c.id];
         return {
           id: c.id,
           name: c.name,
@@ -256,7 +277,12 @@ const TherapistDashboard = () => {
           journalEntries: clientJournals.length,
           joinDate: c.created_at,
           therapyActivities: (activitiesByClient[c.id] || []).filter(a => a.completed).length,
-          totalActivities: (activitiesByClient[c.id] || []).length
+          totalActivities: (activitiesByClient[c.id] || []).length,
+          xp: gamData?.xp || 0,
+          level: gamData?.level || 1,
+          streak: gamData?.streak_current || 0,
+          streakLongest: gamData?.streak_longest || 0,
+          badges: gamData?.badges || {}
         };
       });
 
@@ -618,7 +644,7 @@ const TherapistDashboard = () => {
 
   const getGroupAnalytics = () => {
     if (clients.length === 0) return null;
-    const woundCounts = { abandonment: 0, shame: 0, neglect: 0, betrayal: 0, unknown: 0 };
+    const woundCounts = { abandonment: 0, shame: 0, neglect: 0, betrayal: 0, rejection: 0, unknown: 0 };
     const riskCounts = { low: 0, medium: 0, high: 0 };
     let totalProgress = 0;
     let totalModules = 0;
@@ -736,13 +762,31 @@ const TherapistDashboard = () => {
   };
 
   const isDark = theme.isDark;
-  const cardBg = isDark ? 'bg-slate-800/90' : 'bg-white';
-  const cardBorder = isDark ? 'border-slate-700' : 'border-gray-200';
+  const cardBg = isDark ? 'bg-slate-800/90' : 'bg-white/80 backdrop-blur-sm';
+  const cardBorder = isDark ? 'border-slate-700/50' : 'border-gray-200/60';
   const textPrimary = isDark ? 'text-slate-100' : 'text-gray-900';
-  const textSecondary = isDark ? 'text-slate-400' : 'text-gray-500';
+  const textSecondary = isDark ? 'text-slate-400' : 'text-gray-600';
   const textMuted = isDark ? 'text-slate-500' : 'text-gray-400';
   const inputBg = isDark ? 'bg-slate-700 border-slate-600 text-slate-100' : 'bg-white border-gray-300 text-gray-900';
   const hoverBg = isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-50';
+
+  const glowStyles = {
+    blue: isDark ? 'shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/30' : 'shadow-[0_0_20px_rgba(59,130,246,0.1)] border-blue-200',
+    emerald: isDark ? 'shadow-[0_0_15px_rgba(16,185,129,0.15)] border-emerald-500/30' : 'shadow-[0_0_20px_rgba(16,185,129,0.1)] border-emerald-200',
+    amber: isDark ? 'shadow-[0_0_15px_rgba(245,158,11,0.15)] border-amber-500/30' : 'shadow-[0_0_20px_rgba(245,158,11,0.1)] border-amber-200',
+    purple: isDark ? 'shadow-[0_0_15px_rgba(139,92,246,0.15)] border-purple-500/30' : 'shadow-[0_0_20px_rgba(139,92,246,0.1)] border-purple-200',
+    rose: isDark ? 'shadow-[0_0_15px_rgba(244,63,94,0.15)] border-rose-500/30' : 'shadow-[0_0_20px_rgba(244,63,94,0.1)] border-rose-200',
+  };
+
+  const getWoundGlow = (wound) => {
+    const map = { abandonment: 'blue', shame: 'purple', neglect: 'amber', betrayal: 'rose', rejection: 'rose' };
+    return glowStyles[map[wound] || 'amber'];
+  };
+
+  const getBadgeCount = (badges) => {
+    if (!badges || typeof badges !== 'object') return 0;
+    return Object.values(badges).filter(b => b && (b.unlocked || b.earned)).length;
+  };
 
   if (loading) {
     return (
@@ -762,32 +806,39 @@ const TherapistDashboard = () => {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className={`text-2xl sm:text-3xl font-bold ${textPrimary}`}>Therapist Dashboard</h1>
-            <p className={`mt-1 ${textSecondary}`}>Monitor client progress and manage sessions</p>
+            <h1 className={`text-3xl sm:text-4xl font-extrabold ${textPrimary} tracking-tight`}>Therapist Dashboard</h1>
+            <p className={`mt-1.5 text-sm ${textSecondary}`}>Monitor client progress, review responses, and manage sessions</p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-sm ${textMuted}`}>Last updated: {formatDate(new Date().toISOString())}</span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={loadDashboardData}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${cardBorder} ${cardBg} ${textSecondary} text-sm font-medium hover:border-amber-300 transition-all`}
+            >
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
+            <span className={`text-xs ${textMuted}`}>{formatDate(new Date().toISOString())}</span>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Clients', value: stats.totalClients, icon: Users, color: 'from-blue-500 to-blue-600' },
-          { label: 'Active Clients', value: stats.activeSessions, icon: Calendar, color: 'from-emerald-500 to-emerald-600' },
-          { label: 'Assessments Done', value: stats.assessmentsCompleted, icon: CheckCircle, color: 'from-amber-500 to-amber-600' },
-          { label: 'Avg Progress', value: `${stats.avgProgress}%`, icon: TrendingUp, color: 'from-amber-500 to-amber-600' }
+          { label: 'Total Clients', value: stats.totalClients, icon: Users, color: 'from-blue-500 to-blue-600', glow: 'blue' },
+          { label: 'Active Clients', value: stats.activeSessions, icon: Activity, color: 'from-emerald-500 to-emerald-600', glow: 'emerald' },
+          { label: 'Assessments Done', value: stats.assessmentsCompleted, icon: Target, color: 'from-amber-500 to-amber-600', glow: 'amber' },
+          { label: 'Avg Progress', value: `${stats.avgProgress}%`, icon: TrendingUp, color: 'from-purple-500 to-purple-600', glow: 'purple' }
         ].map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className={`${cardBg} rounded-xl border ${cardBorder} p-4 sm:p-5`}>
+            <div key={stat.label} className={`${cardBg} rounded-2xl border ${glowStyles[stat.glow]} p-5 transition-all duration-300 hover:scale-[1.02]`}>
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center flex-shrink-0`}>
-                  <Icon className="w-5 h-5 text-white" />
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <p className={`text-xs sm:text-sm ${textSecondary} truncate`}>{stat.label}</p>
-                  <p className={`text-xl sm:text-2xl font-bold ${textPrimary}`}>{stat.value}</p>
+                  <p className={`text-xs font-medium uppercase tracking-wider ${textMuted}`}>{stat.label}</p>
+                  <p className={`text-2xl sm:text-3xl font-extrabold ${textPrimary} tracking-tight`}>{stat.value}</p>
                 </div>
               </div>
             </div>
@@ -853,6 +904,7 @@ const TherapistDashboard = () => {
                 <option value="shame">Shame</option>
                 <option value="neglect">Neglect</option>
                 <option value="betrayal">Betrayal</option>
+                <option value="rejection">Rejection</option>
               </select>
               <select
                 value={filterRisk}
@@ -872,23 +924,31 @@ const TherapistDashboard = () => {
               const wound = woundColorMap[client.primaryWound] || woundColorMap.abandonment;
               const risk = riskColors[client.riskLevel];
               const inactive = daysSince(client.lastActive);
+              const earnedBadges = getBadgeCount(client.badges);
               return (
-                <div key={client.id} className={`${cardBg} rounded-xl border ${cardBorder} p-4 sm:p-5 transition-all hover:shadow-lg`}>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-emerald-400 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                        {client.name.charAt(0)}
+                <div key={client.id} className={`${cardBg} rounded-2xl border ${getWoundGlow(client.primaryWound)} p-5 transition-all duration-300 hover:scale-[1.005] hover:shadow-xl`}>
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div className="flex items-start gap-4 flex-1 min-w-0">
+                      <div className="relative flex-shrink-0">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg">
+                          {client.name.charAt(0)}
+                        </div>
+                        {client.level > 1 && (
+                          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-white shadow">
+                            {client.level}
+                          </div>
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className={`font-semibold ${textPrimary}`}>{client.name}</h3>
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${risk.bg} ${risk.text}`}>
+                          <h3 className={`font-bold text-lg ${textPrimary} tracking-tight`}>{client.name}</h3>
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${risk.bg} ${risk.text}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${risk.dot}`}></span>
                             {risk.label}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 mt-1 flex-wrap">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${wound.bg} ${wound.text}`}>
+                        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold ${wound.bg} ${wound.text}`}>
                             <Heart className="w-3 h-3" />
                             {client.primaryWound}
                           </span>
@@ -896,45 +956,68 @@ const TherapistDashboard = () => {
                             <Clock className="w-3 h-3" />
                             {inactive === 0 ? 'Active today' : inactive >= 999 ? 'Never active' : `${inactive}d ago`}
                           </span>
+                        </div>
+
+                        <div className="flex items-center gap-4 mt-3 flex-wrap">
+                          <div className="flex items-center gap-1.5">
+                            <Zap className="w-3.5 h-3.5 text-amber-500" />
+                            <span className={`text-xs font-semibold ${textPrimary}`}>{client.xp.toLocaleString()} XP</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Crown className="w-3.5 h-3.5 text-purple-500" />
+                            <span className={`text-xs font-semibold ${textPrimary}`}>Lv.{client.level}</span>
+                          </div>
+                          {client.streak > 0 && (
+                            <div className="flex items-center gap-1.5">
+                              <Flame className="w-3.5 h-3.5 text-orange-500" />
+                              <span className={`text-xs font-semibold ${textPrimary}`}>{client.streak}d streak</span>
+                            </div>
+                          )}
+                          {earnedBadges > 0 && (
+                            <div className="flex items-center gap-1.5">
+                              <Award className="w-3.5 h-3.5 text-emerald-500" />
+                              <span className={`text-xs font-semibold ${textPrimary}`}>{earnedBadges} badges</span>
+                            </div>
+                          )}
                           {client.therapyActivities > 0 && (
-                            <span className={`text-xs ${textMuted} flex items-center gap-1`}>
-                              <Activity className="w-3 h-3" />
-                              {client.therapyActivities} activities done
-                            </span>
+                            <div className="flex items-center gap-1.5">
+                              <Activity className="w-3.5 h-3.5 text-blue-500" />
+                              <span className={`text-xs font-semibold ${textPrimary}`}>{client.therapyActivities} activities</span>
+                            </div>
                           )}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 sm:gap-6">
+                    <div className="flex flex-col items-end gap-3">
                       <div className="flex items-center gap-2">
-                        <div className="w-24 sm:w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="w-28 sm:w-36 h-2.5 bg-gray-200 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all ${
-                              client.progress >= 70 ? 'bg-green-500' : client.progress >= 40 ? 'bg-amber-500' : 'bg-red-400'
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              client.progress >= 70 ? 'bg-gradient-to-r from-green-400 to-emerald-500' : client.progress >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-red-400 to-red-500'
                             }`}
                             style={{ width: `${client.progress}%` }}
                           />
                         </div>
-                        <span className={`text-sm font-semibold ${textPrimary} w-10 text-right`}>{client.progress}%</span>
+                        <span className={`text-sm font-bold ${textPrimary} w-10 text-right`}>{client.progress}%</span>
                       </div>
 
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => { setSelectedInsightClient(client.id); setActiveTab('insights'); }}
-                          className={`p-2 rounded-lg ${hoverBg} ${textSecondary} transition-colors`}
+                          className={`p-2 rounded-xl ${hoverBg} ${textSecondary} transition-all hover:text-amber-500`}
                           title="View Insights"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => { setActiveTab('notes'); setNoteForm(f => ({ ...f, clientId: client.id })); }}
-                          className={`p-2 rounded-lg ${hoverBg} ${textSecondary} transition-colors`}
+                          className={`p-2 rounded-xl ${hoverBg} ${textSecondary} transition-all hover:text-blue-500`}
                           title="Add Note"
                         >
                           <FileText className="w-4 h-4" />
                         </button>
-                        <button className={`p-2 rounded-lg ${hoverBg} ${textSecondary} transition-colors`} title="Schedule">
+                        <button className={`p-2 rounded-xl ${hoverBg} ${textSecondary} transition-all hover:text-emerald-500`} title="Schedule">
                           <Calendar className="w-4 h-4" />
                         </button>
                       </div>
@@ -1067,9 +1150,9 @@ const TherapistDashboard = () => {
       )}
 
       {activeTab === 'progress' && (
-        <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
-          <h2 className={`text-lg font-semibold ${textPrimary} mb-6 flex items-center gap-2`}>
-            <BarChart3 className="w-5 h-5 text-amber-500" />
+        <div className={`${cardBg} rounded-2xl border ${glowStyles.blue} p-6`}>
+          <h2 className={`text-lg font-bold ${textPrimary} mb-6 flex items-center gap-2 tracking-tight`}>
+            <BarChart3 className="w-5 h-5 text-blue-500" />
             Client Progress Overview
           </h2>
 
@@ -1088,14 +1171,14 @@ const TherapistDashboard = () => {
                     <span className={`ml-auto text-sm font-semibold ${textPrimary}`}>{client.progress}%</span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 ml-11">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 ml-11">
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <span className={`text-xs ${textSecondary}`}>Modules</span>
                         <span className={`text-xs font-medium ${textPrimary}`}>{client.modulesCompleted}/{TOTAL_MODULES}</span>
                       </div>
                       <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${(client.modulesCompleted / TOTAL_MODULES) * 100}%` }} />
+                        <div className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all" style={{ width: `${(client.modulesCompleted / TOTAL_MODULES) * 100}%` }} />
                       </div>
                     </div>
                     <div>
@@ -1104,25 +1187,35 @@ const TherapistDashboard = () => {
                         <span className={`text-xs font-medium ${textPrimary}`}>{client.assessmentsTaken}</span>
                       </div>
                       <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${Math.min((client.assessmentsTaken / 5) * 100, 100)}%` }} />
+                        <div className="h-full bg-gradient-to-r from-amber-400 to-amber-600 rounded-full transition-all" style={{ width: `${Math.min((client.assessmentsTaken / 5) * 100, 100)}%` }} />
                       </div>
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs ${textSecondary}`}>Journal Entries</span>
+                        <span className={`text-xs ${textSecondary}`}>Journals</span>
                         <span className={`text-xs font-medium ${textPrimary}`}>{client.journalEntries}</span>
                       </div>
                       <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 rounded-full transition-all" style={{ width: `${Math.min((client.journalEntries / 30) * 100, 100)}%` }} />
+                        <div className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all" style={{ width: `${Math.min((client.journalEntries / 30) * 100, 100)}%` }} />
                       </div>
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs ${textSecondary}`}>Therapy Activities</span>
+                        <span className={`text-xs ${textSecondary}`}>Activities</span>
                         <span className={`text-xs font-medium ${textPrimary}`}>{client.therapyActivities}/{client.totalActivities || 0}</span>
                       </div>
                       <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${client.totalActivities > 0 ? (client.therapyActivities / client.totalActivities) * 100 : 0}%` }} />
+                        <div className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full transition-all" style={{ width: `${client.totalActivities > 0 ? (client.therapyActivities / client.totalActivities) * 100 : 0}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-xs ${textSecondary} flex items-center gap-1`}><Zap className="w-3 h-3 text-amber-500" />XP</span>
+                        <span className={`text-xs font-medium ${textPrimary}`}>{client.xp.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-xs ${textMuted} flex items-center gap-0.5`}><Crown className="w-3 h-3 text-purple-500" />Lv.{client.level}</span>
+                        {client.streak > 0 && <span className={`text-xs ${textMuted} flex items-center gap-0.5`}><Flame className="w-3 h-3 text-orange-500" />{client.streak}d</span>}
                       </div>
                     </div>
                   </div>
@@ -1524,8 +1617,8 @@ const TherapistDashboard = () => {
                                 </div>
                                 <div className={`h-2.5 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-100'}`}>
                                   <div
-                                    className={`h-full rounded-full ${colors.bg.replace('bg-', 'bg-')}`}
-                                    style={{ width: `${pct}%`, backgroundColor: wound === 'abandonment' ? '#3b82f6' : wound === 'shame' ? '#8b5cf6' : wound === 'neglect' ? '#f59e0b' : '#ef4444' }}
+                                    className={`h-full rounded-full`}
+                                    style={{ width: `${pct}%`, backgroundColor: wound === 'abandonment' ? '#3b82f6' : wound === 'shame' ? '#8b5cf6' : wound === 'neglect' ? '#f59e0b' : wound === 'rejection' ? '#f43f5e' : '#ef4444' }}
                                   />
                                 </div>
                               </div>
@@ -1747,17 +1840,19 @@ const TherapistDashboard = () => {
               { type: 'Abandonment', score: assessment.abandonment_score || 0, color: 'blue' },
               { type: 'Shame', score: assessment.shame_score || 0, color: 'purple' },
               { type: 'Neglect', score: assessment.neglect_score || 0, color: 'amber' },
-              { type: 'Betrayal', score: assessment.betrayal_score || 0, color: 'red' }
+              { type: 'Betrayal', score: assessment.betrayal_score || 0, color: 'red' },
+              { type: 'Rejection', score: assessment.rejection_score || 0, color: 'rose' }
             ].sort((a, b) => b.score - a.score) : [];
-            const maxScore = 24;
+            const maxScore = 25;
+            const clientGam = clientGamification[selectedInsightClient];
 
             return (
               <div className="space-y-6">
                 {(assessment || personalization) && (
-                  <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
-                    <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-                      <Sparkles className="w-5 h-5 text-amber-500" />
-                      How Modules Are Personalized for {client?.name}
+                  <div className={`${cardBg} rounded-2xl border ${glowStyles.purple} p-5`}>
+                    <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
+                      <Sparkles className="w-5 h-5 text-purple-500" />
+                      Curriculum Personalization for {client?.name}
                     </h3>
 
                     {assessment && (
@@ -1766,7 +1861,7 @@ const TherapistDashboard = () => {
                           <Target className="w-4 h-4 text-stone-500" />
                           Wound Assessment Scores
                         </h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
                           {woundScores.map(w => (
                             <div key={w.type} className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
                               <div className="flex items-center justify-between mb-2">
@@ -1777,8 +1872,9 @@ const TherapistDashboard = () => {
                                 <div
                                   className={`h-full rounded-full transition-all ${
                                     w.color === 'blue' ? 'bg-blue-500' :
-                                    w.color === 'purple' ? 'bg-amber-500' :
-                                    w.color === 'amber' ? 'bg-amber-500' : 'bg-red-500'
+                                    w.color === 'purple' ? 'bg-purple-500' :
+                                    w.color === 'amber' ? 'bg-amber-500' :
+                                    w.color === 'rose' ? 'bg-rose-500' : 'bg-red-500'
                                   }`}
                                   style={{ width: `${(w.score / maxScore) * 100}%` }}
                                 />
@@ -1820,14 +1916,21 @@ const TherapistDashboard = () => {
                                     <h5 className={`font-medium ${textPrimary} text-sm`}>{mod.title || `Module ${idx + 1}`}</h5>
                                     {mod.personalizedContent?.woundFocus && (
                                       <div className="flex items-center gap-2 mt-1">
-                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                                           mod.personalizedContent.woundFocus.toLowerCase().includes('abandon') ? 'bg-blue-100 text-blue-700' :
-                                          mod.personalizedContent.woundFocus.toLowerCase().includes('shame') ? 'bg-amber-100 text-amber-700' :
+                                          mod.personalizedContent.woundFocus.toLowerCase().includes('shame') ? 'bg-purple-100 text-purple-700' :
                                           mod.personalizedContent.woundFocus.toLowerCase().includes('neglect') ? 'bg-amber-100 text-amber-700' :
+                                          mod.personalizedContent.woundFocus.toLowerCase().includes('reject') ? 'bg-rose-100 text-rose-700' :
                                           'bg-red-100 text-red-700'
                                         }`}>
-                                          Focus: {mod.personalizedContent.woundFocus}
+                                          <span className="flex items-center gap-1"><Target className="w-3 h-3" /> Focus: {mod.personalizedContent.woundFocus}</span>
                                         </span>
+                                      </div>
+                                    )}
+                                    {mod.personalizedContent?.specificChanges && (
+                                      <div className={`mt-2 p-2 rounded-lg ${isDark ? 'bg-purple-900/20 border-purple-800/30' : 'bg-purple-50 border-purple-100'} border`}>
+                                        <p className={`text-xs font-semibold ${isDark ? 'text-purple-300' : 'text-purple-700'} mb-1`}>What Changed:</p>
+                                        <p className={`text-xs ${isDark ? 'text-purple-200' : 'text-purple-600'} leading-relaxed`}>{mod.personalizedContent.specificChanges}</p>
                                       </div>
                                     )}
                                     {mod.personalizedContent?.healingGoals && mod.personalizedContent.healingGoals.length > 0 && (
@@ -1865,42 +1968,72 @@ const TherapistDashboard = () => {
                             ))}
                           </div>
                         ) : (
-                          <div className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
-                            <div className="flex items-start gap-3">
-                              <Sparkles className={`w-5 h-5 ${textMuted} flex-shrink-0 mt-0.5`} />
-                              <div>
-                                <p className={`text-sm ${textSecondary}`}>
-                                  {personalization.primaryWound ? (
-                                    <>Curriculum personalized for <span className="font-semibold">{personalization.primaryWound}</span> wound pattern</>
-                                  ) : 'Personalized curriculum is active for this client'}
-                                </p>
-                                {personalization.woundRanking && (
-                                  <div className="mt-2 flex flex-wrap gap-1.5">
-                                    {personalization.woundRanking.map((wr, i) => (
-                                      <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${
-                                        i === 0 ? 'bg-amber-100 text-amber-700' :
-                                        i === 1 ? 'bg-blue-100 text-blue-700' :
-                                        'bg-gray-100 text-gray-600'
-                                      }`}>
-                                        {i + 1}. {wr.type} ({wr.score})
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                                {personalization.focusAreas && (
-                                  <div className="mt-2">
-                                    <p className={`text-xs font-medium ${textSecondary} mb-1`}>Focus Areas:</p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                      {personalization.focusAreas.map((area, i) => (
-                                        <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-slate-600 text-slate-300' : 'bg-gray-100 text-gray-700'}`}>
-                                          {area}
+                          <div className="space-y-3">
+                            <div className={`p-4 rounded-xl border ${isDark ? 'border-purple-800/40 bg-purple-900/15' : 'border-purple-200 bg-purple-50/50'}`}>
+                              <div className="flex items-start gap-3">
+                                <Gem className={`w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5`} />
+                                <div className="flex-1">
+                                  <p className={`text-sm font-semibold ${textPrimary}`}>
+                                    {personalization.primaryWound ? (
+                                      <>Curriculum adapted for <span className="text-purple-600 dark:text-purple-400 capitalize">{personalization.primaryWound}</span> wound pattern</>
+                                    ) : 'Personalized curriculum is active for this client'}
+                                  </p>
+                                  {personalization.woundRanking && (
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                      {personalization.woundRanking.map((wr, i) => (
+                                        <span key={i} className={`text-xs px-2.5 py-1 rounded-lg font-medium ${
+                                          i === 0 ? 'bg-amber-100 text-amber-700' :
+                                          i === 1 ? 'bg-blue-100 text-blue-700' :
+                                          'bg-gray-100 text-gray-600'
+                                        }`}>
+                                          #{i + 1} {wr.type} ({wr.score})
                                         </span>
                                       ))}
                                     </div>
-                                  </div>
-                                )}
+                                  )}
+                                  {personalization.focusAreas && (
+                                    <div className="mt-3">
+                                      <p className={`text-xs font-semibold ${textSecondary} mb-1.5`}>Focus Areas:</p>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {personalization.focusAreas.map((area, i) => (
+                                          <span key={i} className={`text-xs px-2.5 py-1 rounded-lg ${isDark ? 'bg-slate-600 text-slate-300' : 'bg-white border border-gray-200 text-gray-700'}`}>
+                                            {area}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
+
+                            {assessment?.primary_wound && (
+                              <div className={`p-4 rounded-xl border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-white'}`}>
+                                <h5 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                                  <BookOpen className="w-4 h-4 text-amber-500" />
+                                  Specific Curriculum Changes Applied
+                                </h5>
+                                <div className="space-y-3">
+                                  {[
+                                    { mod: 'Module 1: Foundations', change: `Introduction exercises adapted to ${assessment.primary_wound} wound patterns. Parts identification focuses on protectors related to ${assessment.primary_wound} triggers.` },
+                                    { mod: 'Module 2: Deep Dive', change: `Wound exploration prioritizes ${assessment.primary_wound} themes. Reflection questions tailored to ${assessment.primary_wound}-specific childhood experiences and beliefs.` },
+                                    { mod: 'Module 3: Protective System', change: `Protector mapping focused on ${assessment.primary_wound}-related defenses. Activities highlight how managers and firefighters specifically guard ${assessment.primary_wound} exiles.` },
+                                    { mod: 'Module 4: Healing Protocols', change: `Unburdening sequences customized for ${assessment.primary_wound} burdens. Reparenting visualizations address core ${assessment.primary_wound} needs.` },
+                                    { mod: 'Module 5: Advanced Practice', change: `Daily practices include ${assessment.primary_wound}-specific exercises. Long-term maintenance plan addresses ${assessment.primary_wound} trigger management.` }
+                                  ].map((item, i) => (
+                                    <div key={i} className="flex items-start gap-3">
+                                      <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5">
+                                        {i + 1}
+                                      </div>
+                                      <div>
+                                        <p className={`text-xs font-semibold ${textPrimary}`}>{item.mod}</p>
+                                        <p className={`text-xs ${textMuted} mt-0.5 leading-relaxed`}>{item.change}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -1916,9 +2049,61 @@ const TherapistDashboard = () => {
                   </div>
                 )}
 
-                <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
-                  <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-                    <MessageCircle className="w-5 h-5 text-amber-500" />
+                {clientGam && (
+                  <div className={`${cardBg} rounded-2xl border ${glowStyles.amber} p-5`}>
+                    <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
+                      <Trophy className="w-5 h-5 text-amber-500" />
+                      Gamification Progress
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                      {[
+                        { label: 'Total XP', value: (clientGam.xp || 0).toLocaleString(), icon: Zap, color: 'text-amber-500' },
+                        { label: 'Level', value: clientGam.level || 1, icon: Crown, color: 'text-purple-500' },
+                        { label: 'Current Streak', value: `${clientGam.streak_current || 0}d`, icon: Flame, color: 'text-orange-500' },
+                        { label: 'Best Streak', value: `${clientGam.streak_longest || 0}d`, icon: Star, color: 'text-yellow-500' }
+                      ].map(stat => {
+                        const SIcon = stat.icon;
+                        return (
+                          <div key={stat.label} className={`p-3 rounded-xl border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gradient-to-br from-amber-50/50 to-white'}`}>
+                            <SIcon className={`w-5 h-5 ${stat.color} mb-1`} />
+                            <p className={`text-lg font-extrabold ${textPrimary}`}>{stat.value}</p>
+                            <p className={`text-xs ${textMuted}`}>{stat.label}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {clientGam.badges && typeof clientGam.badges === 'object' && Object.keys(clientGam.badges).length > 0 && (
+                      <div>
+                        <p className={`text-sm font-semibold ${textSecondary} mb-2 flex items-center gap-1.5`}>
+                          <Award className="w-4 h-4 text-emerald-500" />
+                          Badges
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(clientGam.badges).map(([key, badge]) => (
+                            <div
+                              key={key}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 border ${
+                                (badge?.unlocked || badge?.earned)
+                                  ? (isDark ? 'bg-emerald-900/30 border-emerald-700 text-emerald-300' : 'bg-emerald-50 border-emerald-200 text-emerald-700')
+                                  : (isDark ? 'bg-slate-700/50 border-slate-600 text-slate-400' : 'bg-gray-100 border-gray-200 text-gray-400')
+                              }`}
+                            >
+                              {(badge?.unlocked || badge?.earned) ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                              {badge?.name || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              {badge?.progress !== undefined && !(badge?.unlocked || badge?.earned) && (
+                                <span className="opacity-70">({badge.progress}/{badge.target || '?'})</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className={`${cardBg} rounded-2xl border ${glowStyles.blue} p-5`}>
+                  <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
+                    <MessageCircle className="w-5 h-5 text-blue-500" />
                     Recent Module Answers
                   </h3>
                   {clientInsights.recentAnswers.length === 0 ? (
@@ -1942,8 +2127,8 @@ const TherapistDashboard = () => {
                 </div>
 
                 {clientInsights.activityProgress.length > 0 && (
-                  <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
-                    <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                  <div className={`${cardBg} rounded-2xl border ${glowStyles.emerald} p-5`}>
+                    <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
                       <Activity className="w-5 h-5 text-emerald-500" />
                       Therapy Activity Progress
                     </h3>
@@ -1968,8 +2153,8 @@ const TherapistDashboard = () => {
                   </div>
                 )}
 
-                <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
-                  <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                <div className={`${cardBg} rounded-2xl border ${glowStyles.amber} p-5`}>
+                  <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
                     <Lightbulb className="w-5 h-5 text-amber-500" />
                     Session Prep
                   </h3>
@@ -1988,9 +2173,9 @@ const TherapistDashboard = () => {
                   </ul>
                 </div>
 
-                <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
-                  <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
-                    <FileText className="w-5 h-5 text-amber-500" />
+                <div className={`${cardBg} rounded-2xl border ${glowStyles.emerald} p-5`}>
+                  <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
+                    <FileText className="w-5 h-5 text-emerald-500" />
                     Therapist Feedback
                   </h3>
                   <p className={`text-sm ${textSecondary} mb-3`}>
