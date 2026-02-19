@@ -20,7 +20,7 @@ const ClientPINLogin = ({ onLogin }) => {
     e.preventDefault();
     
     if (pin.length !== 6) {
-      setError('Please enter a 6-digit PIN');
+      setError('Please enter a 5-digit PIN');
       return;
     }
 

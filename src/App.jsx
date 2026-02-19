@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Settings as SettingsIcon, Home as HomeIcon, BookOpen, ClipboardList, BookHeart, Handshake, LogOut } from 'lucide-react';
 import { useTheme } from './contexts/ThemeContext';
 import ClientPINLogin from './components/ClientPINLogin';
+import SSOCallback from './components/SSOCallback';
 import PINAuthDiagnostic from './components/PINAuthDiagnostic';
 import TestClientCreator from './components/TestClientCreator';
 import Home from './pages/Home';
