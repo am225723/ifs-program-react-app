@@ -106,7 +106,7 @@ const animationStyles = {
 };
 
 export function ThemeProvider({ children }) {
-  const [currentTheme, setCurrentTheme] = useState(themePresets.sanctuary);
+  const [currentTheme, setCurrentTheme] = useState(themePresets.warmth);
   const [animationsEnabled, setAnimationsEnabled] = useState(true);
   const [animationSpeed, setAnimationSpeed] = useState('normal');
   const [prefsLoaded, setPrefsLoaded] = useState(false);

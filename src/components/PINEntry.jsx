@@ -79,21 +79,21 @@ const PINEntry = ({ onSubmit }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-700">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-amber-700 via-emerald-800 to-stone-800">
       <div className="absolute inset-0 bg-black bg-opacity-20"></div>
       
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-4000"></div>
+        <div className="absolute top-20 left-20 w-72 h-72 bg-amber-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-72 h-72 bg-emerald-400 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-orange-300 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-4000"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-md">
         <div className="bg-white/95 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <div className="w-20 h-20 bg-gradient-to-r from-amber-600 to-emerald-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               {success ? (
                 <Shield className="w-10 h-10 text-white" />
               ) : (
@@ -135,8 +135,8 @@ const PINEntry = ({ onSubmit }) => {
                         error
                           ? 'border-red-500 bg-red-50'
                           : pin[index]
-                          ? 'border-purple-600 bg-purple-50 text-purple-600'
-                          : 'border-gray-300 bg-white hover:border-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-200'
+                          ? 'border-amber-600 bg-amber-50 text-amber-700'
+                          : 'border-gray-300 bg-white hover:border-gray-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200'
                       } outline-none`}
                       disabled={isSubmitting}
                     />
@@ -180,7 +180,7 @@ const PINEntry = ({ onSubmit }) => {
                 className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform ${
                   isSubmitting || pin.length !== 6
                     ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 hover:scale-105 hover:shadow-xl'
+                    : 'bg-gradient-to-r from-amber-600 to-emerald-700 text-white hover:from-amber-700 hover:to-emerald-800 hover:scale-105 hover:shadow-xl'
                 }`}
               >
                 {isSubmitting ? (
@@ -194,8 +194,8 @@ const PINEntry = ({ onSubmit }) => {
               </button>
 
               {/* Hint */}
-              <div className="mt-6 p-4 bg-purple-50 rounded-xl border border-purple-200">
-                <p className="text-sm text-purple-700 text-center">
+              <div className="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200">
+                <p className="text-sm text-amber-700 text-center">
                   <span className="font-semibold">Hint:</span> Default PIN is 123456
                 </p>
               </div>

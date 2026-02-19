@@ -56,7 +56,7 @@ function BottomNav() {
     purple: { active: 'text-purple-600', bg: 'bg-purple-100' },
     indigo: { active: 'text-indigo-400', bg: 'bg-indigo-900' },
   };
-  const accent = accentMap[theme.accent] || accentMap.purple;
+  const accent = accentMap[theme.accent] || accentMap.amber;
 
   return (
     <nav className={`fixed bottom-0 left-0 right-0 z-50 backdrop-blur-lg border-t shadow-[0_-2px_10px_rgba(0,0,0,0.06)] ${theme.isDark ? 'bg-slate-900/95 border-slate-700/50' : 'bg-white/95 border-gray-200/50'}`}>
@@ -175,12 +175,10 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
           <header className={`sticky top-0 z-50 backdrop-blur-lg border-b shadow-sm ${theme.isDark ? 'bg-slate-900/80 border-slate-700/50' : 'bg-white/80 border-gray-200/50'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="flex justify-between items-center h-14">
-                    <Link to="/" className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
-                        <span className="text-white text-lg">✦</span>
-                      </div>
-                      <h1 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        IFS Healing
+                    <Link to="/" className="flex items-center gap-2">
+                      <img src="/logo.png" alt="ITS" className="w-9 h-9 rounded-lg object-cover" />
+                      <h1 className="text-base font-bold bg-gradient-to-r from-amber-700 to-emerald-700 bg-clip-text text-transparent leading-tight">
+                        Intrinsic Therapeutic<br/>Solutions
                       </h1>
                     </Link>
                     <div className="flex items-center gap-1">
@@ -188,14 +186,14 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                         <>
                           <Link
                             to="/admin"
-                            className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-purple-400 hover:bg-slate-800' : 'text-gray-500 hover:text-purple-600 hover:bg-purple-50'}`}
+                            className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
                             title="Admin Dashboard"
                           >
                             <ClipboardList className="w-5 h-5" />
                           </Link>
                           <Link
                             to="/therapist-dashboard"
-                            className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-purple-400 hover:bg-slate-800' : 'text-gray-500 hover:text-purple-600 hover:bg-purple-50'}`}
+                            className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
                             title="Therapist Dashboard"
                           >
                             <BookOpen className="w-5 h-5" />
@@ -204,16 +202,16 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                       )}
                       <Link
                         to="/settings"
-                        className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-purple-400 hover:bg-slate-800' : 'text-gray-500 hover:text-purple-600 hover:bg-purple-50'}`}
+                        className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
                         title="Settings"
                       >
                         <SettingsIcon className="w-5 h-5" />
                       </Link>
                       <Link
                         to="/profile"
-                        className={`p-2 rounded-lg transition-all ${theme.isDark ? 'hover:bg-slate-800' : 'hover:bg-purple-50'}`}
+                        className={`p-2 rounded-lg transition-all ${theme.isDark ? 'hover:bg-slate-800' : 'hover:bg-amber-50'}`}
                       >
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-emerald-600 flex items-center justify-center text-white text-xs font-bold">
                           {currentClient?.name?.charAt(0) || '?'}
                         </div>
                       </Link>

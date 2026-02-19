@@ -67,19 +67,17 @@ const ClientPINLogin = ({ onLogin }) => {
 
   // Show PIN login interface
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-purple-100/60 to-indigo-100/50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-stone-100 to-emerald-50/50 flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
-        <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-4000"></div>
+        <div className="absolute top-20 left-20 w-96 h-96 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-emerald-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
+        <div className="absolute bottom-20 left-1/2 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse animation-delay-4000"></div>
       </div>
 
       <div className="relative w-full max-w-md">
         {/* Logo/Branding */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <User className="w-10 h-10 text-purple-500" />
-          </div>
+          <img src="/logo.png" alt="Intrinsic Therapeutic Solutions" className="w-20 h-20 rounded-full object-cover mx-auto mb-4 shadow-lg" />
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Welcome Back
           </h1>
@@ -105,7 +103,7 @@ const ClientPINLogin = ({ onLogin }) => {
                     onClick={() => handlePinBoxClick(index)}
                     className={`w-12 h-14 border-2 rounded-lg flex items-center justify-center text-2xl font-bold cursor-pointer transition-all duration-200 ${
                       pin.length > index
-                        ? 'border-purple-600 bg-purple-50 text-purple-600'
+                        ? 'border-amber-600 bg-amber-50 text-amber-700'
                         : 'border-gray-300 bg-gray-50 text-gray-400'
                     }`}
                   >
@@ -122,7 +120,7 @@ const ClientPINLogin = ({ onLogin }) => {
                 pattern="[0-9]*"
                 value={pin}
                 onChange={handlePinChange}
-                className="w-full text-center text-2xl tracking-widest border-2 border-gray-300 rounded-lg p-3 focus:border-purple-600 focus:outline-none"
+                className="w-full text-center text-2xl tracking-widest border-2 border-gray-300 rounded-lg p-3 focus:border-amber-600 focus:outline-none"
                 placeholder="000000"
                 autoFocus
                 maxLength={6}
@@ -143,7 +141,7 @@ const ClientPINLogin = ({ onLogin }) => {
               disabled={pin.length !== 6 || loading}
               className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center ${
                 pin.length === 6 && !loading
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl'
+                  ? 'bg-gradient-to-r from-amber-600 to-emerald-700 text-white hover:from-amber-700 hover:to-emerald-800 shadow-lg hover:shadow-xl'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
@@ -167,7 +165,7 @@ const ClientPINLogin = ({ onLogin }) => {
             <p className="text-gray-600 text-sm mb-2">
               Your PIN was provided by your therapist
             </p>
-            <button className="text-purple-600 hover:text-purple-700 font-semibold text-sm">
+            <button className="text-amber-700 hover:text-amber-800 font-semibold text-sm">
               Forgot your PIN? Contact support
             </button>
           </div>
@@ -176,7 +174,7 @@ const ClientPINLogin = ({ onLogin }) => {
         <div className="mt-6 text-center">
           <button
             onClick={() => setUseTokenLogin(true)}
-            className="inline-flex items-center space-x-2 text-gray-500 hover:text-purple-600 font-medium transition-colors duration-200"
+            className="inline-flex items-center space-x-2 text-gray-500 hover:text-amber-700 font-medium transition-colors duration-200"
           >
             <Key className="w-4 h-4" />
             <span>Login with Token Instead</span>
