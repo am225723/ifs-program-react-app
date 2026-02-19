@@ -26,6 +26,7 @@ import Affirmations from './pages/Affirmations';
 import TherapyIntegration from './pages/TherapyIntegration';
 import AdminDashboardEnhanced from './pages/AdminDashboardEnhanced';
 import TherapistDashboard from './pages/TherapistDashboard';
+import CoTherapySession from './pages/CoTherapySession';
 import ProgressTimeline from './pages/ProgressTimeline';
 import MoodTracker from './pages/MoodTracker';
 import GamificationHub from './pages/GamificationHub';
@@ -256,6 +257,11 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/therapist-dashboard" element={
                   currentClient?.user_role === 'therapist'
                     ? <TherapistDashboard />
+                    : <Home clientId={currentClient?.id} client={currentClient} />
+                } />
+                <Route path="/co-therapy" element={
+                  currentClient?.user_role === 'therapist'
+                    ? <CoTherapySession />
                     : <Home clientId={currentClient?.id} client={currentClient} />
                 } />
                 <Route path="/progress-timeline" element={<ProgressTimeline />} />

@@ -4,6 +4,9 @@
 This is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It features PIN-based authentication, personalized curriculum delivery based on child wound assessment results, and comprehensive healing exercises.
 
 ## Recent Changes (February 2026)
+- Client Personalization Panel in Therapist Dashboard: Client Insights tab now shows full wound assessment scores, primary/secondary wounds, and per-module personalization details (wound focus, healing goals, tailored activities)
+- Co-Therapy Session page (/co-therapy): Therapist selects a client and guides 9 IFS therapy activities together with step-by-step instructions, therapist clinical guidance, observation checklists, per-step notes, client reflections, timer, and progress saving to client's Supabase record with coTherapy flag
+- LearningModuleRenderer refactored to delegate rendering to LearningModuleEnhanced, enabling all 12 interactive activity types in curriculum modules
 - Fixed SSO callback routing: Replit proxy URL-encodes query params into pathname (`/sso/callback%3Fsso_token=X`), so App.jsx now checks `location.pathname.startsWith('/sso/callback')` before Routes to bypass React Router matching; SSOCallback uses `extractSSOToken()` to parse token from encoded paths
 - tokenAuth.js `cleanTokenFromURL` uses `startsWith` instead of strict equality for SSO path check
 - Fixed dark mode text visibility: Home page cards (Recommendations, Assessments, Healing Tools, IFS Principles) now use dark backgrounds in dark mode instead of invisible light text on light bg

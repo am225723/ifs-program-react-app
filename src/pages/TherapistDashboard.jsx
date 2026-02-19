@@ -4,7 +4,8 @@ import {
   Users, User, TrendingUp, Calendar, FileText, MessageSquare, 
   Clock, CheckCircle, AlertTriangle, Activity, Heart, Shield,
   ChevronRight, Search, Filter, Plus, Eye, BarChart3, Sparkles,
-  BookOpen, ChevronDown, ChevronUp, MessageCircle, Flag, Lightbulb
+  BookOpen, ChevronDown, ChevronUp, MessageCircle, Flag, Lightbulb,
+  Play, Target
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
@@ -327,7 +328,9 @@ const TherapistDashboard = () => {
     try {
       const [
         { data: moduleAnswers },
-        { data: activityProgress }
+        { data: activityProgress },
+        assessmentData,
+        personalizedCurriculum
       ] = await Promise.all([
         supabase
           .from('ifs_module_answers')
@@ -338,7 +341,9 @@ const TherapistDashboard = () => {
         supabase
           .from('ifs_therapy_activity_progress')
           .select('*')
-          .eq('client_id', clientId)
+          .eq('client_id', clientId),
+        supabaseHelpers.getAssessment(clientId),
+        supabaseHelpers.getPersonalizedCurriculum(clientId)
       ]);
 
       const recentAnswers = [];
@@ -363,7 +368,9 @@ const TherapistDashboard = () => {
       setClientInsights({
         recentAnswers: recentAnswers.slice(0, 10),
         activityProgress: activityProgress || [],
-        sessionPrep
+        sessionPrep,
+        assessment: assessmentData || null,
+        personalization: personalizedCurriculum || null
       });
     } catch (e) {
       console.error('Error loading client insights:', e);
@@ -601,7 +608,8 @@ const TherapistDashboard = () => {
           { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
           { id: 'actions', label: 'Quick Actions', icon: Sparkles },
           { id: 'lessons', label: 'Lesson Plans', icon: BookOpen },
-          { id: 'insights', label: 'Client Insights', icon: Eye }
+          { id: 'insights', label: 'Client Insights', icon: Eye },
+          { id: 'co-therapy', label: 'Co-Therapy', icon: Heart }
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -1156,8 +1164,181 @@ const TherapistDashboard = () => {
 
           {selectedInsightClient && !insightsLoading && clientInsights && (() => {
             const client = clients.find(c => c.id === selectedInsightClient);
+            const assessment = clientInsights.assessment;
+            const personalization = clientInsights.personalization;
+            const woundScores = assessment ? [
+              { type: 'Abandonment', score: assessment.abandonment_score || 0, color: 'blue' },
+              { type: 'Shame', score: assessment.shame_score || 0, color: 'purple' },
+              { type: 'Neglect', score: assessment.neglect_score || 0, color: 'amber' },
+              { type: 'Betrayal', score: assessment.betrayal_score || 0, color: 'red' }
+            ].sort((a, b) => b.score - a.score) : [];
+            const maxScore = 24;
+
             return (
               <div className="space-y-6">
+                {(assessment || personalization) && (
+                  <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                    <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                      <Sparkles className="w-5 h-5 text-purple-500" />
+                      How Modules Are Personalized for {client?.name}
+                    </h3>
+
+                    {assessment && (
+                      <div className="mb-6">
+                        <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                          <Target className="w-4 h-4 text-indigo-500" />
+                          Wound Assessment Scores
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                          {woundScores.map(w => (
+                            <div key={w.type} className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className={`text-xs font-medium ${textSecondary}`}>{w.type}</span>
+                                <span className={`text-sm font-bold ${textPrimary}`}>{w.score}/{maxScore}</span>
+                              </div>
+                              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all ${
+                                    w.color === 'blue' ? 'bg-blue-500' :
+                                    w.color === 'purple' ? 'bg-purple-500' :
+                                    w.color === 'amber' ? 'bg-amber-500' : 'bg-red-500'
+                                  }`}
+                                  style={{ width: `${(w.score / maxScore) * 100}%` }}
+                                />
+                              </div>
+                              <p className={`text-xs mt-1 ${textMuted}`}>
+                                {w.score >= 17 ? 'High priority' : w.score >= 9 ? 'Moderate' : 'Low'}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className={`p-3 rounded-lg ${isDark ? 'bg-indigo-900/20 border-indigo-800' : 'bg-indigo-50 border-indigo-100'} border`}>
+                          <p className={`text-sm ${textSecondary}`}>
+                            <span className="font-medium">Primary wound:</span>{' '}
+                            <span className={`font-semibold ${textPrimary}`}>{assessment.primary_wound || woundScores[0]?.type || 'Not assessed'}</span>
+                            {assessment.secondary_wound && (
+                              <> | <span className="font-medium">Secondary:</span>{' '}
+                              <span className={textPrimary}>{assessment.secondary_wound}</span></>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {personalization && (
+                      <div>
+                        <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                          <BookOpen className="w-4 h-4 text-emerald-500" />
+                          Module Personalizations
+                        </h4>
+                        {personalization.personalizedModules && personalization.personalizedModules.length > 0 ? (
+                          <div className="space-y-3">
+                            {personalization.personalizedModules.map((mod, idx) => (
+                              <div key={mod.id || idx} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                    {idx + 1}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h5 className={`font-medium ${textPrimary} text-sm`}>{mod.title || `Module ${idx + 1}`}</h5>
+                                    {mod.personalizedContent?.woundFocus && (
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                          mod.personalizedContent.woundFocus.toLowerCase().includes('abandon') ? 'bg-blue-100 text-blue-700' :
+                                          mod.personalizedContent.woundFocus.toLowerCase().includes('shame') ? 'bg-purple-100 text-purple-700' :
+                                          mod.personalizedContent.woundFocus.toLowerCase().includes('neglect') ? 'bg-amber-100 text-amber-700' :
+                                          'bg-red-100 text-red-700'
+                                        }`}>
+                                          Focus: {mod.personalizedContent.woundFocus}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {mod.personalizedContent?.healingGoals && mod.personalizedContent.healingGoals.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className={`text-xs font-medium ${textSecondary} mb-1`}>Healing Goals:</p>
+                                        <ul className="space-y-1">
+                                          {mod.personalizedContent.healingGoals.map((goal, gi) => (
+                                            <li key={gi} className={`text-xs ${textMuted} flex items-start gap-1.5`}>
+                                              <Target className="w-3 h-3 text-emerald-500 mt-0.5 flex-shrink-0" />
+                                              {goal}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {mod.personalizedContent?.activities && mod.personalizedContent.activities.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className={`text-xs font-medium ${textSecondary} mb-1`}>Tailored Activities:</p>
+                                        <ul className="space-y-1">
+                                          {mod.personalizedContent.activities.map((act, ai) => (
+                                            <li key={ai} className={`text-xs ${textMuted} flex items-start gap-1.5`}>
+                                              <Activity className="w-3 h-3 text-purple-500 mt-0.5 flex-shrink-0" />
+                                              {act}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {mod.description && (
+                                      <p className={`text-xs ${textMuted} mt-2 leading-relaxed`}>{mod.description}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                            <div className="flex items-start gap-3">
+                              <Sparkles className={`w-5 h-5 ${textMuted} flex-shrink-0 mt-0.5`} />
+                              <div>
+                                <p className={`text-sm ${textSecondary}`}>
+                                  {personalization.primaryWound ? (
+                                    <>Curriculum personalized for <span className="font-semibold">{personalization.primaryWound}</span> wound pattern</>
+                                  ) : 'Personalized curriculum is active for this client'}
+                                </p>
+                                {personalization.woundRanking && (
+                                  <div className="mt-2 flex flex-wrap gap-1.5">
+                                    {personalization.woundRanking.map((wr, i) => (
+                                      <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${
+                                        i === 0 ? 'bg-purple-100 text-purple-700' :
+                                        i === 1 ? 'bg-blue-100 text-blue-700' :
+                                        'bg-gray-100 text-gray-600'
+                                      }`}>
+                                        {i + 1}. {wr.type} ({wr.score})
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                {personalization.focusAreas && (
+                                  <div className="mt-2">
+                                    <p className={`text-xs font-medium ${textSecondary} mb-1`}>Focus Areas:</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {personalization.focusAreas.map((area, i) => (
+                                        <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-slate-600 text-slate-300' : 'bg-gray-100 text-gray-700'}`}>
+                                          {area}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {!assessment && !personalization && (
+                      <div className="text-center py-6">
+                        <Sparkles className={`w-8 h-8 mx-auto mb-2 ${textMuted}`} />
+                        <p className={`text-sm ${textSecondary}`}>{client?.name} hasn't completed the wound assessment yet</p>
+                        <p className={`text-xs ${textMuted} mt-1`}>Modules will be personalized after they complete the assessment</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
                   <h3 className={`text-lg font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
                     <MessageCircle className="w-5 h-5 text-purple-500" />
@@ -1253,6 +1434,91 @@ const TherapistDashboard = () => {
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {activeTab === 'co-therapy' && (
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+              <Heart className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className={`text-lg font-semibold ${textPrimary}`}>Co-Therapy Sessions</h2>
+              <p className={`text-sm ${textSecondary}`}>Guide therapy activities together with your client in real time</p>
+            </div>
+          </div>
+
+          <div className={`${cardBg} rounded-xl border ${cardBorder} p-6 mb-6`}>
+            <p className={`text-sm ${textSecondary} mb-4`}>
+              Select a client and launch a guided therapy activity. You'll walk through each step together, with space for your clinical notes and observations at every stage.
+            </p>
+            <div className="mb-4">
+              <label className={`block text-sm font-medium ${textSecondary} mb-2`}>Select Client</label>
+              <select
+                className={`w-full sm:w-80 px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+                defaultValue=""
+                id="co-therapy-client-select"
+              >
+                <option value="">Choose a client...</option>
+                {clients.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <Link
+              to="/co-therapy"
+              onClick={(e) => {
+                const select = document.getElementById('co-therapy-client-select');
+                const clientId = select?.value;
+                if (clientId) {
+                  sessionStorage.setItem('co_therapy_client_id', clientId);
+                  const client = clients.find(c => c.id === clientId);
+                  if (client) sessionStorage.setItem('co_therapy_client_name', client.name);
+                } else {
+                  e.preventDefault();
+                  alert('Please select a client first');
+                }
+              }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-lg font-medium hover:from-pink-600 hover:to-rose-700 transition-all shadow-md"
+            >
+              <Play className="w-4 h-4" />
+              Launch Co-Therapy Session
+            </Link>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { title: 'Guided Parts Dialogue', desc: 'Therapist-led conversation with internal parts', duration: '20-30 min', category: 'in-session' },
+              { title: 'Protector Negotiation', desc: 'Help protective parts feel safe for deeper work', duration: '25-35 min', category: 'in-session' },
+              { title: 'Unburdening Ceremony', desc: 'Sacred step-by-step guide for burden release', duration: '30-45 min', category: 'in-session' },
+              { title: 'Inner Child Rescue', desc: 'Find, comfort, and retrieve wounded exile parts', duration: '25-40 min', category: 'in-session' },
+              { title: 'Parts Council Meeting', desc: 'Facilitate communication between multiple parts', duration: '30-45 min', category: 'in-session' },
+              { title: 'Somatic Parts Work', desc: 'Use body sensations to discover and heal parts', duration: '20-30 min', category: 'in-session' },
+              { title: 'Attachment Repair', desc: 'Reparent exile parts and repair attachment wounds', duration: '30-40 min', category: 'in-session' },
+              { title: 'Self-Energy Cultivation', desc: 'Strengthen the compassionate core of Self', duration: '15-20 min', category: 'in-session' },
+              { title: 'Trailhead Exploration', desc: 'Use real-life triggers to discover healing paths', duration: '20-30 min', category: 'in-session' }
+            ].map((activity, i) => (
+              <div key={i} className={`${cardBg} rounded-xl border ${cardBorder} p-4 transition-all hover:shadow-md`}>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center text-white flex-shrink-0">
+                    <Heart className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className={`font-medium ${textPrimary} text-sm`}>{activity.title}</h4>
+                    <p className={`text-xs ${textMuted} mt-1`}>{activity.desc}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`text-xs ${textMuted} flex items-center gap-1`}>
+                        <Clock className="w-3 h-3" />
+                        {activity.duration}
+                      </span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">{activity.category}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
