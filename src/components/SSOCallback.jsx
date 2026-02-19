@@ -104,4 +104,3 @@ export default function SSOCallback({ onLogin }) {
     </div>
   );
 }
-w
