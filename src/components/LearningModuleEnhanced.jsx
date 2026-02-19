@@ -600,7 +600,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
   // Wound Selector Component
   const renderWoundSelector = () => {
     const wounds = [
-      'Rejection', 'Abandonment', 'Neglect', 'Criticism/Shame', 
+      'Helplessness', 'Abandonment', 'Neglect', 'Criticism/Shame', 
       'Betrayal', 'Humiliation', 'Injustice', 'Loss/Grief', 
       'Emotional Invalidation', 'Trauma'
     ];

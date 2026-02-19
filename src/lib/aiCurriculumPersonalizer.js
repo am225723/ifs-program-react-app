@@ -56,17 +56,17 @@ class AICurriculumPersonalizer {
           "Heal trauma responses"
         ]
       },
-      rejection: {
-        name: "Rejection (Unwanted Child)",
-        focus: ["belonging work", "self-worth cultivation", "authentic expression", "social confidence"],
-        activities: ["belonging meditation", "worthiness affirmations", "authentic expression exercises"],
-        modules: ["inner-child-connection", "self-worth-building", "authentic-expression"],
+      helplessness: {
+        name: "Helplessness (Powerless Child)",
+        focus: ["agency building", "empowerment work", "choice reclamation", "learned helplessness healing"],
+        activities: ["empowerment meditation", "agency affirmations", "choice-building exercises"],
+        modules: ["inner-child-connection", "agency-building", "empowerment-practice"],
         healingGoals: [
-          "Cultivate sense of belonging",
-          "Build unconditional self-worth",
-          "Express authentic self safely",
-          "Release need to earn love",
-          "Heal fear of rejection"
+          "Reclaim sense of personal power",
+          "Build confidence in ability to create change",
+          "Heal learned helplessness patterns",
+          "Develop healthy assertiveness",
+          "Trust your capacity to handle challenges"
         ]
       }
     };
@@ -376,10 +376,10 @@ class AICurriculumPersonalizer {
         'safety-regulation': 'Establishing Internal Safety',
         'trust-rebuilding': 'Rebuilding Trust Capacity'
       },
-      rejection: {
-        'inner-child-connection': 'Meeting Your Unwanted Child',
-        'self-worth-building': 'Building Unconditional Self-Worth',
-        'authentic-expression': 'Expressing Your Authentic Self'
+      helplessness: {
+        'inner-child-connection': 'Meeting Your Powerless Child',
+        'agency-building': 'Reclaiming Your Personal Power',
+        'empowerment-practice': 'Building Confidence in Your Choices'
       }
     };
     return titles[woundId]?.[moduleId] || 'Personalized Healing Module';
@@ -407,10 +407,10 @@ class AICurriculumPersonalizer {
         'safety-regulation': 'Learn techniques to regulate fear and create internal safety.',
         'trust-rebuilding': 'Gradually rebuild your capacity to trust yourself and others.'
       },
-      rejection: {
-        'inner-child-connection': 'Gently meet the part of you that fears being pushed away and offer it belonging.',
-        'self-worth-building': 'Cultivate an unshakable sense of your own worth and value.',
-        'authentic-expression': 'Learn to express your true self without fear of judgment.'
+      helplessness: {
+        'inner-child-connection': 'Gently meet the part of you that feels powerless and offer it agency and strength.',
+        'agency-building': 'Reclaim your sense of personal power and ability to create meaningful change.',
+        'empowerment-practice': 'Build confidence that your choices matter and you can shape your own life.'
       }
     };
     return descriptions[woundId]?.[moduleId] || 'Personalized healing module for your specific wound pattern.';
@@ -448,7 +448,7 @@ class AICurriculumPersonalizer {
       shame: ["Compassion-focused practices", "Inner critic transformation", "Worthiness building"],
       neglect: ["Needs identification", "Self-care practices", "Visibility exercises"],
       betrayal: ["Safety protocols", "Trust building", "Fear regulation"],
-      rejection: ["Belonging exercises", "Self-worth affirmations", "Authentic expression practice"]
+      helplessness: ["Agency-building exercises", "Empowerment affirmations", "Choice reclamation practice"]
     };
     return adaptations[woundId] || ["Standard healing exercises"];
   }
@@ -479,7 +479,7 @@ class AICurriculumPersonalizer {
       shame: ["compassion", "inner critic", "worthiness", "self-acceptance"],
       neglect: ["needs identification", "self-care", "expression", "advocacy"],
       betrayal: ["safety", "trust", "fear regulation", "vulnerability"],
-      rejection: ["belonging", "self-worth", "authentic expression", "social confidence"]
+      helplessness: ["agency", "empowerment", "choice reclamation", "assertiveness"]
     };
     return types[woundId] || ["general healing"];
   }
@@ -490,7 +490,7 @@ class AICurriculumPersonalizer {
       shame: "May bring up difficult emotions - practice extra self-compassion",
       neglect: "May feel overwhelming at first - start small and build gradually",
       betrayal: "May activate fear responses - maintain safety protocols",
-      rejection: "May trigger feelings of not belonging - remind yourself you are welcome here"
+      helplessness: "May trigger feelings of powerlessness - remind yourself you have choices and agency now"
     };
     return warnings[woundId] || "Proceed with self-awareness and compassion";
   }
@@ -512,7 +512,7 @@ class AICurriculumPersonalizer {
       shame: ["Deep shame release", "Inner critic transformation", "Core worthiness work"],
       neglect: ["Advanced needs work", "Deep self-advocacy", "Expression therapy"],
       betrayal: ["Advanced trauma release", "Deep trust building", "Complex fear regulation"],
-      rejection: ["Deep belonging work", "Core worth reclamation", "Authentic self integration"]
+      helplessness: ["Deep agency work", "Core empowerment reclamation", "Personal power integration"]
     };
     return techniques[woundId] || ["Advanced healing techniques"];
   }
@@ -523,7 +523,7 @@ class AICurriculumPersonalizer {
       shame: "Daily compassion practice, weekly inner critic dialogue",
       neglect: "Daily needs check, weekly self-care routine",
       betrayal: "Daily safety check, weekly trust practice",
-      rejection: "Daily belonging affirmations, weekly authentic expression practice"
+      helplessness: "Daily empowerment affirmations, weekly agency-building practice"
     };
     return practices[woundId] || "Daily healing practice";
   }

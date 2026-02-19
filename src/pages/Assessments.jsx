@@ -48,14 +48,14 @@ const assessmentDefinitions = [
       shame: { label: 'Shame', icon: Eye, color: '#EC4899', description: 'Deep sense of being flawed or defective, hiding your true self' },
       neglect: { label: 'Neglect', icon: Heart, color: '#8B5CF6', description: 'Feeling unseen, unheard, or emotionally invisible to caregivers' },
       betrayal: { label: 'Betrayal', icon: Shield, color: '#F59E0B', description: 'Difficulty trusting after broken promises or violated boundaries' },
-      rejection: { label: 'Rejection', icon: AlertTriangle, color: '#EF4444', description: 'Fear of being pushed away or not being good enough' }
+      helplessness: { label: 'Helplessness', icon: AlertTriangle, color: '#EF4444', description: 'Feeling powerless, trapped, or unable to change your circumstances' }
     },
     protectorQuestions: [
       { category: 'abandonment', text: 'Do you have a part that tries to be a "people pleaser" or "caretaker" to ensure no one leaves you?', protectorType: 'People-pleaser managers' },
       { category: 'shame', text: 'Do you have a part that is a harsh "Inner Critic" or a "Perfectionist" trying to hide your flaws?', protectorType: 'Inner Critic / Perfectionist managers' },
       { category: 'neglect', text: 'Do you have a part that withdraws, dissociates, or "numbs out" to avoid needing anything?', protectorType: 'Withdrawal / Numbing protectors' },
       { category: 'betrayal', text: 'Do you have a part that is aggressive, controlling, or extremely suspicious to keep you safe?', protectorType: 'Controller / Hypervigilant managers' },
-      { category: 'rejection', text: 'Do you have a part that avoids social situations or hides your true self to prevent being judged?', protectorType: 'Avoidance / Hiding managers' }
+      { category: 'helplessness', text: 'Do you have a part that freezes, shuts down, or gives up when things feel overwhelming?', protectorType: 'Freeze / Collapse protectors' }
     ],
     questions: [
       { id: 1, text: 'I often feel anxious when people get too close to me emotionally.', category: 'abandonment' },
@@ -78,11 +78,11 @@ const assessmentDefinitions = [
       { id: 18, text: 'Vulnerability feels dangerous; showing emotion feels like handing someone a weapon.', category: 'betrayal' },
       { id: 19, text: 'I need to be in control of my environment at all times to feel safe.', category: 'betrayal' },
       { id: 20, text: 'I find it hard to set boundaries, or I set them too rigidly to protect myself.', category: 'betrayal' },
-      { id: 21, text: 'I feel uncomfortable being the center of attention.', category: 'rejection' },
-      { id: 22, text: 'I constantly seek reassurance from others that I am wanted or valued.', category: 'rejection' },
-      { id: 23, text: 'I feel I need to earn love through achievement or caretaking.', category: 'rejection' },
-      { id: 24, text: 'I avoid getting too attached to people or things because I expect to be pushed away.', category: 'rejection' },
-      { id: 25, text: 'I feel a deep sense of unworthiness, as if I am not good enough to be chosen.', category: 'rejection' }
+      { id: 21, text: 'I often feel powerless to change my situation, even when I know something is wrong.', category: 'helplessness' },
+      { id: 22, text: 'When faced with conflict or difficulty, I tend to freeze or shut down rather than take action.', category: 'helplessness' },
+      { id: 23, text: 'I feel like no matter what I do, the outcome will be the same — so why try.', category: 'helplessness' },
+      { id: 24, text: 'I often feel trapped in patterns or relationships but believe I cannot escape them.', category: 'helplessness' },
+      { id: 25, text: 'As a child, I learned that expressing my needs or opinions would not change anything.', category: 'helplessness' }
     ]
   },
   {
@@ -308,7 +308,7 @@ export default function Assessments() {
               shame_score: results.scores.shame?.average || 0,
               neglect_score: results.scores.neglect?.average || 0,
               betrayal_score: results.scores.betrayal?.average || 0,
-              rejection_score: results.scores.rejection?.average || 0,
+              helplessness_score: results.scores.helplessness?.average || 0,
               primary_wound: results.primary,
               secondary_wound: results.secondary,
               answers: results.answers,

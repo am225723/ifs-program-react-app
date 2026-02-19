@@ -17,7 +17,7 @@ const woundColorMap = {
   shame: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
   neglect: { bg: 'bg-amber-100', text: 'text-amber-700', dot: 'bg-amber-500' },
   betrayal: { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' },
-  rejection: { bg: 'bg-rose-100', text: 'text-rose-700', dot: 'bg-rose-500' }
+  helplessness: { bg: 'bg-rose-100', text: 'text-rose-700', dot: 'bg-rose-500' }
 };
 
 const riskColors = {
@@ -55,12 +55,12 @@ const sessionPrepByWound = {
     'Consider grounding exercises before parts work',
     'Build rapport before deeper wound exploration'
   ],
-  rejection: [
-    'Validate belonging — rejection wounds create deep "unwanted" feelings',
-    'Watch for people-pleasing protectors trying to earn acceptance',
-    'Explore fear of authentic self-expression gently',
-    'Address the exile that believes they are inherently unwanted',
-    'Build unconditional self-worth separate from others\' approval'
+  helplessness: [
+    'Validate agency — helplessness wounds create deep "I can\'t change anything" beliefs',
+    'Watch for freeze/collapse protectors that shut down under stress',
+    'Explore learned helplessness patterns from childhood gently',
+    'Address the exile that believes they are powerless and trapped',
+    'Build sense of personal agency and empowerment through small choices'
   ]
 };
 
@@ -644,7 +644,7 @@ const TherapistDashboard = () => {
 
   const getGroupAnalytics = () => {
     if (clients.length === 0) return null;
-    const woundCounts = { abandonment: 0, shame: 0, neglect: 0, betrayal: 0, rejection: 0, unknown: 0 };
+    const woundCounts = { abandonment: 0, shame: 0, neglect: 0, betrayal: 0, helplessness: 0, unknown: 0 };
     const riskCounts = { low: 0, medium: 0, high: 0 };
     let totalProgress = 0;
     let totalModules = 0;
@@ -779,7 +779,7 @@ const TherapistDashboard = () => {
   };
 
   const getWoundGlow = (wound) => {
-    const map = { abandonment: 'blue', shame: 'purple', neglect: 'amber', betrayal: 'rose', rejection: 'rose' };
+    const map = { abandonment: 'blue', shame: 'purple', neglect: 'amber', betrayal: 'rose', helplessness: 'rose' };
     return glowStyles[map[wound] || 'amber'];
   };
 
@@ -904,7 +904,7 @@ const TherapistDashboard = () => {
                 <option value="shame">Shame</option>
                 <option value="neglect">Neglect</option>
                 <option value="betrayal">Betrayal</option>
-                <option value="rejection">Rejection</option>
+                <option value="helplessness">Helplessness</option>
               </select>
               <select
                 value={filterRisk}
@@ -1618,7 +1618,7 @@ const TherapistDashboard = () => {
                                 <div className={`h-2.5 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-100'}`}>
                                   <div
                                     className={`h-full rounded-full`}
-                                    style={{ width: `${pct}%`, backgroundColor: wound === 'abandonment' ? '#3b82f6' : wound === 'shame' ? '#8b5cf6' : wound === 'neglect' ? '#f59e0b' : wound === 'rejection' ? '#f43f5e' : '#ef4444' }}
+                                    style={{ width: `${pct}%`, backgroundColor: wound === 'abandonment' ? '#3b82f6' : wound === 'shame' ? '#8b5cf6' : wound === 'neglect' ? '#f59e0b' : wound === 'helplessness' ? '#f43f5e' : '#ef4444' }}
                                   />
                                 </div>
                               </div>
@@ -1841,7 +1841,7 @@ const TherapistDashboard = () => {
               { type: 'Shame', score: assessment.shame_score || 0, color: 'purple' },
               { type: 'Neglect', score: assessment.neglect_score || 0, color: 'amber' },
               { type: 'Betrayal', score: assessment.betrayal_score || 0, color: 'red' },
-              { type: 'Rejection', score: assessment.rejection_score || 0, color: 'rose' }
+              { type: 'Helplessness', score: assessment.helplessness_score || 0, color: 'rose' }
             ].sort((a, b) => b.score - a.score) : [];
             const maxScore = 25;
             const clientGam = clientGamification[selectedInsightClient];

@@ -25,7 +25,7 @@ const Assessment = () => {
         {
           id: 3,
           question: 'I feel like I have to hide parts of myself to be accepted.',
-          wound: 'rejection'
+          wound: 'helplessness'
         },
         {
           id: 4,

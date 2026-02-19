@@ -149,10 +149,10 @@ const Home = ({ clientId, client }) => {
         modules: ['Module 2: Trust Recovery', 'Module 4: Healthy Boundaries'],
         affirmation: "I am safe to trust myself and choose trustworthy people."
       },
-      rejection: {
-        exercises: ['Belonging Meditation', 'Self-Worth Affirmation Practice'],
-        modules: ['Module 2: Rejection Healing', 'Module 4: Authentic Expression'],
-        affirmation: "I belong here. I am wanted and valued exactly as I am."
+      helplessness: {
+        exercises: ['Empowerment Meditation', 'Agency-Building Practice'],
+        modules: ['Module 2: Helplessness Healing', 'Module 4: Reclaiming Power'],
+        affirmation: "I have the power to create change. My choices matter and I am capable."
       }
     };
     return recommendations[wound] || recommendations.abandonment;
