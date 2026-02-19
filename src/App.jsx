@@ -178,7 +178,7 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                     <Link to="/" className="flex items-center gap-2">
                       <img src="/logo.png" alt="ITS" className="w-9 h-auto" />
                       <h1 className="text-base font-bold bg-gradient-to-r from-amber-700 to-emerald-700 bg-clip-text text-transparent leading-tight">
-                        Intrinsic Therapeutic<br/>Solutions
+                        Internal Family<br/>Systems
                       </h1>
                     </Link>
                     <div className="flex items-center gap-1">

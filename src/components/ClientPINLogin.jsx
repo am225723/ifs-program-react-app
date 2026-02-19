@@ -77,7 +77,7 @@ const ClientPINLogin = ({ onLogin }) => {
       <div className="relative w-full max-w-md">
         {/* Logo/Branding */}
         <div className="text-center mb-8">
-          <img src="/logo.png" alt="Intrinsic Therapeutic Solutions" className="w-28 h-auto mx-auto mb-4" />
+          <img src="/logo.png" alt="Internal Family Systems" className="w-28 h-auto mx-auto mb-4" />
           <h1 className="text-4xl font-bold text-gray-800 mb-2">
             Welcome Back
           </h1>
