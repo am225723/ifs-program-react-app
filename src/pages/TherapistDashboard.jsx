@@ -154,7 +154,7 @@ const TherapistDashboard = () => {
   const [clientGamification, setClientGamification] = useState({});
 
   const [activeAction, setActiveAction] = useState(null);
-  const [newClientForm, setNewClientForm] = useState({ name: '', email: '', phone: '', pin: '' });
+  const [newClientForm, setNewClientForm] = useState({ name: '', email: '', phone: '', pin: '', role: 'client' });
   const [newClientResult, setNewClientResult] = useState(null);
   const [newClientLoading, setNewClientLoading] = useState(false);
   const [reminderForm, setReminderForm] = useState({ clientId: '', type: 'session', message: '' });
@@ -542,7 +542,7 @@ const TherapistDashboard = () => {
           email: newClientForm.email.trim() || null,
           phone: newClientForm.phone.trim() || null,
           pin,
-          user_role: 'client',
+          user_role: newClientForm.role || 'client',
           status: 'active',
           created_at: new Date().toISOString()
         })
@@ -551,7 +551,7 @@ const TherapistDashboard = () => {
       if (error) {
         setNewClientResult({ error: error.message });
       } else {
-        setNewClientResult({ success: true, name: data.name, pin });
+        setNewClientResult({ success: true, name: data.name, pin, role: data.user_role });
         await loadDashboardData();
       }
     } catch (e) {
@@ -1290,7 +1290,7 @@ const TherapistDashboard = () => {
                     onClick={() => {
                       setActiveAction(action.id);
                       if (action.id === 'create-client') {
-                        setNewClientForm({ name: '', email: '', phone: '', pin: '' });
+                        setNewClientForm({ name: '', email: '', phone: '', pin: '', role: 'client' });
                         setNewClientResult(null);
                       }
                       if (action.id === 'send-reminder') {
@@ -1328,8 +1328,8 @@ const TherapistDashboard = () => {
                       <Plus className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h2 className={`text-lg font-semibold ${textPrimary}`}>Create New Client</h2>
-                      <p className={`text-sm ${textSecondary}`}>Choose a PIN or leave it blank to auto-generate one</p>
+                      <h2 className={`text-lg font-semibold ${textPrimary}`}>Create New User</h2>
+                      <p className={`text-sm ${textSecondary}`}>Set a PIN and role, or leave PIN blank to auto-generate</p>
                     </div>
                   </div>
 
@@ -1337,8 +1337,11 @@ const TherapistDashboard = () => {
                     <div className="space-y-4">
                       <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-5 text-center">
                         <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
-                        <h3 className="text-lg font-semibold text-emerald-800 mb-1">Client Created</h3>
-                        <p className="text-sm text-emerald-600 mb-4">{newClientResult.name} is ready to log in</p>
+                        <h3 className="text-lg font-semibold text-emerald-800 mb-1">{newClientResult.role === 'therapist' ? 'Therapist' : 'Client'} Created</h3>
+                        <p className="text-sm text-emerald-600 mb-2">{newClientResult.name} is ready to log in</p>
+                        <span className={`inline-block text-xs font-semibold px-3 py-1 rounded-full mb-3 ${newClientResult.role === 'therapist' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
+                          Role: {newClientResult.role === 'therapist' ? 'Therapist' : 'Client'}
+                        </span>
                         <div className="bg-white rounded-lg p-4 border border-emerald-200 inline-block">
                           <p className="text-xs text-gray-500 mb-1">Access PIN</p>
                           <p className="text-3xl font-mono font-bold text-gray-900 tracking-widest">{newClientResult.pin}</p>
@@ -1354,7 +1357,7 @@ const TherapistDashboard = () => {
                         </div>
                       </div>
                       <button
-                        onClick={() => { setNewClientResult(null); setNewClientForm({ name: '', email: '', phone: '', pin: '' }); }}
+                        onClick={() => { setNewClientResult(null); setNewClientForm({ name: '', email: '', phone: '', pin: '', role: 'client' }); }}
                         className="w-full py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         Create Another Client
@@ -1387,6 +1390,36 @@ const TherapistDashboard = () => {
                           className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-blue-500 outline-none font-mono text-lg tracking-widest`}
                         />
                         <p className={`text-xs ${textMuted} mt-1`}>Choose a 6-digit PIN for this client to use when logging in. Leave blank to auto-generate one.</p>
+                      </div>
+                      <div>
+                        <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>User Role *</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            { value: 'client', label: 'Client', desc: 'Access to curriculum, assessments, and exercises', icon: '👤' },
+                            { value: 'therapist', label: 'Therapist', desc: 'Full admin dashboard and client management', icon: '🛡️' }
+                          ].map(role => (
+                            <button
+                              key={role.value}
+                              type="button"
+                              onClick={() => setNewClientForm(prev => ({ ...prev, role: role.value }))}
+                              className={`p-3 rounded-lg border-2 text-left transition-all ${
+                                newClientForm.role === role.value
+                                  ? role.value === 'therapist'
+                                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 dark:border-purple-400'
+                                    : 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-400'
+                                  : `${cardBorder} hover:border-gray-400`
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-lg">{role.icon}</span>
+                                <span className={`text-sm font-semibold ${newClientForm.role === role.value ? (role.value === 'therapist' ? 'text-purple-700 dark:text-purple-300' : 'text-blue-700 dark:text-blue-300') : textPrimary}`}>
+                                  {role.label}
+                                </span>
+                              </div>
+                              <p className={`text-xs ${textMuted}`}>{role.desc}</p>
+                            </button>
+                          ))}
+                        </div>
                       </div>
                       <div>
                         <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Email (optional)</label>
