@@ -196,9 +196,9 @@ const TherapistDashboard = () => {
       ] = await Promise.all([
         supabase
           .from('ifs_assessment_results')
-          .select('id, client_id, primary_wound, secondary_wound, assessment_date, created_at')
+          .select('id, client_id, primary_wound, secondary_wound, abandonment_score, shame_score, neglect_score, betrayal_score, rejection_score, created_at')
           .in('client_id', clientIds)
-          .order('assessment_date', { ascending: false }),
+          .order('created_at', { ascending: false }),
         supabase
           .from('ifs_client_progress')
           .select('id, client_id, module_id, completed, is_completed')
@@ -1836,12 +1836,18 @@ const TherapistDashboard = () => {
             const client = clients.find(c => c.id === selectedInsightClient);
             const assessment = clientInsights.assessment;
             const personalization = clientInsights.personalization;
+            const normalizeScore = (s) => {
+              if (s === null || s === undefined) return 0;
+              const num = Number(s);
+              if (isNaN(num)) return 0;
+              return num <= 5 ? Math.round(num * 5) : Math.round(num);
+            };
             const woundScores = assessment ? [
-              { type: 'Abandonment', score: assessment.abandonment_score || 0, color: 'blue' },
-              { type: 'Shame', score: assessment.shame_score || 0, color: 'purple' },
-              { type: 'Neglect', score: assessment.neglect_score || 0, color: 'amber' },
-              { type: 'Betrayal', score: assessment.betrayal_score || 0, color: 'red' },
-              { type: 'Helplessness', score: assessment.rejection_score || 0, color: 'rose' }
+              { type: 'Abandonment', score: normalizeScore(assessment.abandonment_score), color: 'blue' },
+              { type: 'Shame', score: normalizeScore(assessment.shame_score), color: 'purple' },
+              { type: 'Neglect', score: normalizeScore(assessment.neglect_score), color: 'amber' },
+              { type: 'Betrayal', score: normalizeScore(assessment.betrayal_score), color: 'red' },
+              { type: 'Helplessness', score: normalizeScore(assessment.rejection_score), color: 'rose' }
             ].sort((a, b) => b.score - a.score) : [];
             const maxScore = 25;
             const clientGam = clientGamification[selectedInsightClient];
@@ -1967,119 +1973,115 @@ const TherapistDashboard = () => {
                               </div>
                             ))}
                           </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <div className={`p-4 rounded-xl border ${isDark ? 'border-purple-800/40 bg-purple-900/15' : 'border-purple-200 bg-purple-50/50'}`}>
-                              <div className="flex items-start gap-3">
-                                <Gem className={`w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5`} />
-                                <div className="flex-1">
-                                  <p className={`text-sm font-semibold ${textPrimary}`}>
-                                    {personalization.primaryWound ? (
-                                      <>Curriculum adapted for <span className="text-purple-600 dark:text-purple-400 capitalize">{personalization.primaryWound}</span> wound pattern</>
-                                    ) : 'Personalized curriculum is active for this client'}
-                                  </p>
-                                  {personalization.woundRanking && (
-                                    <div className="mt-2 flex flex-wrap gap-1.5">
-                                      {personalization.woundRanking.map((wr, i) => (
-                                        <span key={i} className={`text-xs px-2.5 py-1 rounded-lg font-medium ${
-                                          i === 0 ? 'bg-amber-100 text-amber-700' :
-                                          i === 1 ? 'bg-blue-100 text-blue-700' :
-                                          'bg-gray-100 text-gray-600'
-                                        }`}>
-                                          #{i + 1} {wr.type} ({wr.score})
+                        ) : personalization.primaryWound ? (
+                          <div className={`p-4 rounded-xl border ${isDark ? 'border-purple-800/40 bg-purple-900/15' : 'border-purple-200 bg-purple-50/50'}`}>
+                            <div className="flex items-start gap-3">
+                              <Gem className={`w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5`} />
+                              <div className="flex-1">
+                                <p className={`text-sm font-semibold ${textPrimary}`}>
+                                  Curriculum adapted for <span className="text-purple-600 dark:text-purple-400 capitalize">{personalization.primaryWound}</span> wound pattern
+                                </p>
+                                {personalization.woundRanking && (
+                                  <div className="mt-2 flex flex-wrap gap-1.5">
+                                    {personalization.woundRanking.map((wr, i) => (
+                                      <span key={i} className={`text-xs px-2.5 py-1 rounded-lg font-medium ${
+                                        i === 0 ? 'bg-amber-100 text-amber-700' :
+                                        i === 1 ? 'bg-blue-100 text-blue-700' :
+                                        'bg-gray-100 text-gray-600'
+                                      }`}>
+                                        #{i + 1} {wr.type} ({wr.score})
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                {personalization.focusAreas && (
+                                  <div className="mt-3">
+                                    <p className={`text-xs font-semibold ${textSecondary} mb-1.5`}>Focus Areas:</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {personalization.focusAreas.map((area, i) => (
+                                        <span key={i} className={`text-xs px-2.5 py-1 rounded-lg ${isDark ? 'bg-slate-600 text-slate-300' : 'bg-white border border-gray-200 text-gray-700'}`}>
+                                          {area}
                                         </span>
                                       ))}
                                     </div>
-                                  )}
-                                  {personalization.focusAreas && (
-                                    <div className="mt-3">
-                                      <p className={`text-xs font-semibold ${textSecondary} mb-1.5`}>Focus Areas:</p>
-                                      <div className="flex flex-wrap gap-1.5">
-                                        {personalization.focusAreas.map((area, i) => (
-                                          <span key={i} className={`text-xs px-2.5 py-1 rounded-lg ${isDark ? 'bg-slate-600 text-slate-300' : 'bg-white border border-gray-200 text-gray-700'}`}>
-                                            {area}
-                                          </span>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
-
-                            {assessment?.primary_wound && (() => {
-                              const wound = assessment.primary_wound;
-                              const woundChanges = {
-                                abandonment: [
-                                  { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with attachment-focused check-in. Parts identification prioritizes people-pleaser and caretaker protectors. Added "safe base" grounding exercise before parts work.' },
-                                  { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization starts with "finding the child who was left" imagery. Reflection prompts explore fears of being forgotten, moments of feeling alone, and beliefs like "people always leave." Added journaling on earliest abandonment memory.' },
-                                  { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map highlights clinging/anxious attachment managers and numbing firefighters. Added specific prompts: "Which part monitors whether people will stay?" and "Which part pushes people away before they can leave?"' },
-                                  { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening focuses on releasing "I will be abandoned" burden. Reparenting visualization emphasizes consistent presence: "I will never leave you." Added secure attachment meditation with internal safe figure who stays.' },
-                                  { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes attachment check-in ritual and self-soothing sequence for abandonment triggers. Maintenance plan focuses on building internal secure base. Added "emergency protocol" for when abandonment panic activates.' }
-                                ],
-                                shame: [
-                                  { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with self-compassion warm-up before any parts work. Parts identification focuses on Inner Critic and Perfectionist managers. Added explicit permission: "There is nothing wrong with you" framing throughout.' },
-                                  { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization gently approaches "the child who believes they are broken." Reflection prompts explore core defectiveness beliefs, moments of being told "something is wrong with you," and hiding behaviors. Includes compassion letter to younger self.' },
-                                  { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map centers on Perfectionist managers, people-pleasers hiding flaws, and shame-avoidance firefighters. Added prompts: "Which part tries to be perfect so no one sees your flaws?" and "Which part attacks you before others can?"' },
-                                  { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening releases "I am fundamentally broken" burden. Reparenting visualization emphasizes unconditional acceptance: "You are enough exactly as you are." Added worthiness meditation and inner critic transformation dialogue.' },
-                                  { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes self-compassion check-in and inner critic dialogue. Maintenance plan builds "worthiness evidence" log. Added "shame resilience" protocol for when shame spirals activate.' }
-                                ],
-                                neglect: [
-                                  { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with needs identification exercise — "What do I need right now?" Parts identification focuses on withdrawal/numbing protectors and the "invisible child" exile. Added validation: "Your needs matter" framing.' },
-                                  { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization seeks "the child who became invisible." Reflection prompts explore emotional unavailability, learning to not need anything, and disconnection from own desires. Includes needs inventory exercise.' },
-                                  { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map highlights self-reliance managers, dissociation firefighters, and emotional numbness parts. Added prompts: "Which part learned to stop asking?" and "Which part makes you invisible so you won\'t be a burden?"' },
-                                  { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening releases "My needs don\'t matter" burden. Reparenting visualization emphasizes attentive care: "I see you. I hear you. You matter." Added nurturing self-care ritual and needs-honoring practice.' },
-                                  { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes needs check-in and self-advocacy micro-exercise. Maintenance plan builds consistent self-care routine. Added "visibility practice" — asking for one thing you need each day.' }
-                                ],
-                                betrayal: [
-                                  { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with safety assessment and grounding. Parts identification focuses on hypervigilant controllers and suspicious managers. Added explicit safety protocols before any vulnerability work.' },
-                                  { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization approaches "the child whose trust was shattered" with extra safety layers. Reflection prompts explore broken promises, violated boundaries, and "the other shoe dropping" beliefs. Includes trust inventory.' },
-                                  { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map centers on controller/hypervigilant managers and aggressive boundary-enforcement firefighters. Added prompts: "Which part scans for danger constantly?" and "Which part never lets your guard down?"' },
-                                  { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening releases "I can never trust anyone" burden. Reparenting visualization emphasizes reliable protection: "I will keep you safe. I will not betray you." Added gradual trust-rebuilding exercises with internal parts first.' },
-                                  { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes safety check-in and fear regulation exercise. Maintenance plan focuses on discernment skills — learning to assess trustworthiness. Added "trust thermometer" tracking for gradual re-engagement.' }
-                                ],
-                                helplessness: [
-                                  { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with small-choice empowerment exercise — "Choose one thing right now." Parts identification focuses on freeze/collapse protectors and the "trapped child" exile. Added framing: "You have more power than you know."' },
-                                  { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization approaches "the child who learned nothing would change." Reflection prompts explore moments of powerlessness, giving up, and beliefs like "why bother trying." Includes agency inventory — times you did create change.' },
-                                  { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map centers on freeze/shutdown managers and collapse/give-up firefighters. Added prompts: "Which part stops you from even trying?" and "Which part believes the outcome is already decided?"' },
-                                  { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening releases "Nothing I do matters" burden. Reparenting visualization emphasizes empowerment: "You have choices now. Your voice matters." Added incremental agency exercises — celebrating small wins and successful decisions.' },
-                                  { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes "one empowered choice" exercise and agency affirmation. Maintenance plan builds confidence through progressively bigger decisions. Added "power log" — tracking moments you successfully influenced an outcome.' }
-                                ]
-                              };
-                              const changes = woundChanges[wound] || woundChanges.abandonment;
-                              return (
-                                <div className={`p-4 rounded-xl border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-white'}`}>
-                                  <h5 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
-                                    <BookOpen className="w-4 h-4 text-amber-500" />
-                                    Specific Curriculum Changes Applied
-                                  </h5>
-                                  <div className="space-y-4">
-                                    {changes.map((item, i) => (
-                                      <div key={i} className="flex items-start gap-3">
-                                        <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5">
-                                          {i + 1}
-                                        </div>
-                                        <div className="flex-1">
-                                          <p className={`text-xs font-bold ${textPrimary}`}>{item.mod}</p>
-                                          <div className={`mt-1.5 p-2.5 rounded-lg ${isDark ? 'bg-slate-600/40' : 'bg-gray-50'} border ${cardBorder}`}>
-                                            <p className={`text-[10px] uppercase tracking-wider font-semibold ${textMuted} mb-1`}>Standard Version</p>
-                                            <p className={`text-xs ${textMuted} leading-relaxed`}>{item.standard}</p>
-                                          </div>
-                                          <div className={`mt-1.5 p-2.5 rounded-lg ${isDark ? 'bg-emerald-900/20 border-emerald-800/30' : 'bg-emerald-50/70 border-emerald-100'} border`}>
-                                            <p className={`text-[10px] uppercase tracking-wider font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'} mb-1`}>Personalized for {wound}</p>
-                                            <p className={`text-xs ${isDark ? 'text-emerald-200' : 'text-emerald-700'} leading-relaxed`}>{item.changed}</p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            })()}
                           </div>
-                        )}
+                        ) : null}
                       </div>
                     )}
+
+                    {assessment?.primary_wound && (() => {
+                      const wound = assessment.primary_wound;
+                      const woundChanges = {
+                        abandonment: [
+                          { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with attachment-focused check-in. Parts identification prioritizes people-pleaser and caretaker protectors. Added "safe base" grounding exercise before parts work.' },
+                          { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization starts with "finding the child who was left" imagery. Reflection prompts explore fears of being forgotten, moments of feeling alone, and beliefs like "people always leave." Added journaling on earliest abandonment memory.' },
+                          { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map highlights clinging/anxious attachment managers and numbing firefighters. Added specific prompts: "Which part monitors whether people will stay?" and "Which part pushes people away before they can leave?"' },
+                          { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening focuses on releasing "I will be abandoned" burden. Reparenting visualization emphasizes consistent presence: "I will never leave you." Added secure attachment meditation with internal safe figure who stays.' },
+                          { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes attachment check-in ritual and self-soothing sequence for abandonment triggers. Maintenance plan focuses on building internal secure base. Added "emergency protocol" for when abandonment panic activates.' }
+                        ],
+                        shame: [
+                          { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with self-compassion warm-up before any parts work. Parts identification focuses on Inner Critic and Perfectionist managers. Added explicit permission: "There is nothing wrong with you" framing throughout.' },
+                          { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization gently approaches "the child who believes they are broken." Reflection prompts explore core defectiveness beliefs, moments of being told "something is wrong with you," and hiding behaviors. Includes compassion letter to younger self.' },
+                          { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map centers on Perfectionist managers, people-pleasers hiding flaws, and shame-avoidance firefighters. Added prompts: "Which part tries to be perfect so no one sees your flaws?" and "Which part attacks you before others can?"' },
+                          { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening releases "I am fundamentally broken" burden. Reparenting visualization emphasizes unconditional acceptance: "You are enough exactly as you are." Added worthiness meditation and inner critic transformation dialogue.' },
+                          { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes self-compassion check-in and inner critic dialogue. Maintenance plan builds "worthiness evidence" log. Added "shame resilience" protocol for when shame spirals activate.' }
+                        ],
+                        neglect: [
+                          { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with needs identification exercise — "What do I need right now?" Parts identification focuses on withdrawal/numbing protectors and the "invisible child" exile. Added validation: "Your needs matter" framing.' },
+                          { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization seeks "the child who became invisible." Reflection prompts explore emotional unavailability, learning to not need anything, and disconnection from own desires. Includes needs inventory exercise.' },
+                          { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map highlights self-reliance managers, dissociation firefighters, and emotional numbness parts. Added prompts: "Which part learned to stop asking?" and "Which part makes you invisible so you won\'t be a burden?"' },
+                          { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening releases "My needs don\'t matter" burden. Reparenting visualization emphasizes attentive care: "I see you. I hear you. You matter." Added nurturing self-care ritual and needs-honoring practice.' },
+                          { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes needs check-in and self-advocacy micro-exercise. Maintenance plan builds consistent self-care routine. Added "visibility practice" — asking for one thing you need each day.' }
+                        ],
+                        betrayal: [
+                          { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with safety assessment and grounding. Parts identification focuses on hypervigilant controllers and suspicious managers. Added explicit safety protocols before any vulnerability work.' },
+                          { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization approaches "the child whose trust was shattered" with extra safety layers. Reflection prompts explore broken promises, violated boundaries, and "the other shoe dropping" beliefs. Includes trust inventory.' },
+                          { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map centers on controller/hypervigilant managers and aggressive boundary-enforcement firefighters. Added prompts: "Which part scans for danger constantly?" and "Which part never lets your guard down?"' },
+                          { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening releases "I can never trust anyone" burden. Reparenting visualization emphasizes reliable protection: "I will keep you safe. I will not betray you." Added gradual trust-rebuilding exercises with internal parts first.' },
+                          { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes safety check-in and fear regulation exercise. Maintenance plan focuses on discernment skills — learning to assess trustworthiness. Added "trust thermometer" tracking for gradual re-engagement.' }
+                        ],
+                        helplessness: [
+                          { mod: 'Module 1: IFS Foundations', standard: 'General parts introduction with broad examples of protectors and exiles', changed: 'Opens with small-choice empowerment exercise — "Choose one thing right now." Parts identification focuses on freeze/collapse protectors and the "trapped child" exile. Added framing: "You have more power than you know."' },
+                          { mod: 'Module 2: Inner Child Discovery', standard: 'Neutral wound exploration across all wound types equally', changed: 'Guided visualization approaches "the child who learned nothing would change." Reflection prompts explore moments of powerlessness, giving up, and beliefs like "why bother trying." Includes agency inventory — times you did create change.' },
+                          { mod: 'Module 3: Protective Parts Mapping', standard: 'Generic protector identification using standard categories', changed: 'Protector map centers on freeze/shutdown managers and collapse/give-up firefighters. Added prompts: "Which part stops you from even trying?" and "Which part believes the outcome is already decided?"' },
+                          { mod: 'Module 4: Healing & Unburdening', standard: 'Standard unburdening protocol with general reparenting', changed: 'Unburdening releases "Nothing I do matters" burden. Reparenting visualization emphasizes empowerment: "You have choices now. Your voice matters." Added incremental agency exercises — celebrating small wins and successful decisions.' },
+                          { mod: 'Module 5: Integration & Daily Practice', standard: 'General maintenance exercises and trigger management', changed: 'Daily practice includes "one empowered choice" exercise and agency affirmation. Maintenance plan builds confidence through progressively bigger decisions. Added "power log" — tracking moments you successfully influenced an outcome.' }
+                        ]
+                      };
+                      const changes = woundChanges[wound] || woundChanges.abandonment;
+                      return (
+                        <div className={`${cardBg} rounded-2xl border ${glowStyles.emerald} p-5 mt-4`}>
+                          <h4 className={`text-sm font-semibold ${textPrimary} mb-4 flex items-center gap-2`}>
+                            <BookOpen className="w-4 h-4 text-amber-500" />
+                            Specific Curriculum Changes Applied
+                          </h4>
+                          <div className="space-y-4">
+                            {changes.map((item, i) => (
+                              <div key={i} className="flex items-start gap-3">
+                                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5">
+                                  {i + 1}
+                                </div>
+                                <div className="flex-1">
+                                  <p className={`text-xs font-bold ${textPrimary}`}>{item.mod}</p>
+                                  <div className={`mt-1.5 p-2.5 rounded-lg ${isDark ? 'bg-slate-600/40' : 'bg-gray-50'} border ${cardBorder}`}>
+                                    <p className={`text-[10px] uppercase tracking-wider font-semibold ${textMuted} mb-1`}>Standard Version</p>
+                                    <p className={`text-xs ${textMuted} leading-relaxed`}>{item.standard}</p>
+                                  </div>
+                                  <div className={`mt-1.5 p-2.5 rounded-lg ${isDark ? 'bg-emerald-900/20 border-emerald-800/30' : 'bg-emerald-50/70 border-emerald-100'} border`}>
+                                    <p className={`text-[10px] uppercase tracking-wider font-semibold ${isDark ? 'text-emerald-400' : 'text-emerald-600'} mb-1`}>Personalized for {wound}</p>
+                                    <p className={`text-xs ${isDark ? 'text-emerald-200' : 'text-emerald-700'} leading-relaxed`}>{item.changed}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {!assessment && !personalization && (
                       <div className="text-center py-6">

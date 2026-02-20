@@ -296,31 +296,33 @@ export default function Assessments() {
           }, { onConflict: 'client_id,module_id' });
 
         if (assessmentId === 'wounds') {
-          const woundScores = {};
-          Object.entries(results.scores).forEach(([key, val]) => {
-            woundScores[`${key}_score`] = val.average;
-          });
+          const abandonmentTotal = results.scores.abandonment?.total || 0;
+          const shameTotal = results.scores.shame?.total || 0;
+          const neglectTotal = results.scores.neglect?.total || 0;
+          const betrayalTotal = results.scores.betrayal?.total || 0;
+          const helplessnessTotal = results.scores.helplessness?.total || 0;
 
           await supabase
             .from('ifs_assessment_results')
             .upsert({
               client_id: client.id,
-              abandonment_score: results.scores.abandonment?.average || 0,
-              shame_score: results.scores.shame?.average || 0,
-              neglect_score: results.scores.neglect?.average || 0,
-              betrayal_score: results.scores.betrayal?.average || 0,
-              rejection_score: results.scores.helplessness?.average || 0,
+              assessment_type: 'wound',
+              abandonment_score: abandonmentTotal,
+              shame_score: shameTotal,
+              neglect_score: neglectTotal,
+              betrayal_score: betrayalTotal,
+              rejection_score: helplessnessTotal,
               primary_wound: results.primary,
               secondary_wound: results.secondary,
               answers: results.answers,
               personalization_data: { protectorPatterns: results.protectorPatterns || {} },
               created_at: new Date().toISOString()
-            });
+            }, { onConflict: 'client_id,assessment_type' });
 
           try {
             const assessmentForPersonalizer = results.ranked.map(([id, data]) => ({
               id,
-              score: data.total || Math.round((data.average || 0) * (data.count || 5))
+              score: data.total || 0
             }));
             const personalizedCurriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentForPersonalizer);
             if (personalizedCurriculum && personalizedCurriculum.personalizedModules?.length > 0) {

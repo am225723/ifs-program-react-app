@@ -78,9 +78,10 @@ export const supabaseHelpers = {
       .from('ifs_assessment_results')
       .upsert({
         client_id: userId,
+        assessment_type: 'wound',
         ...assessmentData,
         created_at: new Date().toISOString()
-      });
+      }, { onConflict: 'client_id,assessment_type' });
     if (error) console.error('Error saving assessment:', error);
     return data;
   },
