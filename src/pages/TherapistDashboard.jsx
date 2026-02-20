@@ -1841,7 +1841,7 @@ const TherapistDashboard = () => {
               { type: 'Shame', score: assessment.shame_score || 0, color: 'purple' },
               { type: 'Neglect', score: assessment.neglect_score || 0, color: 'amber' },
               { type: 'Betrayal', score: assessment.betrayal_score || 0, color: 'red' },
-              { type: 'Helplessness', score: assessment.helplessness_score || 0, color: 'rose' }
+              { type: 'Helplessness', score: assessment.rejection_score || 0, color: 'rose' }
             ].sort((a, b) => b.score - a.score) : [];
             const maxScore = 25;
             const clientGam = clientGamification[selectedInsightClient];

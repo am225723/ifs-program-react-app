@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS ifs_assessment_results (
   shame_score NUMERIC,
   neglect_score NUMERIC,
   betrayal_score NUMERIC,
-  rejection_score NUMERIC,
+  rejection_score NUMERIC, -- maps to "Helplessness" wound in the UI
   primary_wound VARCHAR(50),
   secondary_wound VARCHAR(50),
   wound_scores JSONB,

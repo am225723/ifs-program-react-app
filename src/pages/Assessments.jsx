@@ -308,7 +308,7 @@ export default function Assessments() {
               shame_score: results.scores.shame?.average || 0,
               neglect_score: results.scores.neglect?.average || 0,
               betrayal_score: results.scores.betrayal?.average || 0,
-              helplessness_score: results.scores.helplessness?.average || 0,
+              rejection_score: results.scores.helplessness?.average || 0,
               primary_wound: results.primary,
               secondary_wound: results.secondary,
               answers: results.answers,
