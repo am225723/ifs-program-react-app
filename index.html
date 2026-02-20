@@ -15,6 +15,16 @@
     <meta name="apple-mobile-web-app-title" content="IFS Healing" />
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
 
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "e5dccda5-8644-424e-a0bd-f4144395e258",
+        });
+      });
+    </script>
+
     <script>
       (function applyRedirectParam() {
         const params = new URLSearchParams(window.location.search);
