@@ -8,8 +8,9 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { useParts } from '../contexts/PartsContext';
 import { useData } from '../contexts/DataContext';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
+import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
 
 const protectivePartsDefinitions = {
   manager: [
@@ -315,6 +316,19 @@ export default function Assessments() {
               personalization_data: { protectorPatterns: results.protectorPatterns || {} },
               created_at: new Date().toISOString()
             });
+
+          try {
+            const assessmentForPersonalizer = results.ranked.map(([id, data]) => ({
+              id,
+              score: data.total || Math.round((data.average || 0) * (data.count || 5))
+            }));
+            const personalizedCurriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(assessmentForPersonalizer);
+            if (personalizedCurriculum && personalizedCurriculum.personalizedModules?.length > 0) {
+              await supabaseHelpers.savePersonalizedCurriculum(client.id, personalizedCurriculum);
+            }
+          } catch (personalizationError) {
+            console.error('Error generating personalized curriculum:', personalizationError);
+          }
         }
       }
 

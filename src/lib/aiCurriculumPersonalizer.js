@@ -85,25 +85,39 @@ class AICurriculumPersonalizer {
       return this.getDefaultCurriculum();
     }
 
-    // Sort by score to get primary, secondary, tertiary wounds
-    const sortedResults = [...assessmentResults].sort((a, b) => b.score - a.score);
+    const validResults = assessmentResults.filter(r => r && r.id && typeof r.score === 'number');
+    if (validResults.length === 0) {
+      console.log('❌ No valid assessment results after filtering');
+      return this.getDefaultCurriculum();
+    }
+
+    const sortedResults = [...validResults].sort((a, b) => b.score - a.score);
     const primaryWound = sortedResults[0];
-    const secondaryWound = sortedResults[1];
+    const secondaryWound = sortedResults[1] || null;
     const tertiaryWound = sortedResults.slice(2);
 
-    // Calculate wound intensity levels
-    const intensity = this.calculateWoundIntensity(primaryWound.score);
+    if (!this.woundProfiles[primaryWound.id]) {
+      console.log(`❌ Unknown wound type: ${primaryWound.id}`);
+      return this.getDefaultCurriculum();
+    }
+
+    const intensity = this.calculateWoundIntensity(primaryWound.score || 0);
     
-    console.log(`📊 Primary wound: ${primaryWound.id} (${primaryWound.score}/24) - ${intensity} intensity`);
-    console.log(`📊 Secondary wound: ${secondaryWound?.id} (${secondaryWound?.score}/24)`);
+    console.log(`📊 Primary wound: ${primaryWound.id} (${primaryWound.score}/25) - ${intensity} intensity`);
+    console.log(`📊 Secondary wound: ${secondaryWound?.id} (${secondaryWound?.score}/25)`);
     console.log(`📊 Tertiary wounds: ${tertiaryWound.map(w => `${w.id}(${w.score})`).join(', ')}`);
 
-    // Generate personalized curriculum
+    const woundRanking = sortedResults.map(w => ({ type: w.id, score: w.score || 0 }));
+    const primaryProfile = this.woundProfiles[primaryWound.id];
+    const focusAreas = primaryProfile ? [...primaryProfile.focus] : [];
+
     const personalizedCurriculum = {
       primaryWound: primaryWound.id,
       secondaryWound: secondaryWound?.id || null,
       tertiaryWounds: tertiaryWound.map(w => w.id),
       intensity,
+      woundRanking,
+      focusAreas,
       personalizedModules: this.generatePersonalizedModules(primaryWound, secondaryWound, tertiaryWound),
       healingPlan: this.createHealingPlan(primaryWound, secondaryWound, intensity),
       adaptations: this.generateAdaptations(primaryWound, secondaryWound, intensity),
@@ -139,7 +153,8 @@ class AICurriculumPersonalizer {
     const primaryProfile = this.woundProfiles[primaryWound.id];
     const secondaryProfile = secondaryWound ? this.woundProfiles[secondaryWound.id] : null;
     
-    // Base modules for everyone
+    const specificChangesMap = this.getSpecificChangesMap();
+
     const baseModules = [
       {
         id: 'foundation-welcome',
@@ -150,13 +165,14 @@ class AICurriculumPersonalizer {
         isRequired: true,
         estimatedMinutes: 15,
         personalizedContent: {
+          woundFocus: primaryProfile.name,
           message: `Your healing journey will focus on healing your ${primaryProfile.name}`,
-          expectations: this.setExpectations(primaryWound, primaryProfile)
+          expectations: this.setExpectations(primaryWound, primaryProfile),
+          specificChanges: `Standard: General welcome and overview. Personalized for ${primaryWound.id}: ${specificChangesMap[primaryWound.id]?.welcome || 'Tailored opening based on wound profile'}`
         }
       }
     ];
 
-    // Primary wound-specific modules
     const primaryModules = primaryProfile.modules.map((moduleId, index) => ({
       id: `${primaryWound.id}-${moduleId}`,
       title: this.generateModuleTitle(primaryWound.id, moduleId),
@@ -169,12 +185,12 @@ class AICurriculumPersonalizer {
         woundFocus: primaryProfile.name,
         healingGoals: primaryProfile.healingGoals,
         activities: primaryProfile.activities,
-        adaptations: this.getActivityAdaptations(primaryWound.id)
+        adaptations: this.getActivityAdaptations(primaryWound.id),
+        specificChanges: specificChangesMap[primaryWound.id]?.modules?.[index] || `Adapted for ${primaryProfile.name} with targeted healing exercises and wound-specific reflections`
       },
       innerChildFocus: true
     }));
 
-    // Secondary wound integration modules
     const integrationModules = [];
     if (secondaryProfile) {
       integrationModules.push({
@@ -186,13 +202,16 @@ class AICurriculumPersonalizer {
         isRequired: true,
         estimatedMinutes: 25,
         personalizedContent: {
+          woundFocus: `${primaryProfile.name} + ${secondaryProfile.name}`,
           message: `Integration work for ${primaryProfile.name} and ${secondaryProfile.name}`,
-          combinedFocus: [primaryProfile.focus, secondaryProfile.focus].flat()
+          combinedFocus: [primaryProfile.focus, secondaryProfile.focus].flat(),
+          healingGoals: [...primaryProfile.healingGoals.slice(0, 2), ...secondaryProfile.healingGoals.slice(0, 2)],
+          activities: [...primaryProfile.activities, ...secondaryProfile.activities],
+          specificChanges: `Standard: Single-wound focus. Personalized: Combines ${primaryWound.id} and ${secondaryWound.id} healing — addresses how ${primaryProfile.name} and ${secondaryProfile.name} patterns interact and reinforce each other`
         }
       });
     }
 
-    // Advanced modules based on intensity
     const advancedModules = [];
     const intensity = this.calculateWoundIntensity(primaryWound.score);
     
@@ -206,13 +225,15 @@ class AICurriculumPersonalizer {
         isRequired: true,
         estimatedMinutes: 30,
         personalizedContent: {
+          woundFocus: primaryProfile.name,
           intensityLevel: intensity,
-          specializedTechniques: this.getIntensiveTechniques(primaryWound.id)
+          specializedTechniques: this.getIntensiveTechniques(primaryWound.id),
+          healingGoals: [`Deep ${primaryWound.id} wound processing`, `${intensity === 'severe' ? 'Gentle stabilization' : 'Gradual deepening'} techniques`],
+          specificChanges: `Standard: Not included at lower intensity levels. Added because ${primaryWound.id} score is ${intensity}: Includes specialized ${primaryProfile.name} protocols with extra safety measures, pacing adjustments, and professional support recommendations`
         }
       });
     }
 
-    // Consolidation and future planning
     const consolidationModules = [
       {
         id: 'healing-consolidation',
@@ -223,8 +244,11 @@ class AICurriculumPersonalizer {
         isRequired: true,
         estimatedMinutes: 20,
         personalizedContent: {
+          woundFocus: primaryProfile.name,
           achievedGoals: primaryProfile.healingGoals,
-          ongoingPractice: this.getOngoingPractices(primaryWound.id)
+          ongoingPractice: this.getOngoingPractices(primaryWound.id),
+          healingGoals: [`Integrate ${primaryWound.id} healing insights`, 'Build sustainable self-care plan'],
+          specificChanges: `Standard: Generic review and next steps. Personalized for ${primaryWound.id}: Consolidation focused on ${primaryProfile.focus.slice(0, 2).join(' and ')}, with ongoing practices tailored to ${primaryProfile.name} recovery`
         }
       }
     ];
@@ -542,6 +566,51 @@ class AICurriculumPersonalizer {
       woundType: this.woundProfiles[secondaryWoundId].name,
       additionalFocus: this.woundProfiles[secondaryWoundId].focus,
       integrationNeeds: [`Address ${secondaryWoundId} patterns`, `Integrate with primary wound healing`]
+    };
+  }
+
+  getSpecificChangesMap() {
+    return {
+      abandonment: {
+        welcome: 'Opens with attachment-focused check-in, validates fear of being left, establishes safe base grounding exercise',
+        modules: [
+          'Standard: General parts introduction. Personalized for abandonment: Opens with attachment-focused check-in, prioritizes people-pleaser and caretaker protectors, added safe base grounding before each exploration',
+          'Standard: Basic self-soothing techniques. Personalized for abandonment: Focuses on secure attachment visualization, "finding the child who was left" inner work, internalized safe parent exercises',
+          'Standard: General boundary work. Personalized for abandonment: Healthy attachment boundaries, distinguishing closeness from enmeshment, building trust without losing self'
+        ]
+      },
+      shame: {
+        welcome: 'Opens with compassion-centered greeting, normalizes shame responses, includes worthiness affirmation before beginning',
+        modules: [
+          'Standard: General parts introduction. Personalized for shame: Prioritizes inner critic and perfectionist protectors, includes self-compassion pauses, reframes "flaws" as protective adaptations',
+          'Standard: Basic self-compassion practices. Personalized for shame: Deep inner critic dialogue work, "the unworthy child" unburdening, mirrors worthiness through compassionate witnessing',
+          'Standard: General inner work exercises. Personalized for shame: Core worthiness building, releasing toxic shame burdens, self-acceptance practices with gentle exposure to vulnerability'
+        ]
+      },
+      neglect: {
+        welcome: 'Opens with needs-awareness check-in, validates the experience of being unseen, includes "I matter" grounding exercise',
+        modules: [
+          'Standard: General parts introduction. Personalized for neglect: Focuses on invisible/lost child parts, self-advocacy protectors, includes needs identification exercises before each module',
+          'Standard: Basic self-care practices. Personalized for neglect: Deep needs identification work, "seeing the unseen child" visualization, building consistent self-nurturing routines',
+          'Standard: General expression exercises. Personalized for neglect: Finding your voice exercises, visibility work, learning to ask for what you need without guilt'
+        ]
+      },
+      betrayal: {
+        welcome: 'Opens with safety-first check-in, validates hypervigilance as protective, establishes trust at your own pace framework',
+        modules: [
+          'Standard: General parts introduction. Personalized for betrayal: Prioritizes hypervigilant and controller protectors, includes safety protocols before vulnerability work, extra grounding between exercises',
+          'Standard: Basic safety techniques. Personalized for betrayal: Advanced safety regulation, "the terrified child" gentle approach, rebuilding internal trust system step by step',
+          'Standard: General trust exercises. Personalized for betrayal: Gradual vulnerability practice, fear processing with containment, rebuilding trust capacity with clear safety exits'
+        ]
+      },
+      helplessness: {
+        welcome: 'Opens with small-choice empowerment exercise, validates freeze/collapse responses, establishes "you have agency here" framework',
+        modules: [
+          'Standard: General parts introduction. Personalized for helplessness: Focuses on freeze/collapse and people-pleaser protectors, includes choice-point exercises, reframes passivity as a learned survival strategy',
+          'Standard: Basic empowerment practices. Personalized for helplessness: "The powerless child" reclamation work, building sense of agency through small wins, transforming "why bother" beliefs',
+          'Standard: General assertiveness exercises. Personalized for helplessness: Progressive agency-building, from micro-choices to confident action, celebrating each moment of personal power'
+        ]
+      }
     };
   }
 
