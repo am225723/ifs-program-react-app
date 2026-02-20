@@ -23,14 +23,16 @@ const woundColors = {
   abandonment: { bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-700', fill: 'bg-blue-500' },
   shame: { bg: 'bg-amber-100', border: 'border-amber-400', text: 'text-amber-700', fill: 'bg-amber-500' },
   neglect: { bg: 'bg-amber-100', border: 'border-amber-400', text: 'text-amber-700', fill: 'bg-amber-500' },
-  betrayal: { bg: 'bg-red-100', border: 'border-red-400', text: 'text-red-700', fill: 'bg-red-500' }
+  betrayal: { bg: 'bg-red-100', border: 'border-red-400', text: 'text-red-700', fill: 'bg-red-500' },
+  helplessness: { bg: 'bg-rose-100', border: 'border-rose-400', text: 'text-rose-700', fill: 'bg-rose-500' }
 };
 
 const woundDescriptions = {
   abandonment: "A deep fear of being left alone or rejected. This wound often develops when caregivers were physically or emotionally unavailable.",
   shame: "A core belief of being fundamentally flawed or unworthy. This wound develops from criticism, humiliation, or conditional love.",
   neglect: "Feeling invisible or that your needs don't matter. This wound comes from emotional or physical needs being consistently unmet.",
-  betrayal: "Difficulty trusting others due to broken promises or violated boundaries. This wound develops from experiences of deception or abandonment."
+  betrayal: "Difficulty trusting others due to broken promises or violated boundaries. This wound develops from experiences of deception or abandonment.",
+  helplessness: "A deep sense of powerlessness or feeling trapped. This wound develops when a child's autonomy was suppressed or they felt unable to influence their environment."
 };
 
 const Profile = ({ client }) => {
@@ -110,8 +112,8 @@ const Profile = ({ client }) => {
       const scores = assessment.scores || {};
       Object.entries(scores).forEach(([wound, score]) => {
         const intensity = getIntensityLevel(score);
-        const bar = '█'.repeat(Math.round(score / 24 * 20)) + '░'.repeat(20 - Math.round(score / 24 * 20));
-        report += `${wound.charAt(0).toUpperCase() + wound.slice(1)}: ${score}/24 (${intensity.level})\n  [${bar}]\n`;
+        const bar = '█'.repeat(Math.round(score / 25 * 20)) + '░'.repeat(20 - Math.round(score / 25 * 20));
+        report += `${wound.charAt(0).toUpperCase() + wound.slice(1)}: ${score}/25 (${intensity.level})\n  [${bar}]\n`;
       });
       report += `\nAssessment Date: ${formatDate(assessment.created_at)}\n\n`;
     }
@@ -185,7 +187,7 @@ const Profile = ({ client }) => {
     return { level: 'Low', color: 'text-green-600' };
   };
 
-  const getScorePercentage = (score) => Math.round((score / 24) * 100);
+  const getScorePercentage = (score) => Math.round((score / 25) * 100);
 
   if (loading) {
     return (
@@ -318,8 +320,9 @@ const Profile = ({ client }) => {
                   </h3>
 
                   <div className="space-y-4 mb-8">
-                    {['abandonment', 'shame', 'neglect', 'betrayal'].map((wound) => {
-                      const score = assessment[`${wound}_score`] || 0;
+                    {['abandonment', 'shame', 'neglect', 'betrayal', 'helplessness'].map((wound) => {
+                      const scoreKey = wound === 'helplessness' ? 'rejection_score' : `${wound}_score`;
+                      const score = assessment[scoreKey] || 0;
                       const intensity = getIntensityLevel(score);
                       const percentage = getScorePercentage(score);
                       const colors = woundColors[wound];
@@ -330,7 +333,7 @@ const Profile = ({ client }) => {
                             <span className={`font-medium capitalize ${colors.text}`}>{wound}</span>
                             <div className="flex items-center gap-3">
                               <span className={`text-sm font-medium ${intensity.color}`}>{intensity.level}</span>
-                              <span className="font-bold text-gray-700">{score}/24</span>
+                              <span className="font-bold text-gray-700">{score}/25</span>
                             </div>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-3">
