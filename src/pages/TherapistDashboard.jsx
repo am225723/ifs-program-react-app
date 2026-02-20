@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Users, User, TrendingUp, Calendar, FileText, MessageSquare, 
   Clock, CheckCircle, AlertTriangle, Activity, Heart, Shield,
@@ -129,6 +129,7 @@ function generateAlertsFromClients(clients, recentAssessments, recentJournals) {
 
 const TherapistDashboard = () => {
   const { theme } = useTheme();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterWound, setFilterWound] = useState('all');
   const [filterRisk, setFilterRisk] = useState('all');
@@ -1280,6 +1281,9 @@ const TherapistDashboard = () => {
               {[
                 { id: 'create-client', label: 'Create New Client PIN', icon: Plus, color: 'from-blue-500 to-blue-600', desc: 'Generate a secure access PIN for a new client' },
                 { id: 'send-reminder', label: 'Send Reminder', icon: MessageSquare, color: 'from-emerald-500 to-emerald-600', desc: 'Send session or activity reminders to clients' },
+                { id: 'link:/therapist-messages', label: 'Client Messages', icon: MessageCircle, color: 'from-blue-500 to-indigo-600', desc: 'Send and receive secure messages with clients' },
+                { id: 'link:/therapist-homework', label: 'Homework Manager', icon: Target, color: 'from-amber-500 to-amber-600', desc: 'Create, assign, and track client homework' },
+                { id: 'link:/therapist-reports', label: 'Progress Reports', icon: Download, color: 'from-emerald-500 to-teal-600', desc: 'Generate and export client progress reports' },
                 { id: 'export-reports', label: 'Export All Reports', icon: Download, color: 'from-amber-500 to-amber-600', desc: 'Download comprehensive progress reports' },
                 { id: 'group-analytics', label: 'View Group Analytics', icon: BarChart3, color: 'from-amber-500 to-amber-600', desc: 'Analyze trends across all clients' }
               ].map((action) => {
@@ -1288,6 +1292,10 @@ const TherapistDashboard = () => {
                   <button
                     key={action.id}
                     onClick={() => {
+                      if (action.id.startsWith('link:')) {
+                        navigate(action.id.replace('link:', ''));
+                        return;
+                      }
                       setActiveAction(action.id);
                       if (action.id === 'create-client') {
                         setNewClientForm({ name: '', email: '', phone: '', pin: '', role: 'client' });

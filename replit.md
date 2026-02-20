@@ -23,7 +23,10 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 **Core Features:**
 - **Assessment Suite**: IFS Wound, Protective Parts, and Self-Energy assessments.
 - **Parts Visualization Studio**: Drag-and-drop interface for mapping and visualizing internal parts.
-- **Therapist Dashboard**: Client management, session notes, progress tracking, client insights, quick actions (create PIN, send reminders, export reports).
+- **Therapist Dashboard**: Client management, session notes, progress tracking, client insights, quick actions (create PIN, send reminders, export reports, messaging, homework, reports).
+- **Therapist-Client Messaging**: Two-way secure messaging between therapists and clients via `TherapistMessages.jsx` and `ClientInbox.jsx`. Uses `ifs_messages` table with sender_role, read receipts, and quick message templates.
+- **Homework Assignment System**: Therapists assign categorized homework (journaling, parts-work, meditation, etc.) with priorities and due dates via `TherapistHomework.jsx`. Clients view/complete assignments with reflection notes via `ClientHomework.jsx`. Uses extended `ifs_therapy_homework` table.
+- **Progress Reports**: Comprehensive report generation with assessment scores, module completion, mood/energy trends, homework rates, gamification stats, and text export via `TherapistReports.jsx`.
 - **Co-Therapy Session Page**: Facilitates guided therapy activities between therapist and client with step-by-step instructions and progress saving.
 - **Gamification Hub**: Integrates XP, levels, badges, and streaks to encourage engagement.
 - **AI Parts Dialogue**: Perplexity AI-powered conversations with inner parts.

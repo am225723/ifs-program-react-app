@@ -199,13 +199,32 @@ CREATE TABLE IF NOT EXISTS ifs_therapy_sessions (
 CREATE TABLE IF NOT EXISTS ifs_therapy_homework (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID NOT NULL,
+  therapist_id UUID,
   title VARCHAR(255) NOT NULL,
   description TEXT,
+  category VARCHAR(50) DEFAULT 'general',
+  priority VARCHAR(20) DEFAULT 'normal',
   due_date DATE,
+  status VARCHAR(30) DEFAULT 'assigned',
   completed BOOLEAN DEFAULT false,
+  completed_at TIMESTAMP WITH TIME ZONE,
+  completion_notes TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- 15b. Messages
+CREATE TABLE IF NOT EXISTS ifs_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  therapist_id UUID NOT NULL,
+  client_id UUID NOT NULL,
+  sender_role VARCHAR(20) NOT NULL DEFAULT 'therapist',
+  body TEXT NOT NULL,
+  read_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_messages_client ON ifs_messages(client_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_messages_therapist ON ifs_messages(therapist_id, created_at DESC);
 
 -- 16. Parts dialogue history
 CREATE TABLE IF NOT EXISTS ifs_parts_dialogue (

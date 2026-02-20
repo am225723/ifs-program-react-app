@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Home as HomeIcon, BookOpen, ClipboardList, BookHeart, Handshake, LogOut } from 'lucide-react';
+import { Settings as SettingsIcon, Home as HomeIcon, BookOpen, ClipboardList, BookHeart, Handshake, LogOut, MessageSquare } from 'lucide-react';
 import { useTheme } from './contexts/ThemeContext';
 import ClientPINLogin from './components/ClientPINLogin';
 import SSOCallback from './components/SSOCallback';
@@ -31,6 +31,11 @@ import ProgressTimeline from './pages/ProgressTimeline';
 import MoodTracker from './pages/MoodTracker';
 import GamificationHub from './pages/GamificationHub';
 import PartsDialogue from './pages/PartsDialogue';
+import TherapistMessages from './pages/TherapistMessages';
+import TherapistHomework from './pages/TherapistHomework';
+import TherapistReports from './pages/TherapistReports';
+import ClientInbox from './pages/ClientInbox';
+import ClientHomework from './pages/ClientHomework';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
@@ -201,6 +206,13 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                         </>
                       )}
                       <Link
+                        to="/inbox"
+                        className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
+                        title="Messages"
+                      >
+                        <MessageSquare className="w-5 h-5" />
+                      </Link>
+                      <Link
                         to="/settings"
                         className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
                         title="Settings"
@@ -262,6 +274,27 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                     ? <CoTherapySession />
                     : <Home clientId={currentClient?.id} client={currentClient} />
                 } />
+                <Route path="/therapist-messages" element={
+                  currentClient?.user_role === 'therapist'
+                    ? <TherapistMessages />
+                    : <Home clientId={currentClient?.id} client={currentClient} />
+                } />
+                <Route path="/therapist-homework" element={
+                  currentClient?.user_role === 'therapist'
+                    ? <TherapistHomework />
+                    : <Home clientId={currentClient?.id} client={currentClient} />
+                } />
+                <Route path="/therapist-reports" element={
+                  currentClient?.user_role === 'therapist'
+                    ? <TherapistReports />
+                    : <Home clientId={currentClient?.id} client={currentClient} />
+                } />
+                <Route path="/inbox" element={
+                  currentClient?.user_role === 'therapist'
+                    ? <TherapistMessages />
+                    : <ClientInbox />
+                } />
+                <Route path="/my-homework" element={<ClientHomework />} />
                 <Route path="/progress-timeline" element={<ProgressTimeline />} />
                 <Route path="/mood-tracker" element={<MoodTracker />} />
                 <Route path="/gamification" element={<GamificationHub />} />
