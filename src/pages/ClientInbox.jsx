@@ -96,16 +96,24 @@ const ClientInbox = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const [sendError, setSendError] = useState(null);
+
   const handleSend = async () => {
-    if (!newMessage.trim() || !selectedTherapist || !client?.id) return;
+    if (!newMessage.trim()) return;
+    if (!selectedTherapist) { setSendError('No therapist selected'); return; }
+    if (!client?.id) { setSendError('Client session not found. Please log in again.'); return; }
     setSending(true);
+    setSendError(null);
     const { error } = await supabase.from('ifs_messages').insert({
       therapist_id: selectedTherapist.id,
       client_id: client.id,
       sender_role: 'client',
       body: newMessage.trim()
     });
-    if (!error) {
+    if (error) {
+      console.error('Send message error:', error);
+      setSendError(error.message || 'Failed to send message');
+    } else {
       setNewMessage('');
       await loadMessages();
     }
@@ -221,6 +229,11 @@ const ClientInbox = () => {
         </div>
 
         <div className={`p-3 border-t ${cardBorder}`}>
+          {sendError && (
+            <div className="px-3 py-2 mb-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded-lg">
+              {sendError}
+            </div>
+          )}
           <div className="flex gap-2">
             <textarea
               value={newMessage}
