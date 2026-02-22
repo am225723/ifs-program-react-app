@@ -79,7 +79,7 @@ const TherapistReports = () => {
         : null;
 
       const completedModules = progress?.filter(p => p.completed).length || 0;
-      const totalModules = 5;
+      const totalModules = progress?.length || 8;
       const completedHomework = homework?.filter(h => h.completed).length || 0;
       const totalHomework = homework?.length || 0;
       const completedExercises = exercises?.filter(e => e.completed).length || 0;

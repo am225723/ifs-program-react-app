@@ -13,18 +13,44 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 export const supabaseHelpers = {
   async saveModuleProgress(userId, moduleId, progress) {
-    const { data, error } = await supabase
+    const progressData = {
+      current_step: progress.currentStep ?? progress.current_step ?? 0,
+      responses: progress.responses || {},
+      completed_steps: progress.completedSteps ?? progress.completed_steps ?? [],
+      completed: progress.isCompleted ?? progress.is_completed ?? progress.completed ?? false,
+      updated_at: new Date().toISOString()
+    };
+    if (progress.completedAt || progress.completed_at) {
+      progressData.completed_at = progress.completedAt || progress.completed_at;
+    }
+
+    const { data: existingRows } = await supabase
       .from('ifs_client_progress')
-      .upsert({
-        client_id: userId,
-        module_id: moduleId,
-        current_step: progress.currentStep ?? progress.current_step ?? 0,
-        responses: progress.responses || {},
-        completed_steps: progress.completedSteps ?? progress.completed_steps ?? [],
-        interactive_data: progress.interactiveData ?? progress.interactive_data ?? {},
-        completed: progress.isCompleted ?? progress.is_completed ?? progress.completed ?? false,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'client_id,module_id' });
+      .select('id')
+      .eq('client_id', userId)
+      .eq('module_id', moduleId)
+      .order('updated_at', { ascending: false });
+
+    const existing = existingRows?.[0] || null;
+
+    if (existingRows && existingRows.length > 1) {
+      const dupeIds = existingRows.slice(1).map(r => r.id);
+      await supabase.from('ifs_client_progress').delete().in('id', dupeIds);
+    }
+
+    let data, error;
+    if (existing) {
+      ({ data, error } = await supabase
+        .from('ifs_client_progress')
+        .update(progressData)
+        .eq('id', existing.id)
+        .select());
+    } else {
+      ({ data, error } = await supabase
+        .from('ifs_client_progress')
+        .insert({ client_id: userId, module_id: moduleId, ...progressData })
+        .select());
+    }
     if (error) console.error('Error saving module progress:', error);
     return data;
   },
@@ -35,9 +61,10 @@ export const supabaseHelpers = {
       .select('*')
       .eq('client_id', userId)
       .eq('module_id', moduleId)
-      .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching module progress:', error);
-    return data;
+      .order('updated_at', { ascending: false })
+      .maybeSingle();
+    if (error) console.error('Error fetching module progress:', error);
+    return data || null;
   },
 
   async getAllModuleProgress(userId) {
@@ -91,8 +118,21 @@ export const supabaseHelpers = {
     };
     const { data, error } = await supabase
       .from('ifs_assessment_results')
-      .insert(safeData);
-    if (error) console.error('Error saving assessment:', error);
+      .insert(safeData)
+      .select();
+    if (error) {
+      console.error('Error saving assessment:', error);
+      const { helplessness_score, ...fallbackData } = safeData;
+      const { data: retryData, error: retryError } = await supabase
+        .from('ifs_assessment_results')
+        .insert(fallbackData)
+        .select();
+      if (retryError) {
+        console.error('Retry save also failed:', retryError);
+        return null;
+      }
+      return retryData;
+    }
     return data;
   },
 
@@ -518,6 +558,12 @@ export const supabaseHelpers = {
         client_id: userId,
         module_id: m.id || m.moduleId || `module_${i + 1}`,
         module_title: m.title || m.moduleTitle || `Module ${i + 1}`,
+        module_order: i + 1,
+        module_description: m.description || m.moduleDescription || '',
+        customized_content: m.customizedContent || m.content || {},
+        primary_wound_focus: m.primaryWoundFocus || m.woundFocus || null,
+        estimated_minutes: m.estimatedMinutes || m.duration || 30,
+        difficulty_level: m.difficultyLevel || m.difficulty || 'beginner',
         updated_at: new Date().toISOString()
       }));
 
@@ -540,12 +586,20 @@ export const supabaseHelpers = {
     if (error) console.error('Error fetching curriculum:', error);
     if (!data || data.length === 0) return null;
     return {
-      personalizedModules: data.map(row => ({
-        id: row.module_id,
-        moduleId: row.module_id,
-        title: row.module_title,
-        moduleTitle: row.module_title
-      }))
+      personalizedModules: data
+        .sort((a, b) => (a.module_order || 0) - (b.module_order || 0))
+        .map(row => ({
+          id: row.module_id,
+          moduleId: row.module_id,
+          title: row.module_title,
+          moduleTitle: row.module_title,
+          description: row.module_description || '',
+          customizedContent: row.customized_content || {},
+          primaryWoundFocus: row.primary_wound_focus,
+          estimatedMinutes: row.estimated_minutes || 30,
+          difficultyLevel: row.difficulty_level || 'beginner',
+          order: row.module_order
+        }))
     };
   },
 
