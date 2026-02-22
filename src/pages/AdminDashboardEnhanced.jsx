@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Users, 
   Plus, 
@@ -48,6 +48,7 @@ const getWoundColor = (wound) => {
 };
 
 const AdminDashboardEnhanced = () => {
+  const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -563,6 +564,8 @@ const AdminDashboardEnhanced = () => {
         <ClientDetailsModal
           client={selectedClient}
           onClose={() => setSelectedClient(null)}
+          onViewReport={() => { setSelectedClient(null); navigate('/therapist-reports'); }}
+          onSendMessage={() => { setSelectedClient(null); navigate('/therapist-messages'); }}
         />
       )}
 
@@ -1105,7 +1108,7 @@ const CreateClientModal = ({ onClose, onCreate }) => {
   );
 };
 
-const ClientDetailsModal = ({ client, onClose }) => {
+const ClientDetailsModal = ({ client, onClose, onViewReport, onSendMessage }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -1181,10 +1184,16 @@ const ClientDetailsModal = ({ client, onClose }) => {
           </div>
 
           <div className="flex gap-3">
-            <button className="flex-1 px-6 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors">
+            <button
+              onClick={onViewReport}
+              className="flex-1 px-6 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+            >
               View Full Report
             </button>
-            <button className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+            <button
+              onClick={onSendMessage}
+              className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+            >
               Send Message
             </button>
           </div>

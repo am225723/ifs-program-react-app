@@ -6,7 +6,7 @@ import {
   ChevronRight, Search, Filter, Plus, Eye, BarChart3, Sparkles,
   BookOpen, ChevronDown, ChevronUp, MessageCircle, Flag, Lightbulb,
   Play, Target, X, Copy, Download, ArrowLeft, RefreshCw,
-  Award, Flame, Star, Zap, Trophy, Crown, Gem
+  Award, Flame, Star, Zap, Trophy, Crown, Gem, Edit2, Save
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
@@ -89,7 +89,9 @@ function generateAlertsFromClients(clients, recentAssessments, recentJournals) {
         icon: AlertTriangle,
         message: `${client.name} hasn't logged in for ${diffDays} days`,
         client: client.name,
-        time: `${diffDays} days inactive`
+        time: `${diffDays} days inactive`,
+        clientId: client.id,
+        action: 'view_progress'
       });
     }
   });
@@ -104,7 +106,9 @@ function generateAlertsFromClients(clients, recentAssessments, recentJournals) {
         icon: CheckCircle,
         message: `${client.name} completed a new assessment`,
         client: client.name,
-        time: daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`
+        time: daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`,
+        clientId: client.id,
+        action: 'view_assessment'
       });
     }
   });
@@ -119,7 +123,9 @@ function generateAlertsFromClients(clients, recentAssessments, recentJournals) {
         icon: FileText,
         message: `${client.name} wrote a new journal entry`,
         client: client.name,
-        time: daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`
+        time: daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`,
+        clientId: client.id,
+        action: 'view_journal'
       });
     }
   });
@@ -161,6 +167,11 @@ const TherapistDashboard = () => {
   const [reminderForm, setReminderForm] = useState({ clientId: '', type: 'session', message: '' });
   const [reminderSaved, setReminderSaved] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [expandedJournals, setExpandedJournals] = useState({});
+  const [selectedLessonClient, setSelectedLessonClient] = useState('');
+  const [clientCurriculum, setClientCurriculum] = useState(null);
+  const [editingModule, setEditingModule] = useState(null);
+  const [editModuleForm, setEditModuleForm] = useState({ title: '', description: '', estimatedMinutes: 30 });
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
@@ -366,7 +377,10 @@ const TherapistDashboard = () => {
         { data: moduleAnswers },
         { data: activityProgress },
         assessmentData,
-        personalizedCurriculum
+        personalizedCurriculum,
+        { data: interactiveData },
+        { data: journalEntries },
+        { data: progressData }
       ] = await Promise.all([
         supabase
           .from('ifs_module_answers')
@@ -379,7 +393,22 @@ const TherapistDashboard = () => {
           .select('*')
           .eq('client_id', clientId),
         supabaseHelpers.getAssessment(clientId),
-        supabaseHelpers.getPersonalizedCurriculum(clientId)
+        supabaseHelpers.getPersonalizedCurriculum(clientId),
+        supabase
+          .from('ifs_interactive_data')
+          .select('*')
+          .eq('client_id', clientId)
+          .in('module_id', ['assessment_parts', 'assessment_self-energy']),
+        supabase
+          .from('ifs_journal_entries')
+          .select('*')
+          .eq('client_id', clientId)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('ifs_client_progress')
+          .select('*')
+          .eq('client_id', clientId)
       ]);
 
       const recentAnswers = [];
@@ -397,6 +426,9 @@ const TherapistDashboard = () => {
         });
       });
 
+      const partsEntry = (interactiveData || []).find(d => d.module_id === 'assessment_parts');
+      const selfEnergyEntry = (interactiveData || []).find(d => d.module_id === 'assessment_self-energy');
+
       const client = clients.find(c => c.id === clientId);
       const wound = client?.primaryWound || 'abandonment';
       const sessionPrep = sessionPrepByWound[wound] || sessionPrepByWound.abandonment;
@@ -406,7 +438,11 @@ const TherapistDashboard = () => {
         activityProgress: activityProgress || [],
         sessionPrep,
         assessment: assessmentData || null,
-        personalization: personalizedCurriculum || null
+        personalization: personalizedCurriculum || null,
+        partsAssessment: partsEntry?.data || null,
+        selfEnergyAssessment: selfEnergyEntry?.data || null,
+        journalEntries: journalEntries || [],
+        moduleProgress: progressData || []
       });
     } catch (e) {
       console.error('Error loading client insights:', e);
@@ -474,6 +510,38 @@ const TherapistDashboard = () => {
 
   const toggleModule = (moduleId) => {
     setExpandedModules(prev => ({ ...prev, [moduleId]: !prev[moduleId] }));
+  };
+
+  const loadClientCurriculum = async (clientId) => {
+    if (!clientId) { setClientCurriculum(null); return; }
+    const { data } = await supabase
+      .from('ifs_personalized_curriculum')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('module_order');
+    setClientCurriculum(data || []);
+  };
+
+  const [moduleSaveError, setModuleSaveError] = useState('');
+  const handleSaveModuleEdit = async () => {
+    if (!editingModule) return;
+    setModuleSaveError('');
+    const { error } = await supabase
+      .from('ifs_personalized_curriculum')
+      .update({
+        module_title: editModuleForm.title,
+        module_description: editModuleForm.description,
+        estimated_minutes: editModuleForm.estimatedMinutes,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', editingModule.id);
+    if (error) {
+      console.error('Error saving module:', error);
+      setModuleSaveError('Failed to save changes. Please try again.');
+    } else {
+      loadClientCurriculum(selectedLessonClient);
+      setEditingModule(null);
+    }
   };
 
   const handleFeedbackChange = async (clientId, value) => {
@@ -1263,7 +1331,15 @@ const TherapistDashboard = () => {
                       <p className={`text-sm ${textPrimary}`}>{alert.message}</p>
                       <p className={`text-xs mt-1 ${textMuted}`}>{alert.time}</p>
                     </div>
-                    <button className={`text-xs px-3 py-1 rounded-lg ${hoverBg} ${textSecondary} border ${cardBorder} flex-shrink-0`}>
+                    <button 
+                      onClick={() => {
+                        if (alert.clientId) {
+                          setSelectedInsightClient(alert.clientId);
+                          setActiveTab('insights');
+                        }
+                      }}
+                      className={`text-xs px-3 py-1 rounded-lg ${hoverBg} ${textSecondary} border ${cardBorder} flex-shrink-0`}
+                    >
                       View
                     </button>
                   </div>
@@ -1732,104 +1808,262 @@ const TherapistDashboard = () => {
               <p className={`text-sm ${textSecondary}`}>Detailed guides for each module session</p>
             </div>
           </div>
-          <div className="space-y-4">
-            {lessonPlans.map((module, index) => (
-              <div key={module.id} className={`${cardBg} rounded-xl border ${cardBorder} overflow-hidden transition-all`}>
-                <button
-                  onClick={() => toggleModule(module.id)}
-                  className={`w-full flex items-center justify-between p-5 text-left ${hoverBg} transition-colors`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold ${textPrimary}`}>{module.title}</h3>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className={`text-xs ${textMuted} flex items-center gap-1`}>
-                          <Clock className="w-3 h-3" />
-                          {module.duration}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  {expandedModules[module.id] ? (
-                    <ChevronUp className={`w-5 h-5 ${textMuted} flex-shrink-0`} />
-                  ) : (
-                    <ChevronDown className={`w-5 h-5 ${textMuted} flex-shrink-0`} />
-                  )}
-                </button>
 
-                {expandedModules[module.id] && (
-                  <div className={`px-5 pb-5 border-t ${cardBorder}`}>
-                    <div className="grid md:grid-cols-2 gap-5 mt-5">
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Lightbulb className="w-4 h-4 text-amber-500" />
-                          <h4 className={`font-medium ${textPrimary} text-sm`}>Session Goals</h4>
-                        </div>
-                        <p className={`text-sm ${textSecondary} leading-relaxed`}>{module.goals}</p>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <MessageCircle className="w-4 h-4 text-stone-500" />
-                          <h4 className={`font-medium ${textPrimary} text-sm`}>Discussion Topics</h4>
-                        </div>
-                        <ul className="space-y-2">
-                          {module.topics.map((topic, i) => (
-                            <li key={i} className={`text-sm ${textSecondary} flex items-start gap-2`}>
-                              <span className="text-amber-400 mt-0.5 flex-shrink-0">&ldquo;</span>
-                              <span className="italic">{topic}</span>
-                              <span className="text-amber-400 mt-0.5 flex-shrink-0">&rdquo;</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Activity className="w-4 h-4 text-emerald-500" />
-                          <h4 className={`font-medium ${textPrimary} text-sm`}>Activities to Do Together</h4>
-                        </div>
-                        <ul className="space-y-1.5">
-                          {module.activities.map((activity, i) => (
-                            <li key={i} className={`text-sm ${textSecondary} flex items-center gap-2`}>
-                              <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                              {activity}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <AlertTriangle className="w-4 h-4 text-amber-500" />
-                          <h4 className={`font-medium ${textPrimary} text-sm`}>What to Watch For</h4>
-                        </div>
-                        <ul className="space-y-1.5">
-                          {module.watchFor.map((item, i) => (
-                            <li key={i} className={`text-sm ${textSecondary} flex items-center gap-2`}>
-                              <Flag className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <div className={`mt-5 p-4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-amber-50'} border ${isDark ? 'border-slate-600' : 'border-amber-100'}`}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <BookOpen className="w-4 h-4 text-amber-500" />
-                        <h4 className={`font-medium ${textPrimary} text-sm`}>Homework Assignment</h4>
-                      </div>
-                      <p className={`text-sm ${textSecondary}`}>{module.homework}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="mb-6">
+            <label className={`block text-sm font-medium ${textSecondary} mb-2`}>View Client's Personalized Curriculum</label>
+            <select
+              value={selectedLessonClient}
+              onChange={(e) => {
+                setSelectedLessonClient(e.target.value);
+                if (e.target.value) loadClientCurriculum(e.target.value);
+                else setClientCurriculum(null);
+              }}
+              className={`w-full sm:w-80 px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none`}
+            >
+              <option value="">Standard Lesson Plans</option>
+              {clients.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
           </div>
+
+          {selectedLessonClient && clientCurriculum ? (
+            <div className="space-y-4">
+              {clientCurriculum.length === 0 ? (
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-8 text-center`}>
+                  <BookOpen className={`w-10 h-10 mx-auto mb-3 ${textMuted}`} />
+                  <p className={`${textSecondary}`}>No personalized curriculum found for this client.</p>
+                  <p className={`text-sm ${textMuted} mt-1`}>Complete an assessment first to generate a personalized curriculum.</p>
+                </div>
+              ) : (
+                clientCurriculum.map((mod, index) => {
+                  const customContent = mod.customized_content || {};
+                  const woundColors = woundColorMap[mod.primary_wound_focus] || { bg: 'bg-gray-100', text: 'text-gray-700' };
+                  const difficultyColors = {
+                    beginner: 'bg-green-100 text-green-700',
+                    intermediate: 'bg-yellow-100 text-yellow-700',
+                    advanced: 'bg-red-100 text-red-700'
+                  };
+
+                  return (
+                    <div key={mod.id} className={`${cardBg} rounded-xl border ${cardBorder} overflow-hidden transition-all`}>
+                      {editingModule?.id === mod.id ? (
+                        <div className="p-5 space-y-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className={`font-semibold ${textPrimary}`}>Edit Module {mod.module_order || index + 1}</h3>
+                            <button
+                              onClick={() => setEditingModule(null)}
+                              className={`p-1.5 rounded-lg ${hoverBg} ${textMuted}`}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div>
+                            <label className={`block text-sm font-medium ${textSecondary} mb-1`}>Title</label>
+                            <input
+                              type="text"
+                              value={editModuleForm.title}
+                              onChange={(e) => setEditModuleForm(prev => ({ ...prev, title: e.target.value }))}
+                              className={`w-full px-3 py-2 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none`}
+                            />
+                          </div>
+                          <div>
+                            <label className={`block text-sm font-medium ${textSecondary} mb-1`}>Description</label>
+                            <textarea
+                              value={editModuleForm.description}
+                              onChange={(e) => setEditModuleForm(prev => ({ ...prev, description: e.target.value }))}
+                              rows={3}
+                              className={`w-full px-3 py-2 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none resize-none`}
+                            />
+                          </div>
+                          <div>
+                            <label className={`block text-sm font-medium ${textSecondary} mb-1`}>Estimated Minutes</label>
+                            <input
+                              type="number"
+                              value={editModuleForm.estimatedMinutes}
+                              onChange={(e) => setEditModuleForm(prev => ({ ...prev, estimatedMinutes: parseInt(e.target.value) || 0 }))}
+                              className={`w-32 px-3 py-2 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none`}
+                            />
+                          </div>
+                          {moduleSaveError && (
+                            <p className="text-xs text-red-500 font-medium">{moduleSaveError}</p>
+                          )}
+                          <div className="flex gap-2 pt-2">
+                            <button
+                              onClick={handleSaveModuleEdit}
+                              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+                            >
+                              <Save className="w-4 h-4" />
+                              Save Changes
+                            </button>
+                            <button
+                              onClick={() => { setEditingModule(null); setModuleSaveError(''); }}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium ${isDark ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'} transition-colors`}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-5">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-4 flex-1">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                {mod.module_order || index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <h3 className={`font-semibold ${textPrimary}`}>{mod.module_title}</h3>
+                                <p className={`text-sm ${textSecondary} mt-1 leading-relaxed`}>{mod.module_description}</p>
+
+                                <div className="flex flex-wrap items-center gap-2 mt-3">
+                                  {mod.primary_wound_focus && (
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${woundColors.bg} ${woundColors.text}`}>
+                                      {mod.primary_wound_focus}
+                                    </span>
+                                  )}
+                                  {mod.difficulty_level && (
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${difficultyColors[mod.difficulty_level] || 'bg-gray-100 text-gray-700'}`}>
+                                      {mod.difficulty_level}
+                                    </span>
+                                  )}
+                                  <span className={`inline-flex items-center gap-1 text-xs ${textMuted}`}>
+                                    <Clock className="w-3 h-3" />
+                                    {mod.estimated_minutes || 30} min
+                                  </span>
+                                </div>
+
+                                {(customContent.specificChanges || customContent.woundFocus) && (
+                                  <div className={`mt-3 p-3 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-amber-50'} border ${isDark ? 'border-slate-600' : 'border-amber-100'}`}>
+                                    <p className={`text-xs font-medium ${textMuted} uppercase tracking-wider mb-1`}>Personalization</p>
+                                    <p className={`text-sm ${textSecondary}`}>
+                                      {customContent.specificChanges || customContent.woundFocus}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setEditingModule(mod);
+                                setEditModuleForm({
+                                  title: mod.module_title || '',
+                                  description: mod.module_description || '',
+                                  estimatedMinutes: mod.estimated_minutes || 30
+                                });
+                              }}
+                              className={`p-2 rounded-lg ${hoverBg} ${textMuted} hover:text-amber-500 transition-colors flex-shrink-0`}
+                              title="Edit module"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {lessonPlans.map((module, index) => (
+                <div key={module.id} className={`${cardBg} rounded-xl border ${cardBorder} overflow-hidden transition-all`}>
+                  <button
+                    onClick={() => toggleModule(module.id)}
+                    className={`w-full flex items-center justify-between p-5 text-left ${hoverBg} transition-colors`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <h3 className={`font-semibold ${textPrimary}`}>{module.title}</h3>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className={`text-xs ${textMuted} flex items-center gap-1`}>
+                            <Clock className="w-3 h-3" />
+                            {module.duration}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {expandedModules[module.id] ? (
+                      <ChevronUp className={`w-5 h-5 ${textMuted} flex-shrink-0`} />
+                    ) : (
+                      <ChevronDown className={`w-5 h-5 ${textMuted} flex-shrink-0`} />
+                    )}
+                  </button>
+
+                  {expandedModules[module.id] && (
+                    <div className={`px-5 pb-5 border-t ${cardBorder}`}>
+                      <div className="grid md:grid-cols-2 gap-5 mt-5">
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Lightbulb className="w-4 h-4 text-amber-500" />
+                            <h4 className={`font-medium ${textPrimary} text-sm`}>Session Goals</h4>
+                          </div>
+                          <p className={`text-sm ${textSecondary} leading-relaxed`}>{module.goals}</p>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <MessageCircle className="w-4 h-4 text-stone-500" />
+                            <h4 className={`font-medium ${textPrimary} text-sm`}>Discussion Topics</h4>
+                          </div>
+                          <ul className="space-y-2">
+                            {module.topics.map((topic, i) => (
+                              <li key={i} className={`text-sm ${textSecondary} flex items-start gap-2`}>
+                                <span className="text-amber-400 mt-0.5 flex-shrink-0">&ldquo;</span>
+                                <span className="italic">{topic}</span>
+                                <span className="text-amber-400 mt-0.5 flex-shrink-0">&rdquo;</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Activity className="w-4 h-4 text-emerald-500" />
+                            <h4 className={`font-medium ${textPrimary} text-sm`}>Activities to Do Together</h4>
+                          </div>
+                          <ul className="space-y-1.5">
+                            {module.activities.map((activity, i) => (
+                              <li key={i} className={`text-sm ${textSecondary} flex items-center gap-2`}>
+                                <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                                {activity}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <AlertTriangle className="w-4 h-4 text-amber-500" />
+                            <h4 className={`font-medium ${textPrimary} text-sm`}>What to Watch For</h4>
+                          </div>
+                          <ul className="space-y-1.5">
+                            {module.watchFor.map((item, i) => (
+                              <li key={i} className={`text-sm ${textSecondary} flex items-center gap-2`}>
+                                <Flag className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className={`mt-5 p-4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-amber-50'} border ${isDark ? 'border-slate-600' : 'border-amber-100'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <BookOpen className="w-4 h-4 text-amber-500" />
+                          <h4 className={`font-medium ${textPrimary} text-sm`}>Homework Assignment</h4>
+                        </div>
+                        <p className={`text-sm ${textSecondary}`}>{module.homework}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -1942,6 +2176,112 @@ const TherapistDashboard = () => {
                             )}
                           </p>
                         </div>
+                      </div>
+                    )}
+
+                    {clientInsights.partsAssessment && (
+                      <div className="mb-6">
+                        <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                          <Shield className="w-4 h-4 text-purple-500" />
+                          Protective Parts Assessment
+                        </h4>
+                        {(() => {
+                          const partsData = clientInsights.partsAssessment;
+                          const scores = partsData.scores || partsData.results || partsData.categories || {};
+                          const patterns = partsData.patterns || partsData.protectorPatterns || partsData.identified_patterns || [];
+                          const sortedScores = Object.entries(scores)
+                            .map(([key, val]) => ({ category: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), score: typeof val === 'number' ? val : (val?.score || 0) }))
+                            .sort((a, b) => b.score - a.score);
+                          const maxPartScore = sortedScores.length > 0 ? Math.max(...sortedScores.map(s => s.score), 10) : 10;
+                          return (
+                            <div>
+                              {sortedScores.length > 0 && (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                                  {sortedScores.map((s, idx) => (
+                                    <div key={s.category} className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className={`text-xs font-medium ${textSecondary}`}>{s.category}</span>
+                                        <span className={`text-sm font-bold ${textPrimary}`}>{s.score}</span>
+                                      </div>
+                                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div
+                                          className={`h-full rounded-full transition-all ${idx === 0 ? 'bg-purple-500' : idx === 1 ? 'bg-indigo-500' : 'bg-violet-400'}`}
+                                          style={{ width: `${(s.score / maxPartScore) * 100}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {Array.isArray(patterns) && patterns.length > 0 && (
+                                <div className={`p-3 rounded-lg ${isDark ? 'bg-purple-900/20 border-purple-800/30' : 'bg-purple-50 border-purple-100'} border`}>
+                                  <p className={`text-xs font-semibold ${isDark ? 'text-purple-300' : 'text-purple-700'} mb-2`}>Identified Protector Patterns:</p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {patterns.map((p, i) => (
+                                      <span key={i} className={`text-xs px-2 py-1 rounded-lg ${isDark ? 'bg-purple-800/40 text-purple-200' : 'bg-purple-100 text-purple-700'}`}>
+                                        {typeof p === 'string' ? p : p.name || p.label || JSON.stringify(p)}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              {sortedScores.length === 0 && (!Array.isArray(patterns) || patterns.length === 0) && (
+                                <div className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                                  <p className={`text-xs ${textMuted}`}>Parts assessment data recorded. Raw data available for review.</p>
+                                  <pre className={`text-xs ${textMuted} mt-2 whitespace-pre-wrap break-words max-h-32 overflow-y-auto`}>
+                                    {JSON.stringify(partsData, null, 2)}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+
+                    {clientInsights.selfEnergyAssessment && (
+                      <div className="mb-6">
+                        <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                          <Heart className="w-4 h-4 text-emerald-500" />
+                          Self-Energy Assessment
+                        </h4>
+                        {(() => {
+                          const seData = clientInsights.selfEnergyAssessment;
+                          const qualities = seData.scores || seData.qualities || seData.selfEnergyScores || {};
+                          const sortedQualities = Object.entries(qualities)
+                            .map(([key, val]) => ({ quality: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), score: typeof val === 'number' ? val : (val?.score || 0) }))
+                            .sort((a, b) => b.score - a.score);
+                          const maxSEScore = sortedQualities.length > 0 ? Math.max(...sortedQualities.map(s => s.score), 10) : 10;
+                          return (
+                            <div>
+                              {sortedQualities.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                  {sortedQualities.map((q, idx) => (
+                                    <div key={q.quality} className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                                      <div className="flex items-center justify-between mb-2">
+                                        <span className={`text-xs font-medium ${textSecondary}`}>{q.quality}</span>
+                                        <span className={`text-sm font-bold ${textPrimary}`}>{q.score}</span>
+                                      </div>
+                                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div
+                                          className={`h-full rounded-full transition-all ${idx < 2 ? 'bg-emerald-500' : idx < 4 ? 'bg-teal-500' : 'bg-green-400'}`}
+                                          style={{ width: `${(q.score / maxSEScore) * 100}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                                  <p className={`text-xs ${textMuted}`}>Self-energy assessment data recorded. Raw data available for review.</p>
+                                  <pre className={`text-xs ${textMuted} mt-2 whitespace-pre-wrap break-words max-h-32 overflow-y-auto`}>
+                                    {JSON.stringify(seData, null, 2)}
+                                  </pre>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
 
@@ -2183,6 +2523,110 @@ const TherapistDashboard = () => {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {clientInsights.journalEntries && clientInsights.journalEntries.length > 0 && (
+                  <div className={`${cardBg} rounded-2xl border ${glowStyles.purple} p-5`}>
+                    <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
+                      <FileText className="w-5 h-5 text-purple-500" />
+                      Journal Entries
+                      <span className={`text-xs font-normal ${textMuted} ml-1`}>({clientInsights.journalEntries.length})</span>
+                    </h3>
+                    <div className="space-y-3">
+                      {clientInsights.journalEntries.map((entry, i) => {
+                        const isExpanded = expandedJournals[entry.id];
+                        const content = entry.content || '';
+                        const needsTruncate = content.length > 200;
+                        return (
+                          <div key={entry.id || i} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <p className={`text-sm font-medium ${textPrimary}`}>{entry.title || 'Untitled Entry'}</p>
+                                {entry.mood && (
+                                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                    entry.mood === 'great' || entry.mood === 'happy' ? 'bg-emerald-100 text-emerald-700' :
+                                    entry.mood === 'good' || entry.mood === 'calm' ? 'bg-blue-100 text-blue-700' :
+                                    entry.mood === 'okay' || entry.mood === 'neutral' ? 'bg-amber-100 text-amber-700' :
+                                    entry.mood === 'bad' || entry.mood === 'sad' ? 'bg-orange-100 text-orange-700' :
+                                    entry.mood === 'terrible' || entry.mood === 'angry' ? 'bg-red-100 text-red-700' :
+                                    'bg-gray-100 text-gray-700'
+                                  }`}>{entry.mood}</span>
+                                )}
+                              </div>
+                              <span className={`text-xs ${textMuted} whitespace-nowrap`}>
+                                {entry.created_at ? new Date(entry.created_at).toLocaleDateString() : ''}
+                              </span>
+                            </div>
+                            <p className={`text-sm ${textSecondary} leading-relaxed`}>
+                              {isExpanded || !needsTruncate ? content : `${content.substring(0, 200)}...`}
+                            </p>
+                            {needsTruncate && (
+                              <button
+                                onClick={() => setExpandedJournals(prev => ({ ...prev, [entry.id]: !prev[entry.id] }))}
+                                className={`text-xs font-medium mt-2 ${isDark ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'}`}
+                              >
+                                {isExpanded ? 'Show less' : 'Read more'}
+                              </button>
+                            )}
+                            {entry.tags && entry.tags.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {entry.tags.map((tag, ti) => (
+                                  <span key={ti} className={`text-[10px] px-1.5 py-0.5 rounded ${isDark ? 'bg-slate-600 text-slate-300' : 'bg-gray-200 text-gray-600'}`}>
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {clientInsights.moduleProgress && clientInsights.moduleProgress.length > 0 && (
+                  <div className={`${cardBg} rounded-2xl border ${glowStyles.blue} p-5`}>
+                    <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
+                      <BarChart3 className="w-5 h-5 text-blue-500" />
+                      Module Progress
+                    </h3>
+                    <div className="space-y-3">
+                      {clientInsights.moduleProgress.map((prog, i) => {
+                        const completedSteps = Array.isArray(prog.completed_steps) ? prog.completed_steps.length : (prog.completed_steps || 0);
+                        const totalSteps = prog.total_steps || 0;
+                        const currentStep = prog.current_step || 0;
+                        const progressPct = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : (prog.completed ? 100 : 0);
+                        return (
+                          <div key={prog.id || i} className={`flex items-center gap-3 p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                            {prog.completed ? (
+                              <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                            ) : (
+                              <Clock className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-medium ${textPrimary}`}>
+                                {(prog.module_id || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              </p>
+                              <div className="flex items-center gap-3 mt-1">
+                                <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full ${prog.completed ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                                    style={{ width: `${progressPct}%` }}
+                                  />
+                                </div>
+                                <span className={`text-xs ${textMuted} whitespace-nowrap`}>
+                                  {totalSteps > 0 ? `${completedSteps}/${totalSteps} steps` : (prog.completed ? 'Complete' : `Step ${currentStep}`)}
+                                </span>
+                              </div>
+                            </div>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${prog.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {prog.completed ? 'Done' : 'In Progress'}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 

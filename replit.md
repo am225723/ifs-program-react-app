@@ -23,7 +23,7 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 **Core Features:**
 - **Assessment Suite**: IFS Wound, Protective Parts, and Self-Energy assessments.
 - **Parts Visualization Studio**: Drag-and-drop interface for mapping and visualizing internal parts.
-- **Therapist Dashboard**: Client management, session notes, progress tracking, client insights, quick actions (create PIN, send reminders, export reports, messaging, homework, reports).
+- **Therapist Dashboard**: Client management, session notes, progress tracking, client insights (wound assessment, protective parts, self-energy, journal entries, module progress, gamification, session prep), quick actions (create PIN, send reminders, export reports, messaging, homework, reports). Alerts have functional "View" buttons that navigate to the relevant client's Insights tab. Lesson Plans tab includes client selector for viewing personalized curriculum vs standard, with inline module editing (title, description, estimated minutes).
 - **Therapist-Client Messaging**: Two-way secure messaging between therapists and clients via `TherapistMessages.jsx` and `ClientInbox.jsx`. Uses `ifs_messages` table with sender_role, read receipts, and quick message templates.
 - **Homework Assignment System**: Therapists assign categorized homework (journaling, parts-work, meditation, etc.) with priorities and due dates via `TherapistHomework.jsx`. Clients view/complete assignments with reflection notes via `ClientHomework.jsx`. Uses extended `ifs_therapy_homework` table.
 - **Progress Reports**: Comprehensive report generation with assessment scores, module completion, mood/energy trends, homework rates, gamification stats, and text export via `TherapistReports.jsx`.
