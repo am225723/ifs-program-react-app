@@ -93,8 +93,8 @@ export const supabaseHelpers = {
       .eq('client_id', userId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching assessment:', error);
+      .maybeSingle();
+    if (error) console.error('Error fetching assessment:', error);
     return data;
   },
 
@@ -216,11 +216,11 @@ export const supabaseHelpers = {
   async saveClientData(userId, userData) {
     const { data, error } = await supabase
       .from('ifs_clients')
-      .upsert({
-        id: userId,
+      .update({
         ...userData,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
+      })
+      .eq('id', userId);
     if (error) console.error('Error saving client data:', error);
     return data;
   },
@@ -495,25 +495,48 @@ export const supabaseHelpers = {
   },
 
   async savePersonalizedCurriculum(userId, curriculumData) {
-    const { data, error } = await supabase
-      .from('ifs_personalized_curriculum')
-      .upsert({
+    try {
+      await supabase
+        .from('ifs_personalized_curriculum')
+        .delete()
+        .eq('client_id', userId);
+
+      const modules = curriculumData?.personalizedModules || curriculumData?.modules || [];
+      if (modules.length === 0) return null;
+
+      const rows = modules.map((m, i) => ({
         client_id: userId,
-        curriculum_data: curriculumData,
+        module_id: m.id || m.moduleId || `module_${i + 1}`,
+        module_title: m.title || m.moduleTitle || `Module ${i + 1}`,
         updated_at: new Date().toISOString()
-      }, { onConflict: 'client_id' });
-    if (error) console.error('Error saving curriculum:', error);
-    return data;
+      }));
+
+      const { data, error } = await supabase
+        .from('ifs_personalized_curriculum')
+        .insert(rows);
+      if (error) console.error('Error saving curriculum:', error);
+      return data;
+    } catch (err) {
+      console.error('Error saving personalized curriculum:', err);
+      return null;
+    }
   },
 
   async getPersonalizedCurriculum(userId) {
     const { data, error } = await supabase
       .from('ifs_personalized_curriculum')
-      .select('curriculum_data')
-      .eq('client_id', userId)
-      .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching curriculum:', error);
-    return data?.curriculum_data || null;
+      .select('*')
+      .eq('client_id', userId);
+    if (error) console.error('Error fetching curriculum:', error);
+    if (!data || data.length === 0) return null;
+    return {
+      personalizedModules: data.map(row => ({
+        id: row.module_id,
+        moduleId: row.module_id,
+        title: row.module_title,
+        moduleTitle: row.module_title
+      }))
+    };
   },
 
   async saveTherapistFeedback(therapistId, clientId, feedback) {

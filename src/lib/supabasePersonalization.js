@@ -531,7 +531,7 @@ export const curriculumManager = {
         .from('ifs_personalized_curriculum')
         .select('*')
         .eq('client_id', clientId)
-        .order('module_order', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
 
