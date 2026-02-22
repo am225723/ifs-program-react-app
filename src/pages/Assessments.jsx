@@ -296,28 +296,21 @@ export default function Assessments() {
           }, { onConflict: 'client_id,module_id' });
 
         if (assessmentId === 'wounds') {
-          const abandonmentTotal = results.scores.abandonment?.total || 0;
-          const shameTotal = results.scores.shame?.total || 0;
-          const neglectTotal = results.scores.neglect?.total || 0;
-          const betrayalTotal = results.scores.betrayal?.total || 0;
-          const helplessnessTotal = results.scores.helplessness?.total || 0;
+          const ranked = results.ranked || [];
+          const tertiary = ranked.slice(2).map(([id]) => id);
 
-          await supabase
-            .from('ifs_assessment_results')
-            .upsert({
-              client_id: client.id,
-              assessment_type: 'wound',
-              abandonment_score: abandonmentTotal,
-              shame_score: shameTotal,
-              neglect_score: neglectTotal,
-              betrayal_score: betrayalTotal,
-              helplessness_score: helplessnessTotal,
-              primary_wound: results.primary,
-              secondary_wound: results.secondary,
-              answers: results.answers,
-              personalization_data: { protectorPatterns: results.protectorPatterns || {} },
-              created_at: new Date().toISOString()
-            }, { onConflict: 'client_id,assessment_type' });
+          await supabaseHelpers.saveAssessment(client.id, {
+            abandonment_score: results.scores.abandonment?.total || 0,
+            shame_score: results.scores.shame?.total || 0,
+            neglect_score: results.scores.neglect?.total || 0,
+            betrayal_score: results.scores.betrayal?.total || 0,
+            primary_wound: results.primary,
+            secondary_wound: results.secondary,
+            tertiary_wounds: tertiary,
+            responses: results.answers || {},
+            protector_types: results.protectorPatterns ? Object.keys(results.protectorPatterns) : [],
+            assessment_date: new Date().toISOString()
+          });
 
           try {
             const assessmentForPersonalizer = results.ranked.map(([id, data]) => ({

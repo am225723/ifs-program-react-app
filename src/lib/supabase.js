@@ -74,14 +74,23 @@ export const supabaseHelpers = {
   },
 
   async saveAssessment(userId, assessmentData) {
+    const safeData = {
+      client_id: userId,
+      abandonment_score: assessmentData.abandonment_score || 0,
+      shame_score: assessmentData.shame_score || 0,
+      neglect_score: assessmentData.neglect_score || 0,
+      betrayal_score: assessmentData.betrayal_score || 0,
+      primary_wound: assessmentData.primary_wound || null,
+      secondary_wound: assessmentData.secondary_wound || null,
+      tertiary_wounds: assessmentData.tertiary_wounds || [],
+      responses: assessmentData.responses || assessmentData.answers || {},
+      protector_types: assessmentData.protector_types || [],
+      assessment_date: assessmentData.assessment_date || new Date().toISOString(),
+      created_at: new Date().toISOString()
+    };
     const { data, error } = await supabase
       .from('ifs_assessment_results')
-      .upsert({
-        client_id: userId,
-        assessment_type: 'wound',
-        ...assessmentData,
-        created_at: new Date().toISOString()
-      }, { onConflict: 'client_id,assessment_type' });
+      .insert(safeData);
     if (error) console.error('Error saving assessment:', error);
     return data;
   },

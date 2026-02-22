@@ -131,7 +131,7 @@ const TherapistReports = () => {
         ['Shame', normalizeScore(r.assessment.shame_score)],
         ['Neglect', normalizeScore(r.assessment.neglect_score)],
         ['Betrayal', normalizeScore(r.assessment.betrayal_score)],
-        ['Helplessness', normalizeScore(r.assessment.helplessness_score)],
+        ['Helplessness', normalizeScore(r.assessment.helplessness_score || 0)],
       ];
       scores.forEach(([name, score]) => {
         const bar = '█'.repeat(Math.round(score / 25 * 20)) + '░'.repeat(20 - Math.round(score / 25 * 20));
@@ -332,7 +332,7 @@ const TherapistReports = () => {
                     <ScoreBar label="Shame" score={normalizeScore(reportData.assessment.shame_score)} color="bg-amber-500" />
                     <ScoreBar label="Neglect" score={normalizeScore(reportData.assessment.neglect_score)} color="bg-amber-500" />
                     <ScoreBar label="Betrayal" score={normalizeScore(reportData.assessment.betrayal_score)} color="bg-red-500" />
-                    <ScoreBar label="Helplessness" score={normalizeScore(reportData.assessment.helplessness_score)} color="bg-rose-500" />
+                    <ScoreBar label="Helplessness" score={normalizeScore(reportData.assessment.helplessness_score || 0)} color="bg-rose-500" />
                   </div>
                 );
               })()}
