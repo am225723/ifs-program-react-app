@@ -78,7 +78,7 @@ const TherapistReports = () => {
         ? (filteredMoods.reduce((sum, m) => sum + (m.energy || 0), 0) / filteredMoods.length).toFixed(1)
         : null;
 
-      const completedModules = progress?.filter(p => p.is_completed).length || 0;
+      const completedModules = progress?.filter(p => p.completed).length || 0;
       const totalModules = 5;
       const completedHomework = homework?.filter(h => h.completed).length || 0;
       const totalHomework = homework?.length || 0;
@@ -131,7 +131,7 @@ const TherapistReports = () => {
         ['Shame', normalizeScore(r.assessment.shame_score)],
         ['Neglect', normalizeScore(r.assessment.neglect_score)],
         ['Betrayal', normalizeScore(r.assessment.betrayal_score)],
-        ['Helplessness', normalizeScore(r.assessment.rejection_score)],
+        ['Helplessness', normalizeScore(r.assessment.helplessness_score)],
       ];
       scores.forEach(([name, score]) => {
         const bar = '█'.repeat(Math.round(score / 25 * 20)) + '░'.repeat(20 - Math.round(score / 25 * 20));
@@ -332,7 +332,7 @@ const TherapistReports = () => {
                     <ScoreBar label="Shame" score={normalizeScore(reportData.assessment.shame_score)} color="bg-amber-500" />
                     <ScoreBar label="Neglect" score={normalizeScore(reportData.assessment.neglect_score)} color="bg-amber-500" />
                     <ScoreBar label="Betrayal" score={normalizeScore(reportData.assessment.betrayal_score)} color="bg-red-500" />
-                    <ScoreBar label="Helplessness" score={normalizeScore(reportData.assessment.rejection_score)} color="bg-rose-500" />
+                    <ScoreBar label="Helplessness" score={normalizeScore(reportData.assessment.helplessness_score)} color="bg-rose-500" />
                   </div>
                 );
               })()}

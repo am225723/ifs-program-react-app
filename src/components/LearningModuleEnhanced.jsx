@@ -194,7 +194,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
           setCurrentStepIndex(progress.current_step || 0);
           setActivityResponses(progress.responses || {});
           setCompletedSteps(progress.completed_steps || []);
-          setIsCompleted(progress.is_completed || false);
+          setIsCompleted(progress.completed || progress.is_completed || false);
         }
         
         if (interactiveDataSaved) {

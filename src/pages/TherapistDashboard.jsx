@@ -197,12 +197,12 @@ const TherapistDashboard = () => {
       ] = await Promise.all([
         supabase
           .from('ifs_assessment_results')
-          .select('id, client_id, primary_wound, secondary_wound, abandonment_score, shame_score, neglect_score, betrayal_score, rejection_score, created_at')
+          .select('id, client_id, primary_wound, secondary_wound, abandonment_score, shame_score, neglect_score, betrayal_score, created_at')
           .in('client_id', clientIds)
           .order('created_at', { ascending: false }),
         supabase
           .from('ifs_client_progress')
-          .select('id, client_id, module_id, completed, is_completed')
+          .select('id, client_id, module_id, completed')
           .in('client_id', clientIds),
         supabase
           .from('ifs_journal_entries')
@@ -258,7 +258,7 @@ const TherapistDashboard = () => {
 
         const completedModules = new Set();
         clientProgress.forEach(p => {
-          if (p.completed || p.is_completed) completedModules.add(p.module_id);
+          if (p.completed) completedModules.add(p.module_id);
         });
 
         const modulesCompleted = completedModules.size;
@@ -1888,7 +1888,7 @@ const TherapistDashboard = () => {
               { type: 'Shame', score: normalizeScore(assessment.shame_score), color: 'purple' },
               { type: 'Neglect', score: normalizeScore(assessment.neglect_score), color: 'amber' },
               { type: 'Betrayal', score: normalizeScore(assessment.betrayal_score), color: 'red' },
-              { type: 'Helplessness', score: normalizeScore(assessment.rejection_score), color: 'rose' }
+              { type: 'Helplessness', score: normalizeScore(assessment.helplessness_score), color: 'rose' }
             ].sort((a, b) => b.score - a.score) : [];
             const maxScore = 25;
             const clientGam = clientGamification[selectedInsightClient];

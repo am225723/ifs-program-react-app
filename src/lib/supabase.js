@@ -22,7 +22,7 @@ export const supabaseHelpers = {
         responses: progress.responses || {},
         completed_steps: progress.completedSteps ?? progress.completed_steps ?? [],
         interactive_data: progress.interactiveData ?? progress.interactive_data ?? {},
-        is_completed: progress.isCompleted ?? progress.is_completed ?? false,
+        completed: progress.isCompleted ?? progress.is_completed ?? progress.completed ?? false,
         updated_at: new Date().toISOString()
       }, { onConflict: 'client_id,module_id' });
     if (error) console.error('Error saving module progress:', error);

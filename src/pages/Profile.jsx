@@ -321,7 +321,7 @@ const Profile = ({ client }) => {
 
                   <div className="space-y-4 mb-8">
                     {['abandonment', 'shame', 'neglect', 'betrayal', 'helplessness'].map((wound) => {
-                      const scoreKey = wound === 'helplessness' ? 'rejection_score' : `${wound}_score`;
+                      const scoreKey = `${wound}_score`;
                       const score = assessment[scoreKey] || 0;
                       const intensity = getIntensityLevel(score);
                       const percentage = getScorePercentage(score);

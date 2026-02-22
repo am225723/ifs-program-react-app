@@ -36,7 +36,7 @@ const Curriculum = () => {
         try {
           const allProgress = await supabaseHelpers.getAllModuleProgress(client.id);
           const completed = (allProgress || [])
-            .filter(p => p.is_completed)
+            .filter(p => p.completed)
             .map(p => p.module_id);
           setCompletedModules(completed);
         } catch (err) {
