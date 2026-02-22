@@ -37,6 +37,10 @@ import TherapistHomework from './pages/TherapistHomework';
 import TherapistReports from './pages/TherapistReports';
 import ClientInbox from './pages/ClientInbox';
 import ClientHomework from './pages/ClientHomework';
+import PartsRelationshipMap from './pages/PartsRelationshipMap';
+import UnburdeningProtocol from './pages/UnburdeningProtocol';
+import AssessmentBuilder from './pages/AssessmentBuilder';
+import CustomAssessment from './pages/CustomAssessment';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
@@ -330,6 +334,10 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/mood-tracker" element={<MoodTracker />} />
                 <Route path="/gamification" element={<GamificationHub />} />
                 <Route path="/parts-dialogue" element={<PartsDialogue />} />
+                <Route path="/parts-relationships" element={<PartsRelationshipMap />} />
+                <Route path="/unburdening" element={<UnburdeningProtocol />} />
+                <Route path="/assessment-builder" element={<AssessmentBuilder />} />
+                <Route path="/custom-assessment/:assessmentId" element={<CustomAssessment />} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
                 <Route path="/auth-debug" element={<AuthDebug />} />

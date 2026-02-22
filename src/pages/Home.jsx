@@ -25,7 +25,9 @@ import {
   MessageSquare,
   Trophy,
   BarChart3,
-  Smile
+  Smile,
+  Share2,
+  Feather
 } from 'lucide-react';
 import { assessmentManager } from '../lib/supabasePersonalization';
 import { supabaseHelpers } from '../lib/supabase';
@@ -406,6 +408,20 @@ const Home = ({ clientId, client }) => {
                 </div>
                 <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Homework</span>
                 <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Assignments</span>
+              </Link>
+              <Link to="/parts-relationships" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
+                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-2 group-hover:bg-purple-200 transition-colors">
+                  <Share2 className="w-6 h-6 text-purple-600" />
+                </div>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Parts Map</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Relationships</span>
+              </Link>
+              <Link to="/unburdening" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
+                <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center mb-2 group-hover:bg-teal-200 transition-colors">
+                  <Feather className="w-6 h-6 text-teal-600" />
+                </div>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Unburdening</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Release ritual</span>
               </Link>
             </div>
           </div>

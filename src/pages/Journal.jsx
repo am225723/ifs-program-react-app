@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Heart, 
   Brain, 
@@ -23,7 +23,9 @@ import {
   PenTool,
   Coffee,
   Moon,
-  Sun
+  Sun,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
@@ -87,6 +89,49 @@ const Journal = () => {
   const [showPrompts, setShowPrompts] = useState(false);
   const [savedMessage, setSavedMessage] = useState('');
   const textAreaRef = useRef(null);
+  const [isDictating, setIsDictating] = useState(false);
+  const recognitionRef = useRef(null);
+  const speechSupported = typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  const stopDictation = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsDictating(false);
+    }
+  }, []);
+
+  const dictationBaseRef = useRef('');
+  const startDictation = useCallback(() => {
+    if (!speechSupported) return;
+    dictationBaseRef.current = entryContent;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    let committed = '';
+    recognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          committed += event.results[i][0].transcript + ' ';
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      const base = dictationBaseRef.current;
+      const separator = base && !base.endsWith(' ') ? ' ' : '';
+      setEntryContent(base + separator + committed + interim);
+    };
+    recognition.onerror = () => setIsDictating(false);
+    recognition.onend = () => {
+      setIsDictating(false);
+      dictationBaseRef.current = '';
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsDictating(true);
+  }, [speechSupported, entryContent]);
   const { theme } = useTheme();
   const { awardXP } = useData();
 
@@ -385,12 +430,34 @@ const Journal = () => {
               </div>
             </div>
 
+            {speechSupported && (
+              <div className="flex items-center gap-2 mb-3">
+                <button
+                  onClick={isDictating ? stopDictation : startDictation}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    isDictating
+                      ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30'
+                      : theme.isDark ? 'bg-slate-800 text-amber-400 border border-slate-700 hover:bg-slate-700' : 'bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100'
+                  }`}
+                >
+                  {isDictating ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  {isDictating ? 'Stop Dictation' : 'Voice Dictation'}
+                </button>
+                {isDictating && (
+                  <span className="flex items-center gap-1 text-xs text-red-500 animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    Listening — speak freely...
+                  </span>
+                )}
+              </div>
+            )}
             <textarea
               ref={textAreaRef}
               value={entryContent}
-              onChange={(e) => setEntryContent(e.target.value)}
-              placeholder="Start writing about your inner world..."
-              className={`w-full h-96 text-lg ${textareaText} border-none outline-none resize-none leading-relaxed bg-transparent`}
+              onChange={(e) => { if (!isDictating) setEntryContent(e.target.value); }}
+              readOnly={isDictating}
+              placeholder={isDictating ? "Speak now — your words will appear here..." : "Start writing about your inner world..."}
+              className={`w-full h-96 text-lg ${textareaText} border-none outline-none resize-none leading-relaxed bg-transparent ${isDictating ? 'opacity-80' : ''}`}
             />
 
             <div className="mt-6">

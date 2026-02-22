@@ -29,7 +29,11 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **Progress Reports**: Comprehensive report generation with assessment scores, module completion, mood/energy trends, homework rates, gamification stats, and text export via `TherapistReports.jsx`.
 - **Co-Therapy Session Page**: Facilitates guided therapy activities between therapist and client with step-by-step instructions and progress saving.
 - **Gamification Hub**: Integrates XP, levels, badges, and streaks to encourage engagement.
-- **AI Parts Dialogue**: Perplexity AI-powered conversations with inner parts.
+- **AI Parts Dialogue**: Perplexity AI-powered conversations with inner parts, with voice mode (speech-to-text input and text-to-speech responses using Web Speech API).
+- **Parts Relationship Map**: Interactive SVG graph visualization showing connections between inner parts with relationship types (protects, triggers, comforts, conflicts, allies).
+- **Unburdening Protocol**: Guided 8-step ceremony for releasing emotional burdens, with Supabase persistence and progress tracking.
+- **Assessment Builder**: Therapists can create custom assessments with multiple question types; clients take them via `/custom-assessment/:id`.
+- **Journal Voice Dictation**: Continuous speech-to-text dictation for journal entries using Web Speech API.
 - **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generator.
 - **Theme & Animation Customization**: User preferences for visual and motion accessibility.
 

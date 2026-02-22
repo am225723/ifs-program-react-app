@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   MessageSquare, Send, Heart, Shield, Brain, Sparkles, 
   User, Bot, RefreshCw, ChevronDown, AlertCircle, Settings,
-  Volume2, Loader
+  Volume2, Loader, Mic, MicOff, VolumeX
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabaseHelpers } from '../lib/supabase';
@@ -131,6 +131,64 @@ export default function PartsDialogue() {
   const [fallbackIndex, setFallbackIndex] = useState({});
   const hasApiKey = !!apiKey;
 
+  const [voiceMode, setVoiceMode] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [speakResponses, setSpeakResponses] = useState(true);
+  const recognitionRef = useRef(null);
+  const synthRef = useRef(null);
+  const speechSupported = typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      synthRef.current = window.speechSynthesis;
+    }
+    return () => {
+      if (recognitionRef.current) recognitionRef.current.abort();
+      if (synthRef.current) synthRef.current.cancel();
+    };
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+      setIsListening(false);
+    }
+  }, []);
+
+  const speakText = useCallback((text) => {
+    if (!speakResponses || !synthRef.current) return;
+    synthRef.current.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 0.8;
+    synthRef.current.speak(utterance);
+  }, [speakResponses]);
+
+  const startListening = useCallback(() => {
+    if (!speechSupported) return;
+    if (recognitionRef.current) recognitionRef.current.abort();
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.onresult = (event) => {
+      const lastResult = event.results[event.results.length - 1];
+      const transcript = lastResult[0].transcript;
+      setInputValue(transcript);
+      if (lastResult.isFinal) {
+        setIsListening(false);
+      }
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [speechSupported]);
+
   useEffect(() => {
     const loadMessages = async () => {
       const client = clientAuth.getCurrentClient();
@@ -225,6 +283,7 @@ export default function PartsDialogue() {
 
         if (aiContent) {
           setMessages(prev => [...prev, { role: 'assistant', content: aiContent, timestamp: Date.now(), partId: selectedPart.id }]);
+          if (voiceMode) speakText(aiContent);
         } else {
           throw new Error('No response content');
         }
@@ -232,11 +291,13 @@ export default function PartsDialogue() {
         console.error('Perplexity API error:', err);
         const fallback = getFallbackResponse(selectedPart.id);
         setMessages(prev => [...prev, { role: 'assistant', content: fallback, timestamp: Date.now(), partId: selectedPart.id, isFallback: true }]);
+        if (voiceMode) speakText(fallback);
       }
     } else {
       await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1500));
       const fallback = getFallbackResponse(selectedPart.id);
       setMessages(prev => [...prev, { role: 'assistant', content: fallback, timestamp: Date.now(), partId: selectedPart.id, isFallback: true }]);
+      if (voiceMode) speakText(fallback);
     }
 
     setIsLoading(false);
@@ -399,6 +460,41 @@ export default function PartsDialogue() {
         </div>
       )}
 
+      {speechSupported && (
+        <div className="flex items-center gap-2 mb-2">
+          <button
+            onClick={() => { const newMode = !voiceMode; setVoiceMode(newMode); if (!newMode) { stopListening(); synthRef.current?.cancel(); } }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              voiceMode
+                ? 'bg-amber-600 text-white shadow-md'
+                : isDark ? 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700' : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200'
+            }`}
+          >
+            {voiceMode ? <Mic className="w-3.5 h-3.5" /> : <MicOff className="w-3.5 h-3.5" />}
+            Voice Mode {voiceMode ? 'On' : 'Off'}
+          </button>
+          {voiceMode && (
+            <button
+              onClick={() => { const newVal = !speakResponses; setSpeakResponses(newVal); if (!newVal && synthRef.current) synthRef.current.cancel(); }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                speakResponses
+                  ? isDark ? 'bg-emerald-900/40 text-emerald-300 border border-emerald-700' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                  : isDark ? 'bg-slate-800 text-slate-400 border border-slate-700' : 'bg-gray-100 text-gray-500 border border-gray-200'
+              }`}
+            >
+              {speakResponses ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+              {speakResponses ? 'Read Aloud' : 'Muted'}
+            </button>
+          )}
+          {isListening && (
+            <span className="flex items-center gap-1 text-xs text-red-500 animate-pulse">
+              <span className="w-2 h-2 rounded-full bg-red-500" />
+              Listening...
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="flex items-center gap-2">
         <button
           onClick={clearConversation}
@@ -407,6 +503,20 @@ export default function PartsDialogue() {
         >
           <RefreshCw className="w-4 h-4" />
         </button>
+        {voiceMode && speechSupported && (
+          <button
+            onClick={isListening ? stopListening : startListening}
+            disabled={isLoading}
+            className={`p-2.5 rounded-xl transition-all ${
+              isListening
+                ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30'
+                : isDark ? 'bg-slate-800 text-amber-400 border border-slate-700 hover:bg-slate-700' : 'bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100'
+            } disabled:opacity-50`}
+            title={isListening ? 'Stop listening' : 'Start speaking'}
+          >
+            <Mic className="w-4 h-4" />
+          </button>
+        )}
         <div className={`flex-1 flex items-center rounded-xl border ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
           <input
             ref={inputRef}
@@ -414,7 +524,7 @@ export default function PartsDialogue() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Talk to your ${selectedPart.name}...`}
+            placeholder={voiceMode ? 'Tap mic or type...' : `Talk to your ${selectedPart.name}...`}
             disabled={isLoading}
             className={`flex-1 px-4 py-2.5 text-sm bg-transparent outline-none ${isDark ? 'text-slate-200 placeholder:text-slate-500' : 'text-gray-700 placeholder:text-gray-400'} disabled:opacity-50`}
           />
