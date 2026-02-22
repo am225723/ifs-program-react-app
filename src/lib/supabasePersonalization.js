@@ -413,9 +413,10 @@ export const assessmentManager = {
           shame_score: assessmentData.shame_score,
           neglect_score: assessmentData.neglect_score,
           betrayal_score: assessmentData.betrayal_score,
+          helplessness_score: assessmentData.helplessness_score || 0,
           primary_wound: rankedWounds[0].type,
           secondary_wound: rankedWounds[1].type,
-          tertiary_wounds: [rankedWounds[2].type, rankedWounds[3].type],
+          tertiary_wounds: rankedWounds.slice(2).map(w => w.type),
           responses: assessmentData.responses,
           protector_types: assessmentData.protector_types || [],
           assessment_date: new Date().toISOString()

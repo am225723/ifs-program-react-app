@@ -8,7 +8,8 @@ export const WOUND_TYPES = {
   ABANDONMENT: 'abandonment',
   SHAME: 'shame',
   NEGLECT: 'neglect',
-  BETRAYAL: 'betrayal'
+  BETRAYAL: 'betrayal',
+  HELPLESSNESS: 'helplessness'
 };
 
 // Priority levels based on assessment scores
@@ -35,7 +36,8 @@ export const rankWounds = (assessmentResults) => {
     { type: WOUND_TYPES.ABANDONMENT, score: assessmentResults.abandonment_score || 0 },
     { type: WOUND_TYPES.SHAME, score: assessmentResults.shame_score || 0 },
     { type: WOUND_TYPES.NEGLECT, score: assessmentResults.neglect_score || 0 },
-    { type: WOUND_TYPES.BETRAYAL, score: assessmentResults.betrayal_score || 0 }
+    { type: WOUND_TYPES.BETRAYAL, score: assessmentResults.betrayal_score || 0 },
+    { type: WOUND_TYPES.HELPLESSNESS, score: assessmentResults.helplessness_score || 0 }
   ];
 
   return wounds
@@ -138,6 +140,28 @@ export const getWoundCustomizations = (woundType) => {
       ],
       innerChildMessage: 'You are safe now. It\'s okay to trust in small steps',
       color: 'from-red-400 to-red-600'
+    },
+    [WOUND_TYPES.HELPLESSNESS]: {
+      title: 'Helplessness Wound',
+      subtitle: 'The "Powerless" Child',
+      coreBurden: 'I have no control over what happens to me',
+      protectorTypes: ['Over-achiever managers', 'Freeze-response parts', 'Controlling protectors'],
+      focusAreas: [
+        'Building personal agency',
+        'Recognizing areas of influence',
+        'Empowerment practices',
+        'Releasing learned helplessness',
+        'Developing self-efficacy'
+      ],
+      keyThemes: ['empowerment', 'agency', 'capability', 'resilience'],
+      healingGoals: [
+        'Reclaim sense of personal power',
+        'Recognize choices and agency',
+        'Build confidence in decision-making',
+        'Transform freeze responses into action'
+      ],
+      innerChildMessage: 'You are capable and strong. You have the power to shape your life',
+      color: 'from-purple-400 to-purple-600'
     }
   };
 

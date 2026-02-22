@@ -80,6 +80,7 @@ export const supabaseHelpers = {
       shame_score: assessmentData.shame_score || 0,
       neglect_score: assessmentData.neglect_score || 0,
       betrayal_score: assessmentData.betrayal_score || 0,
+      helplessness_score: assessmentData.helplessness_score || 0,
       primary_wound: assessmentData.primary_wound || null,
       secondary_wound: assessmentData.secondary_wound || null,
       tertiary_wounds: assessmentData.tertiary_wounds || [],

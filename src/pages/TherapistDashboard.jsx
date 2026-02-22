@@ -197,7 +197,7 @@ const TherapistDashboard = () => {
       ] = await Promise.all([
         supabase
           .from('ifs_assessment_results')
-          .select('id, client_id, primary_wound, secondary_wound, abandonment_score, shame_score, neglect_score, betrayal_score, created_at')
+          .select('id, client_id, primary_wound, secondary_wound, abandonment_score, shame_score, neglect_score, betrayal_score, helplessness_score, created_at')
           .in('client_id', clientIds)
           .order('created_at', { ascending: false }),
         supabase
