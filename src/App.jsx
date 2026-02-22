@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Settings as SettingsIcon, Home as HomeIcon, BookOpen, ClipboardList, BookHeart, Handshake, LogOut, MessageSquare } from 'lucide-react';
 import { useTheme } from './contexts/ThemeContext';
+import { supabase } from './lib/supabase';
 import ClientPINLogin from './components/ClientPINLogin';
 import SSOCallback from './components/SSOCallback';
 import PINAuthDiagnostic from './components/PINAuthDiagnostic';
@@ -159,6 +160,31 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
   const { theme } = useTheme();
   const location = useLocation();
   const bgClass = isAuthenticated ? `bg-gradient-to-br ${theme.primary}` : '';
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!currentClient?.id) return;
+    try {
+      const isTherapist = currentClient.user_role === 'therapist';
+      let query = supabase.from('ifs_messages').select('id', { count: 'exact', head: true }).is('read_at', null);
+      if (isTherapist) {
+        query = query.eq('therapist_id', currentClient.id).eq('sender_role', 'client');
+      } else {
+        query = query.eq('client_id', currentClient.id).eq('sender_role', 'therapist');
+      }
+      const { count } = await query;
+      setUnreadMsgCount(count || 0);
+    } catch (e) {
+      console.error('Error fetching unread count:', e);
+    }
+  }, [currentClient?.id, currentClient?.user_role]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !currentClient?.id) return;
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 15000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, currentClient?.id, fetchUnreadCount]);
 
   return (
     <div className={`min-h-screen ${bgClass}`}>
@@ -206,11 +232,16 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                         </>
                       )}
                       <Link
-                        to="/inbox"
-                        className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
+                        to={currentClient?.user_role === 'therapist' ? '/therapist-messages' : '/inbox'}
+                        className={`p-2 rounded-lg transition-all relative ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
                         title="Messages"
                       >
                         <MessageSquare className="w-5 h-5" />
+                        {unreadMsgCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1 animate-pulse">
+                            {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
+                          </span>
+                        )}
                       </Link>
                       <Link
                         to="/settings"

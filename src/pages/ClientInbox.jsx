@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  MessageSquare, Send, Check, CheckCheck, RefreshCw, ArrowLeft
+  MessageSquare, Send, Check, CheckCheck, RefreshCw, ArrowLeft, Trash2
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
@@ -120,6 +120,15 @@ const ClientInbox = () => {
     setSending(false);
   };
 
+  const handleDelete = async (msgId) => {
+    const { error } = await supabase.from('ifs_messages').delete().eq('id', msgId).eq('client_id', client.id);
+    if (error) {
+      console.error('Delete message error:', error);
+    } else {
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+    }
+  };
+
   const formatTime = (ts) => {
     const d = new Date(ts);
     const now = new Date();
@@ -205,7 +214,16 @@ const ClientInbox = () => {
             messages.map(msg => {
               const isClient = msg.sender_role === 'client';
               return (
-                <div key={msg.id} className={`flex ${isClient ? 'justify-end' : 'justify-start'}`}>
+                <div key={msg.id} className={`flex ${isClient ? 'justify-end' : 'justify-start'} group`}>
+                  {isClient && (
+                    <button
+                      onClick={() => handleDelete(msg.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-2 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 hover:text-red-600"
+                      title="Delete message"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                   <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                     isClient
                       ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-br-md'
@@ -221,6 +239,15 @@ const ClientInbox = () => {
                       )}
                     </div>
                   </div>
+                  {!isClient && (
+                    <button
+                      onClick={() => handleDelete(msg.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-2 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 hover:text-red-600"
+                      title="Delete message"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               );
             })

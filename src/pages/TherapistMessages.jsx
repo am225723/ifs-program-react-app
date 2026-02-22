@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   MessageSquare, Send, Search, ChevronLeft, Check, CheckCheck,
-  Clock, User, Shield, RefreshCw
+  Clock, User, Shield, RefreshCw, Trash2
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
@@ -118,6 +118,15 @@ const TherapistMessages = () => {
       await loadMessages(selectedClient.id);
     }
     setSending(false);
+  };
+
+  const handleDelete = async (msgId) => {
+    const { error } = await supabase.from('ifs_messages').delete().eq('id', msgId).eq('therapist_id', therapist.id);
+    if (error) {
+      console.error('Delete message error:', error);
+    } else {
+      setMessages(prev => prev.filter(m => m.id !== msgId));
+    }
   };
 
   const formatTime = (ts) => {
@@ -248,7 +257,16 @@ const TherapistMessages = () => {
                     messages.map(msg => {
                       const isTherapist = msg.sender_role === 'therapist';
                       return (
-                        <div key={msg.id} className={`flex ${isTherapist ? 'justify-end' : 'justify-start'}`}>
+                        <div key={msg.id} className={`flex ${isTherapist ? 'justify-end' : 'justify-start'} group`}>
+                          {isTherapist && (
+                            <button
+                              onClick={() => handleDelete(msg.id)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity self-center mr-2 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 hover:text-red-600"
+                              title="Delete message"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                             isTherapist
                               ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-md'
@@ -264,6 +282,15 @@ const TherapistMessages = () => {
                               )}
                             </div>
                           </div>
+                          {!isTherapist && (
+                            <button
+                              onClick={() => handleDelete(msg.id)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity self-center ml-2 p-1 rounded-full hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 hover:text-red-600"
+                              title="Delete message"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       );
                     })
