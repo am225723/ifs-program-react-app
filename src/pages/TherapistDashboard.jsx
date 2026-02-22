@@ -1361,6 +1361,7 @@ const TherapistDashboard = () => {
                 { id: 'link:/therapist-messages', label: 'Client Messages', icon: MessageCircle, color: 'from-blue-500 to-indigo-600', desc: 'Send and receive secure messages with clients' },
                 { id: 'link:/therapist-homework', label: 'Homework Manager', icon: Target, color: 'from-amber-500 to-amber-600', desc: 'Create, assign, and track client homework' },
                 { id: 'link:/therapist-reports', label: 'Progress Reports', icon: Download, color: 'from-emerald-500 to-teal-600', desc: 'Generate and export client progress reports' },
+                { id: 'link:/assessment-builder', label: 'Assessment Builder', icon: FileText, color: 'from-purple-500 to-purple-600', desc: 'Create custom assessments for clients' },
                 { id: 'export-reports', label: 'Export All Reports', icon: Download, color: 'from-amber-500 to-amber-600', desc: 'Download comprehensive progress reports' },
                 { id: 'group-analytics', label: 'View Group Analytics', icon: BarChart3, color: 'from-amber-500 to-amber-600', desc: 'Analyze trends across all clients' }
               ].map((action) => {

@@ -34,6 +34,7 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **Unburdening Protocol**: Guided 8-step ceremony for releasing emotional burdens, with Supabase persistence and progress tracking.
 - **Assessment Builder**: Therapists can create custom assessments with multiple question types; clients take them via `/custom-assessment/:id`.
 - **Journal Voice Dictation**: Continuous speech-to-text dictation for journal entries using Web Speech API.
+- **Guided Meditations**: 6 IFS-focused guided meditations (Self Energy, Parts Check-In, Inner Safe Place, Protector Appreciation, IFS Body Scan, Compassion Breathing) with step-by-step timed guidance, silent meditation timer, and voice reflection recording via MediaRecorder API.
 - **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generator.
 - **Theme & Animation Customization**: User preferences for visual and motion accessibility.
 

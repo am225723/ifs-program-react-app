@@ -41,6 +41,7 @@ import PartsRelationshipMap from './pages/PartsRelationshipMap';
 import UnburdeningProtocol from './pages/UnburdeningProtocol';
 import AssessmentBuilder from './pages/AssessmentBuilder';
 import CustomAssessment from './pages/CustomAssessment';
+import GuidedMeditation from './pages/GuidedMeditation';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
@@ -338,6 +339,7 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/unburdening" element={<UnburdeningProtocol />} />
                 <Route path="/assessment-builder" element={<AssessmentBuilder />} />
                 <Route path="/custom-assessment/:assessmentId" element={<CustomAssessment />} />
+                <Route path="/meditation" element={<GuidedMeditation />} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
                 <Route path="/auth-debug" element={<AuthDebug />} />

@@ -115,72 +115,111 @@ const TherapistReports = () => {
       return num <= 5 ? Math.round(num * 5) : Math.round(num);
     };
 
-    let content = `IFS SELF-THERAPY PROGRAM — CLIENT PROGRESS REPORT\n`;
-    content += `${'='.repeat(60)}\n\n`;
-    content += `Client: ${r.client?.name || 'Unknown'}\n`;
-    content += `Generated: ${new Date(r.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}\n`;
-    content += `Period: ${dateRange === 'all' ? 'All Time' : dateRange === '7d' ? 'Last 7 Days' : dateRange === '30d' ? 'Last 30 Days' : 'Last 90 Days'}\n`;
-    content += `${'─'.repeat(60)}\n\n`;
+    const period = dateRange === 'all' ? 'All Time' : dateRange === '7d' ? 'Last 7 Days' : dateRange === '30d' ? 'Last 30 Days' : 'Last 90 Days';
+    const genDate = new Date(r.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    if (r.assessment) {
-      content += `WOUND ASSESSMENT\n${'-'.repeat(30)}\n`;
-      content += `Primary Wound: ${r.assessment.primary_wound || 'N/A'}\n`;
-      content += `Secondary Wound: ${r.assessment.secondary_wound || 'N/A'}\n`;
-      const scores = [
-        ['Abandonment', normalizeScore(r.assessment.abandonment_score)],
-        ['Shame', normalizeScore(r.assessment.shame_score)],
-        ['Neglect', normalizeScore(r.assessment.neglect_score)],
-        ['Betrayal', normalizeScore(r.assessment.betrayal_score)],
-        ['Helplessness', normalizeScore(r.assessment.helplessness_score || 0)],
-      ];
-      scores.forEach(([name, score]) => {
-        const bar = '█'.repeat(Math.round(score / 25 * 20)) + '░'.repeat(20 - Math.round(score / 25 * 20));
-        content += `  ${name.padEnd(15)} ${score}/25  [${bar}]\n`;
-      });
-      content += `\n`;
+    const woundScores = r.assessment ? [
+      { name: 'Abandonment', score: normalizeScore(r.assessment.abandonment_score), color: '#d97706' },
+      { name: 'Shame', score: normalizeScore(r.assessment.shame_score), color: '#dc2626' },
+      { name: 'Neglect', score: normalizeScore(r.assessment.neglect_score), color: '#7c3aed' },
+      { name: 'Betrayal', score: normalizeScore(r.assessment.betrayal_score), color: '#2563eb' },
+      { name: 'Helplessness', score: normalizeScore(r.assessment.helplessness_score || 0), color: '#059669' },
+    ] : [];
+
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>IFS Report - ${r.client?.name || 'Client'}</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1f2937; line-height: 1.6; background: white; }
+  .header { text-align: center; padding: 24px 0; border-bottom: 3px solid #d97706; margin-bottom: 24px; }
+  .header h1 { font-size: 22px; color: #92400e; margin-bottom: 4px; letter-spacing: 1px; }
+  .header .subtitle { font-size: 14px; color: #78716c; }
+  .meta { display: flex; justify-content: space-between; background: #fef3c7; padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 13px; }
+  .meta span { color: #92400e; }
+  .section { margin-bottom: 20px; page-break-inside: avoid; }
+  .section h2 { font-size: 15px; color: #92400e; border-bottom: 2px solid #fbbf24; padding-bottom: 6px; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .score-row { display: flex; align-items: center; margin-bottom: 8px; }
+  .score-label { width: 120px; font-size: 13px; font-weight: 600; }
+  .score-bar-bg { flex: 1; height: 18px; background: #f3f4f6; border-radius: 9px; overflow: hidden; margin: 0 10px; }
+  .score-bar { height: 100%; border-radius: 9px; transition: width 0.3s; }
+  .score-val { width: 50px; text-align: right; font-size: 13px; font-weight: 600; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; }
+  .card .label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+  .card .value { font-size: 22px; font-weight: 700; color: #1f2937; margin-top: 2px; }
+  .card .sub { font-size: 11px; color: #9ca3af; }
+  .badge-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .badge { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .note { background: #f9fafb; border-left: 3px solid #d97706; padding: 8px 12px; margin-bottom: 8px; border-radius: 0 6px 6px 0; }
+  .note .date { font-size: 11px; color: #9ca3af; }
+  .note .text { font-size: 13px; }
+  .footer { text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb; margin-top: 30px; font-size: 11px; color: #9ca3af; }
+  .primary-wound { display: inline-block; background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; margin-right: 8px; }
+</style></head><body>
+<div class="header">
+  <h1>Intrinsic Therapeutic Solutions</h1>
+  <div class="subtitle">IFS Self-Therapy Program &mdash; Client Progress Report</div>
+</div>
+<div class="meta">
+  <span><strong>Client:</strong> ${r.client?.name || 'Unknown'}</span>
+  <span><strong>Period:</strong> ${period}</span>
+  <span><strong>Generated:</strong> ${genDate}</span>
+</div>
+
+${r.assessment ? `<div class="section">
+  <h2>Wound Assessment</h2>
+  <p style="margin-bottom:12px">
+    <span class="primary-wound">Primary: ${r.assessment.primary_wound || 'N/A'}</span>
+    <span class="primary-wound">Secondary: ${r.assessment.secondary_wound || 'N/A'}</span>
+  </p>
+  ${woundScores.map(w => `<div class="score-row">
+    <span class="score-label">${w.name}</span>
+    <div class="score-bar-bg"><div class="score-bar" style="width:${(w.score / 25) * 100}%;background:${w.color}"></div></div>
+    <span class="score-val">${w.score}/25</span>
+  </div>`).join('')}
+</div>` : ''}
+
+<div class="section">
+  <h2>Progress Overview</h2>
+  <div class="grid">
+    <div class="card"><div class="label">Module Completion</div><div class="value">${r.progress.percentage}%</div><div class="sub">${r.progress.completedModules} of ${r.progress.totalModules} modules</div></div>
+    <div class="card"><div class="label">Exercises</div><div class="value">${r.exercises.completed}</div><div class="sub">Completed activities</div></div>
+    <div class="card"><div class="label">Journal Entries</div><div class="value">${r.journals.total}</div><div class="sub">Total reflections</div></div>
+    <div class="card"><div class="label">Mood Check-ins</div><div class="value">${r.mood.entries}</div><div class="sub">Avg Mood: ${r.mood.average || 'N/A'}/10 &middot; Energy: ${r.mood.averageEnergy || 'N/A'}/10</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Homework</h2>
+  <div class="grid">
+    <div class="card"><div class="label">Completion Rate</div><div class="value">${r.homework.rate}%</div><div class="sub">${r.homework.completed} of ${r.homework.total} assignments</div></div>
+    <div class="card"><div class="label">Gamification</div><div class="value">${r.gamification.xp} XP</div><div class="sub">Level ${r.gamification.level} &middot; ${r.gamification.currentStreak}-day streak (best: ${r.gamification.longestStreak})</div></div>
+  </div>
+  ${r.gamification.badges?.length > 0 ? `<div class="badge-list">${r.gamification.badges.map(b => `<span class="badge">${typeof b === 'string' ? b : b.name || b.id}</span>`).join('')}</div>` : ''}
+</div>
+
+${r.notes.recent.length > 0 ? `<div class="section">
+  <h2>Recent Therapist Notes</h2>
+  ${r.notes.recent.map(n => `<div class="note">
+    <div class="date">${new Date(n.created_at).toLocaleDateString()}</div>
+    <div class="text">${(n.content || 'No content').slice(0, 300)}</div>
+  </div>`).join('')}
+</div>` : ''}
+
+<div class="footer">
+  <p>Intrinsic Therapeutic Solutions &mdash; IFS Self-Therapy Program</p>
+  <p>This report is confidential. Generated on ${genDate}.</p>
+</div>
+</body></html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
     }
-
-    content += `MODULE PROGRESS\n${'-'.repeat(30)}\n`;
-    content += `  Completed: ${r.progress.completedModules}/${r.progress.totalModules} (${r.progress.percentage}%)\n\n`;
-
-    content += `ENGAGEMENT METRICS\n${'-'.repeat(30)}\n`;
-    content += `  Journal Entries: ${r.journals.total}\n`;
-    content += `  Mood Check-ins: ${r.mood.entries}\n`;
-    content += `  Avg Mood: ${r.mood.average || 'N/A'}/10   Avg Energy: ${r.mood.averageEnergy || 'N/A'}/10\n`;
-    content += `  Exercises Completed: ${r.exercises.completed}\n\n`;
-
-    content += `HOMEWORK\n${'-'.repeat(30)}\n`;
-    content += `  Completed: ${r.homework.completed}/${r.homework.total} (${r.homework.rate}%)\n\n`;
-
-    content += `GAMIFICATION\n${'-'.repeat(30)}\n`;
-    content += `  XP: ${r.gamification.xp}   Level: ${r.gamification.level}\n`;
-    content += `  Current Streak: ${r.gamification.currentStreak} days\n`;
-    content += `  Longest Streak: ${r.gamification.longestStreak} days\n`;
-    if (r.gamification.badges?.length > 0) {
-      content += `  Badges: ${r.gamification.badges.map(b => typeof b === 'string' ? b : b.name || b.id).join(', ')}\n`;
-    }
-    content += `\n`;
-
-    if (r.notes.recent.length > 0) {
-      content += `RECENT THERAPIST NOTES\n${'-'.repeat(30)}\n`;
-      r.notes.recent.forEach(n => {
-        content += `  [${new Date(n.created_at).toLocaleDateString()}] ${n.content?.slice(0, 200) || 'No content'}\n`;
-      });
-      content += `\n`;
-    }
-
-    content += `${'='.repeat(60)}\n`;
-    content += `Report generated by IFS Self-Therapy Program\n`;
-
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `IFS_Report_${r.client?.name?.replace(/\s+/g, '_') || 'Client'}_${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   const handlePrint = () => {
