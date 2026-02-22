@@ -443,9 +443,9 @@ export const assessmentManager = {
         .eq('client_id', clientId)
         .order('assessment_date', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
 
       return { success: true, assessment: data };
     } catch (error) {

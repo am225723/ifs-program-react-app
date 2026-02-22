@@ -476,7 +476,7 @@ export const supabaseHelpers = {
         title: milestone.title,
         description: milestone.description,
         details: milestone.details,
-        date: milestone.date || new Date().toISOString()
+        achieved_at: milestone.date || milestone.achieved_at || new Date().toISOString()
       })
       .select()
       .single();
@@ -489,7 +489,7 @@ export const supabaseHelpers = {
       .from('ifs_milestones')
       .select('*')
       .eq('client_id', userId)
-      .order('date', { ascending: false });
+      .order('created_at', { ascending: false });
     if (error) console.error('Error fetching milestones:', error);
     return data || [];
   },
