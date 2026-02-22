@@ -924,7 +924,8 @@ const TherapistDashboard = () => {
           { id: 'actions', label: 'Quick Actions', icon: Sparkles },
           { id: 'lessons', label: 'Lesson Plans', icon: BookOpen },
           { id: 'insights', label: 'Client Insights', icon: Eye },
-          { id: 'co-therapy', label: 'Co-Therapy', icon: Heart }
+          { id: 'co-therapy', label: 'Co-Therapy', icon: Heart },
+          { id: 'roadmap', label: 'Future Features', icon: Gem }
         ].map(tab => {
           const Icon = tab.icon;
           return (
@@ -2187,50 +2188,87 @@ const TherapistDashboard = () => {
                         </h4>
                         {(() => {
                           const partsData = clientInsights.partsAssessment;
-                          const scores = partsData.scores || partsData.results || partsData.categories || {};
-                          const patterns = partsData.patterns || partsData.protectorPatterns || partsData.identified_patterns || [];
-                          const sortedScores = Object.entries(scores)
-                            .map(([key, val]) => ({ category: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), score: typeof val === 'number' ? val : (val?.score || 0) }))
-                            .sort((a, b) => b.score - a.score);
-                          const maxPartScore = sortedScores.length > 0 ? Math.max(...sortedScores.map(s => s.score), 10) : 10;
+                          const partsDefinitions = {
+                            manager: [
+                              { name: 'The Inner Critic', trigger: [3], threshold: 4, role: 'Drives perfectionism through self-criticism', need: 'Needs to know you are already worthy without being perfect' },
+                              { name: 'The Planner', trigger: [1], threshold: 4, role: 'Prevents surprises through hyper-organization', need: 'Needs to trust that you can handle uncertainty safely' },
+                              { name: 'The Perfectionist', trigger: [7], threshold: 4, role: 'Prevents exposure of perceived flaws', need: 'Needs to learn that imperfection does not mean rejection' },
+                              { name: 'The People Pleaser', trigger: [9], threshold: 4, role: 'Keeps relationships safe through compliance', need: 'Needs to know your true self is lovable without performing' },
+                              { name: 'The Controller', trigger: [5], threshold: 4, role: 'Manages situations to prevent vulnerability', need: 'Needs to feel safe enough to release control and trust the process' },
+                              { name: 'The Worrier', trigger: [14], threshold: 4, role: 'Anticipates danger through hypervigilance', need: 'Needs reassurance that you are safe in the present moment' }
+                            ],
+                            firefighter: [
+                              { name: 'The Distractor', trigger: [2], threshold: 4, role: 'Prevents feeling overwhelming pain', need: 'Needs permission to feel emotions safely without being overwhelmed' },
+                              { name: 'The Numbing Part', trigger: [6], threshold: 4, role: 'Creates emotional distance from pain', need: 'Needs to know that feeling pain will not destroy you' },
+                              { name: 'The Impulse Part', trigger: [4], threshold: 4, role: 'Releases emotional pressure through action', need: 'Needs healthier outlets and the ability to pause before acting' },
+                              { name: 'The Shutdown Part', trigger: [8], threshold: 4, role: 'Protects from emotional overwhelm through withdrawal', need: 'Needs a sense of safety to slowly reconnect with feelings' },
+                              { name: 'The Self-Destructive Part', trigger: [10], threshold: 3, role: 'Redirects unbearable emotional pain', need: 'Needs compassion, not punishment — pain turned inward needs to be witnessed' }
+                            ],
+                            exile: [
+                              { name: 'The Scared Child', trigger: [11], threshold: 4, role: 'Holds the original feelings of being small and helpless', need: 'Needs safety, comfort, and reassurance from Self' },
+                              { name: 'The Lonely Child', trigger: [12], threshold: 4, role: 'Holds unmet needs for belonging and attachment', need: 'Needs to feel seen, held, and never alone again' },
+                              { name: 'The Grieving Child', trigger: [13], threshold: 4, role: 'Holds unprocessed loss and sorrow', need: 'Needs to be witnessed, validated, and allowed to mourn' },
+                              { name: 'The Shamed Child', trigger: [15], threshold: 4, role: 'Holds beliefs of being fundamentally flawed or broken', need: 'Needs to be told "you are enough" and "nothing is wrong with you"' }
+                            ]
+                          };
+                          const rawAnswers = partsData.answers || {};
+                          const identifiedParts = [];
+                          Object.entries(partsDefinitions).forEach(([type, partsList]) => {
+                            partsList.forEach(partDef => {
+                              const triggerScores = partDef.trigger.map(qId => rawAnswers[qId] || rawAnswers[String(qId)] || 0);
+                              const maxScore = Math.max(...triggerScores);
+                              if (maxScore >= partDef.threshold) {
+                                identifiedParts.push({ ...partDef, type, intensity: maxScore, intensityLabel: maxScore >= 5 ? 'Very Active' : 'Active' });
+                              }
+                            });
+                          });
+                          identifiedParts.sort((a, b) => b.intensity - a.intensity);
+
+                          const typeCounts = { manager: 0, firefighter: 0, exile: 0 };
+                          identifiedParts.forEach(p => { typeCounts[p.type] = (typeCounts[p.type] || 0) + 1; });
+                          const typeLabels = { manager: 'Managers', firefighter: 'Firefighters', exile: 'Exiles' };
+                          const typeColors = { manager: { bg: isDark ? 'bg-blue-900/30' : 'bg-blue-50', text: isDark ? 'text-blue-300' : 'text-blue-700', border: isDark ? 'border-blue-800' : 'border-blue-200', bar: 'bg-blue-500' }, firefighter: { bg: isDark ? 'bg-amber-900/30' : 'bg-amber-50', text: isDark ? 'text-amber-300' : 'text-amber-700', border: isDark ? 'border-amber-800' : 'border-amber-200', bar: 'bg-amber-500' }, exile: { bg: isDark ? 'bg-pink-900/30' : 'bg-pink-50', text: isDark ? 'text-pink-300' : 'text-pink-700', border: isDark ? 'border-pink-800' : 'border-pink-200', bar: 'bg-pink-500' } };
+
                           return (
                             <div>
-                              {sortedScores.length > 0 && (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                                  {sortedScores.map((s, idx) => (
-                                    <div key={s.category} className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
-                                      <div className="flex items-center justify-between mb-2">
-                                        <span className={`text-xs font-medium ${textSecondary}`}>{s.category}</span>
-                                        <span className={`text-sm font-bold ${textPrimary}`}>{s.score}</span>
+                              <div className="grid grid-cols-3 gap-3 mb-4">
+                                {Object.entries(typeCounts).map(([type, count]) => (
+                                  <div key={type} className={`p-3 rounded-lg border ${typeColors[type].border} ${typeColors[type].bg} text-center`}>
+                                    <p className={`text-2xl font-extrabold ${typeColors[type].text}`}>{count}</p>
+                                    <p className={`text-xs font-medium ${typeColors[type].text}`}>{typeLabels[type]}</p>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {identifiedParts.length > 0 ? (
+                                <div className="space-y-3">
+                                  {identifiedParts.map((part, idx) => (
+                                    <div key={idx} className={`p-4 rounded-lg border ${typeColors[part.type].border} ${typeColors[part.type].bg}`}>
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <span className={`text-sm font-bold ${textPrimary}`}>{part.name}</span>
+                                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider ${typeColors[part.type].text} ${isDark ? 'bg-slate-700/50' : 'bg-white/70'}`}>{part.type}</span>
+                                        </div>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${part.intensity >= 5 ? (isDark ? 'bg-red-900/40 text-red-300' : 'bg-red-100 text-red-700') : (isDark ? 'bg-yellow-900/40 text-yellow-300' : 'bg-yellow-100 text-yellow-700')}`}>
+                                          {part.intensityLabel} ({part.intensity}/5)
+                                        </span>
                                       </div>
-                                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div
-                                          className={`h-full rounded-full transition-all ${idx === 0 ? 'bg-purple-500' : idx === 1 ? 'bg-indigo-500' : 'bg-violet-400'}`}
-                                          style={{ width: `${(s.score / maxPartScore) * 100}%` }}
-                                        />
+                                      <div className="space-y-1.5">
+                                        <p className={`text-xs ${textSecondary}`}>
+                                          <span className="font-semibold">Role:</span> {part.role}
+                                        </p>
+                                        <p className={`text-xs ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
+                                          <span className="font-semibold">What it needs to step back:</span> {part.need}
+                                        </p>
                                       </div>
                                     </div>
                                   ))}
                                 </div>
-                              )}
-                              {Array.isArray(patterns) && patterns.length > 0 && (
-                                <div className={`p-3 rounded-lg ${isDark ? 'bg-purple-900/20 border-purple-800/30' : 'bg-purple-50 border-purple-100'} border`}>
-                                  <p className={`text-xs font-semibold ${isDark ? 'text-purple-300' : 'text-purple-700'} mb-2`}>Identified Protector Patterns:</p>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {patterns.map((p, i) => (
-                                      <span key={i} className={`text-xs px-2 py-1 rounded-lg ${isDark ? 'bg-purple-800/40 text-purple-200' : 'bg-purple-100 text-purple-700'}`}>
-                                        {typeof p === 'string' ? p : p.name || p.label || JSON.stringify(p)}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                              {sortedScores.length === 0 && (!Array.isArray(patterns) || patterns.length === 0) && (
-                                <div className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
-                                  <p className={`text-xs ${textMuted}`}>Parts assessment data recorded. Raw data available for review.</p>
-                                  <pre className={`text-xs ${textMuted} mt-2 whitespace-pre-wrap break-words max-h-32 overflow-y-auto`}>
-                                    {JSON.stringify(partsData, null, 2)}
-                                  </pre>
+                              ) : (
+                                <div className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'} text-center`}>
+                                  <Shield className={`w-8 h-8 mx-auto mb-2 ${textMuted}`} />
+                                  <p className={`text-sm ${textSecondary}`}>No strongly active protective parts identified</p>
+                                  <p className={`text-xs ${textMuted} mt-1`}>All parts scored below threshold — this may indicate balanced inner system or low assessment engagement</p>
                                 </div>
                               )}
                             </div>
@@ -2243,42 +2281,74 @@ const TherapistDashboard = () => {
                       <div className="mb-6">
                         <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
                           <Heart className="w-4 h-4 text-emerald-500" />
-                          Self-Energy Assessment
+                          Self-Energy Assessment — The 8 C's
                         </h4>
                         {(() => {
                           const seData = clientInsights.selfEnergyAssessment;
-                          const qualities = seData.scores || seData.qualities || seData.selfEnergyScores || {};
-                          const sortedQualities = Object.entries(qualities)
-                            .map(([key, val]) => ({ quality: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), score: typeof val === 'number' ? val : (val?.score || 0) }))
-                            .sort((a, b) => b.score - a.score);
-                          const maxSEScore = sortedQualities.length > 0 ? Math.max(...sortedQualities.map(s => s.score), 10) : 10;
+                          const scores = seData.scores || seData.qualities || {};
+                          const cDescriptions = {
+                            calmness: 'Ability to remain centered and peaceful even under stress',
+                            curiosity: 'Genuine interest in understanding inner experiences without judgment',
+                            compassion: 'Warmth and kindness toward yourself and your parts in pain',
+                            confidence: 'Trust in your ability to handle whatever arises',
+                            courage: 'Willingness to face fears and take steps toward healing',
+                            clarity: 'Seeing situations clearly without parts clouding perception',
+                            creativity: 'Capacity to think flexibly and find new solutions',
+                            connectedness: 'Feeling of connection to others and something larger'
+                          };
+                          const cColors = {
+                            calmness: { ring: 'text-cyan-500', bg: isDark ? 'bg-cyan-900/20' : 'bg-cyan-50', border: isDark ? 'border-cyan-800' : 'border-cyan-200' },
+                            curiosity: { ring: 'text-violet-500', bg: isDark ? 'bg-violet-900/20' : 'bg-violet-50', border: isDark ? 'border-violet-800' : 'border-violet-200' },
+                            compassion: { ring: 'text-pink-500', bg: isDark ? 'bg-pink-900/20' : 'bg-pink-50', border: isDark ? 'border-pink-800' : 'border-pink-200' },
+                            confidence: { ring: 'text-amber-500', bg: isDark ? 'bg-amber-900/20' : 'bg-amber-50', border: isDark ? 'border-amber-800' : 'border-amber-200' },
+                            courage: { ring: 'text-red-500', bg: isDark ? 'bg-red-900/20' : 'bg-red-50', border: isDark ? 'border-red-800' : 'border-red-200' },
+                            clarity: { ring: 'text-blue-500', bg: isDark ? 'bg-blue-900/20' : 'bg-blue-50', border: isDark ? 'border-blue-800' : 'border-blue-200' },
+                            creativity: { ring: 'text-emerald-500', bg: isDark ? 'bg-emerald-900/20' : 'bg-emerald-50', border: isDark ? 'border-emerald-800' : 'border-emerald-200' },
+                            connectedness: { ring: 'text-indigo-500', bg: isDark ? 'bg-indigo-900/20' : 'bg-indigo-50', border: isDark ? 'border-indigo-800' : 'border-indigo-200' }
+                          };
+                          const cQualities = Object.entries(scores).map(([key, val]) => {
+                            const avg = typeof val === 'number' ? val : (val?.average || val?.score || 0);
+                            const pct = Math.round((avg / 5) * 100);
+                            return { key, label: key.charAt(0).toUpperCase() + key.slice(1), avg, pct, desc: cDescriptions[key] || '', colors: cColors[key] || cColors.calmness };
+                          }).sort((a, b) => b.pct - a.pct);
+
+                          const overallAvg = cQualities.length > 0 ? Math.round(cQualities.reduce((s, q) => s + q.pct, 0) / cQualities.length) : 0;
+
                           return (
                             <div>
-                              {sortedQualities.length > 0 ? (
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                  {sortedQualities.map((q, idx) => (
-                                    <div key={q.quality} className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
-                                      <div className="flex items-center justify-between mb-2">
-                                        <span className={`text-xs font-medium ${textSecondary}`}>{q.quality}</span>
-                                        <span className={`text-sm font-bold ${textPrimary}`}>{q.score}</span>
-                                      </div>
-                                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <div
-                                          className={`h-full rounded-full transition-all ${idx < 2 ? 'bg-emerald-500' : idx < 4 ? 'bg-teal-500' : 'bg-green-400'}`}
-                                          style={{ width: `${(q.score / maxSEScore) * 100}%` }}
-                                        />
-                                      </div>
+                              <div className={`p-4 rounded-lg border ${isDark ? 'border-emerald-800 bg-emerald-900/20' : 'border-emerald-200 bg-emerald-50'} mb-4 text-center`}>
+                                <p className={`text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-emerald-600'} mb-1`}>Overall Self-Energy</p>
+                                <p className={`text-4xl font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>{overallAvg}%</p>
+                                <p className={`text-xs ${textMuted} mt-1`}>
+                                  {overallAvg >= 80 ? 'Strong Self-energy connection — excellent foundation for parts work' :
+                                   overallAvg >= 60 ? 'Moderate Self-energy — good base with room for growth' :
+                                   overallAvg >= 40 ? 'Developing Self-energy — protectors may still be blending frequently' :
+                                   'Low Self-energy access — focus on building Self-connection before deep parts work'}
+                                </p>
+                              </div>
+
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {cQualities.map(q => (
+                                  <div key={q.key} className={`p-3 rounded-lg border ${q.colors.border} ${q.colors.bg}`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className={`text-xs font-bold ${q.colors.ring}`}>{q.label}</span>
+                                      <span className={`text-lg font-extrabold ${textPrimary}`}>{q.pct}%</span>
                                     </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
-                                  <p className={`text-xs ${textMuted}`}>Self-energy assessment data recorded. Raw data available for review.</p>
-                                  <pre className={`text-xs ${textMuted} mt-2 whitespace-pre-wrap break-words max-h-32 overflow-y-auto`}>
-                                    {JSON.stringify(seData, null, 2)}
-                                  </pre>
-                                </div>
-                              )}
+                                    <div className="h-2.5 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden mb-2">
+                                      <div
+                                        className={`h-full rounded-full transition-all duration-500 ${
+                                          q.pct >= 80 ? 'bg-emerald-500' :
+                                          q.pct >= 60 ? 'bg-teal-500' :
+                                          q.pct >= 40 ? 'bg-amber-500' :
+                                          'bg-red-400'
+                                        }`}
+                                        style={{ width: `${q.pct}%` }}
+                                      />
+                                    </div>
+                                    <p className={`text-[10px] leading-tight ${textMuted}`}>{q.desc}</p>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           );
                         })()}
@@ -2809,6 +2879,60 @@ const TherapistDashboard = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'roadmap' && (
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+              <Gem className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className={`text-lg font-semibold ${textPrimary}`}>Future Features Roadmap</h2>
+              <p className={`text-sm ${textSecondary}`}>Upcoming enhancements planned for the IFS therapy platform</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {[
+              { title: 'AI-Powered Session Summaries', desc: 'Automatically generate structured session summaries from therapist notes using AI, with key themes, parts identified, progress markers, and suggested homework — saving therapists 15+ minutes per session.', icon: Sparkles, color: 'from-purple-500 to-indigo-600', status: 'In Development' },
+              { title: 'Parts Relationship Mapping', desc: 'Interactive visual map showing how a client\'s protectors, managers, firefighters, and exiles relate to each other — including alliances, conflicts, and polarizations between parts.', icon: Users, color: 'from-blue-500 to-cyan-600', status: 'Planned' },
+              { title: 'Guided Unburdening Protocol', desc: 'Step-by-step digital unburdening ceremony with therapist-guided prompts, visualization audio, and burden release tracking. Includes post-unburdening integration exercises.', icon: Heart, color: 'from-rose-500 to-pink-600', status: 'Planned' },
+              { title: 'Mood & Parts Pattern Analytics', desc: 'Advanced analytics dashboard showing correlations between mood entries, active parts, triggers, and healing progress over time — with trend detection and early warning alerts.', icon: TrendingUp, color: 'from-emerald-500 to-teal-600', status: 'Planned' },
+              { title: 'Secure Video Session Integration', desc: 'Built-in HIPAA-compliant video sessions with real-time parts tracking sidebar, live session notes, and automatic recording transcription for review.', icon: Play, color: 'from-red-500 to-orange-600', status: 'Researching' },
+              { title: 'Client Self-Check-In Between Sessions', desc: 'Daily micro check-ins where clients rate their parts activity, Self-energy level, and emotional state — with automatic alerts to therapist if concerning patterns emerge.', icon: Activity, color: 'from-amber-500 to-yellow-600', status: 'Planned' },
+              { title: 'Group Therapy Module', desc: 'Support for IFS-informed group therapy with shared exercises, group parts mapping, anonymous reflection sharing, and facilitator controls for managing group dynamics.', icon: Users, color: 'from-violet-500 to-purple-600', status: 'Researching' },
+              { title: 'Customizable Assessment Builder', desc: 'Therapists can create custom assessments tailored to their practice — define questions, scoring, wound mappings, and personalization rules without code.', icon: Target, color: 'from-sky-500 to-blue-600', status: 'Planned' },
+              { title: 'Parts Dialogue Voice Mode', desc: 'Voice-guided parts dialogue where clients can speak to their parts using speech recognition, with AI facilitating the conversation in real-time and suggesting Self-led responses.', icon: MessageCircle, color: 'from-teal-500 to-emerald-600', status: 'Researching' },
+              { title: 'Multi-Therapist Practice Management', desc: 'Support for therapy practices with multiple therapists — shared client handoffs, supervisor oversight, cross-therapist analytics, billing integration, and team coordination tools.', icon: Crown, color: 'from-amber-600 to-orange-600', status: 'Planned' }
+            ].map((feature, idx) => {
+              const FIcon = feature.icon;
+              const statusColors = {
+                'In Development': isDark ? 'bg-emerald-900/40 text-emerald-300 border-emerald-700' : 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                'Planned': isDark ? 'bg-blue-900/40 text-blue-300 border-blue-700' : 'bg-blue-100 text-blue-700 border-blue-200',
+                'Researching': isDark ? 'bg-purple-900/40 text-purple-300 border-purple-700' : 'bg-purple-100 text-purple-700 border-purple-200'
+              };
+              return (
+                <div key={idx} className={`${cardBg} rounded-xl border ${cardBorder} p-5 transition-all hover:border-amber-300/50`}>
+                  <div className="flex items-start gap-4">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                      <FIcon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-1.5">
+                        <h3 className={`font-bold ${textPrimary}`}>{feature.title}</h3>
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${statusColors[feature.status]}`}>
+                          {feature.status}
+                        </span>
+                      </div>
+                      <p className={`text-sm ${textSecondary} leading-relaxed`}>{feature.desc}</p>
+                    </div>
+                    <span className={`text-xs font-bold ${textMuted} flex-shrink-0`}>#{idx + 1}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
