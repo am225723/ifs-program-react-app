@@ -13,10 +13,13 @@ import {
   ArrowLeft,
   RefreshCw,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Brain,
+  Sparkles,
+  ClipboardList
 } from 'lucide-react';
 import { assessmentManager } from '../lib/supabasePersonalization';
-import { supabaseHelpers } from '../lib/supabase';
+import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 
 const woundColors = {
@@ -40,6 +43,9 @@ const Profile = ({ client }) => {
   const printRef = useRef();
   const [assessment, setAssessment] = useState(null);
   const [allAssessments, setAllAssessments] = useState([]);
+  const [partsAssessment, setPartsAssessment] = useState(null);
+  const [selfEnergyAssessment, setSelfEnergyAssessment] = useState(null);
+  const [customAssessments, setCustomAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const [moodEntries, setMoodEntries] = useState([]);
@@ -60,9 +66,14 @@ const Profile = ({ client }) => {
 
     setLoading(true);
     try {
-      const [latestResult, historyResult] = await Promise.all([
+      const [latestResult, historyResult, interactiveResult] = await Promise.all([
         assessmentManager.getLatestAssessment(client.id),
-        assessmentManager.getAllAssessments(client.id)
+        assessmentManager.getAllAssessments(client.id),
+        supabase
+          .from('ifs_interactive_data')
+          .select('*')
+          .eq('client_id', client.id)
+          .like('module_id', 'assessment_%')
       ]);
 
       if (latestResult.success && latestResult.assessment) {
@@ -71,6 +82,21 @@ const Profile = ({ client }) => {
       
       if (historyResult.success) {
         setAllAssessments(historyResult.assessments || []);
+      }
+
+      const interactiveData = interactiveResult?.data || [];
+      const partsEntry = interactiveData.find(d => d.module_id === 'assessment_parts');
+      const selfEnergyEntry = interactiveData.find(d => d.module_id === 'assessment_self-energy');
+      if (partsEntry?.data) setPartsAssessment(partsEntry.data);
+      if (selfEnergyEntry?.data) setSelfEnergyAssessment(selfEnergyEntry.data);
+
+      const { data: customData } = await supabase
+        .from('ifs_interactive_data')
+        .select('*')
+        .eq('client_id', client.id)
+        .like('module_id', 'custom_assessment_response_%');
+      if (customData && customData.length > 0) {
+        setCustomAssessments(customData.map(d => ({ ...d.data, moduleId: d.module_id, updatedAt: d.updated_at })));
       }
     } catch (error) {
       console.error('Error loading assessment:', error);
@@ -360,6 +386,167 @@ const Profile = ({ client }) => {
               )}
             </div>
           </div>
+
+          {partsAssessment && (
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+              <div className="p-4 sm:p-8">
+                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-6">
+                  <Shield className="w-5 h-5 text-purple-500" />
+                  Protective Parts Assessment
+                </h2>
+                {partsAssessment.completedAt && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+                    <Calendar className="w-4 h-4" />
+                    Completed: {formatDate(partsAssessment.completedAt)}
+                  </div>
+                )}
+                {partsAssessment.ranked && partsAssessment.ranked.length > 0 && (
+                  <div className="space-y-4 mb-6">
+                    {partsAssessment.ranked.map(([category, data], idx) => {
+                      const colors = idx === 0 ? 'bg-purple-500' : idx === 1 ? 'bg-indigo-500' : 'bg-blue-500';
+                      const percentage = data.maxScale ? (data.average / data.maxScale) * 100 : (data.total / (data.count * 5)) * 100;
+                      return (
+                        <div key={category} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium capitalize text-gray-700">{category}</span>
+                            <div className="flex items-center gap-3">
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                percentage >= 66 ? 'bg-red-100 text-red-700' :
+                                percentage >= 33 ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                              }`}>
+                                {percentage >= 66 ? 'High' : percentage >= 33 ? 'Moderate' : 'Low'}
+                              </span>
+                              <span className="font-bold text-gray-700">
+                                {data.average?.toFixed(1) || (data.total / data.count).toFixed(1)}/{data.maxScale || 5}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div className={`h-3 rounded-full transition-all duration-500 ${colors}`} style={{ width: `${Math.min(percentage, 100)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {partsAssessment.activeParts && partsAssessment.activeParts.length > 0 && (
+                  <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                    <h3 className="font-semibold text-purple-800 mb-3">Active Protective Parts Identified</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {partsAssessment.activeParts.map((part, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                          {part.name || part}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {selfEnergyAssessment && (
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+              <div className="p-4 sm:p-8">
+                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-6">
+                  <Sparkles className="w-5 h-5 text-emerald-500" />
+                  Self-Energy Assessment
+                </h2>
+                {selfEnergyAssessment.completedAt && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+                    <Calendar className="w-4 h-4" />
+                    Completed: {formatDate(selfEnergyAssessment.completedAt)}
+                  </div>
+                )}
+                {selfEnergyAssessment.ranked && selfEnergyAssessment.ranked.length > 0 && (
+                  <div className="space-y-4 mb-6">
+                    {selfEnergyAssessment.ranked.map(([category, data], idx) => {
+                      const colors = ['bg-emerald-500', 'bg-teal-500', 'bg-cyan-500', 'bg-green-500', 'bg-lime-500', 'bg-sky-500', 'bg-indigo-500', 'bg-violet-500'];
+                      const percentage = data.maxScale ? (data.average / data.maxScale) * 100 : (data.total / (data.count * 5)) * 100;
+                      const level = percentage >= 80 ? 'Strong' : percentage >= 60 ? 'Developing' : 'Growing Edge';
+                      const levelStyle = percentage >= 80 ? 'bg-emerald-100 text-emerald-700' : percentage >= 60 ? 'bg-yellow-100 text-yellow-700' : 'bg-orange-100 text-orange-700';
+                      return (
+                        <div key={category} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium capitalize text-gray-700">{category}</span>
+                            <div className="flex items-center gap-3">
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${levelStyle}`}>{level}</span>
+                              <span className="font-bold text-gray-700">
+                                {data.average?.toFixed(1) || (data.total / data.count).toFixed(1)}/{data.maxScale || 5}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div className={`h-3 rounded-full transition-all duration-500 ${colors[idx % colors.length]}`} style={{ width: `${Math.min(percentage, 100)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200">
+                  <h3 className="font-semibold text-emerald-800 mb-3">Understanding Self-Energy</h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    Self-energy reflects your connection to qualities like curiosity, compassion, and calm. Higher scores indicate stronger access to your core Self, which is the foundation for healing in IFS therapy.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {customAssessments.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+              <div className="p-4 sm:p-8">
+                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-6">
+                  <ClipboardList className="w-5 h-5 text-amber-500" />
+                  Custom Assessment Results
+                </h2>
+                <div className="space-y-6">
+                  {customAssessments.map((ca, caIdx) => (
+                    <div key={ca.moduleId || caIdx} className="border border-gray-200 rounded-xl p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-800">{ca.assessmentTitle || 'Custom Assessment'}</h3>
+                        {(ca.completedAt || ca.updatedAt) && (
+                          <span className="text-xs text-gray-500">
+                            {formatDate(ca.completedAt || ca.updatedAt)}
+                          </span>
+                        )}
+                      </div>
+                      {ca.ranked && ca.ranked.length > 0 && (
+                        <div className="space-y-3">
+                          {ca.ranked.map(([category, data], idx) => {
+                            const barColors = ['bg-amber-500', 'bg-emerald-500', 'bg-blue-500', 'bg-purple-500', 'bg-rose-500'];
+                            const percentage = data.percentage || ((data.average / (data.maxScale || 5)) * 100);
+                            return (
+                              <div key={category} className="bg-gray-50 rounded-lg p-3">
+                                <div className="flex justify-between items-center mb-1.5">
+                                  <span className="text-sm font-medium capitalize text-gray-700">{category}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                      data.label === 'High' ? 'bg-red-100 text-red-700' :
+                                      data.label === 'Moderate' ? 'bg-yellow-100 text-yellow-700' :
+                                      'bg-green-100 text-green-700'
+                                    }`}>{data.label || 'N/A'}</span>
+                                    <span className="text-sm font-semibold text-gray-600">
+                                      {data.average?.toFixed(1)}/{data.maxScale || 5}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                  <div className={`h-2.5 rounded-full transition-all duration-500 ${barColors[idx % barColors.length]}`} style={{ width: `${Math.min(percentage, 100)}%` }} />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {allAssessments.length > 1 && (
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden no-print">

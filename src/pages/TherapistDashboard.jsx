@@ -429,6 +429,18 @@ const TherapistDashboard = () => {
       const partsEntry = (interactiveData || []).find(d => d.module_id === 'assessment_parts');
       const selfEnergyEntry = (interactiveData || []).find(d => d.module_id === 'assessment_self-energy');
 
+      let customAssessmentResults = [];
+      try {
+        const { data: customData } = await supabase
+          .from('ifs_interactive_data')
+          .select('*')
+          .eq('client_id', clientId)
+          .like('module_id', 'custom_assessment_response_%');
+        if (customData && customData.length > 0) {
+          customAssessmentResults = customData.map(d => ({ ...d.data, moduleId: d.module_id, updatedAt: d.updated_at }));
+        }
+      } catch (e) { console.error('Error loading custom assessments:', e); }
+
       const client = clients.find(c => c.id === clientId);
       const wound = client?.primaryWound || 'abandonment';
       const sessionPrep = sessionPrepByWound[wound] || sessionPrepByWound.abandonment;
@@ -441,6 +453,7 @@ const TherapistDashboard = () => {
         personalization: personalizedCurriculum || null,
         partsAssessment: partsEntry?.data || null,
         selfEnergyAssessment: selfEnergyEntry?.data || null,
+        customAssessments: customAssessmentResults,
         journalEntries: journalEntries || [],
         moduleProgress: progressData || []
       });
@@ -2353,6 +2366,54 @@ const TherapistDashboard = () => {
                             </div>
                           );
                         })()}
+                      </div>
+                    )}
+
+                    {clientInsights.customAssessments && clientInsights.customAssessments.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                          <FileText className="w-4 h-4 text-amber-500" />
+                          Custom Assessment Results
+                        </h4>
+                        <div className="space-y-4">
+                          {clientInsights.customAssessments.map((ca, caIdx) => (
+                            <div key={ca.moduleId || caIdx} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                              <div className="flex items-center justify-between mb-3">
+                                <span className={`font-medium text-sm ${textPrimary}`}>{ca.assessmentTitle || 'Custom Assessment'}</span>
+                                {(ca.completedAt || ca.updatedAt) && (
+                                  <span className={`text-xs ${textMuted}`}>{new Date(ca.completedAt || ca.updatedAt).toLocaleDateString()}</span>
+                                )}
+                              </div>
+                              {ca.ranked && ca.ranked.length > 0 && (
+                                <div className="space-y-2">
+                                  {ca.ranked.map(([category, data]) => {
+                                    const percentage = data.percentage || ((data.average / (data.maxScale || 5)) * 100);
+                                    return (
+                                      <div key={category}>
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className={`text-xs font-medium capitalize ${textSecondary}`}>{category}</span>
+                                          <div className="flex items-center gap-2">
+                                            <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                                              data.label === 'High' ? (isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-700') :
+                                              data.label === 'Moderate' ? (isDark ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700') :
+                                              (isDark ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700')
+                                            }`}>{data.label || 'N/A'}</span>
+                                            <span className={`text-xs font-semibold ${textSecondary}`}>{data.average?.toFixed(1)}/{data.maxScale || 5}</span>
+                                          </div>
+                                        </div>
+                                        <div className={`h-2 rounded-full overflow-hidden ${isDark ? 'bg-slate-600' : 'bg-gray-200'}`}>
+                                          <div className={`h-full rounded-full transition-all duration-500 ${
+                                            percentage >= 66 ? 'bg-red-500' : percentage >= 33 ? 'bg-amber-500' : 'bg-emerald-500'
+                                          }`} style={{ width: `${Math.min(percentage, 100)}%` }} />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 
