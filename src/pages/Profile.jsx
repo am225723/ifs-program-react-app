@@ -85,6 +85,29 @@ const Profile = ({ client }) => {
       }
 
       const interactiveData = interactiveResult?.data || [];
+      const woundsEntry = interactiveData.find(d => d.module_id === 'assessment_wounds');
+      if (!latestResult.assessment && woundsEntry?.data) {
+        const wd = woundsEntry.data;
+        setAssessment({
+          primary_wound: wd.primary,
+          secondary_wound: wd.secondary,
+          abandonment_score: wd.scores?.abandonment?.total || 0,
+          shame_score: wd.scores?.shame?.total || 0,
+          neglect_score: wd.scores?.neglect?.total || 0,
+          betrayal_score: wd.scores?.betrayal?.total || 0,
+          helplessness_score: wd.scores?.helplessness?.total || 0,
+          scores: {
+            abandonment: wd.scores?.abandonment?.total || 0,
+            shame: wd.scores?.shame?.total || 0,
+            neglect: wd.scores?.neglect?.total || 0,
+            betrayal: wd.scores?.betrayal?.total || 0,
+            helplessness: wd.scores?.helplessness?.total || 0
+          },
+          assessment_date: wd.completedAt || woundsEntry.updated_at,
+          created_at: woundsEntry.updated_at
+        });
+      }
+
       const partsEntry = interactiveData.find(d => d.module_id === 'assessment_parts');
       const selfEnergyEntry = interactiveData.find(d => d.module_id === 'assessment_self-energy');
       if (partsEntry?.data) setPartsAssessment(partsEntry.data);
