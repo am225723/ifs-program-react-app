@@ -272,6 +272,7 @@ export const clientAuth = {
           email: clientData.email,
           phone: clientData.phone,
           therapist_notes: clientData.notes,
+          user_role: clientData.role || 'client',
           status: 'active'
         })
         .select()

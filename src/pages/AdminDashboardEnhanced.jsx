@@ -1015,7 +1015,8 @@ const CreateClientModal = ({ onClose, onCreate }) => {
     name: '',
     email: '',
     phone: '',
-    notes: ''
+    notes: '',
+    role: 'client'
   });
 
   const handleSubmit = (e) => {
@@ -1085,6 +1086,20 @@ const CreateClientModal = ({ onClose, onCreate }) => {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               placeholder="Initial consultation notes..."
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Role *
+            </label>
+            <select
+              value={formData.role}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
+            >
+              <option value="client">Client</option>
+              <option value="therapist">Therapist</option>
+            </select>
           </div>
 
           <div className="flex gap-3 pt-4">
