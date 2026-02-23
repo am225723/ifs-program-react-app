@@ -22,6 +22,53 @@ import { assessmentManager } from '../lib/supabasePersonalization';
 import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 
+const protectivePartsDefinitions = {
+  manager: [
+    { name: 'The Inner Critic', trigger: [3], threshold: 4, description: 'Criticizes you harshly to motivate improvement and prevent failure', role: 'Drives perfectionism through self-criticism' },
+    { name: 'The Planner', trigger: [1], threshold: 4, description: 'Plans everything meticulously to prevent chaos and maintain control', role: 'Prevents surprises through hyper-organization' },
+    { name: 'The Perfectionist', trigger: [7], threshold: 4, description: 'Demands flawless performance to avoid criticism or failure', role: 'Prevents exposure of perceived flaws' },
+    { name: 'The People Pleaser', trigger: [9], threshold: 4, description: 'Puts others first to avoid conflict, rejection, or abandonment', role: 'Keeps relationships safe through compliance' },
+    { name: 'The Controller', trigger: [5], threshold: 4, description: 'Maintains tight control over emotions and environment for safety', role: 'Manages situations to prevent vulnerability' },
+    { name: 'The Worrier', trigger: [14], threshold: 4, description: 'Constantly scans for threats and worries about others\' opinions', role: 'Anticipates danger through hypervigilance' }
+  ],
+  firefighter: [
+    { name: 'The Distractor', trigger: [2], threshold: 4, description: 'Zones out or distracts when overwhelming emotions surface', role: 'Prevents feeling overwhelming pain' },
+    { name: 'The Numbing Part', trigger: [6], threshold: 4, description: 'Uses substances, food, or activities to numb difficult feelings', role: 'Creates emotional distance from pain' },
+    { name: 'The Impulse Part', trigger: [4], threshold: 4, description: 'Acts impulsively when stress builds up, seeking quick relief', role: 'Releases emotional pressure through action' },
+    { name: 'The Shutdown Part', trigger: [8], threshold: 4, description: 'Shuts down emotionally or dissociates when feelings get intense', role: 'Protects from emotional overwhelm through withdrawal' },
+    { name: 'The Self-Destructive Part', trigger: [10], threshold: 3, description: 'Turns pain inward through self-destructive behaviors', role: 'Redirects unbearable emotional pain' }
+  ],
+  exile: [
+    { name: 'The Scared Child', trigger: [11], threshold: 4, description: 'A young part that carries fear, smallness, and vulnerability', role: 'Holds the original feelings of being small and helpless' },
+    { name: 'The Lonely Child', trigger: [12], threshold: 4, description: 'Carries deep loneliness and longing for connection', role: 'Holds unmet needs for belonging and attachment' },
+    { name: 'The Grieving Child', trigger: [13], threshold: 4, description: 'Carries sadness and grief from painful past experiences', role: 'Holds unprocessed loss and sorrow' },
+    { name: 'The Shamed Child', trigger: [15], threshold: 4, description: 'Carries a deep sense of shame about who they are at their core', role: 'Holds beliefs of being fundamentally flawed or broken' }
+  ]
+};
+
+function getIdentifiedParts(answers) {
+  if (!answers) return [];
+  const identified = [];
+  Object.entries(protectivePartsDefinitions).forEach(([type, partsList]) => {
+    partsList.forEach(partDef => {
+      const triggerScores = partDef.trigger.map(qId => answers[qId] || 0);
+      const maxScore = Math.max(...triggerScores);
+      if (maxScore >= partDef.threshold) {
+        identified.push({ ...partDef, type, intensity: maxScore, intensityLabel: maxScore >= 5 ? 'Very Active' : 'Active' });
+      }
+    });
+  });
+  identified.sort((a, b) => b.intensity - a.intensity);
+  return identified;
+}
+
+const typeLabels = { manager: 'Manager', firefighter: 'Firefighter', exile: 'Exile' };
+const typeColors = {
+  manager: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700', fill: 'bg-blue-500' },
+  firefighter: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', fill: 'bg-amber-500' },
+  exile: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700', badge: 'bg-rose-100 text-rose-700', fill: 'bg-rose-500' }
+};
+
 const woundColors = {
   abandonment: { bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-700', fill: 'bg-blue-500' },
   shame: { bg: 'bg-amber-100', border: 'border-amber-400', text: 'text-amber-700', fill: 'bg-amber-500' },
@@ -410,7 +457,9 @@ const Profile = ({ client }) => {
             </div>
           </div>
 
-          {partsAssessment && (
+          {partsAssessment && (() => {
+            const identifiedParts = getIdentifiedParts(partsAssessment.answers);
+            return (
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
               <div className="p-4 sm:p-8">
                 <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-6">
@@ -453,21 +502,56 @@ const Profile = ({ client }) => {
                     })}
                   </div>
                 )}
-                {partsAssessment.activeParts && partsAssessment.activeParts.length > 0 && (
-                  <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
-                    <h3 className="font-semibold text-purple-800 mb-3">Active Protective Parts Identified</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {partsAssessment.activeParts.map((part, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
-                          {part.name || part}
-                        </span>
-                      ))}
-                    </div>
+
+                {identifiedParts.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                      <Brain className="w-5 h-5 text-purple-500" />
+                      Your Identified Parts
+                    </h3>
+                    {['manager', 'firefighter', 'exile'].map(type => {
+                      const typeParts = identifiedParts.filter(p => p.type === type);
+                      if (typeParts.length === 0) return null;
+                      const tc = typeColors[type];
+                      return (
+                        <div key={type} className="mb-4 last:mb-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${tc.badge}`}>
+                              {typeLabels[type]}
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            {typeParts.map((part) => (
+                              <div key={part.name} className={`p-4 rounded-xl border ${tc.border} ${tc.bg}`}>
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className={`font-semibold ${tc.text}`}>{part.name}</span>
+                                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                                    part.intensityLabel === 'Very Active' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                                  }`}>
+                                    {part.intensityLabel}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-1">{part.description}</p>
+                                <p className="text-xs text-gray-500 italic">{part.role}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {identifiedParts.length === 0 && (
+                  <div className="bg-purple-50 rounded-xl p-6 border border-purple-200 text-center">
+                    <Shield className="w-8 h-8 text-purple-400 mx-auto mb-2" />
+                    <p className="text-sm text-purple-700">No strongly active protective parts identified from this assessment</p>
                   </div>
                 )}
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {selfEnergyAssessment && (
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">

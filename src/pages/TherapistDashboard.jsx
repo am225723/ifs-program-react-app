@@ -113,10 +113,38 @@ function generateAlertsFromClients(clients, recentAssessments, recentJournals) {
     }
   });
 
+  const concerningKeywords = [
+    'suicide', 'suicidal', 'kill myself', 'end my life', 'want to die', 'better off dead',
+    'self-harm', 'self harm', 'cutting', 'hurt myself', 'harming myself',
+    'hopeless', 'no reason to live', 'can\'t go on', 'give up on life',
+    'overdose', 'pills', 'jump off', 'hang myself',
+    'abuse', 'abused', 'being hit', 'hitting me', 'hurting me',
+    'dangerous', 'unsafe', 'scared for my life', 'threatening',
+    'relapse', 'using again', 'drinking again', 'started using',
+    'panic attack', 'can\'t breathe', 'dissociating', 'blacking out',
+    'nobody cares', 'all alone', 'no one would notice', 'disappear'
+  ];
+
   recentJournals.forEach(j => {
     const client = clients.find(c => c.id === j.client_id);
     if (client) {
       const daysAgo = Math.floor((now - new Date(j.created_at)) / (1000 * 60 * 60 * 24));
+      const content = (j.content || '').toLowerCase();
+      const matched = concerningKeywords.filter(kw => content.includes(kw));
+
+      if (matched.length > 0) {
+        alerts.push({
+          id: `concern-${j.id}`,
+          type: 'danger',
+          icon: AlertTriangle,
+          message: `${client.name}'s journal contains concerning language: "${matched.slice(0, 2).join('", "')}"`,
+          client: client.name,
+          time: daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`,
+          clientId: client.id,
+          action: 'view_journal'
+        });
+      }
+
       alerts.push({
         id: `journal-${j.id}`,
         type: 'info',
@@ -692,7 +720,7 @@ const TherapistDashboard = () => {
       ] = await Promise.all([
         supabase.from('ifs_assessment_results').select('*').in('client_id', clientIds),
         supabase.from('ifs_client_progress').select('*').in('client_id', clientIds),
-        supabase.from('ifs_journal_entries').select('id, client_id, created_at, mood').in('client_id', clientIds),
+        supabase.from('ifs_journal_entries').select('id, client_id, created_at, mood, content, title').in('client_id', clientIds),
         supabase.from('ifs_mood_entries').select('client_id, mood, energy, date').in('client_id', clientIds),
         supabase.from('ifs_therapy_activity_progress').select('client_id, activity_id, completed').in('client_id', clientIds)
       ]);
@@ -953,9 +981,9 @@ const TherapistDashboard = () => {
             >
               <Icon className="w-4 h-4" />
               {tab.label}
-              {tab.id === 'alerts' && alerts.filter(a => a.type === 'warning').length > 0 && (
+              {tab.id === 'alerts' && alerts.filter(a => a.type === 'warning' || a.type === 'danger').length > 0 && (
                 <span className="w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                  {alerts.filter(a => a.type === 'warning').length}
+                  {alerts.filter(a => a.type === 'warning' || a.type === 'danger').length}
                 </span>
               )}
             </button>
@@ -1333,6 +1361,7 @@ const TherapistDashboard = () => {
               alerts.map(alert => {
                 const Icon = alert.icon;
                 const alertStyles = {
+                  danger: { bg: isDark ? 'bg-red-900/50 border-red-700 ring-1 ring-red-500/30' : 'bg-red-100 border-red-300 ring-1 ring-red-200', icon: 'text-red-600 animate-pulse' },
                   warning: { bg: isDark ? 'bg-red-900/30 border-red-800' : 'bg-red-50 border-red-200', icon: 'text-red-500' },
                   success: { bg: isDark ? 'bg-green-900/30 border-green-800' : 'bg-green-50 border-green-200', icon: 'text-green-500' },
                   info: { bg: isDark ? 'bg-blue-900/30 border-blue-800' : 'bg-blue-50 border-blue-200', icon: 'text-blue-500' }

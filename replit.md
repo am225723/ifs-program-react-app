@@ -33,7 +33,9 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **Parts Relationship Map**: Interactive SVG graph visualization showing connections between inner parts with relationship types (protects, triggers, comforts, conflicts, allies).
 - **Unburdening Protocol**: Guided 8-step ceremony for releasing emotional burdens, with Supabase persistence and progress tracking.
 - **Assessment Builder**: Therapists can create custom assessments with multiple question types; clients take them via `/custom-assessment/:id`.
-- **Journal Voice Dictation**: Continuous speech-to-text dictation for journal entries using Web Speech API.
+- **Journal Voice Dictation**: Continuous speech-to-text dictation for journal entries using Web Speech API. Journal includes therapist visibility notice and automatic keyword scanning for concerning content (self-harm, crisis language, etc.) that sends alerts to therapists via messaging system.
+- **Journal Safety Alerts**: When a journal entry contains concerning keywords (suicide, self-harm, abuse, relapse, etc.), the system automatically sends an alert message to all active therapists. The Therapist Dashboard also scans recent journal entries and displays `danger`-level alerts with pulsing indicators for entries with concerning language.
+- **Profile Assessment Display**: Profile page shows all assessment results: Wound Assessment (with fallback from interactive data), Protective Parts Assessment (with identified parts listed by type — managers, firefighters, exiles — showing name, description, role, and intensity), Self-Energy Assessment, and Custom Assessment results.
 - **Guided Meditations**: 6 IFS-focused guided meditations (Self Energy, Parts Check-In, Inner Safe Place, Protector Appreciation, IFS Body Scan, Compassion Breathing) with step-by-step timed guidance, silent meditation timer, and voice reflection recording via MediaRecorder API.
 - **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generator.
 - **Theme & Animation Customization**: User preferences for visual and motion accessibility.

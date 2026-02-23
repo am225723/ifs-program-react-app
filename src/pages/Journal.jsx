@@ -32,6 +32,53 @@ import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 import { useTheme } from '../contexts/ThemeContext';
 
+const CONCERNING_KEYWORDS = [
+  'suicide', 'suicidal', 'kill myself', 'end my life', 'want to die', 'better off dead',
+  'self-harm', 'self harm', 'cutting', 'hurt myself', 'harming myself',
+  'hopeless', 'no reason to live', 'can\'t go on', 'give up on life',
+  'overdose', 'pills', 'jump off', 'hang myself',
+  'abuse', 'abused', 'being hit', 'hitting me', 'hurting me',
+  'dangerous', 'unsafe', 'scared for my life', 'threatening',
+  'relapse', 'using again', 'drinking again', 'started using',
+  'panic attack', 'can\'t breathe', 'dissociating', 'blacking out',
+  'nobody cares', 'all alone', 'no one would notice', 'disappear'
+];
+
+function scanForConcerningContent(text) {
+  if (!text) return [];
+  const lower = text.toLowerCase();
+  return CONCERNING_KEYWORDS.filter(kw => lower.includes(kw));
+}
+
+async function createTherapistAlert(clientId, clientName, journalTitle, matchedKeywords) {
+  try {
+    const { data: therapists } = await supabase
+      .from('ifs_clients')
+      .select('id')
+      .eq('user_role', 'therapist')
+      .eq('status', 'active');
+
+    if (!therapists || therapists.length === 0) return;
+
+    const alertMessage = `Journal entry from ${clientName} contains concerning language: "${matchedKeywords.slice(0, 3).join('", "')}"${matchedKeywords.length > 3 ? ` (+${matchedKeywords.length - 3} more)` : ''}. Entry title: "${journalTitle}"`;
+
+    for (const therapist of therapists) {
+      await supabase
+        .from('ifs_messages')
+        .insert({
+          client_id: clientId,
+          therapist_id: therapist.id,
+          sender_role: 'system',
+          content: alertMessage,
+          created_at: new Date().toISOString(),
+          read: false
+        });
+    }
+  } catch (err) {
+    console.error('Error creating therapist alert:', err);
+  }
+}
+
 const calculateStreak = (entries) => {
   if (!entries || entries.length === 0) return 0;
   const uniqueDays = new Set(
@@ -283,6 +330,11 @@ const Journal = () => {
         if (!error && data && data.id) {
           newEntry.id = data.id;
         }
+
+        const concerningMatches = scanForConcerningContent(entryContent);
+        if (concerningMatches.length > 0) {
+          createTherapistAlert(client.id, client.name || 'Client', entryTitle, concerningMatches);
+        }
       }
     } catch (err) {
       console.error('Error saving entry to Supabase:', err);
@@ -459,6 +511,13 @@ const Journal = () => {
               placeholder={isDictating ? "Speak now — your words will appear here..." : "Start writing about your inner world..."}
               className={`w-full h-96 text-lg ${textareaText} border-none outline-none resize-none leading-relaxed bg-transparent ${isDictating ? 'opacity-80' : ''}`}
             />
+
+            <div className={`flex items-center gap-2 mt-2 px-3 py-2 rounded-lg ${theme.isDark ? 'bg-slate-700/50' : 'bg-amber-50'}`}>
+              <Eye className={`w-3.5 h-3.5 flex-shrink-0 ${theme.isDark ? 'text-amber-400' : 'text-amber-600'}`} />
+              <p className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-amber-700'}`}>
+                Your therapist may review journal entries to better support your healing journey.
+              </p>
+            </div>
 
             <div className="mt-6">
               <div className="flex items-center space-x-2 mb-3">
