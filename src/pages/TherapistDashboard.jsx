@@ -11,6 +11,7 @@ import {
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
+import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
 
 const woundColorMap = {
   abandonment: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
@@ -200,6 +201,52 @@ const TherapistDashboard = () => {
   const [clientCurriculum, setClientCurriculum] = useState(null);
   const [editingModule, setEditingModule] = useState(null);
   const [editModuleForm, setEditModuleForm] = useState({ title: '', description: '', estimatedMinutes: 30 });
+  const [genPrimaryWound, setGenPrimaryWound] = useState('abandonment');
+  const [genSecondaryWound, setGenSecondaryWound] = useState('shame');
+  const [generatingCurriculum, setGeneratingCurriculum] = useState(false);
+  const [genResult, setGenResult] = useState(null);
+
+  const WOUND_TYPES = ['abandonment', 'shame', 'neglect', 'betrayal', 'helplessness'];
+
+  const handleGenerateCurriculum = async (clientId) => {
+    if (!clientId || generatingCurriculum) return;
+    setGeneratingCurriculum(true);
+    setGenResult(null);
+    try {
+      const scores = WOUND_TYPES.map(w => ({
+        id: w,
+        score: w === genPrimaryWound ? 20 : w === genSecondaryWound ? 12 : 2
+      }));
+      const curriculum = aiCurriculumPersonalizer.analyzeAndPersonalize(scores);
+      if (!curriculum || !curriculum.personalizedModules?.length) {
+        setGenResult({ error: 'Could not generate curriculum. Please try different wound types.' });
+        return;
+      }
+      await supabaseHelpers.savePersonalizedCurriculum(clientId, curriculum);
+      const existingAssessment = await supabaseHelpers.getAssessment(clientId);
+      if (!existingAssessment) {
+        await supabase.from('ifs_assessment_results').insert({
+          client_id: clientId,
+          primary_wound: genPrimaryWound,
+          secondary_wound: genSecondaryWound,
+          abandonment_score: genPrimaryWound === 'abandonment' ? 20 : genSecondaryWound === 'abandonment' ? 12 : 2,
+          shame_score: genPrimaryWound === 'shame' ? 20 : genSecondaryWound === 'shame' ? 12 : 2,
+          neglect_score: genPrimaryWound === 'neglect' ? 20 : genSecondaryWound === 'neglect' ? 12 : 2,
+          betrayal_score: genPrimaryWound === 'betrayal' ? 20 : genSecondaryWound === 'betrayal' ? 12 : 2,
+          helplessness_score: genPrimaryWound === 'helplessness' ? 20 : genSecondaryWound === 'helplessness' ? 12 : 2,
+          tertiary_wounds: WOUND_TYPES.filter(w => w !== genPrimaryWound && w !== genSecondaryWound),
+          assessment_date: new Date().toISOString()
+        });
+      }
+      await loadClientCurriculum(clientId);
+      await loadDashboardData();
+      setGenResult({ success: `Personalized curriculum generated for ${clients.find(c => c.id === clientId)?.name || 'client'} (${genPrimaryWound} primary).` });
+    } catch (e) {
+      console.error('Error generating curriculum:', e);
+      setGenResult({ error: 'Failed to generate curriculum: ' + e.message });
+    }
+    setGeneratingCurriculum(false);
+  };
 
   const loadDashboardData = useCallback(async () => {
     setLoading(true);
@@ -1945,13 +1992,94 @@ const TherapistDashboard = () => {
           {selectedLessonClient && clientCurriculum ? (
             <div className="space-y-4">
               {clientCurriculum.length === 0 ? (
-                <div className={`${cardBg} rounded-xl border ${cardBorder} p-8 text-center`}>
-                  <BookOpen className={`w-10 h-10 mx-auto mb-3 ${textMuted}`} />
-                  <p className={`${textSecondary}`}>No personalized curriculum found for this client.</p>
-                  <p className={`text-sm ${textMuted} mt-1`}>Complete an assessment first to generate a personalized curriculum.</p>
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-6`}>
+                  <div className="flex items-start gap-4 mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+                      <BookOpen className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className={`font-semibold ${textPrimary}`}>No personalized curriculum yet</p>
+                      <p className={`text-sm ${textMuted} mt-0.5`}>
+                        This client hasn't completed the wound assessment. You can generate a personalized curriculum for them now by selecting their wound profile below.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className={`block text-sm font-semibold mb-1.5 ${textSecondary}`}>Primary Wound</label>
+                      <select
+                        value={genPrimaryWound}
+                        onChange={e => { setGenPrimaryWound(e.target.value); setGenResult(null); if (e.target.value === genSecondaryWound) setGenSecondaryWound(WOUND_TYPES.find(w => w !== e.target.value)); }}
+                        className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none text-sm`}
+                      >
+                        {WOUND_TYPES.map(w => <option key={w} value={w}>{w.charAt(0).toUpperCase() + w.slice(1)}</option>)}
+                      </select>
+                      <p className={`text-xs mt-1 ${textMuted}`}>60% of curriculum focus</p>
+                    </div>
+                    <div>
+                      <label className={`block text-sm font-semibold mb-1.5 ${textSecondary}`}>Secondary Wound</label>
+                      <select
+                        value={genSecondaryWound}
+                        onChange={e => { setGenSecondaryWound(e.target.value); setGenResult(null); }}
+                        className={`w-full px-3 py-2.5 rounded-lg border ${inputBg} focus:ring-2 focus:ring-amber-500 outline-none text-sm`}
+                      >
+                        {WOUND_TYPES.filter(w => w !== genPrimaryWound).map(w => <option key={w} value={w}>{w.charAt(0).toUpperCase() + w.slice(1)}</option>)}
+                      </select>
+                      <p className={`text-xs mt-1 ${textMuted}`}>30% of curriculum focus</p>
+                    </div>
+                  </div>
+                  {genResult?.error && (
+                    <div className="mb-3 px-4 py-2.5 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{genResult.error}</div>
+                  )}
+                  {genResult?.success && (
+                    <div className="mb-3 px-4 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-700">✓ {genResult.success}</div>
+                  )}
+                  <button
+                    onClick={() => handleGenerateCurriculum(selectedLessonClient)}
+                    disabled={generatingCurriculum}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-60"
+                  >
+                    {generatingCurriculum
+                      ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating...</>
+                      : <><Sparkles className="w-4 h-4" /> Generate Personalized Curriculum</>
+                    }
+                  </button>
+                  <p className={`text-xs mt-3 ${textMuted}`}>
+                    This will create a full 6-module personalized curriculum and save an advisor-assigned wound profile for this client. The client can still complete the formal assessment later to refine it.
+                  </p>
                 </div>
               ) : (
-                clientCurriculum.map((mod, index) => {
+                <>
+                <div className={`${cardBg} rounded-xl border ${cardBorder} p-4 mb-1`}>
+                  <details className="group">
+                    <summary className={`cursor-pointer text-sm font-semibold flex items-center gap-2 ${textSecondary} list-none`}>
+                      <RefreshCw className="w-4 h-4 text-amber-500" />
+                      Regenerate Curriculum with Different Wound Profile
+                      <ChevronDown className="w-3.5 h-3.5 ml-auto group-open:rotate-180 transition-transform" />
+                    </summary>
+                    <div className="mt-3 grid sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className={`block text-xs font-semibold mb-1 ${textMuted}`}>Primary Wound</label>
+                        <select value={genPrimaryWound} onChange={e => { setGenPrimaryWound(e.target.value); setGenResult(null); if (e.target.value === genSecondaryWound) setGenSecondaryWound(WOUND_TYPES.find(w => w !== e.target.value)); }} className={`w-full px-2.5 py-2 rounded-lg border ${inputBg} outline-none text-sm`}>
+                          {WOUND_TYPES.map(w => <option key={w} value={w}>{w.charAt(0).toUpperCase() + w.slice(1)}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={`block text-xs font-semibold mb-1 ${textMuted}`}>Secondary Wound</label>
+                        <select value={genSecondaryWound} onChange={e => { setGenSecondaryWound(e.target.value); setGenResult(null); }} className={`w-full px-2.5 py-2 rounded-lg border ${inputBg} outline-none text-sm`}>
+                          {WOUND_TYPES.filter(w => w !== genPrimaryWound).map(w => <option key={w} value={w}>{w.charAt(0).toUpperCase() + w.slice(1)}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    {genResult?.error && <p className="mt-2 text-xs text-red-600">{genResult.error}</p>}
+                    {genResult?.success && <p className="mt-2 text-xs text-emerald-600">✓ {genResult.success}</p>}
+                    <button onClick={() => handleGenerateCurriculum(selectedLessonClient)} disabled={generatingCurriculum} className="mt-3 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition-all disabled:opacity-60">
+                      {generatingCurriculum ? <><div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Regenerating...</> : <><RefreshCw className="w-3.5 h-3.5" /> Regenerate</>}
+                    </button>
+                    <p className={`text-xs mt-1.5 ${textMuted}`}>This will replace the existing curriculum with a new personalized version.</p>
+                  </details>
+                </div>
+                {clientCurriculum.map((mod, index) => {
                   const customContent = mod.customized_content || {};
                   const woundColors = woundColorMap[mod.primary_wound_focus] || { bg: 'bg-gray-100', text: 'text-gray-700' };
                   const difficultyColors = {
@@ -2076,7 +2204,8 @@ const TherapistDashboard = () => {
                       )}
                     </div>
                   );
-                })
+                })}
+                </>
               )}
             </div>
           ) : (
@@ -2244,6 +2373,32 @@ const TherapistDashboard = () => {
 
             return (
               <div className="space-y-6">
+                {!assessment && !personalization && (
+                  <div className={`${cardBg} rounded-2xl border ${isDark ? 'border-amber-700/40' : 'border-amber-200'} ${isDark ? 'bg-amber-900/10' : 'bg-amber-50'} p-6`}>
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0">
+                        <AlertTriangle className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className={`font-bold mb-1 ${isDark ? 'text-amber-300' : 'text-amber-800'}`}>
+                          No wound assessment data for {client?.name}
+                        </p>
+                        <p className={`text-sm mb-3 ${isDark ? 'text-amber-200/80' : 'text-amber-700'}`}>
+                          This client hasn't completed the IFS wound assessment, so their curriculum cannot be personalized and most insights panels will be empty.
+                          You can generate a personalized curriculum for them right now from the <strong>Lesson Plans</strong> tab.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => { setActiveTab('lessons'); setSelectedLessonClient(selectedInsightClient); loadClientCurriculum(selectedInsightClient); }}
+                            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg text-sm font-semibold hover:from-amber-600 hover:to-orange-600 transition-all"
+                          >
+                            <BookOpen className="w-4 h-4" /> Go to Lesson Plans → Generate Curriculum
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {(assessment || personalization) && (
                   <div className={`${cardBg} rounded-2xl border ${glowStyles.purple} p-5`}>
                     <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
