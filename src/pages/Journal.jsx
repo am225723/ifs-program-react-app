@@ -52,13 +52,13 @@ function scanForConcerningContent(text) {
 
 async function createTherapistAlert(clientId, clientName, journalTitle, matchedKeywords) {
   try {
-    const { data: therapists } = await supabase
+    const { data: advisors } = await supabase
       .from('ifs_clients')
       .select('id')
-      .eq('user_role', 'therapist')
+      .eq('user_role', 'advisor')
       .eq('status', 'active');
 
-    if (!therapists || therapists.length === 0) return;
+    if (!advisors || advisors.length === 0) return;
 
     const alertMessage = `Journal entry from ${clientName} contains concerning language: "${matchedKeywords.slice(0, 3).join('", "')}"${matchedKeywords.length > 3 ? ` (+${matchedKeywords.length - 3} more)` : ''}. Entry title: "${journalTitle}"`;
 
@@ -75,7 +75,7 @@ async function createTherapistAlert(clientId, clientName, journalTitle, matchedK
         });
     }
   } catch (err) {
-    console.error('Error creating therapist alert:', err);
+    console.error('Error creating advisor alert:', err);
   }
 }
 
@@ -515,7 +515,7 @@ const Journal = () => {
             <div className={`flex items-center gap-2 mt-2 px-3 py-2 rounded-lg ${theme.isDark ? 'bg-slate-700/50' : 'bg-amber-50'}`}>
               <Eye className={`w-3.5 h-3.5 flex-shrink-0 ${theme.isDark ? 'text-amber-400' : 'text-amber-600'}`} />
               <p className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-amber-700'}`}>
-                Your therapist may review journal entries to better support your healing journey.
+                Your advisor may review journal entries to better support your healing journey.
               </p>
             </div>
 

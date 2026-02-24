@@ -270,7 +270,7 @@ const AdminDashboardEnhanced = () => {
               <p className="text-gray-600 mt-1">Manage clients and monitor progress</p>
               <Link to="/therapist-dashboard" className="inline-flex items-center text-sm text-amber-600 hover:text-indigo-800 mt-1 font-medium">
                 <BookOpen className="w-4 h-4 mr-1" />
-                Go to Therapist Dashboard (Lesson Plans & Client Insights)
+                Go to Advisor Dashboard (Lesson Plans & Client Insights)
               </Link>
             </div>
             <div className="flex items-center gap-3">
@@ -564,8 +564,8 @@ const AdminDashboardEnhanced = () => {
         <ClientDetailsModal
           client={selectedClient}
           onClose={() => setSelectedClient(null)}
-          onViewReport={() => { setSelectedClient(null); navigate('/therapist-reports'); }}
-          onSendMessage={() => { setSelectedClient(null); navigate('/therapist-messages'); }}
+          onViewReport={() => { setSelectedClient(null); navigate('/advisor-reports'); }}
+          onSendMessage={() => { setSelectedClient(null); navigate('/advisor-messages'); }}
         />
       )}
 
@@ -1098,7 +1098,7 @@ const CreateClientModal = ({ onClose, onCreate }) => {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white"
             >
               <option value="client">Client</option>
-              <option value="therapist">Therapist</option>
+              <option value="therapist">Advisor</option>
             </select>
           </div>
 

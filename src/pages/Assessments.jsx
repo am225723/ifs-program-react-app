@@ -664,7 +664,7 @@ export default function Assessments() {
 
                 <div className={`mt-6 p-4 rounded-xl ${theme.isDark ? 'bg-slate-800 border-slate-700' : 'bg-amber-50 border-amber-100'} border`}>
                   <p className={`text-sm ${theme.isDark ? 'text-slate-300' : 'text-amber-700'}`}>
-                    <strong>Next Step:</strong> After adding parts to your map, visit the <Link to="/parts-studio" className="underline font-medium">Parts Visualization Studio</Link> to explore how these parts relate to each other and to your Self energy. You can also discuss these identified parts with your therapist using the <Link to="/therapy" className="underline font-medium">Therapy Integration</Link> activities.
+                    <strong>Next Step:</strong> After adding parts to your map, visit the <Link to="/parts-studio" className="underline font-medium">Parts Visualization Studio</Link> to explore how these parts relate to each other and to your Self energy. You can also discuss these identified parts with your advisor using the <Link to="/therapy" className="underline font-medium">Therapy Integration</Link> activities.
                   </p>
                 </div>
               </div>

@@ -130,7 +130,7 @@ const ClientHomework = () => {
           <p className={`text-sm font-medium ${textSecondary}`}>
             {filter === 'active' ? 'No active assignments' : filter === 'completed' ? 'No completed assignments yet' : 'No homework assigned yet'}
           </p>
-          <p className={`text-xs ${textMuted} mt-1`}>Assignments from your therapist will appear here</p>
+          <p className={`text-xs ${textMuted} mt-1`}>Assignments from your advisor will appear here</p>
         </div>
       ) : (
         <div className="space-y-3">

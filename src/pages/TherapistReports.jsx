@@ -199,7 +199,7 @@ ${r.assessment ? `<div class="section">
 </div>
 
 ${r.notes.recent.length > 0 ? `<div class="section">
-  <h2>Recent Therapist Notes</h2>
+  <h2>Recent Advisor Notes</h2>
   ${r.notes.recent.map(n => `<div class="note">
     <div class="date">${new Date(n.created_at).toLocaleDateString()}</div>
     <div class="text">${(n.content || 'No content').slice(0, 300)}</div>
@@ -453,7 +453,7 @@ ${r.notes.recent.length > 0 ? `<div class="section">
           {reportData.notes.recent.length > 0 && (
             <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
               <h3 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
-                <FileText className="w-4 h-4 text-purple-500" /> Recent Therapist Notes
+                <FileText className="w-4 h-4 text-purple-500" /> Recent Advisor Notes
               </h3>
               <div className="space-y-3">
                 {reportData.notes.recent.map(note => (

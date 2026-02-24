@@ -43,12 +43,15 @@ export default function AssessmentBuilder() {
   const [copiedId, setCopiedId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const therapist = clientAuth.getCurrentClientValidated();
+  const therapist = clientAuth.getCurrentClient();
   const therapistId = therapist?.id;
 
   useEffect(() => {
-    if (therapistId) loadAssessments();
-    else setLoading(false);
+    if (therapistId) {
+      loadAssessments();
+    } else {
+      setLoading(false);
+    }
   }, [therapistId]);
 
   const loadAssessments = async () => {
@@ -135,6 +138,22 @@ export default function AssessmentBuilder() {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme.isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-amber-50 via-orange-50/30 to-rose-50/30'}`}>
         <div className="animate-spin w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!therapistId) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme.isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-amber-50 via-orange-50/30 to-rose-50/30'}`}>
+        <div className="text-center px-6">
+          <BarChart3 size={48} className={`mx-auto mb-4 ${theme.isDark ? 'text-slate-500' : 'text-amber-400'}`} />
+          <h2 className={`text-xl font-bold mb-2 ${theme.isDark ? 'text-slate-200' : 'text-gray-800'}`}>Advisor Login Required</h2>
+          <p className={`text-sm mb-6 ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Please log in as an Advisor to create assessments.</p>
+          <Link to="/therapist-dashboard" className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:from-amber-600 hover:to-orange-600 transition-all">
+            <ArrowLeft size={16} />
+            Back to Dashboard
+          </Link>
+        </div>
       </div>
     );
   }

@@ -400,7 +400,7 @@ const Home = ({ clientId, client }) => {
                   <MessageSquare className="w-6 h-6 text-blue-600" />
                 </div>
                 <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Messages</span>
-                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Therapist chat</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Advisor chat</span>
               </Link>
               <Link to="/my-homework" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
                 <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mb-2 group-hover:bg-amber-200 transition-colors">

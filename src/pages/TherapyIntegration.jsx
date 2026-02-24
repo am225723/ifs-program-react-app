@@ -12,13 +12,13 @@ const therapistClientActivities = [
     icon: 'BookOpen',
     category: 'preparation',
     duration: '10-15 min',
-    description: 'Prepare yourself before meeting with your therapist so you can make the most of your session time.',
+    description: 'Prepare yourself before meeting with your advisor so you can make the most of your session time.',
     steps: [
       { title: 'Internal Check-In', instruction: 'Close your eyes and take 3 slow breaths. Notice which parts are present right now. Are any parts activated or anxious about the upcoming session?', duration: 3 },
       { title: 'Identify Session Focus', instruction: 'Ask inside: "What part most needs attention today?" Notice who speaks up. Write down the part\'s name and what it wants to share.', duration: 3 },
       { title: 'Note Protector Concerns', instruction: 'Check if any protective parts have concerns about today\'s work. What are they worried about? What do they need to feel safe enough to allow deeper work?', duration: 3 },
-      { title: 'Set an Intention', instruction: 'Set a clear intention for today\'s session. Examples: "I want to understand my inner critic better" or "I\'m ready to witness my wounded child part." Write this down to share with your therapist.', duration: 2 },
-      { title: 'Self-Energy Check', instruction: 'Rate your access to Self-energy right now (1-10). If below 5, do a brief grounding exercise. Your therapist can help you access more Self-energy at the start of your session.', duration: 2 }
+      { title: 'Set an Intention', instruction: 'Set a clear intention for today\'s session. Examples: "I want to understand my inner critic better" or "I\'m ready to witness my wounded child part." Write this down to share with your advisor.', duration: 2 },
+      { title: 'Self-Energy Check', instruction: 'Rate your access to Self-energy right now (1-10). If below 5, do a brief grounding exercise. Your advisor can help you access more Self-energy at the start of your session.', duration: 2 }
     ],
     reflectionPrompts: [
       'Which parts showed up during your preparation?',
@@ -32,14 +32,14 @@ const therapistClientActivities = [
     icon: 'MessageSquare',
     category: 'in-session',
     duration: '20-30 min',
-    description: 'A structured exercise for therapist-guided conversation with your internal parts. Your therapist leads while you turn inward.',
+    description: 'A structured exercise for advisor-guided conversation with your internal parts. Your advisor leads while you turn inward.',
     steps: [
-      { title: 'Find the Target Part', instruction: 'With your therapist\'s guidance, notice which part is most present. Where do you feel it in your body? What emotion does it carry? Describe what you notice to your therapist.', duration: 5 },
-      { title: 'How Do You Feel Toward It?', instruction: 'Your therapist will ask: "How do you feel toward this part?" Notice your honest response. If you feel anything other than curiosity and compassion (like frustration, fear, or judgment), another part is blended. Ask that part to step back.', duration: 5 },
-      { title: 'Get to Know the Part', instruction: 'From Self-energy, ask the part: "What do you want me to know about you?" Listen without judging. Let it share at its own pace. Your therapist will help you stay in Self.', duration: 5 },
+      { title: 'Find the Target Part', instruction: 'With your advisor\'s guidance, notice which part is most present. Where do you feel it in your body? What emotion does it carry? Describe what you notice to your advisor.', duration: 5 },
+      { title: 'How Do You Feel Toward It?', instruction: 'Your advisor will ask: "How do you feel toward this part?" Notice your honest response. If you feel anything other than curiosity and compassion (like frustration, fear, or judgment), another part is blended. Ask that part to step back.', duration: 5 },
+      { title: 'Get to Know the Part', instruction: 'From Self-energy, ask the part: "What do you want me to know about you?" Listen without judging. Let it share at its own pace. Your advisor will help you stay in Self.', duration: 5 },
       { title: 'Understand Its Role', instruction: 'Ask the part: "What is your job in my system? What are you trying to protect me from?" Appreciate its efforts, even if its methods have been painful. Every part has positive intent.', duration: 5 },
       { title: 'What Does It Need?', instruction: 'Ask: "What do you need from me right now?" and "What would you like me to know that I haven\'t understood yet?" Let the part guide the conversation.', duration: 5 },
-      { title: 'Thank and Close', instruction: 'Thank the part for sharing. Ask if there\'s anything else before you close. Let it know you\'ll return. Your therapist will help you transition back.', duration: 3 }
+      { title: 'Thank and Close', instruction: 'Thank the part for sharing. Ask if there\'s anything else before you close. Let it know you\'ll return. Your advisor will help you transition back.', duration: 3 }
     ],
     reflectionPrompts: [
       'What surprised you about what this part shared?',
@@ -54,14 +54,14 @@ const therapistClientActivities = [
     icon: 'Shield',
     category: 'in-session',
     duration: '25-35 min',
-    description: 'Work with your therapist to help protective parts (Managers and Firefighters) feel safe enough to allow access to vulnerable exile parts.',
+    description: 'Work with your advisor to help protective parts (Managers and Firefighters) feel safe enough to allow access to vulnerable exile parts.',
     steps: [
-      { title: 'Identify the Protector', instruction: 'With your therapist, identify which protector is active. Is it a Manager (preventing pain through control) or a Firefighter (reacting to pain that\'s already leaked through)? Notice how it shows up in your body and behavior.', duration: 4 },
+      { title: 'Identify the Protector', instruction: 'With your advisor, identify which protector is active. Is it a Manager (preventing pain through control) or a Firefighter (reacting to pain that\'s already leaked through)? Notice how it shows up in your body and behavior.', duration: 4 },
       { title: 'Acknowledge Its Work', instruction: 'Tell the protector: "I see how hard you\'ve been working to keep me safe. Thank you for protecting me all this time." Notice its response. Does it soften? Does it have more to say?', duration: 4 },
       { title: 'Understand the Fear', instruction: 'Ask the protector: "What are you afraid would happen if you stepped back, even a little?" Listen carefully. Its fears are usually about the exile it\'s guarding — the vulnerable part carrying old pain.', duration: 5 },
-      { title: 'Address Its Concerns', instruction: 'With your therapist\'s help, address each fear directly. Reassure the protector: "I\'m an adult now with resources. I have my therapist here. I can handle what comes up." Ask what it needs to feel safe enough.', duration: 5 },
+      { title: 'Address Its Concerns', instruction: 'With your advisor\'s help, address each fear directly. Reassure the protector: "I\'m an adult now with resources. I have my advisor here. I can handle what comes up." Ask what it needs to feel safe enough.', duration: 5 },
       { title: 'Negotiate Access', instruction: 'Ask the protector: "Would you be willing to relax just a little so I can get to know the part you\'re protecting? You can step back in anytime if it feels too much." Wait for genuine permission — don\'t force it.', duration: 5 },
-      { title: 'Honor the Agreement', instruction: 'If permission is granted, proceed gently with your therapist. If the protector says no, respect that boundary. Ask what it would need before it could allow access in the future. Build trust over time.', duration: 4 },
+      { title: 'Honor the Agreement', instruction: 'If permission is granted, proceed gently with your advisor. If the protector says no, respect that boundary. Ask what it would need before it could allow access in the future. Build trust over time.', duration: 4 },
       { title: 'Check Back In', instruction: 'After any deeper work, check back with the protector: "How are you doing? Was that okay? Do you need anything from me?" This builds trust for future sessions.', duration: 3 }
     ],
     reflectionPrompts: [
@@ -77,14 +77,14 @@ const therapistClientActivities = [
     icon: 'Sparkles',
     category: 'in-session',
     duration: '30-45 min',
-    description: 'A sacred step-by-step guide for the unburdening process. Best done with your therapist present for support and safety.',
+    description: 'A sacred step-by-step guide for the unburdening process. Best done with your advisor present for support and safety.',
     steps: [
       { title: 'Confirm Readiness', instruction: 'Check with all protectors: "Are you ready for this part to release its burdens?" Check with the exile: "Are you ready to let go of what you\'ve been carrying?" Both must say yes. If not, spend more time building trust.', duration: 5 },
-      { title: 'Witness the Story', instruction: 'With your therapist holding space, let the exile show you what happened. Witness the original experience with compassion. You don\'t need to re-live it — just witness it from Self. Let the part know: "I see what happened to you. I\'m so sorry."', duration: 8 },
+      { title: 'Witness the Story', instruction: 'With your advisor holding space, let the exile show you what happened. Witness the original experience with compassion. You don\'t need to re-live it — just witness it from Self. Let the part know: "I see what happened to you. I\'m so sorry."', duration: 8 },
       { title: 'Retrieve the Part', instruction: 'Ask the part: "Would you like to leave that scene? Would you like to come with me to somewhere safe?" If yes, help the part leave the past. Bring it to a safe place — real or imagined. Let it know: "You\'re safe now. That\'s over."', duration: 5 },
       { title: 'Identify the Burdens', instruction: 'Ask the part: "What beliefs or feelings did you take on from that experience?" Common burdens: "I\'m not good enough," "I\'m unlovable," "It was my fault," "I\'m broken." Let the part name each burden.', duration: 5 },
       { title: 'Choose the Release', instruction: 'Ask the part: "How would you like to release these burdens?" Offer the elements: fire (burn away), water (wash away), wind (blow away), earth (bury/compost), light (dissolve into light). Let the part choose what feels right.', duration: 3 },
-      { title: 'Release the Burdens', instruction: 'Guide the part through releasing each burden using its chosen element. Take your time. Notice what happens in the part and in your body as each burden lifts. Your therapist will support you through this.', duration: 8 },
+      { title: 'Release the Burdens', instruction: 'Guide the part through releasing each burden using its chosen element. Take your time. Notice what happens in the part and in your body as each burden lifts. Your advisor will support you through this.', duration: 8 },
       { title: 'Invite In Qualities', instruction: 'Ask the unburdened part: "What qualities would you like to take in to replace what you released?" Common qualities: worthiness, safety, love, joy, innocence, strength, freedom. Let the part absorb these new qualities.', duration: 4 },
       { title: 'Check the System', instruction: 'Notice how your protectors responded to the unburdening. Often they spontaneously relax or shift. Ask them: "How are you now?" Thank all parts involved for their courage and willingness.', duration: 4 }
     ],
@@ -144,13 +144,13 @@ const therapistClientActivities = [
     icon: 'Target',
     category: 'in-session',
     duration: '20-30 min',
-    description: 'Use real-life triggers ("trailheads") as doorways to discover and heal parts. Bring a recent triggering event to explore with your therapist.',
+    description: 'Use real-life triggers ("trailheads") as doorways to discover and heal parts. Bring a recent triggering event to explore with your advisor.',
     steps: [
-      { title: 'Identify the Trigger', instruction: 'Think of a recent situation where you had a strong emotional reaction — anger, sadness, anxiety, shutdown. Describe the situation to your therapist: What happened? Who was involved? What was said or done?', duration: 4 },
+      { title: 'Identify the Trigger', instruction: 'Think of a recent situation where you had a strong emotional reaction — anger, sadness, anxiety, shutdown. Describe the situation to your advisor: What happened? Who was involved? What was said or done?', duration: 4 },
       { title: 'Notice the Reaction', instruction: 'Recall your reaction in detail. What emotions came up? What thoughts? What physical sensations? What did you want to do (fight, flee, freeze, fix)? This reaction is a part — it\'s your trailhead.', duration: 4 },
-      { title: 'Find the Part', instruction: 'Turn inward and locate the part that reacted. Where is it in your body? What does it look like? How old does it feel? Ask your therapist to help you stay curious rather than blended.', duration: 4 },
+      { title: 'Find the Part', instruction: 'Turn inward and locate the part that reacted. Where is it in your body? What does it look like? How old does it feel? Ask your advisor to help you stay curious rather than blended.', duration: 4 },
       { title: 'Explore the Chain', instruction: 'This reacting part is usually a protector. Ask it: "Who are you protecting?" Follow the chain inward. The protector guards an exile — a younger part carrying original pain. Notice who appears.', duration: 5 },
-      { title: 'Connect the Pattern', instruction: 'With your therapist, explore how this trigger connects to older experiences. Ask the exile: "When did you first feel this way?" Let it show you the original wound, if it\'s ready.', duration: 5 },
+      { title: 'Connect the Pattern', instruction: 'With your advisor, explore how this trigger connects to older experiences. Ask the exile: "When did you first feel this way?" Let it show you the original wound, if it\'s ready.', duration: 5 },
       { title: 'Offer What Was Needed', instruction: 'Ask the younger part: "What did you need back then that you didn\'t get?" Then offer it now from Self: safety, comfort, validation, protection, love. Notice what the part receives.', duration: 4 },
       { title: 'Update the System', instruction: 'Let the protector know what you\'ve learned. Ask: "Now that I\'ve connected with the part you\'re protecting, would you be willing to try a different approach next time this trigger comes up?" Discuss alternatives.', duration: 4 }
     ],
@@ -164,17 +164,17 @@ const therapistClientActivities = [
   },
   {
     id: 'self-energy-cultivation',
-    title: 'Self-Energy Cultivation with Therapist',
+    title: 'Self-Energy Cultivation with Advisor',
     icon: 'Brain',
     category: 'in-session',
     duration: '15-20 min',
-    description: 'Strengthen your connection to Self — the calm, compassionate, curious core of who you are. Your therapist guides you to access and deepen Self-energy.',
+    description: 'Strengthen your connection to Self — the calm, compassionate, curious core of who you are. Your advisor guides you to access and deepen Self-energy.',
     steps: [
-      { title: 'The 8 C\'s Inventory', instruction: 'Your therapist will guide you through the 8 C\'s of Self: Calm, Curiosity, Clarity, Compassion, Confidence, Courage, Creativity, Connectedness. Rate each one 1-10. Which are strongest? Which need development?', duration: 4 },
-      { title: 'Unblending Practice', instruction: 'If a part is strongly blended (you ARE the emotion rather than noticing it), your therapist will help you unblend. Try: "I notice a part of me that feels [emotion]" rather than "I feel [emotion]." Notice the shift in perspective.', duration: 4 },
-      { title: 'Self-Energy Expansion', instruction: 'Focus on an area of your body where you feel most like your true self. Your therapist will guide you to expand that feeling outward — like warm light spreading through your body. This IS Self-energy.', duration: 4 },
+      { title: 'The 8 C\'s Inventory', instruction: 'Your advisor will guide you through the 8 C\'s of Self: Calm, Curiosity, Clarity, Compassion, Confidence, Courage, Creativity, Connectedness. Rate each one 1-10. Which are strongest? Which need development?', duration: 4 },
+      { title: 'Unblending Practice', instruction: 'If a part is strongly blended (you ARE the emotion rather than noticing it), your advisor will help you unblend. Try: "I notice a part of me that feels [emotion]" rather than "I feel [emotion]." Notice the shift in perspective.', duration: 4 },
+      { title: 'Self-Energy Expansion', instruction: 'Focus on an area of your body where you feel most like your true self. Your advisor will guide you to expand that feeling outward — like warm light spreading through your body. This IS Self-energy.', duration: 4 },
       { title: 'Parts as Visitors', instruction: 'Imagine yourself sitting in a peaceful place. Parts can come visit you there, but they don\'t overwhelm you. Practice noticing parts arriving and greeting them from Self: "I see you. Welcome. What brings you here?"', duration: 4 },
-      { title: 'Anchoring Self', instruction: 'Create a physical anchor for Self-energy: a hand on your heart, a specific breath pattern, or a word/phrase. Practice accessing Self through this anchor. Your therapist will help you test it with activated parts.', duration: 4 }
+      { title: 'Anchoring Self', instruction: 'Create a physical anchor for Self-energy: a hand on your heart, a specific breath pattern, or a word/phrase. Practice accessing Self through this anchor. Your advisor will help you test it with activated parts.', duration: 4 }
     ],
     reflectionPrompts: [
       'Which of the 8 C\'s feel most natural to you?',
@@ -189,11 +189,11 @@ const therapistClientActivities = [
     icon: 'Heart',
     category: 'in-session',
     duration: '25-40 min',
-    description: 'A guided journey to find, comfort, and retrieve a young exile part stuck in a painful memory. Your therapist provides safety while you connect with your inner child.',
+    description: 'A guided journey to find, comfort, and retrieve a young exile part stuck in a painful memory. Your advisor provides safety while you connect with your inner child.',
     steps: [
-      { title: 'Safety Setup', instruction: 'With your therapist, establish a safe internal space — a peaceful place where you can bring the child part after the rescue. Describe it in detail: What does it look like? What does it feel like? Make it vivid and real.', duration: 4 },
-      { title: 'Protector Permission', instruction: 'Ask your protector parts: "I\'d like to visit the young part you\'re guarding. Will you allow me to go to them with my therapist here?" Wait for genuine permission. If a protector is anxious, ask what it needs to feel safe enough.', duration: 5 },
-      { title: 'Travel to the Child', instruction: 'Close your eyes. With your therapist guiding, let yourself be drawn to the young part. Notice the scene: Where is this child? What age? What\'s happening around them? Don\'t change anything yet — just arrive and observe.', duration: 5 },
+      { title: 'Safety Setup', instruction: 'With your advisor, establish a safe internal space — a peaceful place where you can bring the child part after the rescue. Describe it in detail: What does it look like? What does it feel like? Make it vivid and real.', duration: 4 },
+      { title: 'Protector Permission', instruction: 'Ask your protector parts: "I\'d like to visit the young part you\'re guarding. Will you allow me to go to them with my advisor here?" Wait for genuine permission. If a protector is anxious, ask what it needs to feel safe enough.', duration: 5 },
+      { title: 'Travel to the Child', instruction: 'Close your eyes. With your advisor guiding, let yourself be drawn to the young part. Notice the scene: Where is this child? What age? What\'s happening around them? Don\'t change anything yet — just arrive and observe.', duration: 5 },
       { title: 'Make Contact', instruction: 'Approach the child gently. Let them see you — the adult you are now. You might say: "Hi, I\'m you, grown up. I came to find you." Watch how the child responds. Some may be scared, some may run to you. Let it unfold naturally.', duration: 5 },
       { title: 'Witness and Validate', instruction: 'Ask the child: "What happened to you here?" Listen to their story. Validate their experience: "That should never have happened to you. It wasn\'t your fault. Your feelings make complete sense." Let them be fully heard.', duration: 6 },
       { title: 'Offer What Was Missing', instruction: 'Ask: "What did you need back then?" Give the child exactly what they needed — a hug, protection, comfort, words of love. This is a corrective emotional experience. Let your Self energy flow to them.', duration: 5 },
@@ -214,11 +214,11 @@ const therapistClientActivities = [
     icon: 'Users',
     category: 'in-session',
     duration: '30-45 min',
-    description: 'Facilitate a meeting between multiple parts with your therapist, allowing parts to communicate directly with each other and with Self to resolve internal conflicts.',
+    description: 'Facilitate a meeting between multiple parts with your advisor, allowing parts to communicate directly with each other and with Self to resolve internal conflicts.',
     steps: [
-      { title: 'Set the Council Space', instruction: 'Imagine a round table or circle where all parts can gather. You (Self) sit at the center or head of the table. Your therapist will help you hold the space. Invite all parts who want to be heard today.', duration: 4 },
+      { title: 'Set the Council Space', instruction: 'Imagine a round table or circle where all parts can gather. You (Self) sit at the center or head of the table. Your advisor will help you hold the space. Invite all parts who want to be heard today.', duration: 4 },
       { title: 'Roll Call', instruction: 'Notice who shows up. Go around the circle and acknowledge each part: "I see the Inner Critic, the People Pleaser, the Scared Child..." Let each part know they are welcome and will get a turn to speak.', duration: 5 },
-      { title: 'Hear Each Voice', instruction: 'One at a time, let each part share what\'s on their mind. Your therapist will help you stay in Self as you listen. Ask each part: "What do you want the others to know?" No interrupting — just witnessing.', duration: 8 },
+      { title: 'Hear Each Voice', instruction: 'One at a time, let each part share what\'s on their mind. Your advisor will help you stay in Self as you listen. Ask each part: "What do you want the others to know?" No interrupting — just witnessing.', duration: 8 },
       { title: 'Acknowledge Conflicts', instruction: 'Often parts are in conflict — one wants to take risks while another wants safety. Name these tensions openly: "I notice the Adventurer and the Protector have different needs." Validate both sides.', duration: 5 },
       { title: 'Facilitate Understanding', instruction: 'Help parts see each other\'s perspectives. Ask the Protector: "Can you see that the Adventurer is trying to help too?" Often parts don\'t realize they share the same ultimate goal: your wellbeing.', duration: 6 },
       { title: 'Seek Agreement', instruction: 'From Self, propose a way forward that honors all parts. Ask: "What if we tried this approach? Would everyone be willing?" Negotiate until you find something all parts can accept, even if imperfect.', duration: 5 },
@@ -238,13 +238,13 @@ const therapistClientActivities = [
     icon: 'Activity',
     category: 'in-session',
     duration: '20-30 min',
-    description: 'Use body sensations to discover and communicate with parts. Parts live in the body — this exercise uses somatic awareness to deepen the IFS work with your therapist.',
+    description: 'Use body sensations to discover and communicate with parts. Parts live in the body — this exercise uses somatic awareness to deepen the IFS work with your advisor.',
     steps: [
-      { title: 'Body Scan Arrival', instruction: 'Close your eyes. Starting at the top of your head, slowly scan down through your body. Notice any area that has tension, tightness, warmth, cold, numbness, or tingling. These sensations often point to parts. Report what you find to your therapist.', duration: 4 },
-      { title: 'Choose a Sensation', instruction: 'Pick the strongest or most interesting body sensation. Place your attention directly on it. Don\'t try to change it — just be with it. Describe it to your therapist: size, shape, temperature, color, texture, movement.', duration: 4 },
+      { title: 'Body Scan Arrival', instruction: 'Close your eyes. Starting at the top of your head, slowly scan down through your body. Notice any area that has tension, tightness, warmth, cold, numbness, or tingling. These sensations often point to parts. Report what you find to your advisor.', duration: 4 },
+      { title: 'Choose a Sensation', instruction: 'Pick the strongest or most interesting body sensation. Place your attention directly on it. Don\'t try to change it — just be with it. Describe it to your advisor: size, shape, temperature, color, texture, movement.', duration: 4 },
       { title: 'Ask the Sensation', instruction: 'Speak to the sensation as if it were a part: "What are you?" or "Who are you?" Wait patiently. Parts may communicate through images, words, emotions, memories, or changes in the sensation itself.', duration: 5 },
-      { title: 'Follow the Story', instruction: 'As the part reveals itself, let the sensation guide you deeper. It may move, intensify, or shift. Follow wherever it leads. Your therapist will help you stay present and curious rather than overwhelmed.', duration: 5 },
-      { title: 'Breath and Movement', instruction: 'Your therapist may guide you to breathe into the sensation, gently move the body area, or place a hand there. These somatic interventions help the part feel seen and contacted. Notice what shifts.', duration: 4 },
+      { title: 'Follow the Story', instruction: 'As the part reveals itself, let the sensation guide you deeper. It may move, intensify, or shift. Follow wherever it leads. Your advisor will help you stay present and curious rather than overwhelmed.', duration: 5 },
+      { title: 'Breath and Movement', instruction: 'Your advisor may guide you to breathe into the sensation, gently move the body area, or place a hand there. These somatic interventions help the part feel seen and contacted. Notice what shifts.', duration: 4 },
       { title: 'Release and Integration', instruction: 'If the part is ready, ask what it needs to release its tension. It might need a deep breath, a stretch, a cry, or simply to be held. Follow its guidance. Notice how the body sensation changes as the part is witnessed.', duration: 4 },
       { title: 'Final Body Check', instruction: 'Do one more quick body scan. Notice what has changed since the beginning. Are there new sensations? Has the original one shifted? Thank your body and parts for their communication.', duration: 3 }
     ],
@@ -262,15 +262,15 @@ const therapistClientActivities = [
     icon: 'Heart',
     category: 'in-session',
     duration: '30-40 min',
-    description: 'Work with your therapist to repair attachment wounds by reparenting exile parts. This exercise addresses the core relational injuries that shape your protective system.',
+    description: 'Work with your advisor to repair attachment wounds by reparenting exile parts. This exercise addresses the core relational injuries that shape your protective system.',
     steps: [
-      { title: 'Identify the Attachment Pattern', instruction: 'With your therapist, identify which attachment pattern is most active: anxious (clinging, fear of abandonment), avoidant (pushing away, fear of closeness), or disorganized (wanting closeness but also fearing it). Name the parts involved.', duration: 5 },
-      { title: 'Find the Origin Story', instruction: 'Ask the exile carrying this attachment wound: "When did you first learn that relationships were unsafe?" Let it show you the earliest memory. Your therapist holds the space while you witness the child\'s experience.', duration: 6 },
+      { title: 'Identify the Attachment Pattern', instruction: 'With your advisor, identify which attachment pattern is most active: anxious (clinging, fear of abandonment), avoidant (pushing away, fear of closeness), or disorganized (wanting closeness but also fearing it). Name the parts involved.', duration: 5 },
+      { title: 'Find the Origin Story', instruction: 'Ask the exile carrying this attachment wound: "When did you first learn that relationships were unsafe?" Let it show you the earliest memory. Your advisor holds the space while you witness the child\'s experience.', duration: 6 },
       { title: 'Reparenting from Self', instruction: 'As the compassionate adult you are now, approach the child in the memory. Offer what the original caregiver couldn\'t provide: "I will never leave you. You are safe with me. Your needs matter. I see you and I choose you."', duration: 6 },
-      { title: 'New Experience Practice', instruction: 'Your therapist models a healthy attachment relationship with you in this moment. Notice how it feels to be truly seen, heard, and accepted. Let this new experience sink in. This is what healthy attachment feels like.', duration: 5 },
+      { title: 'New Experience Practice', instruction: 'Your advisor models a healthy attachment relationship with you in this moment. Notice how it feels to be truly seen, heard, and accepted. Let this new experience sink in. This is what healthy attachment feels like.', duration: 5 },
       { title: 'Update Protectors', instruction: 'Let your attachment-related protectors know about this repair. The anxious part can learn that closeness is safe. The avoidant part can learn that vulnerability won\'t destroy you. Ask what they need to try new approaches.', duration: 5 },
-      { title: 'Practice New Patterns', instruction: 'With your therapist, role-play or imagine a real relationship scenario. Practice responding from Self rather than from the old attachment pattern. Notice the difference. Your therapist will coach you through it.', duration: 5 },
-      { title: 'Integration and Homework', instruction: 'Discuss with your therapist one small way you can practice this new attachment pattern before the next session. Maybe it\'s letting yourself be vulnerable with a safe person, or speaking a need out loud.', duration: 4 }
+      { title: 'Practice New Patterns', instruction: 'With your advisor, role-play or imagine a real relationship scenario. Practice responding from Self rather than from the old attachment pattern. Notice the difference. Your advisor will coach you through it.', duration: 5 },
+      { title: 'Integration and Homework', instruction: 'Discuss with your advisor one small way you can practice this new attachment pattern before the next session. Maybe it\'s letting yourself be vulnerable with a safe person, or speaking a need out loud.', duration: 4 }
     ],
     reflectionPrompts: [
       'Which attachment pattern did you explore?',
@@ -286,9 +286,9 @@ const therapistClientActivities = [
     icon: 'Star',
     category: 'in-session',
     duration: '25-35 min',
-    description: 'Explore burdens passed down through your family system — beliefs, emotions, and patterns inherited from parents, grandparents, and cultural lineage. Work with your therapist to name and begin releasing them.',
+    description: 'Explore burdens passed down through your family system — beliefs, emotions, and patterns inherited from parents, grandparents, and cultural lineage. Work with your advisor to name and begin releasing them.',
     steps: [
-      { title: 'Family Pattern Inventory', instruction: 'With your therapist, map out recurring patterns in your family: What beliefs were passed down? ("We don\'t show weakness," "Money is scarce," "Trust no one.") What emotional patterns repeat across generations? Write them down.', duration: 6 },
+      { title: 'Family Pattern Inventory', instruction: 'With your advisor, map out recurring patterns in your family: What beliefs were passed down? ("We don\'t show weakness," "Money is scarce," "Trust no one.") What emotional patterns repeat across generations? Write them down.', duration: 6 },
       { title: 'Find the Carrier Part', instruction: 'Ask inside: "Which part of me carries these family burdens?" Notice who steps forward. This part may not have created the burden — it inherited it. Acknowledge this: "You didn\'t choose this. It was given to you."', duration: 5 },
       { title: 'Trace the Lineage', instruction: 'Ask the part: "Where did this burden come from? Who gave it to you?" You may see images of parents, grandparents, or even ancestors you never met. Notice the chain of pain without judgment.', duration: 5 },
       { title: 'Compassion for the Line', instruction: 'From Self, offer compassion to your entire lineage: "They carried what they could. They passed on what they couldn\'t bear. But this burden doesn\'t have to continue through me." Feel the weight of this recognition.', duration: 5 },
@@ -316,7 +316,7 @@ const therapistClientActivities = [
       { title: 'Map Your Triggers', instruction: 'List 3 things that push you into hyperarousal (fight/flight). What parts activate? List 3 things that push you into hypoarousal (freeze/shutdown). What parts activate? These patterns reveal your protective system.', duration: 4 },
       { title: 'Identify the Gatekeepers', instruction: 'Which parts control the boundaries of your window? There\'s usually a "too much" protector (shuts you down when emotions get too big) and a "too little" protector (ramps you up when you\'re too numb). Name them.', duration: 3 },
       { title: 'Expand the Window', instruction: 'Practice pendulation: shift attention between something comfortable and something slightly uncomfortable. Stay curious. This gentle back-and-forth gradually widens your window of tolerance. Do this for 3 minutes.', duration: 3 },
-      { title: 'Anchor in the Window', instruction: 'Find what helps you stay in the window: breathing patterns, body positions, sensory experiences. Practice one right now. This becomes your go-to regulation tool. Share it with your therapist.', duration: 3 }
+      { title: 'Anchor in the Window', instruction: 'Find what helps you stay in the window: breathing patterns, body positions, sensory experiences. Practice one right now. This becomes your go-to regulation tool. Share it with your advisor.', duration: 3 }
     ],
     reflectionPrompts: [
       'Where were you on the arousal spectrum today?',
@@ -350,7 +350,7 @@ const therapistClientActivities = [
 
 const categoryLabels = {
   'preparation': { label: 'Before Session', color: 'blue' },
-  'in-session': { label: 'With Therapist', color: 'purple' },
+  'in-session': { label: 'With Advisor', color: 'purple' },
   'after-session': { label: 'After Session', color: 'green' },
   'daily-practice': { label: 'Daily Practice', color: 'amber' }
 };
@@ -582,7 +582,7 @@ ${s.insights || 'N/A'}
 Next Session Goals:
 ${s.nextSessionGoals || 'N/A'}
 
-Therapist Notes:
+Advisor Notes:
 ${s.therapistNotes || 'N/A'}
 `).join('\n---\n');
 
@@ -809,7 +809,7 @@ ${s.therapistNotes || 'N/A'}
                 </div>
                 <div>
                   <h2 className={`text-lg font-semibold ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Therapist & Client Activities
+                    Advisor & Client Activities
                   </h2>
                   <p className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
                     {completedActivitiesCount} of {therapistClientActivities.length} activities completed
@@ -828,7 +828,7 @@ ${s.therapistNotes || 'N/A'}
               {[
                 { id: 'all', label: 'All' },
                 { id: 'preparation', label: 'Before Session' },
-                { id: 'in-session', label: 'With Therapist' },
+                { id: 'in-session', label: 'With Advisor' },
                 { id: 'after-session', label: 'After Session' },
                 { id: 'daily-practice', label: 'Daily Practice' }
               ].map(cat => (
@@ -985,13 +985,13 @@ ${s.therapistNotes || 'N/A'}
                     />
                   </div>
                   <div>
-                    <label className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Therapist Notes (optional)</label>
+                    <label className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Advisor Notes (optional)</label>
                     <textarea
                       value={newSession.therapistNotes}
                       onChange={(e) => setNewSession(prev => ({ ...prev, therapistNotes: e.target.value }))}
                       rows={2}
                       className={`w-full mt-1 px-3 py-2 rounded-lg border ${theme.isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-200'}`}
-                      placeholder="Notes or guidance from your therapist..."
+                      placeholder="Notes or guidance from your advisor..."
                     />
                   </div>
                   <button
@@ -1064,7 +1064,7 @@ ${s.therapistNotes || 'N/A'}
                           )}
                           {session.therapistNotes && (
                             <div>
-                              <h4 className={`text-sm font-medium ${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-1`}>Therapist Notes</h4>
+                              <h4 className={`text-sm font-medium ${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-1`}>Advisor Notes</h4>
                               <p className={`text-sm ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>{session.therapistNotes}</p>
                             </div>
                           )}

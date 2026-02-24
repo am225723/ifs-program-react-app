@@ -100,7 +100,7 @@ const ClientInbox = () => {
 
   const handleSend = async () => {
     if (!newMessage.trim()) return;
-    if (!selectedTherapist) { setSendError('No therapist selected'); return; }
+    if (!selectedTherapist) { setSendError('No advisor selected'); return; }
     if (!client?.id) { setSendError('Client session not found. Please log in again.'); return; }
     setSending(true);
     setSendError(null);
@@ -147,14 +147,14 @@ const ClientInbox = () => {
     );
   }
 
-  if (therapists.length === 0) {
+  if (advisors.length === 0) {
     return (
       <div className="max-w-lg mx-auto px-4 py-12 text-center">
         <div className={`${cardBg} rounded-2xl border ${cardBorder} p-8`}>
           <MessageSquare className={`w-16 h-16 mx-auto mb-4 ${textMuted} opacity-20`} />
           <h2 className={`text-lg font-semibold ${textPrimary} mb-2`}>No Messages Yet</h2>
           <p className={`text-sm ${textMuted}`}>
-            Your therapist hasn't sent you any messages yet. Messages will appear here when they reach out to you.
+            Your advisor hasn't sent you any messages yet. Messages will appear here when they reach out to you.
           </p>
         </div>
       </div>
@@ -170,14 +170,14 @@ const ClientInbox = () => {
         <div>
           <h1 className={`text-xl font-bold ${textPrimary}`}>Messages</h1>
           <p className={`text-sm ${textMuted}`}>
-            {unreadCount > 0 ? `${unreadCount} unread message${unreadCount > 1 ? 's' : ''}` : 'Chat with your therapist'}
+            {unreadCount > 0 ? `${unreadCount} unread message${unreadCount > 1 ? 's' : ''}` : 'Chat with your advisor'}
           </p>
         </div>
       </div>
 
-      {therapists.length > 1 && (
+      {advisors.length > 1 && (
         <div className="flex gap-2 mb-4 overflow-x-auto">
-          {therapists.map(t => (
+          {advisors.map(t => (
             <button
               key={t.id}
               onClick={() => setSelectedTherapist(t)}
@@ -200,7 +200,7 @@ const ClientInbox = () => {
           </div>
           <div>
             <p className={`text-sm font-semibold ${textPrimary}`}>{selectedTherapist?.name}</p>
-            <p className={`text-xs ${textMuted}`}>Therapist</p>
+            <p className={`text-xs ${textMuted}`}>Advisor</p>
           </div>
         </div>
 

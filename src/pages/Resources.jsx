@@ -240,7 +240,7 @@ const Resources = () => {
               >
                 <div>
                   <h3 className="text-lg font-bold text-gray-800">IFS Institute</h3>
-                  <p className="text-gray-600">Official website with trainings, resources, and therapist directory</p>
+                  <p className="text-gray-600">Official website with trainings, resources, and advisor directory</p>
                 </div>
                 <ExternalLink className="w-5 h-5 text-teal-600" />
               </a>
@@ -260,9 +260,9 @@ const Resources = () => {
           </div>
 
           <div className="card bg-gradient-to-br from-amber-50 to-emerald-50">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Find a Therapist</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Find a Advisor</h2>
             <p className="text-lg text-gray-700 mb-4">
-              While self-work is valuable, working with a trained IFS therapist can provide deeper healing and support.
+              While self-work is valuable, working with a trained IFS advisor can provide deeper healing and support.
             </p>
             <a
               href="https://ifs-institute.com/practitioners"
@@ -270,7 +270,7 @@ const Resources = () => {
               rel="noopener noreferrer"
               className="inline-flex items-center space-x-2 btn-primary"
             >
-              <span>Find an IFS Therapist</span>
+              <span>Find an IFS Advisor</span>
               <ExternalLink className="w-5 h-5" />
             </a>
           </div>

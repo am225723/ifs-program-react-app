@@ -163,7 +163,7 @@ const ClientPINLogin = ({ onLogin }) => {
           {/* Help Text */}
           <div className="mt-6 text-center">
             <p className="text-gray-600 text-sm mb-2">
-              Your PIN was provided by your therapist
+              Your PIN was provided by your advisor
             </p>
             <button className="text-amber-700 hover:text-amber-800 font-semibold text-sm">
               Forgot your PIN? Contact support

@@ -230,14 +230,14 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                           <Link
                             to="/therapist-dashboard"
                             className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
-                            title="Therapist Dashboard"
+                            title="Advisor Dashboard"
                           >
                             <BookOpen className="w-5 h-5" />
                           </Link>
                         </>
                       )}
                       <Link
-                        to={currentClient?.user_role === 'therapist' ? '/therapist-messages' : '/inbox'}
+                        to={currentClient?.user_role === 'therapist' ? '/advisor-messages' : '/inbox'}
                         className={`p-2 rounded-lg transition-all relative ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
                         title="Messages"
                       >
@@ -310,17 +310,17 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                     ? <CoTherapySession />
                     : <Home clientId={currentClient?.id} client={currentClient} />
                 } />
-                <Route path="/therapist-messages" element={
+                <Route path="/advisor-messages" element={
                   currentClient?.user_role === 'therapist'
                     ? <TherapistMessages />
                     : <Home clientId={currentClient?.id} client={currentClient} />
                 } />
-                <Route path="/therapist-homework" element={
+                <Route path="/advisor-homework" element={
                   currentClient?.user_role === 'therapist'
                     ? <TherapistHomework />
                     : <Home clientId={currentClient?.id} client={currentClient} />
                 } />
-                <Route path="/therapist-reports" element={
+                <Route path="/advisor-reports" element={
                   currentClient?.user_role === 'therapist'
                     ? <TherapistReports />
                     : <Home clientId={currentClient?.id} client={currentClient} />

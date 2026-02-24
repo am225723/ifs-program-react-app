@@ -407,7 +407,7 @@ const TherapistDashboard = () => {
           setTherapistFeedback(feedbackObj);
         }
       } catch (e) {
-        console.error('Failed to load therapist data:', e);
+        console.error('Failed to load advisor data:', e);
       }
     };
     loadInitialData();
@@ -572,7 +572,7 @@ const TherapistDashboard = () => {
         });
         if (saved) newNote.id = saved.id;
       } catch (err) {
-        console.error('Error saving therapist note:', err);
+        console.error('Error saving advisor note:', err);
       }
     }
     setSessionNotes(prev => [newNote, ...prev]);
@@ -631,7 +631,7 @@ const TherapistDashboard = () => {
           feedback: value
         });
       } catch (err) {
-        console.error('Error saving therapist feedback:', err);
+        console.error('Error saving advisor feedback:', err);
       }
     }
   };
@@ -954,7 +954,7 @@ const TherapistDashboard = () => {
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className={`text-3xl sm:text-4xl font-extrabold ${textPrimary} tracking-tight`}>Therapist Dashboard</h1>
+            <h1 className={`text-3xl sm:text-4xl font-extrabold ${textPrimary} tracking-tight`}>Advisor Dashboard</h1>
             <p className={`mt-1.5 text-sm ${textSecondary}`}>Monitor client progress, review responses, and manage sessions</p>
           </div>
           <div className="flex items-center gap-3">
@@ -1438,9 +1438,9 @@ const TherapistDashboard = () => {
               {[
                 { id: 'create-client', label: 'Create New Client PIN', icon: Plus, color: 'from-blue-500 to-blue-600', desc: 'Generate a secure access PIN for a new client' },
                 { id: 'send-reminder', label: 'Send Reminder', icon: MessageSquare, color: 'from-emerald-500 to-emerald-600', desc: 'Send session or activity reminders to clients' },
-                { id: 'link:/therapist-messages', label: 'Client Messages', icon: MessageCircle, color: 'from-blue-500 to-indigo-600', desc: 'Send and receive secure messages with clients' },
-                { id: 'link:/therapist-homework', label: 'Homework Manager', icon: Target, color: 'from-amber-500 to-amber-600', desc: 'Create, assign, and track client homework' },
-                { id: 'link:/therapist-reports', label: 'Progress Reports', icon: Download, color: 'from-emerald-500 to-teal-600', desc: 'Generate and export client progress reports' },
+                { id: 'link:/advisor-messages', label: 'Client Messages', icon: MessageCircle, color: 'from-blue-500 to-indigo-600', desc: 'Send and receive secure messages with clients' },
+                { id: 'link:/advisor-homework', label: 'Homework Manager', icon: Target, color: 'from-amber-500 to-amber-600', desc: 'Create, assign, and track client homework' },
+                { id: 'link:/advisor-reports', label: 'Progress Reports', icon: Download, color: 'from-emerald-500 to-teal-600', desc: 'Generate and export client progress reports' },
                 { id: 'link:/assessment-builder', label: 'Assessment Builder', icon: FileText, color: 'from-purple-500 to-purple-600', desc: 'Create custom assessments for clients' },
                 { id: 'export-reports', label: 'Export All Reports', icon: Download, color: 'from-amber-500 to-amber-600', desc: 'Download comprehensive progress reports' },
                 { id: 'group-analytics', label: 'View Group Analytics', icon: BarChart3, color: 'from-amber-500 to-amber-600', desc: 'Analyze trends across all clients' }
@@ -1503,10 +1503,10 @@ const TherapistDashboard = () => {
                     <div className="space-y-4">
                       <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-5 text-center">
                         <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
-                        <h3 className="text-lg font-semibold text-emerald-800 mb-1">{newClientResult.role === 'therapist' ? 'Therapist' : 'Client'} Created</h3>
+                        <h3 className="text-lg font-semibold text-emerald-800 mb-1">{newClientResult.role === 'therapist' ? 'Advisor' : 'Client'} Created</h3>
                         <p className="text-sm text-emerald-600 mb-2">{newClientResult.name} is ready to log in</p>
                         <span className={`inline-block text-xs font-semibold px-3 py-1 rounded-full mb-3 ${newClientResult.role === 'therapist' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
-                          Role: {newClientResult.role === 'therapist' ? 'Therapist' : 'Client'}
+                          Role: {newClientResult.role === 'therapist' ? 'Advisor' : 'Client'}
                         </span>
                         <div className="bg-white rounded-lg p-4 border border-emerald-200 inline-block">
                           <p className="text-xs text-gray-500 mb-1">Access PIN</p>
@@ -1562,7 +1562,7 @@ const TherapistDashboard = () => {
                         <div className="grid grid-cols-2 gap-3">
                           {[
                             { value: 'client', label: 'Client', desc: 'Access to curriculum, assessments, and exercises', icon: '👤' },
-                            { value: 'therapist', label: 'Therapist', desc: 'Full admin dashboard and client management', icon: '🛡️' }
+                            { value: 'therapist', label: 'Advisor', desc: 'Full admin dashboard and client management', icon: '🛡️' }
                           ].map(role => (
                             <button
                               key={role.value}
@@ -2904,7 +2904,7 @@ const TherapistDashboard = () => {
                 <div className={`${cardBg} rounded-2xl border ${glowStyles.emerald} p-5`}>
                   <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
                     <FileText className="w-5 h-5 text-emerald-500" />
-                    Therapist Feedback
+                    Advisor Feedback
                   </h3>
                   <p className={`text-sm ${textSecondary} mb-3`}>
                     Write your feedback or comments on {client?.name}'s responses:
@@ -2979,7 +2979,7 @@ const TherapistDashboard = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { title: 'Guided Parts Dialogue', desc: 'Therapist-led conversation with internal parts', duration: '20-30 min', category: 'in-session' },
+              { title: 'Guided Parts Dialogue', desc: 'Advisor-led conversation with internal parts', duration: '20-30 min', category: 'in-session' },
               { title: 'Protector Negotiation', desc: 'Help protective parts feel safe for deeper work', duration: '25-35 min', category: 'in-session' },
               { title: 'Unburdening Ceremony', desc: 'Sacred step-by-step guide for burden release', duration: '30-45 min', category: 'in-session' },
               { title: 'Inner Child Rescue', desc: 'Find, comfort, and retrieve wounded exile parts', duration: '25-40 min', category: 'in-session' },
@@ -3025,19 +3025,20 @@ const TherapistDashboard = () => {
           </div>
           <div className="space-y-4">
             {[
-              { title: 'AI-Powered Session Summaries', desc: 'Automatically generate structured session summaries from therapist notes using AI, with key themes, parts identified, progress markers, and suggested homework — saving therapists 15+ minutes per session.', icon: Sparkles, color: 'from-purple-500 to-indigo-600', status: 'In Development' },
-              { title: 'Parts Relationship Mapping', desc: 'Interactive visual map showing how a client\'s protectors, managers, firefighters, and exiles relate to each other — including alliances, conflicts, and polarizations between parts.', icon: Users, color: 'from-blue-500 to-cyan-600', status: 'Planned' },
-              { title: 'Guided Unburdening Protocol', desc: 'Step-by-step digital unburdening ceremony with therapist-guided prompts, visualization audio, and burden release tracking. Includes post-unburdening integration exercises.', icon: Heart, color: 'from-rose-500 to-pink-600', status: 'Planned' },
+              { title: 'Parts Relationship Mapping', desc: 'Interactive visual SVG map showing how a client\'s protectors, managers, firefighters, and exiles relate to each other — including alliances, conflicts, and polarizations between parts. Navigate to Parts Studio to use.', icon: Users, color: 'from-blue-500 to-cyan-600', status: 'Live' },
+              { title: 'Guided Unburdening Protocol', desc: '8-step digital unburdening ceremony with guided prompts, visualization, and burden release tracking. Includes post-unburdening integration exercises. Available under Therapy Integration.', icon: Heart, color: 'from-rose-500 to-pink-600', status: 'Live' },
+              { title: 'Assessment Builder', desc: 'Create custom assessments tailored to your practice — define questions, scoring, and wound mappings. Generate shareable client links. Available under Quick Actions.', icon: Target, color: 'from-sky-500 to-blue-600', status: 'Live' },
+              { title: 'Parts Dialogue Voice Mode', desc: 'Voice-guided parts dialogue where clients speak to their parts using speech recognition, with AI facilitating the conversation and text-to-speech responses. Available under Parts Dialogue.', icon: MessageCircle, color: 'from-teal-500 to-emerald-600', status: 'Live' },
+              { title: 'AI-Powered Session Summaries', desc: 'Automatically generate structured session summaries from advisor notes using AI, with key themes, parts identified, progress markers, and suggested homework — saving advisors 15+ minutes per session.', icon: Sparkles, color: 'from-purple-500 to-indigo-600', status: 'In Development' },
               { title: 'Mood & Parts Pattern Analytics', desc: 'Advanced analytics dashboard showing correlations between mood entries, active parts, triggers, and healing progress over time — with trend detection and early warning alerts.', icon: TrendingUp, color: 'from-emerald-500 to-teal-600', status: 'Planned' },
+              { title: 'Client Self-Check-In Between Sessions', desc: 'Daily micro check-ins where clients rate their parts activity, Self-energy level, and emotional state — with automatic alerts to advisor if concerning patterns emerge.', icon: Activity, color: 'from-amber-500 to-yellow-600', status: 'Planned' },
               { title: 'Secure Video Session Integration', desc: 'Built-in HIPAA-compliant video sessions with real-time parts tracking sidebar, live session notes, and automatic recording transcription for review.', icon: Play, color: 'from-red-500 to-orange-600', status: 'Researching' },
-              { title: 'Client Self-Check-In Between Sessions', desc: 'Daily micro check-ins where clients rate their parts activity, Self-energy level, and emotional state — with automatic alerts to therapist if concerning patterns emerge.', icon: Activity, color: 'from-amber-500 to-yellow-600', status: 'Planned' },
               { title: 'Group Therapy Module', desc: 'Support for IFS-informed group therapy with shared exercises, group parts mapping, anonymous reflection sharing, and facilitator controls for managing group dynamics.', icon: Users, color: 'from-violet-500 to-purple-600', status: 'Researching' },
-              { title: 'Customizable Assessment Builder', desc: 'Therapists can create custom assessments tailored to their practice — define questions, scoring, wound mappings, and personalization rules without code.', icon: Target, color: 'from-sky-500 to-blue-600', status: 'Planned' },
-              { title: 'Parts Dialogue Voice Mode', desc: 'Voice-guided parts dialogue where clients can speak to their parts using speech recognition, with AI facilitating the conversation in real-time and suggesting Self-led responses.', icon: MessageCircle, color: 'from-teal-500 to-emerald-600', status: 'Researching' },
-              { title: 'Multi-Therapist Practice Management', desc: 'Support for therapy practices with multiple therapists — shared client handoffs, supervisor oversight, cross-therapist analytics, billing integration, and team coordination tools.', icon: Crown, color: 'from-amber-600 to-orange-600', status: 'Planned' }
+              { title: 'Multi-Advisor Practice Management', desc: 'Support for therapy practices with multiple advisors — shared client handoffs, supervisor oversight, cross-advisor analytics, billing integration, and team coordination tools.', icon: Crown, color: 'from-amber-600 to-orange-600', status: 'Planned' }
             ].map((feature, idx) => {
               const FIcon = feature.icon;
               const statusColors = {
+                'Live': isDark ? 'bg-amber-900/40 text-amber-300 border-amber-700' : 'bg-amber-100 text-amber-700 border-amber-200',
                 'In Development': isDark ? 'bg-emerald-900/40 text-emerald-300 border-emerald-700' : 'bg-emerald-100 text-emerald-700 border-emerald-200',
                 'Planned': isDark ? 'bg-blue-900/40 text-blue-300 border-blue-700' : 'bg-blue-100 text-blue-700 border-blue-200',
                 'Researching': isDark ? 'bg-purple-900/40 text-purple-300 border-purple-700' : 'bg-purple-100 text-purple-700 border-purple-200'

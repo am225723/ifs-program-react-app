@@ -91,7 +91,7 @@ const therapistClientActivities = [
     icon: 'MessageSquare',
     category: 'in-session',
     duration: '20-30 min',
-    description: 'A structured exercise for therapist-guided conversation with your internal parts. Your therapist leads while you turn inward.',
+    description: 'A structured exercise for advisor-guided conversation with your internal parts. Your advisor leads while you turn inward.',
     therapistGuidance: 'Watch for blending indicators. If client says "I AM angry" vs "I notice anger," they may be blended. Help them create separation. Monitor affect intensity.',
     steps: [
       { title: 'Find the Target Part', instruction: 'With your therapist\'s guidance, notice which part is most present. Where do you feel it in your body? What emotion does it carry? Describe what you notice to your therapist.', duration: 5, therapistNote: 'Observe client body posture. Ask: "Where in your body do you notice this part?" Look for somatic cues.' },
@@ -109,7 +109,7 @@ const therapistClientActivities = [
     icon: 'Shield',
     category: 'in-session',
     duration: '25-35 min',
-    description: 'Work with your therapist to help protective parts feel safe enough to allow access to vulnerable exile parts.',
+    description: 'Work with your advisor to help protective parts feel safe enough to allow access to vulnerable exile parts.',
     therapistGuidance: 'Never bypass protectors. Forcing access to exiles will increase protector activity. Build trust gradually. If protector says no, honor it completely.',
     steps: [
       { title: 'Identify the Protector', instruction: 'With your therapist, identify which protector is active. Is it a Manager or a Firefighter? Notice how it shows up in your body and behavior.', duration: 4, therapistNote: 'Help differentiate: Managers are proactive (control, perfectionism, people-pleasing). Firefighters are reactive (substances, dissociation, rage).' },
@@ -128,7 +128,7 @@ const therapistClientActivities = [
     icon: 'Sparkles',
     category: 'in-session',
     duration: '30-45 min',
-    description: 'A sacred step-by-step guide for the unburdening process. Best done with therapist present for support and safety.',
+    description: 'A sacred step-by-step guide for the unburdening process. Best done with advisor present for support and safety.',
     therapistGuidance: 'This is advanced IFS work. Ensure all protectors have given genuine permission. Rushed unburdening can be re-traumatizing. Take your time.',
     steps: [
       { title: 'Confirm Readiness', instruction: 'Check with all protectors and the exile: "Are you ready for this part to release its burdens?" Both must say yes.', duration: 5, therapistNote: 'If ANY part says no, stop and address that part first. Premature unburdening fails or causes backlash.' },
@@ -206,7 +206,7 @@ const therapistClientActivities = [
     icon: 'Heart',
     category: 'in-session',
     duration: '30-40 min',
-    description: 'Work with your therapist to repair attachment wounds by reparenting exile parts.',
+    description: 'Work with your advisor to repair attachment wounds by reparenting exile parts.',
     therapistGuidance: 'Your therapeutic relationship IS a corrective attachment experience. Use it intentionally. Be consistent, present, and attuned throughout.',
     steps: [
       { title: 'Identify the Attachment Pattern', instruction: 'Identify which pattern is most active: anxious, avoidant, or disorganized. Name the parts involved.', duration: 5, therapistNote: 'Attachment patterns often emerge in the therapy room itself. Notice: Does client seek reassurance (anxious)? Intellectualize (avoidant)? Alternate (disorganized)?' },
@@ -437,7 +437,7 @@ export default function CoTherapySession() {
                 <button onClick={() => setExpandedGuidance(!expandedGuidance)} className={`w-full flex items-center justify-between`}>
                   <h3 className={`font-semibold ${textPrimary} flex items-center gap-2`}>
                     <Lightbulb className="w-4 h-4 text-amber-500" />
-                    Therapist Guidance
+                    Advisor Guidance
                   </h3>
                   {expandedGuidance ? <ChevronUp className={`w-4 h-4 ${textMuted}`} /> : <ChevronDown className={`w-4 h-4 ${textMuted}`} />}
                 </button>
@@ -452,7 +452,7 @@ export default function CoTherapySession() {
             <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
               <h3 className={`font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
                 <FileText className="w-4 h-4 text-blue-500" />
-                Therapist Notes for This Step
+                Advisor Notes for This Step
               </h3>
               <textarea
                 value={therapistNotes[activeStep] || ''}
@@ -572,7 +572,7 @@ export default function CoTherapySession() {
           <h3 className={`font-semibold ${textPrimary} text-sm`}>Session Guide</h3>
         </div>
         <p className={`text-sm ${textSecondary} leading-relaxed`}>
-          Each activity includes step-by-step instructions to read with your client, therapist-specific clinical guidance visible only to you,
+          Each activity includes step-by-step instructions to read with your client, advisor-specific clinical guidance visible only to you,
           observation checkpoints to document what you notice, and space for both your notes and client reflections. All session data saves to the client's record.
         </p>
       </div>
