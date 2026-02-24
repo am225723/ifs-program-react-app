@@ -427,7 +427,9 @@ const TherapistDashboard = () => {
         personalizedCurriculum,
         { data: interactiveData },
         { data: journalEntries },
-        { data: progressData }
+        { data: progressData },
+        { data: checkinRaw },
+        { data: moodRaw }
       ] = await Promise.all([
         supabase
           .from('ifs_module_answers')
@@ -455,7 +457,20 @@ const TherapistDashboard = () => {
         supabase
           .from('ifs_client_progress')
           .select('*')
+          .eq('client_id', clientId),
+        supabase
+          .from('ifs_interactive_data')
+          .select('data, module_id, updated_at')
           .eq('client_id', clientId)
+          .like('module_id', 'daily_checkin_%')
+          .order('updated_at', { ascending: false })
+          .limit(14),
+        supabase
+          .from('ifs_mood_entries')
+          .select('mood, energy, date, emotions')
+          .eq('client_id', clientId)
+          .order('date', { ascending: false })
+          .limit(14)
       ]);
 
       const recentAnswers = [];
@@ -509,6 +524,19 @@ const TherapistDashboard = () => {
       const wound = finalAssessment?.primary_wound || client?.primaryWound || 'abandonment';
       const sessionPrep = sessionPrepByWound[wound] || sessionPrepByWound.abandonment;
 
+      const recentCheckins = (checkinRaw || []).map(r => ({
+        ...r.data,
+        date: r.module_id.replace('daily_checkin_', ''),
+        updatedAt: r.updated_at
+      }));
+
+      const avgSelfEnergy = recentCheckins.length
+        ? (recentCheckins.map(c => c.selfEnergy || 0).reduce((s, v) => s + v, 0) / recentCheckins.length).toFixed(1)
+        : null;
+      const avgMood = (moodRaw || []).length
+        ? ((moodRaw || []).map(e => e.mood || 0).reduce((s, v) => s + v, 0) / (moodRaw || []).length).toFixed(1)
+        : null;
+
       setClientInsights({
         recentAnswers: recentAnswers.slice(0, 10),
         activityProgress: activityProgress || [],
@@ -519,7 +547,11 @@ const TherapistDashboard = () => {
         selfEnergyAssessment: selfEnergyEntry?.data || null,
         customAssessments: customAssessmentResults,
         journalEntries: journalEntries || [],
-        moduleProgress: progressData || []
+        moduleProgress: progressData || [],
+        recentCheckins,
+        recentMoods: moodRaw || [],
+        avgSelfEnergy,
+        avgMood
       });
     } catch (e) {
       console.error('Error loading client insights:', e);
@@ -1442,6 +1474,7 @@ const TherapistDashboard = () => {
                 { id: 'link:/advisor-homework', label: 'Homework Manager', icon: Target, color: 'from-amber-500 to-amber-600', desc: 'Create, assign, and track client homework' },
                 { id: 'link:/advisor-reports', label: 'Progress Reports', icon: Download, color: 'from-emerald-500 to-teal-600', desc: 'Generate and export client progress reports' },
                 { id: 'link:/assessment-builder', label: 'Assessment Builder', icon: FileText, color: 'from-purple-500 to-purple-600', desc: 'Create custom assessments for clients' },
+                { id: 'link:/mood-analytics', label: 'Mood & Parts Analytics', icon: TrendingUp, color: 'from-indigo-500 to-purple-600', desc: 'View mood trends, parts patterns, and self-energy over time' },
                 { id: 'export-reports', label: 'Export All Reports', icon: Download, color: 'from-amber-500 to-amber-600', desc: 'Download comprehensive progress reports' },
                 { id: 'group-analytics', label: 'View Group Analytics', icon: BarChart3, color: 'from-amber-500 to-amber-600', desc: 'Analyze trends across all clients' }
               ].map((action) => {
@@ -2725,6 +2758,67 @@ const TherapistDashboard = () => {
                   </div>
                 )}
 
+                {(clientInsights.recentCheckins?.length > 0 || clientInsights.avgMood || clientInsights.avgSelfEnergy) && (
+                  <div className={`${cardBg} rounded-2xl border ${glowStyles.amber} p-5`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className={`text-lg font-bold ${textPrimary} flex items-center gap-2 tracking-tight`}>
+                        <Activity className="w-5 h-5 text-amber-500" />
+                        Daily Check-Ins & Mood
+                      </h3>
+                      <button
+                        onClick={() => navigate(`/mood-analytics`)}
+                        className="text-xs text-amber-500 hover:text-amber-600 font-medium underline"
+                      >
+                        Full Analytics →
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      {clientInsights.avgSelfEnergy && (
+                        <div className={`rounded-xl p-3 text-center ${isDark ? 'bg-slate-700/50' : 'bg-amber-50'}`}>
+                          <p className={`text-xl font-bold ${isDark ? 'text-amber-300' : 'text-amber-700'}`}>{clientInsights.avgSelfEnergy}<span className="text-sm font-normal">/10</span></p>
+                          <p className={`text-xs mt-0.5 ${textMuted}`}>Avg Self-Energy</p>
+                        </div>
+                      )}
+                      {clientInsights.avgMood && (
+                        <div className={`rounded-xl p-3 text-center ${isDark ? 'bg-slate-700/50' : 'bg-rose-50'}`}>
+                          <p className={`text-xl font-bold ${isDark ? 'text-rose-300' : 'text-rose-700'}`}>{clientInsights.avgMood}<span className="text-sm font-normal">/5</span></p>
+                          <p className={`text-xs mt-0.5 ${textMuted}`}>Avg Mood</p>
+                        </div>
+                      )}
+                      {clientInsights.recentCheckins?.length > 0 && (
+                        <div className={`rounded-xl p-3 text-center ${isDark ? 'bg-slate-700/50' : 'bg-emerald-50'}`}>
+                          <p className={`text-xl font-bold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>{clientInsights.recentCheckins.length}</p>
+                          <p className={`text-xs mt-0.5 ${textMuted}`}>Recent Check-Ins</p>
+                        </div>
+                      )}
+                    </div>
+                    {clientInsights.recentCheckins?.length > 0 && (
+                      <div className="space-y-2">
+                        {clientInsights.recentCheckins.slice(0, 5).map((c, i) => (
+                          <div key={i} className={`flex items-center gap-3 py-2 border-b last:border-0 ${isDark ? 'border-slate-700' : 'border-gray-100'}`}>
+                            <span className={`text-xs font-semibold ${textSecondary} w-24`}>{c.date}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-amber-900/30 text-amber-300' : 'bg-amber-100 text-amber-700'}`}>
+                              Self: {c.selfEnergy || '—'}/10
+                            </span>
+                            {c.mood && <span className={`text-xs ${textMuted}`}>{['','Struggling','Low','Okay','Good','Great'][c.mood] || ''}</span>}
+                            {(c.activeParts || []).length > 0 && (
+                              <span className={`text-xs ${textMuted} truncate`}>{(c.activeParts || []).length} part{c.activeParts.length !== 1 ? 's' : ''} active</span>
+                            )}
+                            {c.intention && <span className={`text-xs italic ${textMuted} truncate flex-1`}>"{c.intention}"</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {(parseFloat(clientInsights.avgSelfEnergy) <= 3 || parseFloat(clientInsights.avgMood) <= 2) && (
+                      <div className={`mt-3 p-3 rounded-xl ${isDark ? 'bg-amber-900/20 border border-amber-700/40' : 'bg-amber-50 border border-amber-200'}`}>
+                        <p className={`text-xs font-semibold ${isDark ? 'text-amber-300' : 'text-amber-800'}`}>
+                          ⚠️ Low self-energy or mood detected — consider adjusting session focus or reaching out.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {clientInsights.journalEntries && clientInsights.journalEntries.length > 0 && (
                   <div className={`${cardBg} rounded-2xl border ${glowStyles.purple} p-5`}>
                     <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
@@ -3030,8 +3124,8 @@ const TherapistDashboard = () => {
               { title: 'Assessment Builder', desc: 'Create custom assessments tailored to your practice — define questions, scoring, and wound mappings. Generate shareable client links. Available under Quick Actions.', icon: Target, color: 'from-sky-500 to-blue-600', status: 'Live' },
               { title: 'Parts Dialogue Voice Mode', desc: 'Voice-guided parts dialogue where clients speak to their parts using speech recognition, with AI facilitating the conversation and text-to-speech responses. Available under Parts Dialogue.', icon: MessageCircle, color: 'from-teal-500 to-emerald-600', status: 'Live' },
               { title: 'AI-Powered Session Summaries', desc: 'Automatically generate structured session summaries from advisor notes using AI, with key themes, parts identified, progress markers, and suggested homework — saving advisors 15+ minutes per session.', icon: Sparkles, color: 'from-purple-500 to-indigo-600', status: 'In Development' },
-              { title: 'Mood & Parts Pattern Analytics', desc: 'Advanced analytics dashboard showing correlations between mood entries, active parts, triggers, and healing progress over time — with trend detection and early warning alerts.', icon: TrendingUp, color: 'from-emerald-500 to-teal-600', status: 'Planned' },
-              { title: 'Client Self-Check-In Between Sessions', desc: 'Daily micro check-ins where clients rate their parts activity, Self-energy level, and emotional state — with automatic alerts to advisor if concerning patterns emerge.', icon: Activity, color: 'from-amber-500 to-yellow-600', status: 'Planned' },
+              { title: 'Mood & Parts Pattern Analytics', desc: 'Advanced analytics dashboard showing correlations between mood entries, active parts, triggers, and healing progress over time — with trend detection and early warning alerts.', icon: TrendingUp, color: 'from-emerald-500 to-teal-600', status: 'Live', link: '/mood-analytics' },
+              { title: 'Client Self-Check-In Between Sessions', desc: 'Daily micro check-ins where clients rate their parts activity, Self-energy level, and emotional state — with automatic alerts to advisor if concerning patterns emerge.', icon: Activity, color: 'from-amber-500 to-yellow-600', status: 'Live', link: '/daily-checkin' },
               { title: 'Secure Video Session Integration', desc: 'Built-in HIPAA-compliant video sessions with real-time parts tracking sidebar, live session notes, and automatic recording transcription for review.', icon: Play, color: 'from-red-500 to-orange-600', status: 'Researching' },
               { title: 'Group Therapy Module', desc: 'Support for IFS-informed group therapy with shared exercises, group parts mapping, anonymous reflection sharing, and facilitator controls for managing group dynamics.', icon: Users, color: 'from-violet-500 to-purple-600', status: 'Researching' },
               { title: 'Multi-Advisor Practice Management', desc: 'Support for therapy practices with multiple advisors — shared client handoffs, supervisor oversight, cross-advisor analytics, billing integration, and team coordination tools.', icon: Crown, color: 'from-amber-600 to-orange-600', status: 'Planned' }

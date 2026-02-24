@@ -42,6 +42,8 @@ import UnburdeningProtocol from './pages/UnburdeningProtocol';
 import AssessmentBuilder from './pages/AssessmentBuilder';
 import CustomAssessment from './pages/CustomAssessment';
 import GuidedMeditation from './pages/GuidedMeditation';
+import DailyCheckin from './pages/DailyCheckin';
+import MoodAnalytics from './pages/MoodAnalytics';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
@@ -340,6 +342,8 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/assessment-builder" element={<AssessmentBuilder />} />
                 <Route path="/custom-assessment/:assessmentId" element={<CustomAssessment />} />
                 <Route path="/meditation" element={<GuidedMeditation />} />
+                <Route path="/daily-checkin" element={<DailyCheckin />} />
+                <Route path="/mood-analytics" element={<MoodAnalytics />} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
                 <Route path="/auth-debug" element={<AuthDebug />} />
