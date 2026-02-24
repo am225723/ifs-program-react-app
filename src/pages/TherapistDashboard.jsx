@@ -232,7 +232,8 @@ const TherapistDashboard = () => {
         { data: progressRows },
         { data: journalRows },
         { data: activityRows },
-        { data: gamificationRows }
+        { data: gamificationRows },
+        { data: interactiveWoundData }
       ] = await Promise.all([
         supabase
           .from('ifs_assessment_results')
@@ -255,8 +256,18 @@ const TherapistDashboard = () => {
         supabase
           .from('ifs_gamification')
           .select('client_id, xp, level, badges, streak_current, streak_longest, last_login_date')
+          .in('client_id', clientIds),
+        supabase
+          .from('ifs_interactive_data')
+          .select('client_id, data, updated_at')
           .in('client_id', clientIds)
+          .eq('module_id', 'assessment_wounds')
       ]);
+
+      const interactiveWoundsByClient = {};
+      (interactiveWoundData || []).forEach(d => {
+        interactiveWoundsByClient[d.client_id] = d.data;
+      });
 
       const assessmentsByClient = {};
       (assessments || []).forEach(a => {
@@ -303,12 +314,20 @@ const TherapistDashboard = () => {
         const modulesCompleted = completedModules.size;
         const progress = TOTAL_MODULES > 0 ? Math.round((modulesCompleted / TOTAL_MODULES) * 100) : 0;
 
+        const interactiveWound = interactiveWoundsByClient[c.id];
+        let primaryWound = latestAssessment?.primary_wound || null;
+        let secondaryWound = latestAssessment?.secondary_wound || null;
+        if (!primaryWound && interactiveWound) {
+          primaryWound = interactiveWound.primary || null;
+          secondaryWound = interactiveWound.secondary || null;
+        }
+
         const gamData = gamificationByClient[c.id];
         return {
           id: c.id,
           name: c.name,
-          primaryWound: latestAssessment?.primary_wound || 'unknown',
-          secondaryWound: latestAssessment?.secondary_wound || null,
+          primaryWound: primaryWound || 'unknown',
+          secondaryWound: secondaryWound || null,
           progress,
           lastActive: c.last_active,
           riskLevel: calculateRiskLevel(c.last_active),
@@ -426,7 +445,7 @@ const TherapistDashboard = () => {
           .from('ifs_interactive_data')
           .select('*')
           .eq('client_id', clientId)
-          .in('module_id', ['assessment_parts', 'assessment_self-energy']),
+          .in('module_id', ['assessment_wounds', 'assessment_parts', 'assessment_self-energy']),
         supabase
           .from('ifs_journal_entries')
           .select('*')
@@ -454,8 +473,25 @@ const TherapistDashboard = () => {
         });
       });
 
+      const woundsEntry = (interactiveData || []).find(d => d.module_id === 'assessment_wounds');
       const partsEntry = (interactiveData || []).find(d => d.module_id === 'assessment_parts');
       const selfEnergyEntry = (interactiveData || []).find(d => d.module_id === 'assessment_self-energy');
+
+      let finalAssessment = assessmentData || null;
+      if (!finalAssessment && woundsEntry?.data) {
+        const wd = woundsEntry.data;
+        finalAssessment = {
+          primary_wound: wd.primary,
+          secondary_wound: wd.secondary,
+          abandonment_score: wd.scores?.abandonment?.total || 0,
+          shame_score: wd.scores?.shame?.total || 0,
+          neglect_score: wd.scores?.neglect?.total || 0,
+          betrayal_score: wd.scores?.betrayal?.total || 0,
+          helplessness_score: wd.scores?.helplessness?.total || 0,
+          assessment_date: wd.completedAt || woundsEntry.updated_at,
+          created_at: woundsEntry.updated_at
+        };
+      }
 
       let customAssessmentResults = [];
       try {
@@ -470,14 +506,14 @@ const TherapistDashboard = () => {
       } catch (e) { console.error('Error loading custom assessments:', e); }
 
       const client = clients.find(c => c.id === clientId);
-      const wound = client?.primaryWound || 'abandonment';
+      const wound = finalAssessment?.primary_wound || client?.primaryWound || 'abandonment';
       const sessionPrep = sessionPrepByWound[wound] || sessionPrepByWound.abandonment;
 
       setClientInsights({
         recentAnswers: recentAnswers.slice(0, 10),
         activityProgress: activityProgress || [],
         sessionPrep,
-        assessment: assessmentData || null,
+        assessment: finalAssessment,
         personalization: personalizedCurriculum || null,
         partsAssessment: partsEntry?.data || null,
         selfEnergyAssessment: selfEnergyEntry?.data || null,
@@ -734,7 +770,9 @@ const TherapistDashboard = () => {
         const avgMood = moods.length > 0 ? (moods.reduce((s, m) => s + (m.mood || 0), 0) / moods.length).toFixed(1) : 'N/A';
         const activities = (activityRows || []).filter(a => a.client_id === c.id);
         const completedActs = activities.filter(a => a.completed).length;
-        csv += `"${c.name}",${latestA?.primary_wound || 'N/A'},${latestA?.secondary_wound || 'N/A'},${c.modulesCompleted},${c.progress}%,${journals.length},${avgMood},${completedActs}/${activities.length},${c.riskLevel},${formatDate(c.joinDate)},${formatDate(c.lastActive)}\n`;
+        const exportPrimary = latestA?.primary_wound || c.primaryWound || 'N/A';
+        const exportSecondary = latestA?.secondary_wound || c.secondaryWound || 'N/A';
+        csv += `"${c.name}",${exportPrimary},${exportSecondary},${c.modulesCompleted},${c.progress}%,${journals.length},${avgMood},${completedActs}/${activities.length},${c.riskLevel},${formatDate(c.joinDate)},${formatDate(c.lastActive)}\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv' });
