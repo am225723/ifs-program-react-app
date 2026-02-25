@@ -752,6 +752,113 @@ export const curriculumModules = [
     estimatedMinutes: 55,
     prerequisites: ['module-4-self-leadership'],
     innerChildFocus: true,
+    woundPersonalization: {
+      abandonment: {
+        childName: 'Lonely Child',
+        moduleIntro: 'This module is personalized for your abandonment wound. You will apply the 6 F\'s protocol specifically to your Lonely Child — the part that carries fear of being left, rejected, or forgotten. Each step is adapted to help you build the internal secure attachment your Lonely Child has always needed.',
+        selfCsIntegration: 'The 8 C\'s of Self — Curiosity, Compassion, Calm, Clarity, Confidence, Courage, Creativity, and Connectedness — are the foundation of the 6 F\'s. For abandonment wounds, Compassion and Connectedness are your most powerful allies. When your Lonely Child fears being left again, your Self\'s Compassion says "I will never leave you" and your Connectedness reminds it that belonging is your birthright.',
+        guidedSteps: [
+          '**FIND** (with Curiosity): Notice your Lonely Child. Where does abandonment live in your body? Perhaps a hollow ache in your chest, a clenching in your stomach, or a desperate reaching in your arms. Say to yourself: "Something in me is afraid of being left." Let Curiosity guide you — "I wonder what this part needs to show me today."',
+          '**FOCUS** (with Calm & Connectedness): Turn your full, steady attention to your Lonely Child. Imagine sitting beside this young part — not rushing to fix, not pulling away. Your Calm presence says: "I\'m here. I\'m not going anywhere." This consistent, patient Focus is the opposite of what abandonment taught — someone is finally staying.',
+          '**FLESH OUT** (with Curiosity & Clarity): Ask your Lonely Child with genuine Curiosity: "How old are you? What moment are you stuck in? Who left, and what did you decide it meant about you?" Listen for beliefs like "I\'m too much," "I\'m not enough to keep people," or "Everyone leaves eventually." Let Clarity help you see these as burdens, not truths.',
+          '**FEEL TOWARD** (with Compassion — the 8 C\'s checkpoint): This is your most important step. Check: Can you feel genuine Compassion for this Lonely Child? Or does another part jump in — maybe a protector saying "Stop being so needy" or "Don\'t be weak"? If so, thank that protector and ask it to step back. Your Lonely Child needs your Compassion, not more rejection from within.',
+          '**BEFRIEND** (with Courage & Connectedness): This takes Courage — offering the very thing your Lonely Child fears it will never receive. Say: "I see how long you\'ve waited for someone to stay. I\'m here now, and I\'m not leaving. You are not too much. You deserve to be held." Feel the Connectedness between your Self and this part.',
+          '**FEAR** (with Calm & Clarity): Ask gently: "What are you most afraid of? What would happen if everyone left?" Listen without trying to talk the part out of its fear. Common abandonment fears: "I\'ll be completely alone," "I\'ll die without connection," "There\'s something fundamentally unlovable about me." Hold these fears with Calm. Your Clarity knows: these fears are real to this part, but they are not the whole truth.',
+          'Close by making a specific promise to your Lonely Child — a daily ritual of connection. This part heals through consistent, reliable presence, not grand gestures. "I will check in with you every morning. You are never alone inside."'
+        ],
+        reflectionPrompts: [
+          'What did your Lonely Child reveal about its deepest fear of abandonment? How old did it feel?',
+          'Which of the 8 C\'s felt easiest to bring to your Lonely Child? Which C\'s did protectors block?',
+          'What promise did you make to your Lonely Child? How will you keep this commitment daily?',
+          'How did it feel to be the one who stays? What shifted in your body when you offered consistent presence?',
+          'What protector parts tried to interrupt the 6 F\'s process? What were they afraid of?'
+        ]
+      },
+      shame: {
+        childName: 'Unworthy Child',
+        moduleIntro: 'This module is personalized for your shame wound. You will apply the 6 F\'s protocol specifically to your Unworthy Child — the part that carries the belief "I am fundamentally flawed." Each step is adapted to gently approach this deeply hidden part and begin replacing toxic shame with inherent worthiness.',
+        selfCsIntegration: 'The 8 C\'s of Self are essential for shame work because your Unworthy Child has been told it doesn\'t deserve Compassion or Curiosity — only judgment. For shame wounds, Compassion is revolutionary (it directly contradicts the shame message) and Courage is vital (approaching shame requires bravery because the Inner Critic will fight hard to keep shame hidden). Creativity helps find new ways to see yourself beyond the shame story.',
+        guidedSteps: [
+          '**FIND** (with Curiosity, not judgment): Notice your Unworthy Child. Shame often hides — it may show up as heat in your face, a desire to disappear, a sinking feeling in your gut, or a voice that says "don\'t look here." Your Inner Critic may try to redirect you. Gently say: "Something in me carries shame. I\'m curious about this part, not here to judge it."',
+          '**FOCUS** (with Compassion & Calm): Turn toward your Unworthy Child with the warmest, most unconditional attention you can offer. This part expects judgment — your Compassionate Focus is startling and healing. Imagine looking at this child the way a perfectly loving parent would: with complete acceptance. Let Calm steady you if shame waves intensify.',
+          '**FLESH OUT** (with Curiosity & Courage): It takes Courage to ask the shame questions. Ask your Unworthy Child: "What do you believe is wrong with you? Who first made you feel this way? What experience taught you that you are flawed?" Listen for the core shame beliefs: "I\'m broken," "I\'m disgusting," "If people really knew me, they\'d leave." These are burdens, not truths about who you are.',
+          '**FEEL TOWARD** (with Compassion — the 8 C\'s checkpoint): The critical checkpoint for shame. Can you feel Compassion for this child who has believed they are fundamentally defective? Or does the Inner Critic hijack this step with "You should be ashamed of being ashamed"? If judgment arises, that\'s a protector — thank it and ask it to step back. Your Unworthy Child needs to be met with the Compassion it has never received.',
+          '**BEFRIEND** (with Courage & Creativity): This requires the most Courage — looking directly at your Unworthy Child and saying what it has never heard: "There is nothing wrong with you. You were never broken. What happened to you was wrong, but you are not wrong." Use Creativity to find the words this specific child needs. Perhaps: "You are worthy exactly as you are, without earning it."',
+          '**FEAR** (with Calm & Clarity): Ask: "What are you afraid people would see if they really looked? What\'s the worst thing about you that you\'re trying to hide?" These fears are the core of toxic shame. Hold them with Calm — not dismissing them, but not agreeing either. Clarity reveals: these beliefs were installed by others; they were never your truth.',
+          'Close by placing one hand on your heart. Let your Self whisper to your Unworthy Child: "You are not what happened to you. You are not what they said about you. You are worthy of love — not because of what you do, but because of who you are."'
+        ],
+        reflectionPrompts: [
+          'What core shame belief did your Unworthy Child reveal? Where did it originate?',
+          'How did the Inner Critic try to interfere during the 6 F\'s? What was it protecting?',
+          'Which of the 8 C\'s felt hardest to bring to shame work? Why do you think that is?',
+          'What shifted when you told your Unworthy Child there is nothing wrong with them?',
+          'How can you practice seeing yourself through Compassion rather than the Critic\'s eyes this week?'
+        ]
+      },
+      neglect: {
+        childName: 'Lost Child',
+        moduleIntro: 'This module is personalized for your neglect wound. You will apply the 6 F\'s protocol specifically to your Lost Child — the part that learned to disappear, minimize needs, and take up as little space as possible. Each step is adapted to help you find and reconnect with a part that became expert at being invisible.',
+        selfCsIntegration: 'The 8 C\'s of Self are especially healing for neglect because your Lost Child has never experienced someone bringing Curiosity to their inner world. For neglect wounds, Curiosity says "I want to know you" (the opposite of being ignored), and Calm provides the steady attention this child was never given. Connectedness reminds the Lost Child that wanting to be seen is natural and healthy, not "too much."',
+        guidedSteps: [
+          '**FIND** (with Curiosity & patience): Your Lost Child may be the hardest part to find — they became expert at hiding and not taking up space. Look for: numbness, blankness, the feeling of "nothing\'s wrong," or a quiet emptiness. These are signs your Lost Child is nearby but invisible. Say with genuine Curiosity: "I know there\'s a part of me that learned to disappear. I\'m looking for you now."',
+          '**FOCUS** (with Calm & Connectedness): When you locate your Lost Child, give it the one thing it has never received: your full, undivided attention. Not rushed, not distracted — truly present. This part may test you by retreating further. Stay. Your Calm says "I have time for you." Your Connectedness says "I see you, and I\'m not looking away."',
+          '**FLESH OUT** (with Curiosity): Ask your Lost Child with warm Curiosity: "How old are you? What was it like to be invisible? What did you need that nobody noticed? What did you stop asking for because no one was listening?" Listen for beliefs like "My needs don\'t matter," "I\'m invisible," "I\'d better not bother anyone." These are survival strategies, not truths.',
+          '**FEEL TOWARD** (with Compassion — the 8 C\'s checkpoint): Can you feel genuine Compassion for a child who learned their needs don\'t matter? Or does a protector part say "Stop making a big deal out of nothing" or "Other people had it worse"? These minimizing parts protect the Lost Child from the pain of acknowledging what was missing. If they arise, thank them and gently ask: "Can you let me see this child?"',
+          '**BEFRIEND** (with Courage & Creativity): Tell your Lost Child what they have waited their whole life to hear: "I see you. You matter. Your needs are real and important. You are not invisible to me." Use Creativity to show up in the specific way this child needed: perhaps holding them, sitting with them quietly, or asking "What do you need right now?" — a question nobody asked.',
+          '**FEAR** (with Calm & Clarity): Ask: "What are you afraid of if you let yourself be seen? What happens if you admit you have needs?" Common neglect fears: "My needs will burden people," "If I ask, I\'ll be rejected or ignored again," "I don\'t deserve to take up space." Hold these with Calm. Clarity reveals: these fears were learned; your right to have needs was never actually negotiable.',
+          'Close with a specific self-attunement practice. Ask your Lost Child right now: "What do you need from me today?" Then provide it. This daily practice of noticing and meeting your own needs is how your Lost Child learns it truly matters.'
+        ],
+        reflectionPrompts: [
+          'Was your Lost Child hard to find? What did the "invisibility" feel like in your body?',
+          'What needs did your Lost Child reveal that had been buried? How old is this neglect pattern?',
+          'Which of the 8 C\'s felt most healing for your Lost Child? Which felt unfamiliar?',
+          'What happened inside you when you said "You matter" to the part that learned to disappear?',
+          'What is one need you will practice meeting for yourself this week?'
+        ]
+      },
+      betrayal: {
+        childName: 'Terrified Child',
+        moduleIntro: 'This module is personalized for your betrayal wound. You will apply the 6 F\'s protocol specifically to your Terrified Child — the part that experienced violation of trust and now guards against further betrayal. Each step is adapted to honor this part\'s need for safety above all else.',
+        selfCsIntegration: 'The 8 C\'s of Self are critical for betrayal work because trust itself was weaponized against your Terrified Child. For betrayal wounds, Calm is essential (this part\'s nervous system is hyperactivated), and Courage allows you to approach terror without running. Clarity helps distinguish past danger from present safety, and Confidence gradually builds trust that your Self is a reliable, safe leader — unlike whoever betrayed this part.',
+        guidedSteps: [
+          '**FIND** (with Calm & Curiosity): Your Terrified Child may be behind layers of hypervigilant protectors. Look for: body tension, scanning for danger, difficulty relaxing, or a pit of dread in your stomach. Before approaching the Terrified Child, first acknowledge its protectors: "I see the parts that are keeping watch. Thank you for your vigilance. I\'d like to gently approach the part they\'re protecting."',
+          '**FOCUS** (with Calm — this is paramount): Your Terrified Child needs Calm above all else. Approach slowly, like approaching a frightened animal. If you move too fast, protectors will slam the door. Let your Focus be steady but gentle, predictable but not intense. Your Calm says: "There is no rush. You set the pace. I will not push past your boundaries."',
+          '**FLESH OUT** (with Curiosity & Courage): If your Terrified Child is willing, ask very gently: "What happened to you? Who broke your trust? What did you learn about the world from that experience?" This takes Courage — the answers may be painful. Listen for beliefs like "No one can be trusted," "Love is dangerous," "If I let my guard down, I\'ll be hurt again." These are survival lessons, not eternal truths.',
+          '**FEEL TOWARD** (with Compassion — the 8 C\'s checkpoint): Can you feel Compassion for a child whose trust was violated? Or does a protector leap in with "Don\'t be vulnerable — that\'s how you got hurt"? Hypervigilant parts work hard to prevent this step. If they activate, honor them: "I understand why you don\'t want us to be open. What happened was real. But I need to reach the child you\'re protecting."',
+          '**BEFRIEND** (with Confidence & Courage): This is the step where you become the trustworthy presence your Terrified Child never had. Say: "I am not going to hurt you. I am not going to betray you. I know someone did, and that was not okay. But I am safe. I am your Self — the one presence that will never violate your trust." Build Confidence slowly, through consistent small acts of reliability.',
+          '**FEAR** (with Calm & Clarity): Ask: "What are you most afraid will happen if you trust again? What is the worst-case scenario you\'re preventing?" Betrayal fears run deep: "I\'ll be used again," "Love is a trap," "If I open up, I\'ll be destroyed." Hold these with profound Calm. Clarity whispers: past betrayal was real, but your Self has the power to create safety now.',
+          'Close with a safety commitment. Tell your Terrified Child: "I will never force you to trust before you\'re ready. You decide the pace. I will prove my reliability to you through consistent, gentle action — not words alone." This part heals through earned trust, demonstrated over time.'
+        ],
+        reflectionPrompts: [
+          'How did your hypervigilant protectors respond when you tried to reach the Terrified Child?',
+          'What beliefs about trust did your Terrified Child reveal? Where did they come from?',
+          'Which of the 8 C\'s felt most important for your Terrified Child? Why?',
+          'What did it feel like to tell your Terrified Child that your Self is safe and will not betray them?',
+          'How can you demonstrate trustworthiness to this part through small, consistent actions this week?'
+        ]
+      },
+      helplessness: {
+        childName: 'Powerless Child',
+        moduleIntro: 'This module is personalized for your helplessness wound. You will apply the 6 F\'s protocol specifically to your Powerless Child — the part that learned "nothing I do matters" and gave up trying to affect the world around it. Each step is adapted to gently reawaken this part\'s sense of agency and personal power.',
+        selfCsIntegration: 'The 8 C\'s of Self are transformative for helplessness because your Powerless Child has never experienced being led by someone capable and effective. For helplessness wounds, Confidence is the most healing C — it demonstrates that your Self IS capable, even when parts feel stuck. Courage says "I will try, even when it feels pointless." Creativity opens doors the Powerless Child believes are permanently closed.',
+        guidedSteps: [
+          '**FIND** (with Curiosity): Your Powerless Child may show up as: freeze, collapse, "what\'s the point?" thinking, going blank when decisions arise, or a heavy resignation in your body. It often looks like passivity or apathy. Say with Curiosity: "Something in me has given up. I wonder when this part learned that trying was useless."',
+          '**FOCUS** (with Confidence & Calm): Direct your attention to your Powerless Child with an important new quality: Confidence. Not arrogant confidence — the quiet Confidence of a Self that knows it can handle what comes. Your Calm says: "I\'m here." Your Confidence adds: "And I\'m capable." This combination is what your Powerless Child has never witnessed from a caretaker.',
+          '**FLESH OUT** (with Curiosity & Clarity): Ask your Powerless Child: "What made you give up? When did you learn that nothing you did mattered? What happened when you tried to make things better and failed?" Listen for beliefs like "I can\'t change anything," "My voice doesn\'t matter," "Why bother trying?" Clarity helps you see: these were true in the original situation, but they are not true now.',
+          '**FEEL TOWARD** (with Compassion — the 8 C\'s checkpoint): Can you feel Compassion for a child who was stripped of agency? Or does a protector say "Stop being lazy" or "Just try harder"? These parts misunderstand helplessness as a character flaw rather than a survival response. If judgment arises, gently redirect: "This child didn\'t choose to give up. They were taught that their efforts were meaningless."',
+          '**BEFRIEND** (with Courage & Creativity): This takes Courage — making promises to a part that has been disappointed before. Say: "I see that you stopped trying because trying led to nothing. That made sense then. But I am here now, and I am capable. Together, we can make choices that matter. You don\'t have to do it alone anymore." Use Creativity to imagine what agency could look like — even small choices count.',
+          '**FEAR** (with Calm & Clarity): Ask: "What are you afraid would happen if you tried and failed again? What\'s scarier — staying stuck or risking disappointment?" Common helplessness fears: "I\'ll try and nothing will change again," "I\'ll look foolish for hoping," "The world will just knock me down." Calm holds these fears. Clarity reveals the crucial difference: your Self now has resources your Powerless Child never had.',
+          'Close with a small, achievable act of agency — right now, in this moment. Ask your Powerless Child: "What is one tiny choice we can make together today?" Make it. Celebrate it. This part heals not through big transformations but through accumulated evidence that their actions create real effects.'
+        ],
+        reflectionPrompts: [
+          'What experience taught your Powerless Child that their efforts were meaningless?',
+          'How did it feel to bring Confidence (the C) to a part that has only known powerlessness?',
+          'Which of the 8 C\'s does your Powerless Child need most right now? Why?',
+          'What small act of agency did you and your Powerless Child practice? How did it feel?',
+          'Where in your daily life do you still defer, comply, or give up? What could you choose differently?'
+        ]
+      }
+    },
     steps: [
       {
         type: 'learn',

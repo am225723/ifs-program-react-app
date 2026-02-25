@@ -310,27 +310,44 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
     if (!step) return [];
     const missing = [];
     const data = step.data;
+    const woundPersonalization = module?.woundPersonalization?.[woundContext?.primary];
+    const isSixFs = data.id?.includes('six-fs');
 
-    if (step.type === 'learn' && data.reflectionPrompts) {
-      data.reflectionPrompts.forEach((prompt, index) => {
-        const val = activityResponses[`reflection-${index}`];
-        if (!val || val.trim().length === 0) {
-          missing.push(`Reflection question ${index + 1}`);
-        }
-      });
+    if (step.type === 'learn') {
+      const prompts = (isSixFs && woundPersonalization?.reflectionPrompts)
+        ? woundPersonalization.reflectionPrompts
+        : data.reflectionPrompts;
+      if (prompts) {
+        prompts.forEach((prompt, index) => {
+          const val = activityResponses[`reflection-${index}`];
+          if (!val || val.trim().length === 0) {
+            missing.push(`Reflection question ${index + 1}`);
+          }
+        });
+      }
     }
 
-    if (step.type === 'activity' && data.questions) {
-      data.questions.forEach((q, index) => {
-        const val = activityResponses[`question-${index}`];
-        if (!val || val.trim().length === 0) {
-          missing.push(`Question ${index + 1}`);
-        }
-      });
+    if (step.type === 'activity') {
+      if (data.questions) {
+        data.questions.forEach((q, index) => {
+          const val = activityResponses[`question-${index}`];
+          if (!val || val.trim().length === 0) {
+            missing.push(`Question ${index + 1}`);
+          }
+        });
+      }
+      if (isSixFs && woundPersonalization?.reflectionPrompts) {
+        woundPersonalization.reflectionPrompts.forEach((prompt, index) => {
+          const val = activityResponses[`wound-reflection-${index}`];
+          if (!val || val.trim().length === 0) {
+            missing.push(`Wound reflection ${index + 1}`);
+          }
+        });
+      }
     }
 
     return missing;
-  }, [activityResponses]);
+  }, [activityResponses, module, woundContext]);
 
   const isCurrentStepComplete = useCallback(() => {
     if (!currentStep) return true;
@@ -422,6 +439,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
   // Render Learn section
   const renderLearnSection = (step) => {
     const data = step.data;
+    const woundPersonalization = module?.woundPersonalization?.[woundContext?.primary];
+    const isSixFsLearn = data.id?.includes('six-fs');
     
     return (
       <div className="space-y-6">
@@ -434,6 +453,20 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
             <p className="text-gray-600">Educational Content</p>
           </div>
         </div>
+
+        {isSixFsLearn && woundPersonalization && (
+          <div className="bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-5 border-2 border-amber-200 mb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <Heart className="w-5 h-5 text-rose-500" />
+              <p className="font-semibold text-gray-900">Personalized for Your {woundPersonalization.childName}</p>
+            </div>
+            <p className="text-sm text-gray-700 leading-relaxed mb-3">{woundPersonalization.moduleIntro}</p>
+            <div className="p-3 bg-white/80 rounded-lg border border-amber-100">
+              <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-1">How the 8 C's of Self Support Your 6 F's Practice</p>
+              <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.selfCsIntegration}</p>
+            </div>
+          </div>
+        )}
 
         <div className="prose max-w-none">
           {data.content.map((paragraph, index) => (
@@ -473,9 +506,11 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
 
         {data.reflectionPrompts && data.reflectionPrompts.length > 0 && (
           <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">🤔 Reflection Prompts:</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {isSixFsLearn && woundPersonalization ? `Reflection — Your ${woundPersonalization.childName}` : 'Reflection Prompts:'}
+            </h3>
             <div className="space-y-5">
-              {data.reflectionPrompts.map((prompt, index) => (
+              {(isSixFsLearn && woundPersonalization?.reflectionPrompts ? woundPersonalization.reflectionPrompts : data.reflectionPrompts).map((prompt, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex items-start space-x-3">
                     <span className="text-yellow-600 font-bold mt-1">Q{index + 1}.</span>
@@ -484,7 +519,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
                   <textarea
                     value={activityResponses[`reflection-${index}`] || ''}
                     onChange={(e) => handleActivityResponse(`reflection-${index}`, e.target.value)}
-                    placeholder="Write your reflection here..."
+                    placeholder={isSixFsLearn && woundPersonalization ? `Reflect on your ${woundPersonalization.childName} experience...` : "Write your reflection here..."}
                     className="w-full px-4 py-3 border border-yellow-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white/80 text-gray-700"
                     rows={3}
                   />
@@ -500,6 +535,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
   // Render Activity section
   const renderActivitySection = (step) => {
     const data = step.data;
+    const woundPersonalization = module?.woundPersonalization?.[woundContext?.primary];
+    const isSixFsActivity = data.id?.includes('six-fs') || data.interactiveElements?.includes('six-fs-wizard');
     
     return (
       <div className="space-y-6">
@@ -508,13 +545,28 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
             <Target className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{data.title}</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {isSixFsActivity && woundPersonalization
+                ? `6 F's Protocol — ${woundPersonalization.childName} Practice`
+                : data.title}
+            </h2>
             <p className="text-gray-600">Interactive Activity</p>
           </div>
         </div>
 
+        {isSixFsActivity && woundPersonalization && (
+          <div className="bg-gradient-to-r from-amber-50 to-stone-50 rounded-lg p-5 border border-amber-200 mb-2">
+            <p className="text-sm font-medium text-amber-800 mb-2">Personalized for Your {woundPersonalization.childName}</p>
+            <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.moduleIntro}</p>
+          </div>
+        )}
+
         <div className="bg-gradient-to-r from-teal-50 to-green-50 rounded-lg p-6 border border-teal-100">
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">{data.prompt}</p>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            {isSixFsActivity && woundPersonalization
+              ? `You will now practice the complete 6 F's protocol with your ${woundPersonalization.childName}. Each step below is personalized for your ${woundContext.primary} wound. The 8 C's of Self — Curiosity, Compassion, Calm, Clarity, Confidence, Courage, Creativity, and Connectedness — are woven into each step as your guiding inner resources. Take your time; depth is more important than speed.`
+              : data.prompt}
+          </p>
         </div>
 
         {/* Interactive Elements */}
@@ -546,14 +598,47 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
 
         {data.guidedSteps && data.guidedSteps.length > 0 && (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Guided Steps:</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {isSixFsActivity && woundPersonalization
+                ? `Guided Steps — Personalized for Your ${woundPersonalization.childName}`
+                : 'Guided Steps:'}
+            </h3>
+            {isSixFsActivity && woundPersonalization?.selfCsIntegration && (
+              <div className="p-4 bg-amber-50 rounded-lg border border-amber-200 mb-2">
+                <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-1">The 8 C's of Self in Your Practice</p>
+                <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.selfCsIntegration}</p>
+              </div>
+            )}
             <div className="space-y-3">
-              {data.guidedSteps.map((step, index) => (
+              {(isSixFsActivity && woundPersonalization?.guidedSteps ? woundPersonalization.guidedSteps : data.guidedSteps).map((step, index) => (
                 <div key={index} className="flex items-start space-x-3 p-4 bg-white rounded-lg border border-gray-200">
                   <div className="w-8 h-8 bg-gradient-to-r from-teal-500 to-green-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                     {index + 1}
                   </div>
-                  <p className="text-gray-700">{step}</p>
+                  <p className="text-gray-700 leading-relaxed">{step}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {isSixFsActivity && woundPersonalization?.reflectionPrompts && (
+          <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-100">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Wound-Specific Reflection:</h3>
+            <div className="space-y-5">
+              {woundPersonalization.reflectionPrompts.map((prompt, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-yellow-600 font-bold mt-1">Q{index + 1}.</span>
+                    <p className="text-gray-700 italic">{prompt}</p>
+                  </div>
+                  <textarea
+                    value={activityResponses[`wound-reflection-${index}`] || ''}
+                    onChange={(e) => handleActivityResponse(`wound-reflection-${index}`, e.target.value)}
+                    placeholder={`Reflect on your ${woundPersonalization.childName} experience...`}
+                    className="w-full px-4 py-3 border border-yellow-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white/80 text-gray-700"
+                    rows={3}
+                  />
                 </div>
               ))}
             </div>
@@ -735,7 +820,9 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
 
   // Six F's Wizard Component
   const renderSixFsWizard = () => {
-    const steps = [
+    const woundPersonalization = module?.woundPersonalization?.[woundContext?.primary];
+
+    const defaultSteps = [
       { name: 'Find', description: 'Notice when a part is active in your system' },
       { name: 'Focus', description: 'Direct your compassionate attention to the part' },
       { name: 'Flesh Out', description: 'Explore the part\'s role and perspective' },
@@ -744,29 +831,64 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
       { name: 'Fear', description: 'Ask what the part fears would happen if it stopped' }
     ];
 
+    const steps = woundPersonalization
+      ? defaultSteps.map((step, i) => ({
+          ...step,
+          description: woundPersonalization.guidedSteps[i]
+            ? woundPersonalization.guidedSteps[i].replace(/^\*\*[A-Z ]+\*\*[^:]*:\s*/, '')
+            : step.description
+        }))
+      : defaultSteps;
+
+    const woundGradients = {
+      abandonment: 'from-blue-500 to-indigo-600',
+      shame: 'from-purple-500 to-rose-500',
+      neglect: 'from-amber-500 to-orange-500',
+      betrayal: 'from-red-500 to-rose-600',
+      helplessness: 'from-green-500 to-emerald-600'
+    };
+    const gradientClass = woundContext?.primary ? woundGradients[woundContext.primary] || 'from-amber-500 to-stone-500' : 'from-amber-500 to-stone-500';
+
     return (
       <div className="bg-gradient-to-r from-amber-100 to-stone-100 rounded-lg p-6 border border-amber-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">🔮 6 F's Protocol Guide</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          {woundPersonalization ? `6 F's Protocol — Personalized for Your ${woundPersonalization.childName}` : "6 F's Protocol Guide"}
+        </h3>
+        {woundPersonalization && (
+          <div className="mb-4 space-y-3">
+            <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.moduleIntro}</p>
+            <div className="p-3 bg-white/80 rounded-lg border border-amber-200">
+              <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-1">The 8 C's of Self in Your 6 F's Practice</p>
+              <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.selfCsIntegration}</p>
+            </div>
+          </div>
+        )}
         <div className="space-y-4">
           {steps.map((step, index) => (
             <div key={step.name} className="flex items-start space-x-3 p-4 bg-white rounded-lg border border-gray-200">
-              <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-stone-500 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              <div className={`w-8 h-8 bg-gradient-to-r ${gradientClass} rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
                 {index + 1}
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-gray-900">{step.name}</h4>
-                <p className="text-sm text-gray-600 mt-1">{step.description}</p>
+                <p className="text-sm text-gray-600 mt-1 leading-relaxed">{step.description}</p>
                 <textarea
                   value={interactiveData[`6fs-${step.name.toLowerCase()}`] || ''}
                   onChange={(e) => handleInteractiveChange(`6fs-${step.name.toLowerCase()}`, e.target.value)}
-                  placeholder={`Notes for ${step.name} step...`}
+                  placeholder={woundPersonalization ? `Your ${woundPersonalization.childName} notes for the ${step.name} step...` : `Notes for ${step.name} step...`}
                   className="mt-2 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                  rows={2}
+                  rows={woundPersonalization ? 3 : 2}
                 />
               </div>
             </div>
           ))}
         </div>
+        {woundPersonalization?.guidedSteps?.[6] && (
+          <div className="mt-4 p-4 bg-white/80 rounded-lg border border-amber-200">
+            <p className="text-sm font-medium text-amber-800 mb-1">Closing Practice</p>
+            <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.guidedSteps[6]}</p>
+          </div>
+        )}
       </div>
     );
   };

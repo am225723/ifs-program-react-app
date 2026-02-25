@@ -73,14 +73,8 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
 
       if (clientId) {
         try {
-          const [curriculumRes, assessmentRes, interactiveRes] = await Promise.all([
+          const [curriculumRes, interactiveRes] = await Promise.all([
             supabaseHelpers.getPersonalizedCurriculum(clientId),
-            supabase.from('ifs_assessment_results')
-              .select('primary_wound, secondary_wound')
-              .eq('client_id', clientId)
-              .order('assessment_date', { ascending: false })
-              .limit(1)
-              .maybeSingle(),
             supabase.from('ifs_interactive_data')
               .select('data')
               .eq('client_id', clientId)
@@ -90,13 +84,9 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
 
           personalizedCurriculum = curriculumRes;
 
-          let primaryWound = assessmentRes.data?.primary_wound;
-          let secondaryWound = assessmentRes.data?.secondary_wound;
-
-          if (!primaryWound && interactiveRes.data?.data) {
-            primaryWound = interactiveRes.data.data.primary;
-            secondaryWound = interactiveRes.data.data.secondary;
-          }
+          const wd = interactiveRes.data?.data;
+          let primaryWound = wd?.primary;
+          let secondaryWound = wd?.secondary;
 
           if (primaryWound && WOUND_MODULE_PRIORITIES[primaryWound]) {
             const priority = getWoundPriority(primaryWound, moduleId);
