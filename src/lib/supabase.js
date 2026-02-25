@@ -551,6 +551,8 @@ export const supabaseHelpers = {
       return null;
     }
 
+    const truncate = (val, max) => (val && val.length > max ? val.substring(0, max) : val);
+
     const rows = modules.map((m, i) => ({
       client_id: userId,
       module_id: m.id || m.moduleId || `module_${i + 1}`,
@@ -558,9 +560,9 @@ export const supabaseHelpers = {
       module_order: i + 1,
       module_description: m.description || m.moduleDescription || '',
       customized_content: m.customizedContent || m.content || m.personalizedContent || {},
-      primary_wound_focus: m.primaryWoundFocus || m.woundFocus || (m.personalizedContent?.woundFocus ? m.personalizedContent.woundFocus : null),
+      primary_wound_focus: truncate(m.primaryWoundFocus || m.woundFocus || (m.personalizedContent?.woundFocus ? m.personalizedContent.woundFocus : null), 50),
       estimated_minutes: m.estimatedMinutes || m.duration || 30,
-      difficulty_level: m.difficultyLevel || m.difficulty || 'beginner',
+      difficulty_level: truncate(m.difficultyLevel || m.difficulty || 'beginner', 20),
       updated_at: new Date().toISOString()
     }));
 

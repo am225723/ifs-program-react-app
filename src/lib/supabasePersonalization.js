@@ -505,7 +505,7 @@ export const curriculumManager = {
             module_description: module.description,
             customized_content: module,
             original_module_id: module.id.replace('personalized-', ''),
-            primary_wound_focus: module.primaryWoundFocus,
+            primary_wound_focus: (module.primaryWoundFocus || '').substring(0, 50) || null,
             customization_notes: `Customized for ${personalizedCurriculum.woundProfile.primary.customization.title}`,
             estimated_minutes: module.estimatedMinutes || 30,
             difficulty_level: index < 2 ? 'beginner' : index < 4 ? 'intermediate' : 'advanced',
