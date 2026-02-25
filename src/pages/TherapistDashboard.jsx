@@ -223,21 +223,23 @@ const TherapistDashboard = () => {
         return;
       }
       await supabaseHelpers.savePersonalizedCurriculum(clientId, curriculum);
-      const existingAssessment = await supabaseHelpers.getAssessment(clientId);
-      if (!existingAssessment) {
-        await supabase.from('ifs_assessment_results').insert({
-          client_id: clientId,
-          primary_wound: genPrimaryWound,
-          secondary_wound: genSecondaryWound,
-          abandonment_score: genPrimaryWound === 'abandonment' ? 20 : genSecondaryWound === 'abandonment' ? 12 : 2,
-          shame_score: genPrimaryWound === 'shame' ? 20 : genSecondaryWound === 'shame' ? 12 : 2,
-          neglect_score: genPrimaryWound === 'neglect' ? 20 : genSecondaryWound === 'neglect' ? 12 : 2,
-          betrayal_score: genPrimaryWound === 'betrayal' ? 20 : genSecondaryWound === 'betrayal' ? 12 : 2,
-          helplessness_score: genPrimaryWound === 'helplessness' ? 20 : genSecondaryWound === 'helplessness' ? 12 : 2,
-          tertiary_wounds: WOUND_TYPES.filter(w => w !== genPrimaryWound && w !== genSecondaryWound),
-          assessment_date: new Date().toISOString()
-        });
-      }
+
+      // Always insert a fresh assessment record so the client's curriculum page
+      // picks up the latest wound type (most recent assessment_date wins).
+      const scoreForWound = (w) => genPrimaryWound === w ? 20 : genSecondaryWound === w ? 12 : 2;
+      const { error: assessErr } = await supabase.from('ifs_assessment_results').insert({
+        client_id: clientId,
+        primary_wound: genPrimaryWound,
+        secondary_wound: genSecondaryWound,
+        abandonment_score: scoreForWound('abandonment'),
+        shame_score: scoreForWound('shame'),
+        neglect_score: scoreForWound('neglect'),
+        betrayal_score: scoreForWound('betrayal'),
+        tertiary_wounds: WOUND_TYPES.filter(w => w !== genPrimaryWound && w !== genSecondaryWound),
+        assessment_date: new Date().toISOString(),
+        assessment_version: '1.0'
+      });
+      if (assessErr) console.warn('Assessment record write failed (non-critical):', assessErr.message);
       await loadClientCurriculum(clientId);
       await loadDashboardData();
       setGenResult({ success: `Personalized curriculum generated for ${clients.find(c => c.id === clientId)?.name || 'client'} (${genPrimaryWound} primary).` });

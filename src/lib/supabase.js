@@ -545,37 +545,45 @@ export const supabaseHelpers = {
   },
 
   async savePersonalizedCurriculum(userId, curriculumData) {
-    try {
-      await supabase
-        .from('ifs_personalized_curriculum')
-        .delete()
-        .eq('client_id', userId);
-
-      const modules = curriculumData?.personalizedModules || curriculumData?.modules || [];
-      if (modules.length === 0) return null;
-
-      const rows = modules.map((m, i) => ({
-        client_id: userId,
-        module_id: m.id || m.moduleId || `module_${i + 1}`,
-        module_title: m.title || m.moduleTitle || `Module ${i + 1}`,
-        module_order: i + 1,
-        module_description: m.description || m.moduleDescription || '',
-        customized_content: m.customizedContent || m.content || {},
-        primary_wound_focus: m.primaryWoundFocus || m.woundFocus || null,
-        estimated_minutes: m.estimatedMinutes || m.duration || 30,
-        difficulty_level: m.difficultyLevel || m.difficulty || 'beginner',
-        updated_at: new Date().toISOString()
-      }));
-
-      const { data, error } = await supabase
-        .from('ifs_personalized_curriculum')
-        .insert(rows);
-      if (error) console.error('Error saving curriculum:', error);
-      return data;
-    } catch (err) {
-      console.error('Error saving personalized curriculum:', err);
+    const modules = curriculumData?.personalizedModules || curriculumData?.modules || [];
+    if (modules.length === 0) {
+      console.warn('savePersonalizedCurriculum: no modules to save — aborting to preserve existing data');
       return null;
     }
+
+    const rows = modules.map((m, i) => ({
+      client_id: userId,
+      module_id: m.id || m.moduleId || `module_${i + 1}`,
+      module_title: m.title || m.moduleTitle || `Module ${i + 1}`,
+      module_order: i + 1,
+      module_description: m.description || m.moduleDescription || '',
+      customized_content: m.customizedContent || m.content || m.personalizedContent || {},
+      primary_wound_focus: m.primaryWoundFocus || m.woundFocus || (m.personalizedContent?.woundFocus ? m.personalizedContent.woundFocus : null),
+      estimated_minutes: m.estimatedMinutes || m.duration || 30,
+      difficulty_level: m.difficultyLevel || m.difficulty || 'beginner',
+      updated_at: new Date().toISOString()
+    }));
+
+    const { error: deleteError } = await supabase
+      .from('ifs_personalized_curriculum')
+      .delete()
+      .eq('client_id', userId);
+
+    if (deleteError) {
+      console.error('Error deleting old curriculum:', deleteError);
+      throw new Error('Failed to clear existing curriculum: ' + deleteError.message);
+    }
+
+    const { data, error } = await supabase
+      .from('ifs_personalized_curriculum')
+      .insert(rows);
+
+    if (error) {
+      console.error('Error saving curriculum rows:', error);
+      throw new Error('Failed to save curriculum modules: ' + error.message);
+    }
+
+    return data;
   },
 
   async getPersonalizedCurriculum(userId) {
