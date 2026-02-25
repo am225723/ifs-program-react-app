@@ -4,6 +4,8 @@
  * Fully functional interactive activities and exercises
  */
 
+import { advancedModules } from './advancedModules.js';
+
 // Core interfaces for the learning system
 export const CurriculumSection = {
   id: '',
@@ -47,7 +49,7 @@ export const CurriculumModule = {
 };
 
 // Comprehensive curriculum modules with extensive content
-export const curriculumModules = [
+const coreModules = [
   {
     id: 'module-1-intro-ifs',
     order: 1,
@@ -981,6 +983,118 @@ export const curriculumModules = [
     estimatedMinutes: 60,
     prerequisites: ['module-5-six-fs-protocol'],
     innerChildFocus: true,
+    woundPersonalization: {
+      abandonment: {
+        childName: 'Lonely Child',
+        moduleIntro: 'Your Lonely Child carries the core burden of abandonment: "I will always be left. I am not worth staying for. If I need too much, people will disappear." These beliefs were installed during moments when the people you depended on were physically or emotionally absent. The unburdening process will help your Lonely Child release these beliefs and receive what was always true: you are worthy of lasting, permanent love.',
+        selfCsIntegration: 'Compassion holds your Lonely Child during the most painful part of unburdening — witnessing the original abandonment. Connectedness provides the corrective experience: someone is HERE now. Calm reassures: "I will not leave you during this process." Courage faces the original pain of being left without running.',
+        guidedSteps: [
+          'Prepare for unburdening by connecting deeply with your Lonely Child. Ask: "Are you ready to let go of the belief that you will always be left? Are you ready to release the ache of waiting for someone who never came?"',
+          'Ask your Lonely Child to show you the original abandonment scene — the moment it decided "I am not worth staying for." Witness this scene with Compassion, not as the helpless child, but as the Self who is permanently here.',
+          'Tell your Lonely Child in the scene: "I see what happened. I see them leaving. I am so sorry no one stayed. But I need you to know: their leaving was about THEM, not about you. You were always worth staying for."',
+          'Ask: "Would you like to leave this place of waiting? Would you like to come with me somewhere where you are never left?" If yes, gently take your Lonely Child out of the abandonment scene.',
+          'Name the burdens to release: "I will always be left," "I am too much," "I am not enough to keep people," "Love always ends," "I am fundamentally unlovable." Ask your Lonely Child which ones it carries.',
+          'Choose an element for release (fire, water, wind, earth, or light). Watch each burden dissolve, wash away, or burn. Notice what lifts from your chest, your arms, your stomach.',
+          'Invite in new qualities: permanent belonging, inherent worthiness, the felt sense of being KEPT and CHOSEN. Let your Lonely Child absorb these qualities like sunlight after a long winter.',
+          'Close by making the ultimate reparenting promise: "You will never be left inside again. I am your permanent home. Wherever I go, you are with me. You belong."'
+        ],
+        reflectionPrompts: [
+          'What original abandonment scene did your Lonely Child show you? How old were you?',
+          'Which burdens were heaviest? Which element did your child choose for release?',
+          'What did your Lonely Child look or feel like AFTER the burdens were released?',
+          'What new qualities did your child receive? How do they feel in your body?',
+          'How has the unburdening shifted your relationship with your Lonely Child?'
+        ]
+      },
+      shame: {
+        childName: 'Unworthy Child',
+        moduleIntro: 'Your Unworthy Child carries the heaviest burdens of all: "I am fundamentally flawed. There is something wrong with me that cannot be fixed. If people saw the real me, they would be disgusted." These toxic beliefs were not yours — they were installed by people who couldn\'t love you properly. Unburdening shame is among the most profound healing possible: the moment your child realizes it was never broken.',
+        selfCsIntegration: 'Courage is essential — approaching shame directly takes extraordinary bravery because every instinct says to hide. Compassion provides what shame says you don\'t deserve: unconditional kindness. Clarity reveals the crucial truth: "These beliefs were LIES. They were never true about you." Creativity helps find new ways to see the self beneath the shame.',
+        guidedSteps: [
+          'Prepare for shame unburdening by creating maximum safety. Your Unworthy Child will resist being seen — shame\'s core defense is hiding. Say: "I know you\'re afraid to be seen. I promise: what I see is beautiful, not shameful. There is nothing you can show me that will make me turn away."',
+          'Ask your Unworthy Child to show you the scene where shame was first installed — the moment it absorbed the belief "something is wrong with me." This may be a specific incident of humiliation, criticism, or abuse, or a pervasive atmosphere of conditional love.',
+          'Witness the scene from Self. See the child who was told they were defective. See the person who installed the shame — and see THEIR limitation, not the child\'s defectiveness. Say: "I see what they did to you. I see what they said. What they said was wrong. Not you — THEM."',
+          'Help your Unworthy Child leave the shaming environment: "You don\'t have to stay in this place where you\'re told you\'re broken. Come with me. I see who you really are, and you are whole."',
+          'Name the shame burdens: "I am disgusting," "I am broken," "I am too much and not enough," "I don\'t deserve love," "If they saw the real me..." Ask which burdens your Unworthy Child has carried the longest.',
+          'Release each shame burden through your child\'s chosen element. Shame is often released through fire (burning the lies) or light (dissolving darkness). Watch each false belief about defectiveness turn to ash or dissolve. What remains is the truth.',
+          'Invite in the truth: inherent worthiness, wholeness, goodness, innocence. These aren\'t new qualities — they were always there, hidden beneath the shame. Let your child feel its own essential nature for perhaps the first time.',
+          'Close with the words your Unworthy Child has waited a lifetime to hear — and believe: "There was never anything wrong with you. You were never broken. You are whole, worthy, and lovable — not because of what you do, but because of who you are. The shame was a lie, and today, we let it go."'
+        ],
+        reflectionPrompts: [
+          'What scene did your Unworthy Child show you? Who installed the shame?',
+          'What was it like to see the shamer\'s limitation instead of your child\'s defectiveness?',
+          'Which shame burden was hardest to release? Which felt most "true" even though it wasn\'t?',
+          'What did your child\'s essential nature look like after the shame was removed?',
+          'How does your body feel now compared to before the unburdening?'
+        ]
+      },
+      neglect: {
+        childName: 'Lost Child',
+        moduleIntro: 'Your Lost Child carries burdens of invisibility: "My needs don\'t matter. I am invisible. I don\'t deserve attention. I should take up as little space as possible." These beliefs formed not from what was done TO you, but from what was NOT done FOR you — the attention, attunement, and care that never came. Unburdening neglect means releasing the false belief that you don\'t deserve to be seen.',
+        selfCsIntegration: 'Curiosity gently draws out the Lost Child who has been hiding: "I want to see all of you." Calm provides the patient, unhurried attention this child was never given. Compassion wraps around the specific pain of absence — the grief of what was never provided. Connectedness fills the emptiness with felt relationship.',
+        guidedSteps: [
+          'Find your Lost Child for the unburdening. It may have retreated deep into your inner world, making itself as small and unnoticeable as possible. Be patient. Say: "I am looking for the part of me that learned to disappear. I will keep looking until I find you. You are worth finding."',
+          'Ask your Lost Child to show you what neglect looked like — not a dramatic event, but the quiet, daily absence: the parent who was physically present but emotionally absent, the needs that went unnoticed, the milestones no one celebrated, the tears no one wiped.',
+          'Witness the absence. This is unique to neglect unburdening — you\'re not witnessing something that happened, but something that DIDN\'T happen. Say: "I see what was missing. I see the empty chair where attention should have sat. I see the silence where your name should have been called. I grieve this absence with you."',
+          'Help your Lost Child step out of the background: "You don\'t have to stay in the corner anymore. You don\'t have to be small. Come forward. Let me see you. You deserve the center of someone\'s attention, and right now, that someone is me."',
+          'Name the neglect burdens: "I don\'t matter," "My needs are a burden," "I am invisible," "I should take up less space," "No one would miss me." Ask which burdens your Lost Child carries.',
+          'Release each burden through your child\'s chosen element. Neglect burdens are often released through water (washing away the emptiness) or earth (grounding into substance and presence). Watch the beliefs of invisibility dissolve.',
+          'Invite in what was missing: visibility, importance, substance, deserving, presence. Let your Lost Child feel what it\'s like to MATTER — to be seen, noticed, delighted in, and prioritized. These are not luxuries; they are needs that were always legitimate.',
+          'Close by giving your Lost Child what no one gave: your full, complete, undivided attention. Say: "You matter. You have always mattered. The neglect was never because you weren\'t important enough — it was because the people around you couldn\'t see what was right in front of them. I see you now. I will never look away."'
+        ],
+        reflectionPrompts: [
+          'What did the neglect look like in the scene your Lost Child showed you?',
+          'What was it like to grieve an absence rather than an event? How is neglect grief different?',
+          'Which invisibility burden did your Lost Child carry longest?',
+          'What did "mattering" feel like when your Lost Child received it?',
+          'How has this unburdening changed your Lost Child\'s willingness to be seen?'
+        ]
+      },
+      betrayal: {
+        childName: 'Terrified Child',
+        moduleIntro: 'Your Terrified Child carries burdens of violated trust: "No one can be trusted. Love is dangerous. If I let my guard down, I will be hurt again. My body is not my own." These beliefs were forged in the fire of someone using their power against you — the ultimate violation. Unburdening betrayal requires the most safety, the most patience, and the most respect for pace of any wound type.',
+        selfCsIntegration: 'Calm is essential — the betrayed nervous system must feel regulated before unburdening can begin. Confidence says "I am strong enough to witness this." Courage faces the original violation without dissociating. Clarity provides the crucial distinction: "What happened was done TO you. It does not define you."',
+        guidedSteps: [
+          'Betrayal unburdening requires extra preparation. Before approaching the Terrified Child, check with every protector: "Is it safe to go here? Do you give permission?" If any protector says no, HONOR that. This unburdening cannot be forced — it must be fully consensual.',
+          'If protectors give permission, approach your Terrified Child with extreme gentleness. It may be locked in a defensive posture — frozen, armored, or hiding. Say: "I am here. I will not touch you without permission. I will not move closer than you allow. You set every boundary."',
+          'If the Terrified Child is willing, ask it to show you what happened — only as much as it wants to share. You may see fragments, feelings, or body sensations rather than a clear narrative. Whatever comes, receive it. Say: "I believe you. What happened was wrong. It was not your fault."',
+          'The Retrieval step is critical for betrayal: "Would you like to leave that place? Would you like to get far, far away from the person who hurt you?" If yes, imagine carrying your Terrified Child to the safest place it can imagine. Let IT choose where safety lives.',
+          'Name the betrayal burdens: "I can\'t trust anyone," "Love is a trap," "My body is not safe," "It was my fault for trusting," "I am damaged," "I will never be safe." Ask which burdens your Terrified Child carries.',
+          'Release through the child\'s chosen element. Betrayal burdens are often released through fire (burning the violation) or wind (blowing it far, far away). Some parts need to physically give back burdens to the betrayer in the visualization: "This pain was never mine to carry. I give it back to you."',
+          'Invite in what was stolen: safety, sovereignty, bodily autonomy, the right to trust wisely, innocence (not naivety — true innocence). These qualities were always yours. The betrayal couldn\'t destroy them — only bury them.',
+          'Close with a safety vow: "No one will ever have that power over you again. I am the guardian now. Your body is yours. Your trust is yours to give or withhold. You are safe — not because the world is safe, but because I am here to protect you."'
+        ],
+        reflectionPrompts: [
+          'How did your protectors respond to the request to unburden? Did they all give permission?',
+          'What did your Terrified Child share about the betrayal? How much was it ready to reveal?',
+          'Which burden felt most deeply embedded? Which was hardest to release?',
+          'What did your Terrified Child look like after the burdens were lifted?',
+          'How did the safety vow land with your Terrified Child? What did it need to hear most?'
+        ]
+      },
+      helplessness: {
+        childName: 'Powerless Child',
+        moduleIntro: 'Your Powerless Child carries burdens of crushed agency: "Nothing I do matters. I can\'t change anything. My voice has no power. I am stuck forever." These beliefs formed when your natural childhood agency — your will, your voice, your preferences — was systematically overridden, ignored, or punished. Unburdening helplessness means reclaiming the agency that was always yours by right.',
+        selfCsIntegration: 'Confidence is the most transformative quality here — your Powerless Child has never experienced being led by someone capable. Your Self\'s Confidence says "I CAN, and therefore WE can." Courage faces the original helplessness without collapsing back into it. Creativity envisions possibilities beyond the stuck place. Clarity reveals: "I was helpless THEN. I am not helpless NOW."',
+        guidedSteps: [
+          'Find your Powerless Child. It may be frozen, collapsed, or curled in a posture of defeat. Approach with energy — not forceful energy, but the vibrant, capable presence of an adult Self who can DO things. Say: "I see you gave up. I understand why. But I am here now, and I have power you didn\'t have."',
+          'Ask your Powerless Child to show you the scene where agency was crushed — the moment it learned that trying was useless. Maybe it was screaming for help and no one came. Maybe it fought back and was overpowered. Maybe it expressed a need and was told it didn\'t matter. Witness this with Courage.',
+          'In the witnessing, do what no one did then: RESPOND. If your child screamed for help, hear the scream and come running. If it fought back, stand beside it and add your strength. If it expressed a need, listen and respond. Provide the response that was missing.',
+          'Retrieve your Powerless Child from the scene of helplessness: "You don\'t have to stay in this place where nothing worked. Come with me. I will show you a world where your actions create results."',
+          'Name the helplessness burdens: "Nothing I do matters," "I can\'t change anything," "My voice is useless," "Why bother trying," "I am permanently stuck," "I am weak." Ask which burdens your Powerless Child carries.',
+          'Release through the child\'s chosen element. Helplessness burdens are often released through earth (grounding into solid, capable presence) or fire (burning the chains of paralysis). Some parts want to physically stand up, push something away, or make noise during the release — let them.',
+          'Invite in what was crushed: agency, capability, voice, power, the RIGHT to affect the world. These aren\'t skills to learn — they\'re innate qualities that were suppressed. Let your Powerless Child feel its own natural strength and will emerge.',
+          'Close with an empowerment declaration. Stand up if possible. Feel your body\'s strength. Say: "You are not stuck. You are not powerless. You are not voiceless. Your actions create change. Your voice carries weight. Your will matters. I will prove this to you every single day through the choices we make together."'
+        ],
+        reflectionPrompts: [
+          'What scene of helplessness did your Powerless Child show you? What was crushed?',
+          'What was it like to RESPOND to the scene — to provide the help that was missing?',
+          'Which helplessness burden was most deeply ingrained?',
+          'What did your Powerless Child look like after the burdens of helplessness lifted?',
+          'How does the empowerment declaration feel in your body? Where do you feel agency returning?'
+        ]
+      }
+    },
     steps: [
       {
         type: 'learn',
@@ -1486,6 +1600,8 @@ export const curriculumModules = [
     ]
   }
 ];
+
+export const curriculumModules = [...coreModules, ...advancedModules];
 
 /**
  * Get a specific module by ID

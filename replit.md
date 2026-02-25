@@ -42,6 +42,23 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generator.
 - **Theme & Animation Customization**: User preferences for visual and motion accessibility.
 
+**Curriculum Modules (11 total):**
+- Modules 1-4: Foundations, Wounds Deep Dive, Protective System, Self Leadership (core, no wound personalization yet)
+- Module 5: 6 F's Protocol Mastery — fully wound-personalized (abandonment/shame/neglect/betrayal/helplessness) with adapted guided steps, 8 C's integration, and reflection prompts
+- Module 6: Inner Child Unburdening & Integration — fully wound-personalized unburdening ceremonies per wound type
+- Module 5 Bonus: Advanced Healing Exercises & Daily Practices
+- Module 7: Reparenting Your Inner Child (`src/data/advancedModules.js`) — wound-personalized reparenting approaches (secure attachment for abandonment, unconditional regard for shame, attunement for neglect, earned trust for betrayal, agency for helplessness)
+- Module 8: Somatic Healing & Body Wisdom — wound-specific body patterns, somatic interventions, and nervous system regulation
+- Module 9: Relationships & Attachment Patterns — how each wound creates relationship cycles and Self-led alternatives
+- Module 10: Transforming the Inner Critic — wound-specific Critic strategies and befriending approaches
+- Advanced modules live in `src/data/advancedModules.js` and are merged into `curriculumModules` via spread in `curriculumData.js`
+
+**Wound Personalization Architecture:**
+- `woundPersonalization` object on module data with keys per wound type (abandonment, shame, neglect, betrayal, helplessness)
+- Each entry: `childName`, `moduleIntro`, `selfCsIntegration` (8 C's guidance), `guidedSteps` (7 steps), `reflectionPrompts` (5 prompts)
+- `LearningModuleEnhanced.jsx` renders personalized content in `renderLearnSection`, `renderActivitySection`, and `renderSixFsWizard`
+- `getStepRequirements` validates wound-specific reflection prompts for step completion
+
 ## External Dependencies
 - **Supabase**: Primary backend service for database, authentication, and edge functions.
 - **Perplexity API**: Used for AI-enhanced personalization and AI Parts Dialogue (optional).
