@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Plus, Trash2, Edit3, Save, Copy, ArrowLeft, ArrowRight,
+  Plus, Trash2, Edit3, Save, Copy, ArrowLeft,
   ChevronUp, ChevronDown, CheckCircle, Target, BookOpen,
-  Star, BarChart3, Share2, Eye, Sparkles, Link2
+  Star, BarChart3, Share2, Sparkles, Link2, AlertCircle, RefreshCw
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
@@ -42,6 +42,9 @@ export default function AssessmentBuilder() {
   const [editing, setEditing] = useState(null);
   const [copiedId, setCopiedId] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [loadError, setLoadError] = useState(null);
+  const [saveError, setSaveError] = useState(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const therapist = clientAuth.getCurrentClient();
   const therapistId = therapist?.id;
@@ -55,6 +58,8 @@ export default function AssessmentBuilder() {
   }, [therapistId]);
 
   const loadAssessments = async () => {
+    setLoadError(null);
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('ifs_interactive_data')
@@ -62,24 +67,30 @@ export default function AssessmentBuilder() {
         .eq('client_id', therapistId)
         .like('module_id', 'custom_assessment_%');
 
-      if (!error && data) {
+      if (error) {
+        setLoadError(`Failed to load assessments: ${error.message}`);
+      } else if (data) {
         const filtered = data
           .filter(row => !row.module_id.startsWith('custom_assessment_response_'))
           .map(row => row.data)
+          .filter(Boolean)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setAssessments(filtered);
       }
     } catch (e) {
-      console.error('Error loading assessments:', e);
+      setLoadError(`Unexpected error: ${e.message}`);
     }
     setLoading(false);
   };
 
   const saveAssessment = async (assessment) => {
     setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
     try {
       const updated = { ...assessment, updatedAt: new Date().toISOString() };
-      await supabase
+
+      const { error } = await supabase
         .from('ifs_interactive_data')
         .upsert({
           client_id: therapistId,
@@ -87,6 +98,12 @@ export default function AssessmentBuilder() {
           data: updated,
           updated_at: new Date().toISOString()
         }, { onConflict: 'client_id,module_id' });
+
+      if (error) {
+        setSaveError(`Save failed: ${error.message}`);
+        setSaving(false);
+        return;
+      }
 
       setAssessments(prev => {
         const idx = prev.findIndex(a => a.id === assessment.id);
@@ -97,24 +114,34 @@ export default function AssessmentBuilder() {
         }
         return [updated, ...prev];
       });
-      setEditing(null);
+
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setEditing(null);
+      }, 1200);
     } catch (e) {
-      console.error('Error saving assessment:', e);
+      setSaveError(`Unexpected error: ${e.message}`);
     }
     setSaving(false);
   };
 
   const deleteAssessment = async (id) => {
     try {
-      await supabase
+      const { error } = await supabase
         .from('ifs_interactive_data')
         .delete()
         .eq('client_id', therapistId)
         .eq('module_id', `custom_assessment_${id}`);
+
+      if (error) {
+        alert(`Delete failed: ${error.message}`);
+        return;
+      }
       setAssessments(prev => prev.filter(a => a.id !== id));
       setDeleteConfirm(null);
     } catch (e) {
-      console.error('Error deleting assessment:', e);
+      alert(`Unexpected error: ${e.message}`);
     }
   };
 
@@ -123,6 +150,8 @@ export default function AssessmentBuilder() {
     navigator.clipboard.writeText(url).then(() => {
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
+    }).catch(() => {
+      prompt('Copy this link:', url);
     });
   };
 
@@ -159,7 +188,20 @@ export default function AssessmentBuilder() {
   }
 
   if (editing) {
-    return <AssessmentForm assessment={editing} theme={theme} saving={saving} onSave={saveAssessment} onCancel={() => setEditing(null)} moveQuestion={moveQuestion} />;
+    return (
+      <AssessmentForm
+        assessment={editing}
+        theme={theme}
+        saving={saving}
+        saveError={saveError}
+        saveSuccess={saveSuccess}
+        onSave={saveAssessment}
+        onCancel={() => { setEditing(null); setSaveError(null); setSaveSuccess(false); }}
+        moveQuestion={moveQuestion}
+        copyLink={copyLink}
+        copiedId={copiedId}
+      />
+    );
   }
 
   return (
@@ -186,7 +228,20 @@ export default function AssessmentBuilder() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
-        {assessments.length === 0 ? (
+        {loadError && (
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700">
+            <AlertCircle size={18} className="shrink-0 mt-0.5" />
+            <div className="flex-1 text-sm">
+              <p className="font-medium">Could not load assessments</p>
+              <p className="text-red-600 mt-0.5">{loadError}</p>
+            </div>
+            <button onClick={loadAssessments} className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-lg bg-red-100 hover:bg-red-200 transition-colors">
+              <RefreshCw size={12} /> Retry
+            </button>
+          </div>
+        )}
+
+        {assessments.length === 0 && !loadError ? (
           <div className={`text-center py-16 rounded-2xl border-2 border-dashed ${theme.isDark ? 'border-slate-700 text-slate-400' : 'border-amber-200 text-gray-400'}`}>
             <BarChart3 size={48} className="mx-auto mb-4 opacity-50" />
             <h3 className="text-lg font-semibold mb-2">No assessments yet</h3>
@@ -225,10 +280,10 @@ export default function AssessmentBuilder() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <button onClick={() => setEditing({ ...assessment })} className={`p-2 rounded-lg transition-colors ${theme.isDark ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-amber-50 text-gray-400'}`} title="Edit">
+                    <button onClick={() => { setSaveError(null); setSaveSuccess(false); setEditing({ ...assessment }); }} className={`p-2 rounded-lg transition-colors ${theme.isDark ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-amber-50 text-gray-400'}`} title="Edit">
                       <Edit3 size={16} />
                     </button>
-                    <button onClick={() => copyLink(assessment.id)} className={`p-2 rounded-lg transition-colors ${copiedId === assessment.id ? 'text-emerald-500' : theme.isDark ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-amber-50 text-gray-400'}`} title="Copy link">
+                    <button onClick={() => copyLink(assessment.id)} className={`p-2 rounded-lg transition-colors ${copiedId === assessment.id ? 'text-emerald-500' : theme.isDark ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-amber-50 text-gray-400'}`} title="Copy client link">
                       {copiedId === assessment.id ? <CheckCircle size={16} /> : <Link2 size={16} />}
                     </button>
                     {deleteConfirm === assessment.id ? (
@@ -256,9 +311,10 @@ export default function AssessmentBuilder() {
   );
 }
 
-function AssessmentForm({ assessment, theme, saving, onSave, onCancel, moveQuestion }) {
+function AssessmentForm({ assessment, theme, saving, saveError, saveSuccess, onSave, onCancel, moveQuestion, copyLink, copiedId }) {
   const [form, setForm] = useState(assessment);
   const [showScoringRules, setShowScoringRules] = useState(Object.keys(assessment.scoringRules || {}).length > 0);
+  const [attempted, setAttempted] = useState(false);
 
   const updateField = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
@@ -302,7 +358,21 @@ function AssessmentForm({ assessment, theme, saving, onSave, onCancel, moveQuest
 
   const categories = [...new Set(form.questions.map(q => q.category).filter(Boolean))];
 
-  const isValid = form.title.trim() && form.questions.length > 0 && form.questions.every(q => q.text.trim());
+  const titleMissing = !form.title.trim();
+  const noQuestions = form.questions.length === 0;
+  const emptyQuestions = form.questions.filter(q => !q.text.trim());
+  const isValid = !titleMissing && !noQuestions && emptyQuestions.length === 0;
+
+  const handleSaveClick = () => {
+    setAttempted(true);
+    if (isValid) onSave(form);
+  };
+
+  const validationMessage = attempted && !isValid
+    ? titleMissing ? 'Please add a title'
+      : noQuestions ? 'Please add at least one question'
+      : `${emptyQuestions.length} question${emptyQuestions.length > 1 ? 's are' : ' is'} missing text`
+    : null;
 
   return (
     <div className={`min-h-screen pb-24 ${theme.isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-amber-50 via-orange-50/30 to-rose-50/30'}`}>
@@ -316,15 +386,30 @@ function AssessmentForm({ assessment, theme, saving, onSave, onCancel, moveQuest
               {assessment.title ? 'Edit Assessment' : 'New Assessment'}
             </h1>
           </div>
-          <button
-            onClick={() => onSave(form)}
-            disabled={!isValid || saving}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Save size={18} />
-            {saving ? 'Saving...' : 'Save'}
-          </button>
+          <div className="flex items-center gap-3">
+            {saveSuccess && (
+              <span className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium animate-pulse">
+                <CheckCircle size={16} /> Saved!
+              </span>
+            )}
+            <button
+              onClick={handleSaveClick}
+              disabled={saving}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-medium hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save size={18} />
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
         </div>
+        {(saveError || validationMessage) && (
+          <div className="max-w-4xl mx-auto px-4 pb-3">
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{saveError || validationMessage}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
@@ -333,14 +418,21 @@ function AssessmentForm({ assessment, theme, saving, onSave, onCancel, moveQuest
 
           <div className="space-y-4">
             <div>
-              <label className={`block text-sm font-medium mb-1.5 ${theme.isDark ? 'text-slate-300' : 'text-gray-700'}`}>Title *</label>
+              <label className={`block text-sm font-medium mb-1.5 ${theme.isDark ? 'text-slate-300' : 'text-gray-700'}`}>
+                Title <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={form.title}
                 onChange={(e) => updateField('title', e.target.value)}
                 placeholder="e.g., Self-Compassion Scale"
-                className={`w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${theme.isDark ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-500' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'}`}
+                className={`w-full px-4 py-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-amber-500/50 ${
+                  attempted && titleMissing
+                    ? 'border-red-400 bg-red-50'
+                    : theme.isDark ? 'bg-slate-700 border-slate-600 text-slate-100 placeholder-slate-500' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
+                }`}
               />
+              {attempted && titleMissing && <p className="mt-1 text-xs text-red-600">Title is required</p>}
             </div>
 
             <div>
@@ -382,9 +474,14 @@ function AssessmentForm({ assessment, theme, saving, onSave, onCancel, moveQuest
 
         <div className={`rounded-2xl border backdrop-blur-xl p-6 ${theme.isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-white/80 border-amber-100'}`}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className={`text-lg font-semibold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'}`}>
-              Questions ({form.questions.length})
-            </h2>
+            <div>
+              <h2 className={`text-lg font-semibold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'}`}>
+                Questions ({form.questions.length})
+              </h2>
+              {attempted && noQuestions && (
+                <p className="text-xs text-red-600 mt-0.5">At least one question is required</p>
+              )}
+            </div>
             <button
               onClick={addQuestion}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
@@ -395,58 +492,74 @@ function AssessmentForm({ assessment, theme, saving, onSave, onCancel, moveQuest
           </div>
 
           {form.questions.length === 0 ? (
-            <div className={`text-center py-10 rounded-xl border-2 border-dashed ${theme.isDark ? 'border-slate-700 text-slate-500' : 'border-amber-200 text-gray-400'}`}>
-              <p className="text-sm">No questions added yet. Click "Add Question" to begin.</p>
+            <div className={`text-center py-10 rounded-xl border-2 border-dashed ${
+              attempted ? 'border-red-300 bg-red-50/30' : theme.isDark ? 'border-slate-700 text-slate-500' : 'border-amber-200 text-gray-400'
+            }`}>
+              <p className={`text-sm ${attempted ? 'text-red-600' : ''}`}>No questions added yet. Click "Add Question" to begin.</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {form.questions.map((q, idx) => (
-                <div key={q.id} className={`rounded-xl border p-4 ${theme.isDark ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50/80 border-gray-200'}`}>
-                  <div className="flex items-start gap-3">
-                    <span className={`text-xs font-bold mt-3 shrink-0 w-6 h-6 flex items-center justify-center rounded-full ${theme.isDark ? 'bg-slate-600 text-slate-300' : 'bg-amber-100 text-amber-700'}`}>
-                      {idx + 1}
-                    </span>
-                    <div className="flex-1 space-y-2">
-                      <input
-                        type="text"
-                        value={q.text}
-                        onChange={(e) => updateQuestion(idx, 'text', e.target.value)}
-                        placeholder="Question text..."
-                        className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm ${theme.isDark ? 'bg-slate-600 border-slate-500 text-slate-100 placeholder-slate-400' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'}`}
-                      />
-                      <div className="flex gap-2">
+              {form.questions.map((q, idx) => {
+                const isEmpty = attempted && !q.text.trim();
+                return (
+                  <div key={q.id} className={`rounded-xl border p-4 ${
+                    isEmpty
+                      ? 'border-red-300 bg-red-50/30'
+                      : theme.isDark ? 'bg-slate-700/50 border-slate-600' : 'bg-gray-50/80 border-gray-200'
+                  }`}>
+                    <div className="flex items-start gap-3">
+                      <span className={`text-xs font-bold mt-3 shrink-0 w-6 h-6 flex items-center justify-center rounded-full ${
+                        isEmpty ? 'bg-red-100 text-red-700' : theme.isDark ? 'bg-slate-600 text-slate-300' : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {idx + 1}
+                      </span>
+                      <div className="flex-1 space-y-2">
                         <input
                           type="text"
-                          value={q.category}
-                          onChange={(e) => updateQuestion(idx, 'category', e.target.value)}
-                          placeholder="Category (e.g., anxiety)"
-                          className={`flex-1 px-3 py-1.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-xs ${theme.isDark ? 'bg-slate-600 border-slate-500 text-slate-100 placeholder-slate-400' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'}`}
+                          value={q.text}
+                          onChange={(e) => updateQuestion(idx, 'text', e.target.value)}
+                          placeholder="Question text... *"
+                          className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm ${
+                            isEmpty
+                              ? 'border-red-400 bg-red-50 text-red-900 placeholder-red-400'
+                              : theme.isDark ? 'bg-slate-600 border-slate-500 text-slate-100 placeholder-slate-400' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'
+                          }`}
                         />
-                        <select
-                          value={q.scaleType}
-                          onChange={(e) => updateQuestion(idx, 'scaleType', e.target.value)}
-                          className={`px-3 py-1.5 rounded-lg border focus:outline-none text-xs ${theme.isDark ? 'bg-slate-600 border-slate-500 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`}
-                        >
-                          <option value="1-5">1–5 Likert</option>
-                          <option value="1-7">1–7 Likert</option>
-                          <option value="1-10">1–10 Scale</option>
-                        </select>
+                        {isEmpty && <p className="text-xs text-red-600">Question text is required</p>}
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={q.category}
+                            onChange={(e) => updateQuestion(idx, 'category', e.target.value)}
+                            placeholder="Category (optional, e.g. anxiety)"
+                            className={`flex-1 px-3 py-1.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-xs ${theme.isDark ? 'bg-slate-600 border-slate-500 text-slate-100 placeholder-slate-400' : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400'}`}
+                          />
+                          <select
+                            value={q.scaleType}
+                            onChange={(e) => updateQuestion(idx, 'scaleType', e.target.value)}
+                            className={`px-3 py-1.5 rounded-lg border focus:outline-none text-xs ${theme.isDark ? 'bg-slate-600 border-slate-500 text-slate-100' : 'bg-white border-gray-200 text-gray-900'}`}
+                          >
+                            <option value="1-5">1–5 Likert</option>
+                            <option value="1-7">1–7 Likert</option>
+                            <option value="1-10">1–10 Scale</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-0.5 shrink-0">
+                        <button onClick={() => handleMove(idx, -1)} disabled={idx === 0} className={`p-1 rounded ${theme.isDark ? 'hover:bg-slate-600 text-slate-400' : 'hover:bg-gray-200 text-gray-400'} disabled:opacity-30`}>
+                          <ChevronUp size={14} />
+                        </button>
+                        <button onClick={() => handleMove(idx, 1)} disabled={idx === form.questions.length - 1} className={`p-1 rounded ${theme.isDark ? 'hover:bg-slate-600 text-slate-400' : 'hover:bg-gray-200 text-gray-400'} disabled:opacity-30`}>
+                          <ChevronDown size={14} />
+                        </button>
+                        <button onClick={() => removeQuestion(idx)} className={`p-1 rounded ${theme.isDark ? 'hover:bg-red-500/20 text-red-400' : 'hover:bg-red-50 text-red-400'}`}>
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-0.5 shrink-0">
-                      <button onClick={() => handleMove(idx, -1)} disabled={idx === 0} className={`p-1 rounded ${theme.isDark ? 'hover:bg-slate-600 text-slate-400' : 'hover:bg-gray-200 text-gray-400'} disabled:opacity-30`}>
-                        <ChevronUp size={14} />
-                      </button>
-                      <button onClick={() => handleMove(idx, 1)} disabled={idx === form.questions.length - 1} className={`p-1 rounded ${theme.isDark ? 'hover:bg-slate-600 text-slate-400' : 'hover:bg-gray-200 text-gray-400'} disabled:opacity-30`}>
-                        <ChevronDown size={14} />
-                      </button>
-                      <button onClick={() => removeQuestion(idx)} className={`p-1 rounded ${theme.isDark ? 'hover:bg-red-500/20 text-red-400' : 'hover:bg-red-50 text-red-400'}`}>
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -464,7 +577,7 @@ function AssessmentForm({ assessment, theme, saving, onSave, onCancel, moveQuest
           {showScoringRules && (
             <div className="space-y-3">
               <p className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-                Define how each category maps to result descriptions. Categories are auto-detected from your questions.
+                Optional: Define how each category maps to result labels. Categories are auto-detected from your questions.
               </p>
               {categories.length === 0 ? (
                 <p className={`text-sm italic ${theme.isDark ? 'text-slate-500' : 'text-gray-400'}`}>Add questions with categories first.</p>
@@ -505,24 +618,23 @@ function AssessmentForm({ assessment, theme, saving, onSave, onCancel, moveQuest
           )}
         </div>
 
-        {form.id && (
-          <div className={`rounded-2xl border backdrop-blur-xl p-6 ${theme.isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-white/80 border-amber-100'}`}>
-            <h2 className={`text-lg font-semibold mb-3 ${theme.isDark ? 'text-slate-100' : 'text-gray-900'}`}>Share Assessment</h2>
-            <div className={`flex items-center gap-2 p-3 rounded-xl ${theme.isDark ? 'bg-slate-700' : 'bg-amber-50'}`}>
-              <Share2 size={16} className={theme.isDark ? 'text-slate-400' : 'text-amber-500'} />
-              <code className={`flex-1 text-xs truncate ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-                {window.location.origin}/custom-assessment/{form.id}
-              </code>
-              <button
-                onClick={() => copyLink(form.id)}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
-              >
-                {copiedId === form.id ? <CheckCircle size={14} /> : <Copy size={14} />}
-                {copiedId === form.id ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
+        <div className={`rounded-2xl border backdrop-blur-xl p-6 ${theme.isDark ? 'bg-slate-800/80 border-slate-700' : 'bg-white/80 border-amber-100'}`}>
+          <h2 className={`text-lg font-semibold mb-1 ${theme.isDark ? 'text-slate-100' : 'text-gray-900'}`}>Share Assessment</h2>
+          <p className={`text-xs mb-3 ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Save the assessment first, then share this link with clients so they can take it.</p>
+          <div className={`flex items-center gap-2 p-3 rounded-xl ${theme.isDark ? 'bg-slate-700' : 'bg-amber-50'}`}>
+            <Share2 size={16} className={theme.isDark ? 'text-slate-400' : 'text-amber-500'} />
+            <code className={`flex-1 text-xs truncate ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+              {window.location.origin}/custom-assessment/{form.id}
+            </code>
+            <button
+              onClick={() => copyLink(form.id)}
+              className="flex items-center gap-1 px-3 py-1.5 text-xs bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg font-medium hover:from-amber-600 hover:to-orange-600 transition-all"
+            >
+              {copiedId === form.id ? <CheckCircle size={14} /> : <Copy size={14} />}
+              {copiedId === form.id ? 'Copied!' : 'Copy Link'}
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -131,7 +131,7 @@ export default function CustomAssessment() {
     try {
       const client = clientAuth.getCurrentClientValidated();
       if (client) {
-        await supabase
+        const { error } = await supabase
           .from('ifs_interactive_data')
           .upsert({
             client_id: client.id,
@@ -139,7 +139,8 @@ export default function CustomAssessment() {
             data: { ...res, assessmentTitle: assessment.title, assessmentId: resolvedId },
             updated_at: new Date().toISOString()
           }, { onConflict: 'client_id,module_id' });
-        setSaved(true);
+        if (!error) setSaved(true);
+        else console.error('Error saving results:', error.message);
       }
     } catch (e) {
       console.error('Error saving results:', e);
