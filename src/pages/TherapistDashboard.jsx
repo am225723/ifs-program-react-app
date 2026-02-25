@@ -235,6 +235,7 @@ const TherapistDashboard = () => {
         shame_score: scoreForWound('shame'),
         neglect_score: scoreForWound('neglect'),
         betrayal_score: scoreForWound('betrayal'),
+        helplessness_score: scoreForWound('helplessness'),
         tertiary_wounds: WOUND_TYPES.filter(w => w !== genPrimaryWound && w !== genSecondaryWound),
         assessment_date: new Date().toISOString(),
         assessment_version: '1.0'
