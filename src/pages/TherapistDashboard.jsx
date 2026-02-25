@@ -12,6 +12,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
+import { WOUND_LESSON_PLANS, WOUND_DISPLAY } from '../lib/woundLessonPlans';
 
 const woundColorMap = {
   abandonment: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
@@ -205,6 +206,10 @@ const TherapistDashboard = () => {
   const [genSecondaryWound, setGenSecondaryWound] = useState('shame');
   const [generatingCurriculum, setGeneratingCurriculum] = useState(false);
   const [genResult, setGenResult] = useState(null);
+  const [showAddModule, setShowAddModule] = useState(false);
+  const [addModuleWound, setAddModuleWound] = useState('abandonment');
+  const [addingModuleId, setAddingModuleId] = useState(null);
+  const [addModuleResult, setAddModuleResult] = useState(null);
 
   const WOUND_TYPES = ['abandonment', 'shame', 'neglect', 'betrayal', 'helplessness'];
 
@@ -700,6 +705,68 @@ const TherapistDashboard = () => {
     } else {
       loadClientCurriculum(selectedLessonClient);
       setEditingModule(null);
+    }
+  };
+
+  const handleAddWoundModule = async (template) => {
+    if (!selectedLessonClient || addingModuleId) return;
+    setAddingModuleId(template.id);
+    setAddModuleResult(null);
+    try {
+      const nextOrder = (clientCurriculum || []).length + 1;
+      const moduleId = `wound-${template.id}-${Date.now()}`;
+      const truncate = (val, max) => (val && val.length > max ? val.substring(0, max) : val);
+      const { error } = await supabase
+        .from('ifs_personalized_curriculum')
+        .insert({
+          client_id: selectedLessonClient,
+          module_id: moduleId,
+          module_order: nextOrder,
+          module_title: template.title,
+          module_description: template.description,
+          customized_content: {
+            goals: template.goals,
+            topics: template.topics,
+            activities: template.activities,
+            watchFor: template.watchFor,
+            homework: template.homework || '',
+            woundFocus: addModuleWound
+          },
+          primary_wound_focus: truncate(addModuleWound, 50),
+          estimated_minutes: template.estimatedMinutes || 60,
+          difficulty_level: template.difficulty || 'beginner',
+          updated_at: new Date().toISOString()
+        });
+      if (error) throw error;
+      setAddModuleResult({ success: `"${template.title}" added as Module ${nextOrder}` });
+      await loadClientCurriculum(selectedLessonClient);
+    } catch (err) {
+      console.error('Error adding module:', err);
+      setAddModuleResult({ error: 'Failed to add module: ' + err.message });
+    }
+    setAddingModuleId(null);
+  };
+
+  const handleRemoveModule = async (mod) => {
+    if (!selectedLessonClient) return;
+    const confirmed = window.confirm(`Remove "${mod.module_title}" from this client's curriculum?`);
+    if (!confirmed) return;
+    try {
+      const { error } = await supabase
+        .from('ifs_personalized_curriculum')
+        .delete()
+        .eq('id', mod.id);
+      if (error) throw error;
+      const remaining = (clientCurriculum || []).filter(m => m.id !== mod.id);
+      for (let i = 0; i < remaining.length; i++) {
+        await supabase
+          .from('ifs_personalized_curriculum')
+          .update({ module_order: i + 1, updated_at: new Date().toISOString() })
+          .eq('id', remaining[i].id);
+      }
+      await loadClientCurriculum(selectedLessonClient);
+    } catch (err) {
+      console.error('Error removing module:', err);
     }
   };
 
@@ -2186,28 +2253,202 @@ const TherapistDashboard = () => {
                                     </p>
                                   </div>
                                 )}
+
+                                {customContent.goals && (
+                                  <div className={`mt-3 p-3 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-gray-50'} border ${isDark ? 'border-slate-600' : 'border-gray-200'}`}>
+                                    <p className={`text-xs font-medium ${textMuted} uppercase tracking-wider mb-1`}>Session Goals</p>
+                                    <p className={`text-sm ${textSecondary}`}>{customContent.goals}</p>
+                                    {customContent.topics?.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className={`text-xs font-medium ${textMuted} uppercase tracking-wider mb-1`}>Discussion Topics</p>
+                                        <ul className="space-y-0.5">
+                                          {customContent.topics.map((t, i) => (
+                                            <li key={i} className={`text-sm ${textSecondary} italic`}>&ldquo;{t}&rdquo;</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {customContent.activities?.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className={`text-xs font-medium ${textMuted} uppercase tracking-wider mb-1`}>Activities</p>
+                                        <ul className="space-y-0.5">
+                                          {customContent.activities.map((a, i) => (
+                                            <li key={i} className={`text-sm ${textSecondary} flex items-center gap-1.5`}>
+                                              <CheckCircle className="w-3 h-3 text-emerald-500 flex-shrink-0" />{a}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                    {customContent.watchFor?.length > 0 && (
+                                      <div className="mt-2">
+                                        <p className={`text-xs font-medium ${textMuted} uppercase tracking-wider mb-1`}>Watch For</p>
+                                        <ul className="space-y-0.5">
+                                          {customContent.watchFor.map((w, i) => (
+                                            <li key={i} className={`text-sm ${textSecondary} flex items-center gap-1.5`}>
+                                              <AlertTriangle className="w-3 h-3 text-amber-500 flex-shrink-0" />{w}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             </div>
-                            <button
-                              onClick={() => {
-                                setEditingModule(mod);
-                                setEditModuleForm({
-                                  title: mod.module_title || '',
-                                  description: mod.module_description || '',
-                                  estimatedMinutes: mod.estimated_minutes || 30
-                                });
-                              }}
-                              className={`p-2 rounded-lg ${hoverBg} ${textMuted} hover:text-amber-500 transition-colors flex-shrink-0`}
-                              title="Edit module"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
+                            <div className="flex flex-col gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => {
+                                  setEditingModule(mod);
+                                  setEditModuleForm({
+                                    title: mod.module_title || '',
+                                    description: mod.module_description || '',
+                                    estimatedMinutes: mod.estimated_minutes || 30
+                                  });
+                                }}
+                                className={`p-2 rounded-lg ${hoverBg} ${textMuted} hover:text-amber-500 transition-colors`}
+                                title="Edit module"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveModule(mod)}
+                                className={`p-2 rounded-lg ${hoverBg} ${textMuted} hover:text-red-500 transition-colors`}
+                                title="Remove module"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}
                     </div>
                   );
                 })}
+
+                <div className={`${cardBg} rounded-xl border-2 border-dashed ${isDark ? 'border-slate-600' : 'border-gray-300'} overflow-hidden transition-all`}>
+                  {!showAddModule ? (
+                    <button
+                      onClick={() => { setShowAddModule(true); setAddModuleResult(null); }}
+                      className={`w-full p-5 flex items-center justify-center gap-3 ${hoverBg} transition-colors`}
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                        <Plus className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className={`font-semibold ${textPrimary}`}>Add Wound-Specific Lesson Plan</p>
+                        <p className={`text-sm ${textMuted}`}>Browse and add targeted healing modules by child wound type</p>
+                      </div>
+                    </button>
+                  ) : (
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className={`font-semibold ${textPrimary} flex items-center gap-2`}>
+                          <Heart className="w-4 h-4 text-rose-500" />
+                          Add Wound-Specific Lesson Plan
+                        </h3>
+                        <button onClick={() => { setShowAddModule(false); setAddModuleResult(null); }} className={`p-1.5 rounded-lg ${hoverBg} ${textMuted}`}>
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {WOUND_TYPES.map(w => {
+                          const wd = WOUND_DISPLAY[w];
+                          const isActive = addModuleWound === w;
+                          return (
+                            <button
+                              key={w}
+                              onClick={() => { setAddModuleWound(w); setAddModuleResult(null); }}
+                              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                                isActive
+                                  ? `bg-gradient-to-r ${wd.gradient} text-white shadow-lg`
+                                  : `${isDark ? wd.darkBg + ' ' + wd.darkBorder + ' ' + wd.darkText : wd.bg + ' ' + wd.border + ' ' + wd.text} border`
+                              }`}
+                            >
+                              {wd.label} ({wd.childName})
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {addModuleResult?.success && (
+                        <div className="mb-3 px-4 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-700 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" /> {addModuleResult.success}
+                        </div>
+                      )}
+                      {addModuleResult?.error && (
+                        <div className="mb-3 px-4 py-2.5 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700">{addModuleResult.error}</div>
+                      )}
+
+                      <div className="space-y-3 max-h-[28rem] overflow-y-auto pr-1">
+                        {(WOUND_LESSON_PLANS[addModuleWound] || []).map(template => {
+                          const wd = WOUND_DISPLAY[addModuleWound];
+                          const diffColors = { beginner: 'bg-green-100 text-green-700', intermediate: 'bg-yellow-100 text-yellow-700', advanced: 'bg-red-100 text-red-700' };
+                          const alreadyAdded = (clientCurriculum || []).some(m => m.module_title === template.title);
+                          return (
+                            <div key={template.id} className={`rounded-lg border ${isDark ? 'border-slate-600 bg-slate-700/50' : 'border-gray-200 bg-white'} p-4`}>
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                  <h4 className={`font-medium ${textPrimary} text-sm`}>{template.title}</h4>
+                                  <p className={`text-xs ${textSecondary} mt-1 leading-relaxed`}>{template.description}</p>
+                                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isDark ? wd.darkBg + ' ' + wd.darkText : wd.bg + ' ' + wd.text}`}>
+                                      {wd.childName}
+                                    </span>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${diffColors[template.difficulty] || diffColors.beginner}`}>
+                                      {template.difficulty}
+                                    </span>
+                                    <span className={`inline-flex items-center gap-1 text-xs ${textMuted}`}>
+                                      <Clock className="w-3 h-3" /> {template.estimatedMinutes} min
+                                    </span>
+                                  </div>
+                                  <details className="mt-2 group">
+                                    <summary className={`text-xs font-medium ${textMuted} cursor-pointer select-none`}>
+                                      View details
+                                    </summary>
+                                    <div className={`mt-2 text-xs ${textSecondary} space-y-2`}>
+                                      <div><span className={`font-medium ${textMuted}`}>Goals:</span> {template.goals}</div>
+                                      <div>
+                                        <span className={`font-medium ${textMuted}`}>Topics:</span>
+                                        <ul className="ml-3 mt-0.5 space-y-0.5">{template.topics.map((t, i) => <li key={i} className="italic">&ldquo;{t}&rdquo;</li>)}</ul>
+                                      </div>
+                                      <div>
+                                        <span className={`font-medium ${textMuted}`}>Activities:</span>
+                                        <ul className="ml-3 mt-0.5 space-y-0.5">{template.activities.map((a, i) => <li key={i}>{a}</li>)}</ul>
+                                      </div>
+                                      <div>
+                                        <span className={`font-medium ${textMuted}`}>Watch For:</span>
+                                        <ul className="ml-3 mt-0.5 space-y-0.5">{template.watchFor.map((w, i) => <li key={i}>{w}</li>)}</ul>
+                                      </div>
+                                    </div>
+                                  </details>
+                                </div>
+                                <button
+                                  onClick={() => handleAddWoundModule(template)}
+                                  disabled={addingModuleId === template.id || alreadyAdded}
+                                  className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all flex-shrink-0 ${
+                                    alreadyAdded
+                                      ? `${isDark ? 'bg-slate-600 text-slate-400' : 'bg-gray-100 text-gray-400'} cursor-not-allowed`
+                                      : 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 shadow-md'
+                                  } disabled:opacity-60`}
+                                >
+                                  {addingModuleId === template.id ? (
+                                    <><div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> Adding...</>
+                                  ) : alreadyAdded ? (
+                                    <><CheckCircle className="w-3.5 h-3.5" /> Added</>
+                                  ) : (
+                                    <><Plus className="w-3.5 h-3.5" /> Add</>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 </>
               )}
             </div>
