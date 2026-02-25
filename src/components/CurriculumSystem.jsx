@@ -1,44 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  BookOpen, 
-  Lock, 
-  CheckCircle, 
-  Circle, 
-  Play, 
-  Clock, 
-  Award, 
-  Target,
-  Heart,
-  Users,
-  Lightbulb,
-  Zap,
-  ChevronRight,
-  Star,
-  TrendingUp,
-  Brain,
-  Sparkles
+  BookOpen, Lock, CheckCircle, Circle, Play, Clock, Award, Target,
+  Heart, Users, Lightbulb, Zap, ChevronRight, Star, TrendingUp,
+  Brain, Sparkles, Shield, Flag
 } from 'lucide-react';
 import { 
-  curriculumModules, 
-  getModuleById, 
-  checkPrerequisites, 
-  getNextModule,
-  getInnerChildModules,
-  getTotalEstimatedTime
+  curriculumModules, getModuleById, checkPrerequisites,
+  getNextModule, getInnerChildModules, getTotalEstimatedTime
 } from '../data/curriculumData';
-import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
 import { supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
+import { supabase } from '../lib/supabase';
+import { WOUND_MODULE_PRIORITIES, LEVEL_ORDER } from '../lib/woundModulePriorities';
 
 const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   const [completedModules, setCompletedModules] = useState([]);
   const [currentModule, setCurrentModule] = useState(null);
-  const [expandedCategories, setExpandedCategories] = useState(new Set(['all']));
+  const [expandedCategories, setExpandedCategories] = useState(new Set(['introduction', 'parts_system']));
   const [personalizedCurriculum, setPersonalizedCurriculum] = useState(null);
   const [isPersonalized, setIsPersonalized] = useState(false);
+  const [clientWound, setClientWound] = useState(null);
+  const [loadingWound, setLoadingWound] = useState(true);
 
-  // Load user progress and personalized curriculum
   useEffect(() => {
     if (userProgress.completedModules) {
       setCompletedModules(userProgress.completedModules);
@@ -47,110 +31,113 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
     const loadCurriculum = async () => {
       const client = clientAuth.getCurrentClient();
       const id = client?.id;
-      if (!id) return;
-      
+      if (!id) { setLoadingWound(false); return; }
+
       try {
-        const curriculum = await supabaseHelpers.getPersonalizedCurriculum(id);
-        if (curriculum) {
-          setPersonalizedCurriculum(curriculum);
+        const [curriculumRes, assessmentRes, interactiveRes] = await Promise.all([
+          supabaseHelpers.getPersonalizedCurriculum(id),
+          supabase.from('ifs_assessment_results')
+            .select('primary_wound, secondary_wound')
+            .eq('client_id', id)
+            .order('assessment_date', { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          supabase.from('ifs_interactive_data')
+            .select('data')
+            .eq('client_id', id)
+            .eq('module_id', 'assessment_wounds')
+            .maybeSingle()
+        ]);
+
+        if (curriculumRes) {
+          setPersonalizedCurriculum(curriculumRes);
           setIsPersonalized(true);
-          console.log('✅ Loaded personalized curriculum:', curriculum.primaryWound);
+        }
+
+        let primaryWound = assessmentRes.data?.primary_wound;
+        let secondaryWound = assessmentRes.data?.secondary_wound;
+
+        if (!primaryWound && interactiveRes.data?.data) {
+          primaryWound = interactiveRes.data.data.primary;
+          secondaryWound = interactiveRes.data.data.secondary;
+        }
+
+        if (primaryWound && WOUND_MODULE_PRIORITIES[primaryWound]) {
+          setClientWound({ primary: primaryWound, secondary: secondaryWound });
         }
       } catch (error) {
-        console.error('❌ Error loading personalized curriculum:', error);
+        console.error('Error loading curriculum personalization:', error);
       }
+      setLoadingWound(false);
     };
 
     loadCurriculum();
   }, [userProgress]);
 
-  // Get next recommended module
+  const woundConfig = clientWound ? WOUND_MODULE_PRIORITIES[clientWound.primary] : null;
+
+  // Get module priority level for the client's wound
+  const getModulePriority = (moduleId) => {
+    if (!woundConfig) return null;
+    return woundConfig.modules[moduleId] || { level: 'standard', badge: null, message: null };
+  };
+
+  // Sort modules so core/high priority ones appear first within their category
+  const enrichAndSort = (modules) => {
+    return [...modules]
+      .map(m => ({ ...m, _priority: getModulePriority(m.id) }))
+      .sort((a, b) => {
+        if (!woundConfig) return a.order - b.order;
+        const la = LEVEL_ORDER[a._priority?.level || 'standard'];
+        const lb = LEVEL_ORDER[b._priority?.level || 'standard'];
+        if (la !== lb) return la - lb;
+        return a.order - b.order;
+      });
+  };
+
   const nextModule = getNextModule(completedModules);
-  
-  // Category configuration
+
   const categories = [
-    { 
-      id: 'introduction', 
-      title: 'Foundation', 
-      icon: BookOpen, 
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
-    },
-    { 
-      id: 'parts_system', 
-      title: 'Inner Child & Parts', 
-      icon: Users, 
-      color: 'from-amber-500 to-amber-600',
-      bgColor: 'bg-amber-50',
-      borderColor: 'border-amber-200'
-    },
-    { 
-      id: 'self_leadership', 
-      title: 'Self Leadership', 
-      icon: Heart, 
-      color: 'from-teal-500 to-teal-600',
-      bgColor: 'bg-teal-50',
-      borderColor: 'border-teal-200'
-    },
-    { 
-      id: 'protocols', 
-      title: 'Healing Protocols', 
-      icon: Target, 
-      color: 'from-orange-500 to-orange-600',
-      bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200'
-    },
-    { 
-      id: 'unburdening', 
-      title: 'Deep Healing', 
-      icon: Lightbulb, 
-      color: 'from-emerald-500 to-emerald-600',
-      bgColor: 'bg-emerald-50',
-      borderColor: 'border-emerald-200'
-    },
-    { 
-      id: 'integration', 
-      title: 'Integration', 
-      icon: Zap, 
-      color: 'from-green-500 to-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200'
-    }
+    { id: 'introduction', title: 'Foundation', icon: BookOpen, color: 'from-blue-500 to-blue-600' },
+    { id: 'parts_system', title: 'Inner Child & Parts', icon: Heart, color: 'from-rose-500 to-pink-600' },
+    { id: 'self_leadership', title: 'Self Leadership', icon: Star, color: 'from-amber-500 to-amber-600' },
+    { id: 'protocols', title: 'Healing Protocols', icon: Target, color: 'from-orange-500 to-orange-600' },
+    { id: 'unburdening', title: 'Deep Healing', icon: Lightbulb, color: 'from-emerald-500 to-emerald-600' },
+    { id: 'exercises', title: 'Exercises & Integration', icon: Zap, color: 'from-green-500 to-green-600' },
   ];
 
-  // Module status determination
   const getModuleStatus = (module) => {
-    const isCompleted = completedModules.includes(module.id);
-    const hasPrerequisites = module.prerequisites && module.prerequisites.length > 0;
-    const prerequisitesMet = checkPrerequisites(module.id, completedModules);
-
-    if (isCompleted) return 'completed';
-    if (hasPrerequisites && !prerequisitesMet) return 'locked';
+    if (completedModules.includes(module.id)) return 'completed';
+    if (module.prerequisites?.length && !checkPrerequisites(module.id, completedModules)) return 'locked';
     return 'available';
   };
 
-  // Status icons
   const getStatusIcon = (status) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="w-6 h-6 text-green-500" />;
-      case 'locked':
-        return <Lock className="w-6 h-6 text-gray-400" />;
-      default:
-        return <Circle className="w-6 h-6 text-blue-500" />;
-    }
+    if (status === 'completed') return <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />;
+    if (status === 'locked') return <Lock className="w-6 h-6 text-gray-400 flex-shrink-0" />;
+    return <Circle className="w-6 h-6 text-blue-500 flex-shrink-0" />;
   };
 
-  // Toggle category expansion
-  const toggleCategory = (categoryId) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
+  const modulesByCategory = categories.map(cat => ({
+    ...cat,
+    modules: enrichAndSort(curriculumModules.filter(m => m.category === cat.id))
+  }));
+
+  const totalModules = curriculumModules.length;
+  const completedCount = completedModules.length;
+  const progressPercentage = Math.round((completedCount / totalModules) * 100);
+  const innerChildModules = getInnerChildModules();
+  const innerChildCompleted = innerChildModules.filter(m => completedModules.includes(m.id)).length;
+  const totalTime = getTotalEstimatedTime();
+  const completedTime = completedModules.reduce((total, id) => {
+    const m = getModuleById(id);
+    return total + (m?.estimatedMinutes || 0);
+  }, 0);
+
+  const toggleCategory = (id) => {
+    const next = new Set(expandedCategories);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setExpandedCategories(next);
   };
 
   const handleModuleSelect = (module) => {
@@ -161,47 +148,31 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
     }
   };
 
-  // Use personalized modules if available, otherwise use default modules
-  // ALWAYS use default curriculum modules for display
-  // Personalization is applied through the personalizedContent field
-  const activeModules = curriculumModules;
-
-  // Group modules by category
-  const modulesByCategory = categories.map(category => ({
-    ...category,
-    modules: activeModules.filter(m => m.category === category.id)
-  }));
-
-  // Calculate progress statistics
-  const totalModules = curriculumModules.length;
-  const completedCount = completedModules.length;
-  const progressPercentage = Math.round((completedCount / totalModules) * 100);
-  const innerChildModules = getInnerChildModules();
-  const innerChildCompleted = innerChildModules.filter(m => completedModules.includes(m.id)).length;
-  const totalTime = getTotalEstimatedTime();
-  const completedTime = completedModules.reduce((total, id) => {
-    const module = getModuleById(id);
-    return total + (module?.estimatedMinutes || 0);
-  }, 0);
+  // Priority modules for the "Your Healing Focus" section
+  const priorityModules = woundConfig
+    ? curriculumModules
+        .map(m => ({ ...m, _priority: getModulePriority(m.id) }))
+        .filter(m => m._priority?.level === 'core' || m._priority?.level === 'high')
+        .sort((a, b) => LEVEL_ORDER[a._priority.level] - LEVEL_ORDER[b._priority.level])
+        .slice(0, 4)
+    : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50 to-blue-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-emerald-600 bg-clip-text text-transparent">
                 Inner Child Healing Journey
               </h1>
-              <p className="text-gray-600 mt-2">
-                {isPersonalized ? (
-                  <>
-                    <span className="flex items-center">
-                      <Sparkles className="w-4 h-4 mr-1 text-amber-600" />
-                      Personalized curriculum for your {personalizedCurriculum?.primaryWound ? aiCurriculumPersonalizer.woundProfiles[personalizedCurriculum.primaryWound]?.name : 'specific wound pattern'}
-                    </span>
-                  </>
+              <p className="text-gray-600 mt-1 text-sm">
+                {woundConfig ? (
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                    Personalized for your <strong>{woundConfig.childName}</strong> — {woundConfig.tagline}
+                  </span>
                 ) : (
                   'A comprehensive IFS curriculum for healing your Inner Child wounds'
                 )}
@@ -211,7 +182,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
               <Link
                 to={`/curriculum/module/${nextModule.id}`}
                 onClick={() => handleModuleSelect(nextModule)}
-                className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 flex items-center space-x-2 shadow-lg"
+                className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all flex items-center space-x-2 shadow-lg"
               >
                 <Play className="w-5 h-5" />
                 <span>Continue Learning</span>
@@ -221,102 +192,121 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
         </div>
       </div>
 
-      {/* Personalization Banner */}
-      {isPersonalized && personalizedCurriculum && (
-        <div className="bg-gradient-to-r from-amber-50 to-emerald-50 border-b border-amber-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-amber-600 to-emerald-600 rounded-lg flex items-center justify-center">
-                  <Brain className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">AI-Personalized Curriculum</h3>
-                  <p className="text-sm text-gray-600">
-                    Based on your assessment: {personalizedCurriculum.primaryWound && aiCurriculumPersonalizer.woundProfiles[personalizedCurriculum.primaryWound]?.name}
-                    {personalizedCurriculum.secondaryWound && ` + ${aiCurriculumPersonalizer.woundProfiles[personalizedCurriculum.secondaryWound]?.name}`}
-                  </p>
-                </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        {/* === YOUR HEALING FOCUS (only shown when wound is known) === */}
+        {woundConfig && priorityModules.length > 0 && (
+          <div className={`rounded-2xl border-2 p-6 ${woundConfig.lightBg}`}>
+            <div className="flex items-center gap-3 mb-5">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${woundConfig.gradient} flex items-center justify-center shadow-md`}>
+                <Flag className="w-5 h-5 text-white" />
               </div>
-              <div className="flex items-center space-x-4 text-sm">
-                <div className="text-gray-600">
-                  <span className="font-medium">Intensity:</span> {personalizedCurriculum.intensity}
-                </div>
-                <div className="text-gray-600">
-                  <span className="font-medium">Timeline:</span> {personalizedCurriculum.timeline?.totalWeeks} weeks
-                </div>
+              <div>
+                <h2 className={`text-lg font-bold ${woundConfig.textColor}`}>
+                  Your Healing Focus: {woundConfig.childName}
+                </h2>
+                <p className="text-sm text-gray-600">{woundConfig.tagline}</p>
               </div>
             </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {priorityModules.map(mod => {
+                const status = getModuleStatus(mod);
+                const p = mod._priority;
+                return (
+                  <Link
+                    key={mod.id}
+                    to={status !== 'locked' ? `/curriculum/module/${mod.id}` : '#'}
+                    onClick={() => status !== 'locked' && handleModuleSelect(mod)}
+                    className={`block rounded-xl border bg-white p-4 transition-all hover:shadow-md group ${status === 'locked' ? 'opacity-60 cursor-not-allowed' : 'hover:border-current'}`}
+                    style={{ borderColor: status !== 'locked' ? undefined : undefined }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${woundConfig.gradient} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                        {status === 'completed'
+                          ? <CheckCircle className="w-4 h-4 text-white" />
+                          : status === 'locked'
+                          ? <Lock className="w-4 h-4 text-white" />
+                          : <Play className="w-4 h-4 text-white" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          {p?.badge && (
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${woundConfig.darkBg} ${woundConfig.textColor}`}>
+                              {p.badge}
+                            </span>
+                          )}
+                          {status === 'completed' && (
+                            <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">✓ Completed</span>
+                          )}
+                        </div>
+                        <h4 className="font-semibold text-gray-900 text-sm leading-tight">{mod.title}</h4>
+                        {p?.message && <p className="text-xs text-gray-500 mt-1 leading-snug">{p.message}</p>}
+                      </div>
+                      {status === 'available' && (
+                        <ChevronRight className={`w-4 h-4 text-gray-400 group-hover:${woundConfig.textColor} flex-shrink-0 mt-1 transition-colors`} />
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            {clientWound.secondary && WOUND_MODULE_PRIORITIES[clientWound.secondary] && (
+              <p className="text-xs text-gray-500 mt-3">
+                Secondary wound: <span className="font-medium">{WOUND_MODULE_PRIORITIES[clientWound.secondary].childName}</span> ({clientWound.secondary}) — modules throughout the curriculum also address this pattern.
+              </p>
+            )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Progress Overview */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        {/* Progress Overview */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Overall Progress</span>
               <TrendingUp className="w-5 h-5 text-green-500" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{progressPercentage}%</div>
             <div className="mt-2 bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${progressPercentage}%` }}
-              />
+              <div className="bg-gradient-to-r from-amber-600 to-emerald-600 h-2 rounded-full transition-all duration-500" style={{ width: `${progressPercentage}%` }} />
             </div>
-            <div className="text-xs text-gray-500 mt-1">
-              {completedCount} of {totalModules} modules
-            </div>
+            <div className="text-xs text-gray-500 mt-1">{completedCount} of {totalModules} modules</div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Inner Child Focus</span>
               <Heart className="w-5 h-5 text-emerald-500" />
             </div>
-            <div className="text-2xl font-bold text-gray-900">
-              {innerChildCompleted}/{innerChildModules.length}
-            </div>
+            <div className="text-2xl font-bold text-gray-900">{innerChildCompleted}/{innerChildModules.length}</div>
             <div className="mt-2 bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-emerald-600 to-amber-600 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${(innerChildCompleted / innerChildModules.length) * 100}%` }}
-              />
+              <div className="bg-gradient-to-r from-emerald-600 to-amber-600 h-2 rounded-full transition-all duration-500" style={{ width: `${(innerChildCompleted / innerChildModules.length) * 100}%` }} />
             </div>
-            <div className="text-xs text-gray-500 mt-1">
-              Child-focused modules
-            </div>
+            <div className="text-xs text-gray-500 mt-1">Child-focused modules</div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Time Invested</span>
               <Clock className="w-5 h-5 text-blue-500" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{completedTime}min</div>
-            <div className="text-xs text-gray-500 mt-1">
-              {totalTime - completedTime}min remaining
-            </div>
+            <div className="text-xs text-gray-500 mt-1">{totalTime - completedTime}min remaining</div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Achievements</span>
               <Award className="w-5 h-5 text-yellow-500" />
             </div>
             <div className="text-2xl font-bold text-gray-900">{completedCount}</div>
-            <div className="text-xs text-gray-500 mt-1">
-              Modules completed
-            </div>
+            <div className="text-xs text-gray-500 mt-1">Modules completed</div>
           </div>
         </div>
 
         {/* Next Module Recommendation */}
         {nextModule && (
-          <div className="bg-gradient-to-r from-amber-600 to-emerald-600 rounded-xl p-6 mb-8 text-white">
-            <div className="flex items-center justify-between">
+          <div className="bg-gradient-to-r from-amber-600 to-emerald-600 rounded-xl p-6 text-white">
+            <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
                   <div className="w-12 h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
@@ -324,28 +314,23 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold">Next Recommended</h3>
-                    <p className="text-amber-100">Continue your healing journey</p>
+                    {woundConfig && getModulePriority(nextModule.id)?.level === 'core' && (
+                      <span className="text-xs bg-white bg-opacity-20 px-2 py-0.5 rounded-full font-semibold">
+                        🎯 Core focus for your healing
+                      </span>
+                    )}
                   </div>
                 </div>
-                <h4 className="text-2xl font-bold mt-3">{nextModule.title}</h4>
+                <h4 className="text-2xl font-bold mt-2">{nextModule.title}</h4>
                 <p className="text-amber-100 mt-1">{nextModule.description}</p>
-                <div className="flex items-center space-x-4 mt-3 text-sm">
-                  <span className="flex items-center space-x-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{nextModule.estimatedMinutes} minutes</span>
-                  </span>
-                  {nextModule.innerChildFocus && (
-                    <span className="flex items-center space-x-1">
-                      <Heart className="w-4 h-4" />
-                      <span>Inner Child Focus</span>
-                    </span>
-                  )}
-                </div>
+                {woundConfig && getModulePriority(nextModule.id)?.message && (
+                  <p className="text-amber-200 text-sm mt-1 italic">{getModulePriority(nextModule.id).message}</p>
+                )}
               </div>
               <Link
                 to={`/curriculum/module/${nextModule.id}`}
                 onClick={() => handleModuleSelect(nextModule)}
-                className="bg-white text-amber-600 px-6 py-3 rounded-lg font-semibold hover:bg-amber-50 transition-colors flex items-center space-x-2"
+                className="bg-white text-amber-600 px-6 py-3 rounded-lg font-semibold hover:bg-amber-50 transition-colors flex items-center space-x-2 flex-shrink-0"
               >
                 <span>Start Module</span>
                 <ChevronRight className="w-5 h-5" />
@@ -355,16 +340,16 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
         )}
 
         {/* Curriculum Modules by Category */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {modulesByCategory.map(category => {
             const Icon = category.icon;
             const isExpanded = expandedCategories.has(category.id);
             const categoryCompleted = category.modules.filter(m => completedModules.includes(m.id)).length;
             const categoryTotal = category.modules.length;
+            const hasCoreModules = woundConfig && category.modules.some(m => m._priority?.level === 'core');
 
             return (
               <div key={category.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                {/* Category Header */}
                 <button
                   onClick={() => toggleCategory(category.id)}
                   className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -374,78 +359,82 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-lg font-bold text-gray-900">{category.title}</h3>
-                      <p className="text-sm text-gray-600">
-                        {categoryCompleted} of {categoryTotal} modules completed
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-gray-900">{category.title}</h3>
+                        {hasCoreModules && (
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${woundConfig.darkBg} ${woundConfig.textColor}`}>
+                            Core Focus
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">{categoryCompleted} of {categoryTotal} modules completed</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
                     <div className="text-sm font-medium text-gray-600">
                       {categoryCompleted > 0 && `${Math.round((categoryCompleted / categoryTotal) * 100)}%`}
                     </div>
-                    <ChevronRight 
-                      className={`w-5 h-5 text-gray-400 transition-transform ${
-                        isExpanded ? 'transform rotate-90' : ''
-                      }`} 
-                    />
+                    <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                   </div>
                 </button>
 
-                {/* Category Progress Bar */}
                 <div className="px-6 pb-2">
-                  <div className="bg-gray-200 rounded-full h-2">
-                    <div 
-                      className={`bg-gradient-to-r ${category.color} h-2 rounded-full transition-all duration-500`}
-                      style={{ width: `${(categoryCompleted / categoryTotal) * 100}%` }}
-                    />
+                  <div className="bg-gray-200 rounded-full h-1.5">
+                    <div className={`bg-gradient-to-r ${category.color} h-1.5 rounded-full transition-all duration-500`} style={{ width: `${categoryTotal > 0 ? (categoryCompleted / categoryTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
 
-                {/* Module List */}
                 {isExpanded && (
                   <div className="border-t border-gray-100">
-                    {category.modules
-                      .sort((a, b) => a.order - b.order)
-                      .map(module => {
-                        const status = getModuleStatus(module);
-                        const Icon = category.icon;
-                        
-                        return (
-                          <div
-                            key={module.id}
-                            className={`px-6 py-4 border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors ${
-                              status === 'locked' ? 'opacity-60' : ''
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-3 flex-1">
-                                {getStatusIcon(status)}
+                    {category.modules.map(module => {
+                      const status = getModuleStatus(module);
+                      const priority = module._priority;
+                      const isCore = priority?.level === 'core';
+                      const isHigh = priority?.level === 'high';
+
+                      return (
+                        <div
+                          key={module.id}
+                          className={`px-6 py-4 border-b border-gray-50 last:border-b-0 transition-colors
+                            ${status === 'locked' ? 'opacity-60' : 'hover:bg-gray-50'}
+                            ${isCore && woundConfig ? 'bg-gradient-to-r from-white to-amber-50/50' : ''}
+                          `}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-start space-x-3 flex-1 min-w-0">
+                              {getStatusIcon(status)}
+                              <div className="flex-1 min-w-0">
                                 <Link
-                                  to={`/curriculum/module/${module.id}`}
+                                  to={status !== 'locked' ? `/curriculum/module/${module.id}` : '#'}
                                   onClick={() => handleModuleSelect(module)}
-                                  disabled={status === 'locked'}
-                                  className={`text-left flex-1 ${
-                                    status === 'available' || status === 'completed'
-                                      ? 'hover:text-amber-600 transition-colors'
-                                      : 'cursor-not-allowed'
-                                  }`}
+                                  className={`block ${status !== 'locked' ? 'hover:text-amber-600 transition-colors' : 'cursor-not-allowed pointer-events-none'}`}
                                 >
-                                  <h4 className="font-semibold text-gray-900">{module.title}</h4>
-                                  <p className="text-sm text-gray-600 mt-1">{module.description}</p>
-                                  
-                                  {/* Show personalized content if available */}
-                                  {module.personalizedContent && (
-                                    <div className="mt-2 p-2 bg-amber-50 rounded text-xs text-amber-700">
-                                      <div className="flex items-center space-x-1 mb-1">
-                                        <Sparkles className="w-3 h-3" />
-                                        <span className="font-medium">Personalized for you:</span>
-                                      </div>
-                                      <p>{module.personalizedContent.message || 'Tailored to your specific wound pattern'}</p>
+                                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                    <h4 className="font-semibold text-gray-900">{module.title}</h4>
+                                    {priority?.badge && woundConfig && (
+                                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                        isCore ? `${woundConfig.darkBg} ${woundConfig.textColor}` :
+                                        isHigh ? 'bg-amber-100 text-amber-700' :
+                                        'bg-gray-100 text-gray-600'
+                                      }`}>
+                                        {priority.badge}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-gray-600">{module.description}</p>
+
+                                  {priority?.message && woundConfig && (
+                                    <div className={`mt-2 p-2.5 rounded-lg border text-xs ${
+                                      isCore ? `${woundConfig.lightBg} ${woundConfig.textColor}` : 'bg-amber-50 border-amber-200 text-amber-700'
+                                    }`}>
+                                      <span className="flex items-center gap-1 font-semibold mb-0.5">
+                                        <Sparkles className="w-3 h-3" /> Personalized for your {woundConfig.childName}:
+                                      </span>
+                                      {priority.message}
                                     </div>
                                   )}
-                                  
-                                  <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
+
+                                  <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500 flex-wrap gap-1">
                                     <span className="flex items-center space-x-1">
                                       <Clock className="w-3 h-3" />
                                       <span>{module.estimatedMinutes} min</span>
@@ -456,13 +445,13 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                                         <span>Inner Child</span>
                                       </span>
                                     )}
-                                    {module.personalizedContent && (
+                                    {woundConfig && priority?.level !== 'standard' && (
                                       <span className="flex items-center space-x-1">
                                         <Brain className="w-3 h-3" />
-                                        <span>AI-Personalized</span>
+                                        <span>Personalized</span>
                                       </span>
                                     )}
-                                    {module.prerequisites && module.prerequisites.length > 0 && (
+                                    {module.prerequisites?.length > 0 && (
                                       <span className="flex items-center space-x-1">
                                         <Lock className="w-3 h-3" />
                                         <span>Prerequisites</span>
@@ -471,25 +460,32 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                                   </div>
                                 </Link>
                               </div>
+                            </div>
+                            <div className="flex-shrink-0 ml-4">
                               {status === 'available' && (
                                 <Link
                                   to={`/curriculum/module/${module.id}`}
                                   onClick={() => handleModuleSelect(module)}
-                                  className="bg-amber-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+                                  className={`px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors ${
+                                    isCore && woundConfig
+                                      ? `bg-gradient-to-r ${woundConfig.gradient} hover:opacity-90`
+                                      : 'bg-amber-600 hover:bg-amber-700'
+                                  }`}
                                 >
                                   Start
                                 </Link>
                               )}
                               {status === 'completed' && (
-                                <div className="flex items-center space-x-2 text-green-600">
+                                <div className="flex items-center space-x-1 text-green-600">
                                   <CheckCircle className="w-5 h-5" />
-                                  <span className="text-sm font-medium">Completed</span>
+                                  <span className="text-sm font-medium">Done</span>
                                 </div>
                               )}
                             </div>
                           </div>
-                        );
-                      })}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -497,30 +493,24 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
           })}
         </div>
 
-        {/* Learning Journey Tips */}
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-amber-50 rounded-xl p-6 border border-blue-100">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">💡 Learning Journey Tips</h3>
+        {/* Healing Tips — wound-specific if known */}
+        <div className={`rounded-xl p-6 border ${woundConfig ? `${woundConfig.lightBg}` : 'bg-gradient-to-r from-blue-50 to-amber-50 border-blue-100'}`}>
+          <h3 className={`text-lg font-bold mb-3 ${woundConfig ? woundConfig.textColor : 'text-gray-900'}`}>
+            💡 {woundConfig ? `Healing Tips for Your ${woundConfig.childName}` : 'Learning Journey Tips'}
+          </h3>
           <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex items-start space-x-2">
-              <span className="text-blue-500 mt-1">•</span>
-              <span>Complete modules in order to build a strong foundation for Inner Child healing</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <span className="text-blue-500 mt-1">•</span>
-              <span>Take your time with each module - Inner Child work unfolds at its own pace</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <span className="text-blue-500 mt-1">•</span>
-              <span>Practice the exercises regularly to integrate the learning into your daily life</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <span className="text-blue-500 mt-1">•</span>
-              <span>Journal about your experiences to deepen your connection with your Inner Child</span>
-            </li>
-            <li className="flex items-start space-x-2">
-              <span className="text-blue-500 mt-1">•</span>
-              <span>Consider working with an IFS therapist for deeper unburdening work</span>
-            </li>
+            {(woundConfig?.tips || [
+              'Complete modules in order to build a strong foundation for Inner Child healing',
+              'Take your time with each module — Inner Child work unfolds at its own pace',
+              'Practice the exercises regularly to integrate the learning into daily life',
+              'Journal about your experiences to deepen your connection with your Inner Child',
+              'Consider working with an IFS advisor for deeper unburdening work',
+            ]).map((tip, i) => (
+              <li key={i} className="flex items-start space-x-2">
+                <span className={`mt-1 flex-shrink-0 ${woundConfig ? woundConfig.textColor : 'text-blue-500'}`}>•</span>
+                <span>{tip}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </div>

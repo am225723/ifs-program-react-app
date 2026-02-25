@@ -3,14 +3,16 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import LearningModuleEnhanced from './LearningModuleEnhanced';
 import { useData } from '../contexts/DataContext';
-import { supabaseHelpers } from '../lib/supabase';
+import { supabaseHelpers, supabase } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
+import { WOUND_MODULE_PRIORITIES, getWoundPriority } from '../lib/woundModulePriorities';
 
 const LearningModuleRenderer = ({ userProgress = {} }) => {
   const { moduleId } = useParams();
   const navigate = useNavigate();
   const [module, setModule] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [woundContext, setWoundContext] = useState(null);
 
   const generateDefaultStepsForPersonalizedModule = (mod) => {
     const baseSteps = [];
@@ -71,9 +73,44 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
 
       if (clientId) {
         try {
-          personalizedCurriculum = await supabaseHelpers.getPersonalizedCurriculum(clientId);
+          const [curriculumRes, assessmentRes, interactiveRes] = await Promise.all([
+            supabaseHelpers.getPersonalizedCurriculum(clientId),
+            supabase.from('ifs_assessment_results')
+              .select('primary_wound, secondary_wound')
+              .eq('client_id', clientId)
+              .order('assessment_date', { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase.from('ifs_interactive_data')
+              .select('data')
+              .eq('client_id', clientId)
+              .eq('module_id', 'assessment_wounds')
+              .maybeSingle()
+          ]);
+
+          personalizedCurriculum = curriculumRes;
+
+          let primaryWound = assessmentRes.data?.primary_wound;
+          let secondaryWound = assessmentRes.data?.secondary_wound;
+
+          if (!primaryWound && interactiveRes.data?.data) {
+            primaryWound = interactiveRes.data.data.primary;
+            secondaryWound = interactiveRes.data.data.secondary;
+          }
+
+          if (primaryWound && WOUND_MODULE_PRIORITIES[primaryWound]) {
+            const priority = getWoundPriority(primaryWound, moduleId);
+            if (priority && priority.level !== 'standard') {
+              setWoundContext({
+                primary: primaryWound,
+                secondary: secondaryWound,
+                config: WOUND_MODULE_PRIORITIES[primaryWound],
+                priority
+              });
+            }
+          }
         } catch (err) {
-          console.error('Error loading personalized curriculum:', err);
+          console.error('Error loading personalization:', err);
         }
       }
 
@@ -143,6 +180,7 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
       onComplete={handleComplete}
       onBack={handleBack}
       userProgress={userProgress}
+      woundContext={woundContext}
     />
   );
 };

@@ -150,7 +150,7 @@ const VoiceRecorder = ({ onRecordingComplete, label }) => {
   );
 };
 
-const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} }) => {
+const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {}, woundContext = null }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [completedSteps, setCompletedSteps] = useState([]);
   const [activityResponses, setActivityResponses] = useState({});
@@ -2278,6 +2278,12 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {} 
                 <p className="text-sm text-gray-600">
                   Step {currentStepIndex + 1} of {steps.length} • {currentStep.type}
                 </p>
+                {woundContext && (
+                  <div className={`mt-1 inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full ${woundContext.config.darkBg} ${woundContext.config.textColor}`}>
+                    <span>{woundContext.priority.badge}</span>
+                    <span className="font-normal opacity-75">for your {woundContext.config.childName}</span>
+                  </div>
+                )}
               </div>
             </div>
             
