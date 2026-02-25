@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw, Heart, Copy, Check, Sparkles, Volume2, Star, BookOpen } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { supabaseHelpers } from '../lib/supabase';
-import { assessmentManager, clientAuth } from '../lib/supabasePersonalization';
+import { supabaseHelpers, supabase } from '../lib/supabase';
+import { clientAuth } from '../lib/supabasePersonalization';
 
 const woundAffirmations = {
   abandonment: {
@@ -141,11 +141,19 @@ export default function Affirmations() {
   const loadAssessment = async () => {
     const client = clientAuth.getCurrentClient();
     if (client) {
-      const result = await assessmentManager.getLatestAssessment(client.id);
-      if (result && result.success && result.assessment) {
-        setSavedAssessment(result.assessment);
-      } else if (result && result.primary_wound) {
-        setSavedAssessment(result);
+      const { data } = await supabase
+        .from('ifs_interactive_data')
+        .select('data, updated_at')
+        .eq('client_id', client.id)
+        .eq('module_id', 'assessment_wounds')
+        .maybeSingle();
+      if (data?.data) {
+        const wd = data.data;
+        setSavedAssessment({
+          primary_wound: wd.primary,
+          secondary_wound: wd.secondary,
+          assessment_date: wd.completedAt || data.updated_at
+        });
       }
     }
   };

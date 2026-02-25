@@ -34,14 +34,8 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
       if (!id) { setLoadingWound(false); return; }
 
       try {
-        const [curriculumRes, assessmentRes, interactiveRes] = await Promise.all([
+        const [curriculumRes, interactiveRes] = await Promise.all([
           supabaseHelpers.getPersonalizedCurriculum(id),
-          supabase.from('ifs_assessment_results')
-            .select('primary_wound, secondary_wound')
-            .eq('client_id', id)
-            .order('assessment_date', { ascending: false })
-            .limit(1)
-            .maybeSingle(),
           supabase.from('ifs_interactive_data')
             .select('data')
             .eq('client_id', id)
@@ -54,13 +48,10 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
           setIsPersonalized(true);
         }
 
-        let primaryWound = assessmentRes.data?.primary_wound;
-        let secondaryWound = assessmentRes.data?.secondary_wound;
-
-        if (!primaryWound && interactiveRes.data?.data) {
-          primaryWound = interactiveRes.data.data.primary;
-          secondaryWound = interactiveRes.data.data.secondary;
-        }
+        // Wound comes ONLY from the client's own assessment tab results
+        const wd = interactiveRes.data?.data;
+        const primaryWound = wd?.primary;
+        const secondaryWound = wd?.secondary;
 
         if (primaryWound && WOUND_MODULE_PRIORITIES[primaryWound]) {
           setClientWound({ primary: primaryWound, secondary: secondaryWound });

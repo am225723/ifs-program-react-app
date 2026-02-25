@@ -18,7 +18,6 @@ import {
   Sparkles,
   ClipboardList
 } from 'lucide-react';
-import { assessmentManager } from '../lib/supabasePersonalization';
 import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 
@@ -113,27 +112,17 @@ const Profile = ({ client }) => {
 
     setLoading(true);
     try {
-      const [latestResult, historyResult, interactiveResult] = await Promise.all([
-        assessmentManager.getLatestAssessment(client.id),
-        assessmentManager.getAllAssessments(client.id),
-        supabase
-          .from('ifs_interactive_data')
-          .select('*')
-          .eq('client_id', client.id)
-          .like('module_id', 'assessment_%')
-      ]);
-
-      if (latestResult.success && latestResult.assessment) {
-        setAssessment(latestResult.assessment);
-      }
-      
-      if (historyResult.success) {
-        setAllAssessments(historyResult.assessments || []);
-      }
+      const interactiveResult = await supabase
+        .from('ifs_interactive_data')
+        .select('*')
+        .eq('client_id', client.id)
+        .like('module_id', 'assessment_%');
 
       const interactiveData = interactiveResult?.data || [];
+
+      // Wound results: ONLY from the client's actual assessment tab answers
       const woundsEntry = interactiveData.find(d => d.module_id === 'assessment_wounds');
-      if (!latestResult.assessment && woundsEntry?.data) {
+      if (woundsEntry?.data) {
         const wd = woundsEntry.data;
         setAssessment({
           primary_wound: wd.primary,

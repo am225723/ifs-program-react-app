@@ -29,8 +29,7 @@ import {
   Share2,
   Feather
 } from 'lucide-react';
-import { assessmentManager } from '../lib/supabasePersonalization';
-import { supabaseHelpers } from '../lib/supabase';
+import { supabaseHelpers, supabase } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 
 const Home = ({ clientId, client }) => {
@@ -62,9 +61,24 @@ const Home = ({ clientId, client }) => {
     const loadSavedAssessment = async () => {
       if (clientId) {
         try {
-          const result = await assessmentManager.getLatestAssessment(clientId);
-          if (result.success && result.assessment) {
-            setSavedAssessment(result.assessment);
+          const { data } = await supabase
+            .from('ifs_interactive_data')
+            .select('data, updated_at')
+            .eq('client_id', clientId)
+            .eq('module_id', 'assessment_wounds')
+            .maybeSingle();
+          if (data?.data) {
+            const wd = data.data;
+            setSavedAssessment({
+              primary_wound: wd.primary,
+              secondary_wound: wd.secondary,
+              abandonment_score: wd.scores?.abandonment?.total || 0,
+              shame_score: wd.scores?.shame?.total || 0,
+              neglect_score: wd.scores?.neglect?.total || 0,
+              betrayal_score: wd.scores?.betrayal?.total || 0,
+              helplessness_score: wd.scores?.helplessness?.total || 0,
+              assessment_date: wd.completedAt || data.updated_at
+            });
           }
         } catch (error) {
           console.error('Error loading assessment:', error);
