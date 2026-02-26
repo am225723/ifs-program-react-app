@@ -73,12 +73,17 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
 
       if (clientId) {
         try {
-          const [curriculumRes, interactiveRes] = await Promise.all([
+          const [curriculumRes, interactiveRes, partsRes] = await Promise.all([
             supabaseHelpers.getPersonalizedCurriculum(clientId),
             supabase.from('ifs_interactive_data')
               .select('data')
               .eq('client_id', clientId)
               .eq('module_id', 'assessment_wounds')
+              .maybeSingle(),
+            supabase.from('ifs_interactive_data')
+              .select('data')
+              .eq('client_id', clientId)
+              .eq('module_id', 'assessment_parts')
               .maybeSingle()
           ]);
 
@@ -87,6 +92,44 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
           const wd = interactiveRes.data?.data;
           let primaryWound = wd?.primary;
           let secondaryWound = wd?.secondary;
+          const woundScores = wd?.scores;
+
+          const partsData = partsRes.data?.data;
+          let activeParts = [];
+          if (partsData?.answers) {
+            const partsDefs = {
+              manager: [
+                { name: 'The Inner Critic', trigger: [3], threshold: 4 },
+                { name: 'The Planner', trigger: [1], threshold: 4 },
+                { name: 'The Perfectionist', trigger: [7], threshold: 4 },
+                { name: 'The People Pleaser', trigger: [9], threshold: 4 },
+                { name: 'The Controller', trigger: [5], threshold: 4 },
+                { name: 'The Worrier', trigger: [14], threshold: 4 }
+              ],
+              firefighter: [
+                { name: 'The Distractor', trigger: [2], threshold: 4 },
+                { name: 'The Numbing Part', trigger: [6], threshold: 4 },
+                { name: 'The Impulse Part', trigger: [4], threshold: 4 },
+                { name: 'The Shutdown Part', trigger: [8], threshold: 4 },
+                { name: 'The Self-Destructive Part', trigger: [10], threshold: 3 }
+              ],
+              exile: [
+                { name: 'The Scared Child', trigger: [11], threshold: 4 },
+                { name: 'The Lonely Child', trigger: [12], threshold: 4 },
+                { name: 'The Grieving Child', trigger: [13], threshold: 4 },
+                { name: 'The Shamed Child', trigger: [15], threshold: 4 }
+              ]
+            };
+            Object.entries(partsDefs).forEach(([type, parts]) => {
+              parts.forEach(part => {
+                const score = part.trigger.reduce((sum, qId) => sum + (partsData.answers[qId] || 0), 0) / part.trigger.length;
+                if (score >= part.threshold) {
+                  activeParts.push({ name: part.name, type, score, intensity: score >= 5 ? 'Very Active' : 'Active' });
+                }
+              });
+            });
+            activeParts.sort((a, b) => b.score - a.score);
+          }
 
           if (primaryWound && WOUND_MODULE_PRIORITIES[primaryWound]) {
             const priority = getWoundPriority(primaryWound, moduleId);
@@ -94,8 +137,11 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
               setWoundContext({
                 primary: primaryWound,
                 secondary: secondaryWound,
+                scores: woundScores,
                 config: WOUND_MODULE_PRIORITIES[primaryWound],
-                priority
+                secondaryConfig: secondaryWound ? WOUND_MODULE_PRIORITIES[secondaryWound] : null,
+                priority,
+                activeParts
               });
             }
           }

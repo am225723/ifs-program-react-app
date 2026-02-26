@@ -151,6 +151,42 @@ const assessmentDefinitions = [
       { id: 15, text: 'I can adapt my approach when something isn\'t working.', category: 'creativity' },
       { id: 16, text: 'I feel a sense of belonging and meaningful connections in my life.', category: 'connectedness' }
     ]
+  },
+  {
+    id: 'attachment',
+    title: 'Attachment Style Assessment',
+    subtitle: 'Understand your relationship patterns and attachment style',
+    icon: Users,
+    gradient: 'from-violet-500 to-indigo-600',
+    lightBg: 'from-violet-50 to-indigo-50',
+    categories: {
+      secure: { label: 'Secure', icon: Heart, color: '#10B981', description: 'Comfortable with intimacy and independence; trusts others and self' },
+      anxious: { label: 'Anxious-Preoccupied', icon: AlertTriangle, color: '#F59E0B', description: 'Craves closeness but fears rejection; hypervigilant to relationship cues' },
+      avoidant: { label: 'Dismissive-Avoidant', icon: Shield, color: '#6366F1', description: 'Values independence highly; uncomfortable with vulnerability or emotional closeness' },
+      disorganized: { label: 'Fearful-Avoidant', icon: Brain, color: '#EF4444', description: 'Desires closeness but fears it; oscillates between approach and withdrawal' }
+    },
+    questions: [
+      { id: 1, text: 'I find it easy to get close to others and feel comfortable depending on them.', category: 'secure' },
+      { id: 2, text: 'I worry that my partner doesn\'t really love me or won\'t want to stay with me.', category: 'anxious' },
+      { id: 3, text: 'I prefer not to depend on others and don\'t like them depending on me.', category: 'avoidant' },
+      { id: 4, text: 'I want to be emotionally close to others but find it difficult to fully trust them.', category: 'disorganized' },
+      { id: 5, text: 'I am comfortable sharing my feelings and being vulnerable with people I care about.', category: 'secure' },
+      { id: 6, text: 'I often worry that others will abandon or reject me if I\'m not perfect.', category: 'anxious' },
+      { id: 7, text: 'I feel uncomfortable when others want to get too emotionally close.', category: 'avoidant' },
+      { id: 8, text: 'I sometimes push people away right when we\'re getting close, even though I want connection.', category: 'disorganized' },
+      { id: 9, text: 'I trust that the people I care about will be there for me when I need them.', category: 'secure' },
+      { id: 10, text: 'I need a lot of reassurance that I am valued and loved in my relationships.', category: 'anxious' },
+      { id: 11, text: 'I feel more comfortable dealing with problems on my own rather than turning to others.', category: 'avoidant' },
+      { id: 12, text: 'I find myself caught between wanting closeness and fearing being hurt if I let someone in.', category: 'disorganized' },
+      { id: 13, text: 'I can communicate my needs openly without fear of rejection or conflict.', category: 'secure' },
+      { id: 14, text: 'I become very anxious or upset when I sense emotional distance from someone important to me.', category: 'anxious' },
+      { id: 15, text: 'Emotional conversations make me want to withdraw or change the subject.', category: 'avoidant' },
+      { id: 16, text: 'In relationships, I can suddenly shift from feeling very close to feeling panicked and needing space.', category: 'disorganized' },
+      { id: 17, text: 'I feel secure in who I am even when my relationships face challenges.', category: 'secure' },
+      { id: 18, text: 'I tend to give more than I receive in relationships, hoping it will keep people close.', category: 'anxious' },
+      { id: 19, text: 'I feel relieved when I have significant alone time away from close relationships.', category: 'avoidant' },
+      { id: 20, text: 'I sometimes feel confused about whether I want more closeness or more distance in my relationships.', category: 'disorganized' }
+    ]
   }
 ];
 
@@ -214,7 +250,7 @@ export default function Assessments() {
         .from('ifs_interactive_data')
         .select('data, module_id')
         .eq('client_id', client.id)
-        .in('module_id', ['assessment_wounds', 'assessment_parts', 'assessment_self-energy']);
+        .in('module_id', ['assessment_wounds', 'assessment_parts', 'assessment_self-energy', 'assessment_attachment']);
 
       if (!error && data) {
         const results = {};
@@ -357,6 +393,11 @@ export default function Assessments() {
       if (average >= 4) return { level: 'Strong', color: 'text-emerald-600', bg: 'bg-emerald-100', barColor: 'bg-emerald-500' };
       if (average >= 3) return { level: 'Developing', color: 'text-yellow-600', bg: 'bg-yellow-100', barColor: 'bg-yellow-500' };
       return { level: 'Growing Edge', color: 'text-orange-600', bg: 'bg-orange-100', barColor: 'bg-orange-500' };
+    }
+    if (assessmentId === 'attachment') {
+      if (average >= 4) return { level: 'Dominant', color: 'text-violet-600', bg: 'bg-violet-100', barColor: 'bg-violet-500' };
+      if (average >= 3) return { level: 'Present', color: 'text-indigo-600', bg: 'bg-indigo-100', barColor: 'bg-indigo-500' };
+      return { level: 'Minimal', color: 'text-slate-600', bg: 'bg-slate-100', barColor: 'bg-slate-400' };
     }
     if (average >= 4) return { level: 'High', color: 'text-red-600', bg: 'bg-red-100', barColor: 'bg-red-500' };
     if (average >= 3) return { level: 'Moderate', color: 'text-yellow-600', bg: 'bg-yellow-100', barColor: 'bg-yellow-500' };

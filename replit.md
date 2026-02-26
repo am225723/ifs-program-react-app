@@ -21,7 +21,7 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **PWA Support**: Includes manifest.json and service worker for installable mobile application capabilities.
 
 **Core Features:**
-- **Assessment Suite**: IFS Wound, Protective Parts, and Self-Energy assessments.
+- **Assessment Suite**: IFS Wound, Protective Parts, Self-Energy, and Attachment Style assessments.
 - **Parts Visualization Studio**: Drag-and-drop interface for mapping and visualizing internal parts.
 - **Advisor Dashboard**: Client management, session notes, progress tracking, client insights (wound assessment, protective parts, self-energy, journal entries, module progress, gamification, session prep), quick actions (create PIN, send reminders, export reports, messaging, homework, reports). Alerts have functional "View" buttons that navigate to the relevant client's Insights tab. Lesson Plans tab includes client selector for viewing personalized curriculum vs standard, with inline module editing (title, description, estimated minutes), add/remove wound-specific lesson plans from a library of 25 templates (5 per wound type), and module removal with automatic reordering. Route: `/therapist-dashboard`.
 - **Advisor-Client Messaging**: Two-way secure messaging between advisors and clients via `TherapistMessages.jsx` and `ClientInbox.jsx`. Uses `ifs_messages` table with sender_role (`'therapist'` stored value), read receipts, and quick message templates. Route: `/advisor-messages`.
@@ -58,6 +58,9 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - Each entry: `childName`, `moduleIntro`, `selfCsIntegration` (8 C's guidance), `guidedSteps` (7 steps), `reflectionPrompts` (5 prompts)
 - `LearningModuleEnhanced.jsx` renders personalized content in `renderLearnSection`, `renderActivitySection`, and `renderSixFsWizard`
 - `getStepRequirements` validates wound-specific reflection prompts for step completion
+- **Active Parts Integration**: `LearningModuleRenderer.jsx` fetches `assessment_parts` data, computes active parts (managers, firefighters, exiles above threshold), passes them via `woundContext.activeParts`. `renderActivePartsPanel()` in `LearningModuleEnhanced.jsx` displays active parts with type badges and intensity indicators in learn/activity sections.
+- **Dual-Wound Support (Module 6)**: `renderDualWoundPanel()` renders secondary wound unburdening steps and reflections as an expandable section within Module 6, allowing clients to address both primary and secondary wounds.
+- **Attachment Style Assessment**: 20-question assessment (5 per style: secure, anxious, avoidant, disorganized) in `Assessments.jsx`. Saves to `ifs_interactive_data` with `module_id='assessment_attachment'`. Results displayed on Profile page with violet/indigo color scheme. Feeds into Module 9 (Relationships & Attachment Patterns).
 
 ## External Dependencies
 - **Supabase**: Primary backend service for database, authentication, and edge functions.

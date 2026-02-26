@@ -16,7 +16,8 @@ import {
   ChevronUp,
   Brain,
   Sparkles,
-  ClipboardList
+  ClipboardList,
+  Users
 } from 'lucide-react';
 import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
@@ -91,6 +92,7 @@ const Profile = ({ client }) => {
   const [allAssessments, setAllAssessments] = useState([]);
   const [partsAssessment, setPartsAssessment] = useState(null);
   const [selfEnergyAssessment, setSelfEnergyAssessment] = useState(null);
+  const [attachmentAssessment, setAttachmentAssessment] = useState(null);
   const [customAssessments, setCustomAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
@@ -146,8 +148,10 @@ const Profile = ({ client }) => {
 
       const partsEntry = interactiveData.find(d => d.module_id === 'assessment_parts');
       const selfEnergyEntry = interactiveData.find(d => d.module_id === 'assessment_self-energy');
+      const attachmentEntry = interactiveData.find(d => d.module_id === 'assessment_attachment');
       if (partsEntry?.data) setPartsAssessment(partsEntry.data);
       if (selfEnergyEntry?.data) setSelfEnergyAssessment(selfEnergyEntry.data);
+      if (attachmentEntry?.data) setAttachmentAssessment(attachmentEntry.data);
 
       const { data: customData } = await supabase
         .from('ifs_interactive_data')
@@ -585,6 +589,57 @@ const Profile = ({ client }) => {
                   <h3 className="font-semibold text-emerald-800 mb-3">Understanding Self-Energy</h3>
                   <p className="text-gray-700 leading-relaxed">
                     Self-energy reflects your connection to qualities like curiosity, compassion, and calm. Higher scores indicate stronger access to your core Self, which is the foundation for healing in IFS therapy.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {attachmentAssessment && (
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+              <div className="p-4 sm:p-8">
+                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-6">
+                  <Users className="w-5 h-5 text-violet-500" />
+                  Attachment Style Assessment
+                </h2>
+                {attachmentAssessment.completedAt && (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+                    <Calendar className="w-4 h-4" />
+                    Completed: {formatDate(attachmentAssessment.completedAt)}
+                  </div>
+                )}
+                {attachmentAssessment.ranked && attachmentAssessment.ranked.length > 0 && (
+                  <div className="space-y-4 mb-6">
+                    {attachmentAssessment.ranked.map(([category, data], idx) => {
+                      const colors = ['bg-violet-500', 'bg-indigo-500', 'bg-purple-500', 'bg-fuchsia-500'];
+                      const styleLabels = { secure: 'Secure', anxious: 'Anxious-Preoccupied', avoidant: 'Dismissive-Avoidant', disorganized: 'Fearful-Avoidant' };
+                      const percentage = data.maxScale ? (data.average / data.maxScale) * 100 : (data.total / (data.count * 5)) * 100;
+                      const level = percentage >= 80 ? 'Dominant' : percentage >= 60 ? 'Present' : 'Minimal';
+                      const levelStyle = percentage >= 80 ? 'bg-violet-100 text-violet-700' : percentage >= 60 ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-700';
+                      return (
+                        <div key={category} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium text-gray-700">{styleLabels[category] || category}</span>
+                            <div className="flex items-center gap-3">
+                              {idx === 0 && <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-violet-100 text-violet-700">Primary Style</span>}
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${levelStyle}`}>{level}</span>
+                              <span className="font-bold text-gray-700">
+                                {data.average?.toFixed(1) || (data.total / data.count).toFixed(1)}/5
+                              </span>
+                            </div>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div className={`h-3 rounded-full transition-all duration-500 ${colors[idx % colors.length]}`} style={{ width: `${Math.min(percentage, 100)}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <div className="bg-violet-50 rounded-xl p-6 border border-violet-200">
+                  <h3 className="font-semibold text-violet-800 mb-3">Understanding Attachment Styles</h3>
+                  <p className="text-gray-700 leading-relaxed">
+                    Your attachment style reflects patterns learned in early relationships. Most people have a blend of styles. Understanding your dominant pattern helps you recognize relationship cycles and develop more secure connections through IFS work in Module 9.
                   </p>
                 </div>
               </div>

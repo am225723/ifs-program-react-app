@@ -436,6 +436,82 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const typeColors = { manager: 'bg-blue-100 text-blue-800 border-blue-200', firefighter: 'bg-amber-100 text-amber-800 border-amber-200', exile: 'bg-rose-100 text-rose-800 border-rose-200' };
+  const typeLabels = { manager: 'Manager', firefighter: 'Firefighter', exile: 'Exile' };
+
+  const renderActivePartsPanel = () => {
+    if (!woundContext?.activeParts?.length) return null;
+    return (
+      <div className="bg-gradient-to-r from-stone-50 to-amber-50 rounded-lg p-4 border border-stone-200">
+        <div className="flex items-center gap-2 mb-3">
+          <Shield className="w-4 h-4 text-stone-600" />
+          <p className="text-sm font-semibold text-gray-900">Your Active Parts in This Work</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {woundContext.activeParts.map((part, i) => (
+            <div key={i} className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-full border ${typeColors[part.type] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
+              <span className="font-semibold">{part.name}</span>
+              <span className="opacity-60">({typeLabels[part.type] || part.type})</span>
+              {part.intensity === 'Very Active' && <span className="text-red-500 font-bold">!</span>}
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500 mt-2">These parts may activate during this module. Notice them with curiosity, not judgment.</p>
+      </div>
+    );
+  };
+
+  const renderDualWoundPanel = () => {
+    if (module?.id !== 'module-6-inner-child-healing') return null;
+    if (!woundContext?.secondary || !module?.woundPersonalization?.[woundContext.secondary]) return null;
+    const secondaryWP = module.woundPersonalization[woundContext.secondary];
+    const secondaryConfig = woundContext.secondaryConfig;
+    return (
+      <div className="bg-gradient-to-r from-stone-50 to-amber-50 rounded-xl p-5 border-2 border-stone-200">
+        <div className="flex items-center gap-2 mb-2">
+          <Heart className="w-5 h-5 text-amber-600" />
+          <p className="font-semibold text-gray-900">Your Secondary Wound: {secondaryWP.childName}</p>
+          {secondaryConfig && (
+            <span className={`text-xs px-2 py-0.5 rounded-full ${secondaryConfig.darkBg} ${secondaryConfig.textColor}`}>
+              {woundContext.secondary}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-gray-700 leading-relaxed mb-3">{secondaryWP.moduleIntro}</p>
+        <details className="group">
+          <summary className="cursor-pointer text-sm font-medium text-amber-700 hover:text-amber-800">
+            View {secondaryWP.childName} unburdening steps
+          </summary>
+          <div className="mt-3 space-y-2">
+            {secondaryWP.guidedSteps?.map((step, i) => (
+              <div key={i} className="flex items-start gap-2 p-2 bg-white/80 rounded-lg">
+                <span className="w-6 h-6 bg-stone-200 rounded-full flex items-center justify-center text-xs font-bold text-stone-600 flex-shrink-0">{i + 1}</span>
+                <p className="text-sm text-gray-700 leading-relaxed">{step}</p>
+              </div>
+            ))}
+          </div>
+          {secondaryWP.reflectionPrompts && (
+            <div className="mt-3 space-y-3">
+              <p className="text-sm font-medium text-amber-700">{secondaryWP.childName} Reflections:</p>
+              {secondaryWP.reflectionPrompts.map((prompt, i) => (
+                <div key={i} className="space-y-1">
+                  <p className="text-sm text-gray-700 italic">Q{i + 1}. {prompt}</p>
+                  <textarea
+                    value={activityResponses[`secondary-wound-reflection-${i}`] || ''}
+                    onChange={(e) => handleActivityResponse(`secondary-wound-reflection-${i}`, e.target.value)}
+                    placeholder={`Reflect on your ${secondaryWP.childName}...`}
+                    className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:border-transparent bg-white/80"
+                    rows={2}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </details>
+      </div>
+    );
+  };
+
   // Render Learn section
   const renderLearnSection = (step) => {
     const data = step.data;
@@ -454,19 +530,24 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
           </div>
         </div>
 
-        {isSixFsLearn && woundPersonalization && (
+        {woundPersonalization && (
           <div className="bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-5 border-2 border-amber-200 mb-2">
             <div className="flex items-center gap-2 mb-2">
               <Heart className="w-5 h-5 text-rose-500" />
               <p className="font-semibold text-gray-900">Personalized for Your {woundPersonalization.childName}</p>
             </div>
             <p className="text-sm text-gray-700 leading-relaxed mb-3">{woundPersonalization.moduleIntro}</p>
-            <div className="p-3 bg-white/80 rounded-lg border border-amber-100">
-              <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-1">How the 8 C's of Self Support Your 6 F's Practice</p>
-              <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.selfCsIntegration}</p>
-            </div>
+            {woundPersonalization.selfCsIntegration && (
+              <div className="p-3 bg-white/80 rounded-lg border border-amber-100">
+                <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-1">How the 8 C's of Self Support Your Practice</p>
+                <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.selfCsIntegration}</p>
+              </div>
+            )}
           </div>
         )}
+
+        {renderActivePartsPanel()}
+        {renderDualWoundPanel()}
 
         <div className="prose max-w-none">
           {data.content.map((paragraph, index) => (
@@ -554,12 +635,15 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
           </div>
         </div>
 
-        {isSixFsActivity && woundPersonalization && (
+        {woundPersonalization && (
           <div className="bg-gradient-to-r from-amber-50 to-stone-50 rounded-lg p-5 border border-amber-200 mb-2">
             <p className="text-sm font-medium text-amber-800 mb-2">Personalized for Your {woundPersonalization.childName}</p>
             <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.moduleIntro}</p>
           </div>
         )}
+
+        {renderActivePartsPanel()}
+        {renderDualWoundPanel()}
 
         <div className="bg-gradient-to-r from-teal-50 to-green-50 rounded-lg p-6 border border-teal-100">
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
@@ -2401,9 +2485,17 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
                   Step {currentStepIndex + 1} of {steps.length} • {currentStep.type}
                 </p>
                 {woundContext && (
-                  <div className={`mt-1 inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full ${woundContext.config.darkBg} ${woundContext.config.textColor}`}>
-                    <span>{woundContext.priority.badge}</span>
-                    <span className="font-normal opacity-75">for your {woundContext.config.childName}</span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded-full ${woundContext.config.darkBg} ${woundContext.config.textColor}`}>
+                      <span>{woundContext.priority.badge}</span>
+                      <span className="font-normal opacity-75">for your {woundContext.config.childName}</span>
+                    </div>
+                    {woundContext.activeParts?.length > 0 && (
+                      <div className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-stone-100 text-stone-700">
+                        <Shield className="w-3 h-3" />
+                        <span>{woundContext.activeParts.length} active part{woundContext.activeParts.length !== 1 ? 's' : ''}</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
