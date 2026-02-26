@@ -36,18 +36,31 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
       if (!id) { setLoadingWound(false); return; }
 
       try {
-        const [curriculumRes, interactiveRes] = await Promise.all([
+        const [curriculumRes, interactiveRes, progressRes] = await Promise.all([
           supabaseHelpers.getPersonalizedCurriculum(id),
           supabase.from('ifs_interactive_data')
             .select('data')
             .eq('client_id', id)
             .eq('module_id', 'assessment_wounds')
-            .maybeSingle()
+            .maybeSingle(),
+          supabase.from('ifs_client_progress')
+            .select('module_id, completed')
+            .eq('client_id', id)
         ]);
 
         if (curriculumRes) {
           setPersonalizedCurriculum(curriculumRes);
           setIsPersonalized(true);
+        }
+
+        const dbCompleted = (progressRes.data || [])
+          .filter(p => p.completed)
+          .map(p => p.module_id);
+        if (dbCompleted.length > 0) {
+          setCompletedModules(prev => {
+            const merged = new Set([...prev, ...dbCompleted]);
+            return [...merged];
+          });
         }
 
         // Wound comes ONLY from the client's own assessment tab results
