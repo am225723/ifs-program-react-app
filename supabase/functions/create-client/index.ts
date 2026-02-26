@@ -30,32 +30,31 @@ serve(async (req) => {
     });
 
     const { data: { user }, error: authError } = await userClient.auth.getUser();
-
     if (authError || !user) {
-      const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-      const callerPin = req.headers.get("x-caller-pin");
-      if (!callerPin) {
-        return new Response(
-          JSON.stringify({ success: false, error: "Authentication required." }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      const { data: caller, error: callerError } = await adminClient
-        .from("ifs_clients")
-        .select("user_role")
-        .eq("pin", callerPin)
-        .maybeSingle();
-
-      if (callerError || !caller || caller.user_role !== "therapist") {
-        return new Response(
-          JSON.stringify({ success: false, error: "Only therapists can create clients." }),
-          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      return new Response(
+        JSON.stringify({ success: false, error: "Authentication required." }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
+    const { data: caller, error: callerError } = await adminSupabase
+      .from("ifs_clients")
+      .select("id, user_role, status")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (
+      callerError ||
+      !caller ||
+      caller.status !== "active" ||
+      (caller.user_role !== "therapist" && caller.user_role !== "admin")
+    ) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Only therapists can create clients." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { name, email, phone, notes } = await req.json();
 

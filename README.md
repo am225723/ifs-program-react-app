@@ -2,6 +2,27 @@
 
 A comprehensive web application for Internal Family Systems (IFS) therapy, designed to help users understand and heal their inner world through interactive tools, guided exercises, and educational resources.
 
+## 📱 React Native Mobile App (Expo)
+
+The React Native migration is now scaffolded in:
+
+`/Users/integrativePsych/Documents/GitHub/IFSApp/ifs-program-react-app/mobile`
+
+Quick start:
+
+```bash
+cd mobile
+cp .env.example .env
+npm install
+npm run start
+```
+
+Current status:
+- Expo TypeScript app with Expo Router routing shell
+- Supabase Auth (email/password) session context wired
+- Route parity scaffold for existing web paths (with therapist role guards)
+- EAS build profiles configured for internal and production pipelines
+
 ## 🌟 Features
 
 ### Core Educational Content
