@@ -1,73 +1,55 @@
 # IFS Self-Therapy Program
 
 ## Overview
-This project is a React + Vite frontend application designed for an Internal Family Systems (IFS) self-therapy curriculum. Its primary purpose is to provide personalized healing journeys through PIN-based authentication, curriculum tailored by child wound assessments, and a comprehensive suite of interactive healing exercises. The application aims to empower users in their self-discovery and healing process within the IFS framework, offering tools for introspection, progress tracking, and connection with their inner parts.
+This project is a React + Vite frontend application for an Internal Family Systems (IFS) self-therapy curriculum. It provides personalized healing journeys through PIN-based authentication, curriculum tailored by child wound assessments, and a comprehensive suite of interactive healing exercises. The application aims to empower users in their self-discovery and healing process within the IFS framework, offering tools for introspection, progress tracking, and connection with their inner parts, ultimately fostering self-leadership and emotional well-being.
 
 ## User Preferences
 I prefer iterative development with clear communication at each major step. Please ask before making significant architectural changes or adding new external dependencies. I value a clean, readable codebase and well-documented functions. Ensure that all UI components are responsive and theme-aware, supporting both light and dark modes. Prioritize user experience with intuitive navigation and clear visual feedback.
 
 ## System Architecture
-The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for styling and React Router DOM 7 for navigation. It follows a component-based architecture, with reusable UI components, dedicated context providers for global state management (e.g., `DataContext` for Supabase interactions), and separate pages for different functionalities.
+The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for styling and React Router DOM 7 for navigation. It follows a component-based architecture with reusable UI components and dedicated context providers for global state management.
 
 **Key Architectural Decisions:**
-- **PIN-based Authentication**: Secure access is managed via unique 6-digit PINs, primarily for client and therapist roles.
-- **Personalized Curriculum Delivery**: The core of the system involves a sophisticated personalization engine that adapts curriculum content based on a user's "child wound assessment" results (e.g., helplessness, shame, neglect, betrayal). This personalization is applied at a module and activity level.
-- **Interactive Learning Modules**: Curriculum modules are broken into digestible sections with reflection questions and incorporate a wide array of interactive activity types (e.g., true-false quiz, drag-to-rank, guided visualization, parts dialogue).
-- **Comprehensive Tracking Systems**: Includes progress tracking for module completion, exercise progress, mood & energy, journal entries, and gamification elements (XP, levels, badges, streaks).
-- **Role-Based Access Control**: Differentiates between 'client' and 'therapist' roles (stored value), with specific dashboards and features accessible based on user role. The UI displays "Advisor" instead of "Therapist" throughout the interface, while internal role values and DB column names remain as `therapist` for data compatibility.
-- **UI/UX Design**: Employs a modern design language with theme-awareness (including dark mode), amber/emerald/earthy color schemes, and a glassmorphism header. Navigation is primarily through a bottom navigation bar for key sections and a top bar for branding and settings.
-- **Data Persistence**: All user and application data is persistently stored in Supabase, with robust schema design covering assessments, personalized content, progress, journal entries, parts mapping, and gamification.
-- **Offline Support**: While primary data storage is Supabase, some session authentication details use localStorage for login persistence.
+- **PIN-based Authentication**: Secure access via unique 6-digit PINs for client and therapist roles.
+- **Personalized Curriculum Delivery**: Content adapts based on "child wound assessment" results (e.g., helplessness, shame), applying personalization at module and activity levels.
+- **Interactive Learning Modules**: Curriculum modules feature reflection questions and diverse interactive activity types (e.g., quizzes, guided visualization, parts dialogue).
+- **Comprehensive Tracking Systems**: Includes progress tracking for modules, exercises, mood & energy, journal entries, and gamification (XP, levels, badges, streaks).
+- **Role-Based Access Control**: Differentiates 'client' and 'therapist' roles, with specific dashboards and features. The UI displays "Advisor" for therapists.
+- **UI/UX Design**: Modern, theme-aware design (including dark mode) with amber/emerald/earthy color schemes and a glassmorphism header. Navigation uses a bottom bar for key sections and a top bar for branding/settings.
+- **Data Persistence**: All user and application data is stored in Supabase, with a schema covering assessments, personalized content, progress, journal entries, parts mapping, and gamification.
 - **PWA Support**: Includes manifest.json and service worker for installable mobile application capabilities.
 
 **Core Features:**
 - **Assessment Suite**: IFS Wound, Protective Parts, Self-Energy, and Attachment Style assessments.
 - **Parts Visualization Studio**: Drag-and-drop interface for mapping and visualizing internal parts.
-- **Advisor Dashboard**: Client management, session notes, progress tracking, client insights (wound assessment, protective parts, self-energy, journal entries, module progress, gamification, session prep), quick actions (create PIN, send reminders, export reports, messaging, homework, reports). Alerts have functional "View" buttons that navigate to the relevant client's Insights tab. Lesson Plans tab includes client selector for viewing personalized curriculum vs standard, with inline module editing (title, description, estimated minutes), add/remove wound-specific lesson plans from a library of 25 templates (5 per wound type), and module removal with automatic reordering. Route: `/therapist-dashboard`.
-- **Advisor-Client Messaging**: Two-way secure messaging between advisors and clients via `TherapistMessages.jsx` and `ClientInbox.jsx`. Uses `ifs_messages` table with sender_role (`'therapist'` stored value), read receipts, and quick message templates. Route: `/advisor-messages`.
-- **Homework Assignment System**: Advisors assign categorized homework (journaling, parts-work, meditation, etc.) with priorities and due dates via `TherapistHomework.jsx`. Clients view/complete assignments with reflection notes via `ClientHomework.jsx`. Uses extended `ifs_therapy_homework` table. Route: `/advisor-homework`.
-- **Progress Reports**: Comprehensive report generation with assessment scores, module completion, mood/energy trends, homework rates, gamification stats, and text export via `TherapistReports.jsx`. Route: `/advisor-reports`.
-- **Co-Therapy Session Page**: Facilitates guided therapy activities between therapist and client with step-by-step instructions and progress saving.
-- **Gamification Hub**: Integrates XP, levels, badges, and streaks to encourage engagement.
-- **AI Parts Dialogue**: Perplexity AI-powered conversations with inner parts, with voice mode (speech-to-text input and text-to-speech responses using Web Speech API).
-- **Parts Relationship Map**: Interactive SVG graph visualization showing connections between inner parts with relationship types (protects, triggers, comforts, conflicts, allies).
-- **Unburdening Protocol**: Guided 8-step ceremony for releasing emotional burdens, with Supabase persistence and progress tracking.
-- **Assessment Builder**: Therapists can create custom assessments with multiple question types; clients take them via `/custom-assessment/:id`.
-- **Journal Voice Dictation**: Continuous speech-to-text dictation for journal entries using Web Speech API. Journal includes therapist visibility notice and automatic keyword scanning for concerning content (self-harm, crisis language, etc.) that sends alerts to therapists via messaging system.
-- **Journal Safety Alerts**: When a journal entry contains concerning keywords (suicide, self-harm, abuse, relapse, etc.), the system automatically sends an alert message to all active therapists. The Therapist Dashboard also scans recent journal entries and displays `danger`-level alerts with pulsing indicators for entries with concerning language.
-- **Profile Assessment Display**: Profile page shows all assessment results: Wound Assessment (with fallback from interactive data), Protective Parts Assessment (with identified parts listed by type — managers, firefighters, exiles — showing name, description, role, and intensity), Self-Energy Assessment, and Custom Assessment results.
-- **Guided Meditations**: 6 IFS-focused guided meditations (Self Energy, Parts Check-In, Inner Safe Place, Protector Appreciation, IFS Body Scan, Compassion Breathing) with step-by-step timed guidance, silent meditation timer, and voice reflection recording via MediaRecorder API.
-- **Daily Check-In**: Structured 3-step IFS check-in (`DailyCheckin.jsx`) — Self-energy slider (1–10), active parts selector (personalized + defaults by type), and daily intention/reflection. Saves to `ifs_interactive_data` (module_id: `daily_checkin_YYYY-MM-DD`) and `ifs_mood_entries`. Sends low-energy alerts to advisors automatically. Route: `/daily-checkin`.
-- **Mood & Parts Analytics**: SVG-based analytics dashboard (`MoodAnalytics.jsx`) with custom line charts, day-of-week heatmap, emotion/parts frequency bars, self-energy trend, and advisor insights panel with clinical interpretation. Advisors can select any client to view their analytics. Route: `/mood-analytics`. Also linked from TherapistDashboard Quick Actions and Insights tab.
-- **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generator.
-- **Theme & Animation Customization**: User preferences for visual and motion accessibility.
+- **Advisor Dashboard**: Client management, session notes, progress tracking, client insights (assessments, journal entries, module progress, gamification, module response viewer with question text mapping from curriculum), quick actions (create PIN, send reminders, reports), and alerts. Lesson plans are editable and wound-specific. Caseload Overview Cards show secondary wound badges, mini mood trend dots, and current module name with progress bar.
+- **Advisor-Client Messaging**: Two-way secure messaging with read receipts and quick message templates.
+- **Homework Assignment System**: Advisors assign categorized homework with priorities and due dates; clients complete assignments with reflection notes.
+- **Progress Reports**: Comprehensive report generation with assessment scores, module completion, mood/energy trends, and gamification stats.
+- **Co-Therapy Session Page**: Facilitates guided therapy activities between therapist and client, with a collapsible Client Parts Map reference panel showing parts grouped by type (Managers/Firefighters/Exiles) with roles, notes, and primary wound context.
+- **Gamification Hub**: Integrates XP, levels, badges, and streaks.
+- **AI Parts Dialogue**: Perplexity AI-powered conversations with inner parts, including voice mode.
+- **Parts Relationship Map**: Interactive SVG graph visualization of connections between inner parts.
+- **Unburdening Protocol**: Guided 8-step ceremony for releasing emotional burdens.
+- **Assessment Builder**: Therapists can create custom assessments for clients.
+- **Journal Voice Dictation**: Continuous speech-to-text for journal entries, with therapist visibility and automatic keyword scanning for concerning content (sending alerts to therapists).
+- **Profile Assessment Display**: Shows all assessment results on the user profile.
+- **Guided Meditations**: IFS-focused guided meditations with timed guidance and voice reflection recording.
+- **Daily Check-In**: Structured 3-step IFS check-in (Self-energy slider, active parts selector, daily intention/reflection) with low-energy alerts to advisors.
+- **Mood & Parts Analytics**: SVG-based dashboard with custom charts, heatmaps, and trend analysis for mood and parts, with an advisor insights panel.
+- **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generation.
 
 **Curriculum Modules (11 total):**
-- Modules 1-4: Foundations, Wounds Deep Dive, Protective System, Self Leadership (fully wound-personalized for all 5 wound types)
-- Module 5: 6 F's Protocol Mastery — fully wound-personalized (abandonment/shame/neglect/betrayal/helplessness) with adapted guided steps, 8 C's integration, and reflection prompts
-- Module 6: Inner Child Unburdening & Integration — fully wound-personalized unburdening ceremonies per wound type
-- Module 5 Bonus: Advanced Healing Exercises & Daily Practices — fully wound-personalized exercises (letter writing, safe place, reparenting dialogue, body-based) per wound type
-- Module 7: Reparenting Your Inner Child (`src/data/advancedModules.js`) — wound-personalized reparenting approaches (secure attachment for abandonment, unconditional regard for shame, attunement for neglect, earned trust for betrayal, agency for helplessness)
-- Module 8: Somatic Healing & Body Wisdom — wound-specific body patterns, somatic interventions, and nervous system regulation
-- Module 9: Relationships & Attachment Patterns — how each wound creates relationship cycles and Self-led alternatives
-- Module 10: Transforming the Inner Critic — wound-specific Critic strategies and befriending approaches
-- Advanced modules live in `src/data/advancedModules.js` and are merged into `curriculumModules` via spread in `curriculumData.js`
+- **Wound-Personalized Modules**: Modules 1-4 (Foundations, Wounds Deep Dive, Protective System, Self Leadership), Module 5 (6 F's Protocol Mastery), Module 6 (Inner Child Unburdening & Integration), Module 5 Bonus (Advanced Healing Exercises), Module 7 (Reparenting Your Inner Child), Module 8 (Somatic Healing & Body Wisdom), Module 9 (Relationships & Attachment Patterns), Module 10 (Transforming the Inner Critic). All these modules are deeply personalized based on the user's identified wound type.
 
 **Wound Personalization Architecture:**
-- `woundPersonalization` object on module data with keys per wound type (abandonment, shame, neglect, betrayal, helplessness)
-- Each entry: `childName`, `moduleIntro`, `selfCsIntegration` (8 C's guidance), `guidedSteps` (7 steps), `reflectionPrompts` (5 prompts)
-- `LearningModuleEnhanced.jsx` renders personalized content in `renderLearnSection`, `renderActivitySection`, and `renderSixFsWizard`
-- `getStepRequirements` validates wound-specific reflection prompts for step completion
-- **Active Parts Integration**: `LearningModuleRenderer.jsx` fetches `assessment_parts` and `assessment_self-energy` data, computes active parts (managers, firefighters, exiles above threshold), passes them via `woundContext.activeParts`. Also passes `woundContext.selfEnergy` (8 C's scores) and `woundContext.clientName`.
-- **Dynamic Lesson Content Engine**: `src/lib/dynamicLessonContent.js` generates fully personalized lesson narratives from assessment data. `generatePersonalizedLesson(moduleId, woundContext, woundPersonalization)` produces structured content with: personalized intro addressing the user by name and wound child, Manager/Firefighter/Exile sections listing the user's specific parts by name with wound-specific strategy descriptions and intensity scores, Self-Energy section referencing actual 8 C's scores (strengths/growing edges), and closing messages addressed to each part group. Per-module templates frame content differently (Module 1: "Meeting Your Internal Family", Module 2: "Your System's Map", Module 3: "Your Guardian System", etc.). Falls back to static content when assessment data is incomplete.
-- **Dynamic Learn Section Rendering**: `renderLearnSection` in `LearningModuleEnhanced.jsx` calls `generatePersonalizedLesson()` and renders dynamic content with part-type badges (Manager/blue, Firefighter/amber, Exile/rose), score indicators, wound-colored accents, and closing messages. Graceful fallback to existing static rendering when data is missing.
-- **Dynamic Activity Content Engine**: `src/lib/dynamicActivityContent.js` generates personalized activity content from assessment data. `generatePersonalizedActivity(activityId, woundContext, woundPersonalization)` produces personalized `title`, `prompt`, `guidedSteps`, and `questions` that reference the user's specific parts by name, wound type, Self-Energy scores, and body locations. Templates exist for 20+ activity IDs across all modules. Falls back to static content for activities without templates.
-- **Dynamic Activity Section Rendering**: `renderActivitySection` in `LearningModuleEnhanced.jsx` calls `generatePersonalizedActivity()` and uses dynamic content for title, prompt, questions, and guided steps when available. Shows wound-colored accent borders, personalization badge, and wound-themed step numbers. `getStepRequirements` validation is aligned with dynamic questions. Graceful fallback to existing static/woundPersonalization rendering when dynamic data is missing.
-- **Dual-Wound Support (Module 6)**: `renderDualWoundPanel()` renders secondary wound unburdening steps and reflections as an expandable section within Module 6, allowing clients to address both primary and secondary wounds.
-- **Dual-Wound Curriculum Display**: `CurriculumSystem.jsx` shows primary and secondary wounds side-by-side in the "Your Healing Focus" section, with wound focus toggle to sort modules by either wound. Module cards display secondary wound badges. Completed modules have a "Restart" button that clears progress after confirmation.
-- **Attachment Style Assessment**: 20-question assessment (5 per style: secure, anxious, avoidant, disorganized) in `Assessments.jsx`. Saves to `ifs_interactive_data` with `module_id='assessment_attachment'`. Results displayed on Profile page with violet/indigo color scheme. Feeds into Module 9 (Relationships & Attachment Patterns).
+- Modules contain `woundPersonalization` objects with specific content for each wound type (abandonment, shame, neglect, betrayal, helplessness).
+- `LearningModuleEnhanced.jsx` dynamically renders personalized content for learning sections, activities, and specific wizards.
+- Dynamic content engines (`dynamicLessonContent.js`, `dynamicActivityContent.js`) generate personalized narratives and activity prompts by integrating user assessment data (parts, Self-Energy scores, wound type).
+- **Dual-Wound Support**: The system supports addressing both primary and secondary wounds, including dual-wound unburdening steps and curriculum display options.
+- **Attachment Style Assessment Integration**: Results from the attachment style assessment feed into relevant curriculum modules.
 
 ## External Dependencies
-- **Supabase**: Primary backend service for database, authentication, and edge functions.
-- **Perplexity API**: Used for AI-enhanced personalization and AI Parts Dialogue (optional).
-- **Lucide React**: Icon library for UI elements.
+- **Supabase**: Primary backend for database, authentication, and edge functions.
+- **Perplexity API**: Used for AI-enhanced personalization and AI Parts Dialogue.
+- **Lucide React**: Icon library.

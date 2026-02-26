@@ -4,10 +4,10 @@ import {
   ArrowLeft, Play, Pause, ChevronLeft, ChevronRight, CheckCircle,
   Clock, Heart, Shield, MessageSquare, Sparkles, Eye, Brain, Users,
   Star, Target, BookOpen, Activity, AlertCircle, Save, FileText,
-  Lightbulb, ChevronDown, ChevronUp
+  Lightbulb, ChevronDown, ChevronUp, Map
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
-import { supabaseHelpers } from '../lib/supabase';
+import { supabaseHelpers, supabase } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 
 const therapistObservationPrompts = {
@@ -276,6 +276,9 @@ export default function CoTherapySession() {
   const [expandedGuidance, setExpandedGuidance] = useState(true);
   const [completedActivities, setCompletedActivities] = useState({});
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [partsMapData, setPartsMapData] = useState(null);
+  const [partsMapOpen, setPartsMapOpen] = useState(false);
+  const [clientWoundData, setClientWoundData] = useState(null);
 
   useEffect(() => {
     const storedId = sessionStorage.getItem('co_therapy_client_id');
@@ -283,6 +286,24 @@ export default function CoTherapySession() {
     if (storedId) setSelectedClientId(storedId);
     if (storedName) setSelectedClientName(storedName);
   }, []);
+
+  useEffect(() => {
+    if (!selectedClientId) return;
+    const fetchPartsAndWounds = async () => {
+      try {
+        const [partsRes, woundsRes] = await Promise.all([
+          supabase.from('ifs_interactive_data').select('data').eq('client_id', selectedClientId).eq('module_id', 'parts_map').maybeSingle(),
+          supabase.from('ifs_interactive_data').select('data').eq('client_id', selectedClientId).eq('module_id', 'assessment_wounds').maybeSingle()
+        ]);
+        setPartsMapData(partsRes.data?.data || null);
+        const wd = woundsRes.data?.data;
+        setClientWoundData(wd ? { primary_wound: wd.primary, secondary_wound: wd.secondary } : null);
+      } catch (err) {
+        console.error('Error fetching parts map data:', err);
+      }
+    };
+    fetchPartsAndWounds();
+  }, [selectedClientId]);
 
   useEffect(() => {
     let interval;
@@ -389,9 +410,22 @@ export default function CoTherapySession() {
           <button onClick={() => { if (confirm('End this activity? Notes will be lost unless you complete it.')) { setActiveActivity(null); setActiveStep(0); }}} className={`flex items-center gap-2 ${textSecondary} hover:text-red-500 transition-colors text-sm`}>
             <ArrowLeft className="w-4 h-4" /> Exit Activity
           </button>
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'} border ${isDark ? 'border-emerald-800' : 'border-emerald-200'}`}>
-            <Heart className="w-4 h-4 text-emerald-500" />
-            <span className={`text-sm font-medium ${textPrimary}`}>Co-Therapy with {selectedClientName}</span>
+          <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${isDark ? 'bg-emerald-900/30' : 'bg-emerald-50'} border ${isDark ? 'border-emerald-800' : 'border-emerald-200'}`}>
+              <Heart className="w-4 h-4 text-emerald-500" />
+              <span className={`text-sm font-medium ${textPrimary}`}>Co-Therapy with {selectedClientName}</span>
+            </div>
+            <button
+              onClick={() => setPartsMapOpen(!partsMapOpen)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                partsMapOpen
+                  ? `${isDark ? 'bg-violet-900/40 border-violet-700 text-violet-300' : 'bg-violet-100 border-violet-300 text-violet-700'} border`
+                  : `${isDark ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-gray-100 border-gray-200 text-gray-600'} border`
+              }`}
+            >
+              <Map className="w-3.5 h-3.5" />
+              Parts Map
+            </button>
           </div>
         </div>
 
@@ -485,6 +519,65 @@ export default function CoTherapySession() {
                 ))}
               </div>
             </div>
+
+            {partsMapOpen && (
+              <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>
+                <h3 className={`font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                  <Map className="w-4 h-4 text-violet-500" />
+                  Client's Parts Map
+                </h3>
+                {clientWoundData?.primary_wound && (
+                  <div className="mb-3">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${isDark ? 'bg-rose-900/30 text-rose-300 border border-rose-800' : 'bg-rose-100 text-rose-700 border border-rose-200'}`}>
+                      Primary Wound: {clientWoundData.primary_wound.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                    </span>
+                  </div>
+                )}
+                {partsMapData?.parts && partsMapData.parts.length > 0 ? (
+                  <div className="space-y-3">
+                    {(() => {
+                      const groups = { Self: [], Manager: [], Firefighter: [], Exile: [] };
+                      const groupStyles = {
+                        Self: { bg: isDark ? 'bg-emerald-900/20' : 'bg-emerald-50', border: isDark ? 'border-emerald-800' : 'border-emerald-200', badge: isDark ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700', label: 'Self' },
+                        Manager: { bg: isDark ? 'bg-blue-900/20' : 'bg-blue-50', border: isDark ? 'border-blue-800' : 'border-blue-200', badge: isDark ? 'bg-blue-900/40 text-blue-300' : 'bg-blue-100 text-blue-700', label: 'Managers' },
+                        Firefighter: { bg: isDark ? 'bg-amber-900/20' : 'bg-amber-50', border: isDark ? 'border-amber-800' : 'border-amber-200', badge: isDark ? 'bg-amber-900/40 text-amber-300' : 'bg-amber-100 text-amber-700', label: 'Firefighters' },
+                        Exile: { bg: isDark ? 'bg-rose-900/20' : 'bg-rose-50', border: isDark ? 'border-rose-800' : 'border-rose-200', badge: isDark ? 'bg-rose-900/40 text-rose-300' : 'bg-rose-100 text-rose-700', label: 'Exiles' }
+                      };
+                      partsMapData.parts.forEach(part => {
+                        const type = part.type || 'Manager';
+                        if (groups[type]) groups[type].push(part);
+                        else groups.Manager.push(part);
+                      });
+                      return Object.entries(groups).filter(([, parts]) => parts.length > 0).map(([type, parts]) => {
+                        const style = groupStyles[type];
+                        return (
+                          <div key={type}>
+                            <div className={`text-xs font-semibold ${textSecondary} uppercase tracking-wider mb-1.5`}>{style.label}</div>
+                            <div className="space-y-1.5">
+                              {parts.map(part => (
+                                <div key={part.id} className={`p-2.5 rounded-lg ${style.bg} border ${style.border}`}>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className={`text-sm font-medium ${textPrimary}`}>{part.name}</span>
+                                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${style.badge}`}>{type}</span>
+                                  </div>
+                                  {part.role && <p className={`text-xs ${textSecondary} leading-relaxed`}>{part.role}</p>}
+                                  {part.notes && <p className={`text-xs ${textMuted} mt-1 italic`}>{part.notes}</p>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                ) : (
+                  <div className={`p-4 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-gray-50'} text-center`}>
+                    <Map className={`w-8 h-8 mx-auto mb-2 ${textMuted}`} />
+                    <p className={`text-sm ${textSecondary}`}>No parts map data available for this client</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {activeStep === totalSteps - 1 && activeActivity.reflectionPrompts && (
               <div className={`${cardBg} rounded-xl border ${cardBorder} p-5`}>

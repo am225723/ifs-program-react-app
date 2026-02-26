@@ -13,6 +13,7 @@ import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
 import { WOUND_LESSON_PLANS, WOUND_DISPLAY } from '../lib/woundLessonPlans';
+import { curriculumModules } from '../data/curriculumData';
 
 const woundColorMap = {
   abandonment: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
@@ -171,6 +172,7 @@ const TherapistDashboard = () => {
   const [filterRisk, setFilterRisk] = useState('all');
   const [activeTab, setActiveTab] = useState('clients');
   const [expandedModules, setExpandedModules] = useState({});
+  const [expandedResponseModules, setExpandedResponseModules] = useState({});
   const [selectedInsightClient, setSelectedInsightClient] = useState('');
   const [therapistFeedback, setTherapistFeedback] = useState({});
   const [sessionNotes, setSessionNotes] = useState([]);
@@ -288,7 +290,8 @@ const TherapistDashboard = () => {
         { data: journalRows },
         { data: activityRows },
         { data: gamificationRows },
-        { data: interactiveWoundData }
+        { data: interactiveWoundData },
+        { data: moodEntries }
       ] = await Promise.all([
         supabase
           .from('ifs_assessment_results')
@@ -297,7 +300,7 @@ const TherapistDashboard = () => {
           .order('created_at', { ascending: false }),
         supabase
           .from('ifs_client_progress')
-          .select('id, client_id, module_id, completed')
+          .select('id, client_id, module_id, completed, updated_at')
           .in('client_id', clientIds),
         supabase
           .from('ifs_journal_entries')
@@ -316,7 +319,13 @@ const TherapistDashboard = () => {
           .from('ifs_interactive_data')
           .select('client_id, data, updated_at')
           .in('client_id', clientIds)
-          .eq('module_id', 'assessment_wounds')
+          .eq('module_id', 'assessment_wounds'),
+        supabase
+          .from('ifs_mood_entries')
+          .select('client_id, mood, energy, date')
+          .in('client_id', clientIds)
+          .order('date', { ascending: false })
+          .limit(500)
       ]);
 
       const interactiveWoundsByClient = {};
@@ -355,6 +364,14 @@ const TherapistDashboard = () => {
       });
       setClientGamification(gamificationByClient);
 
+      const moodsByClient = {};
+      (moodEntries || []).forEach(m => {
+        if (!moodsByClient[m.client_id]) moodsByClient[m.client_id] = [];
+        if (moodsByClient[m.client_id].length < 5) {
+          moodsByClient[m.client_id].push(m);
+        }
+      });
+
       const enrichedClients = clientList.map(c => {
         const clientAssessments = assessmentsByClient[c.id] || [];
         const latestAssessment = clientAssessments[0];
@@ -378,6 +395,14 @@ const TherapistDashboard = () => {
         }
 
         const gamData = gamificationByClient[c.id];
+
+        const incompleteModules = clientProgress
+          .filter(p => !p.completed)
+          .sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0));
+        const currentModuleId = incompleteModules.length > 0 ? incompleteModules[0].module_id : null;
+
+        const recentMoods = (moodsByClient[c.id] || []).slice(0, 5);
+
         return {
           id: c.id,
           name: c.name,
@@ -396,7 +421,9 @@ const TherapistDashboard = () => {
           level: gamData?.level || 1,
           streak: gamData?.streak_current || 0,
           streakLongest: gamData?.streak_longest || 0,
-          badges: gamData?.badges || {}
+          badges: gamData?.badges || {},
+          currentModuleId,
+          recentMoods
         };
       });
 
@@ -490,8 +517,7 @@ const TherapistDashboard = () => {
           .from('ifs_module_answers')
           .select('*')
           .eq('client_id', clientId)
-          .order('updated_at', { ascending: false })
-          .limit(20),
+          .order('updated_at', { ascending: false }),
         supabase
           .from('ifs_therapy_activity_progress')
           .select('*')
@@ -529,14 +555,18 @@ const TherapistDashboard = () => {
       ]);
 
       const recentAnswers = [];
+      const moduleResponses = {};
       (moduleAnswers || []).forEach(ma => {
         const answers = ma.answers || {};
+        const modId = ma.module_id || 'unknown';
+        if (!moduleResponses[modId]) moduleResponses[modId] = [];
+        moduleResponses[modId].push({ step_id: ma.step_id, answers });
         Object.entries(answers).forEach(([question, answer]) => {
           if (typeof answer === 'string' && answer.trim().length > 0) {
             recentAnswers.push({
               question: question,
               answer: answer,
-              module: ma.module_id || 'Unknown Module',
+              module: modId,
               stepId: ma.step_id
             });
           }
@@ -594,6 +624,7 @@ const TherapistDashboard = () => {
 
       setClientInsights({
         recentAnswers: recentAnswers.slice(0, 10),
+        moduleResponses,
         activityProgress: activityProgress || [],
         sessionPrep,
         assessment: finalAssessment,
@@ -1085,6 +1116,70 @@ const TherapistDashboard = () => {
     return Object.values(badges).filter(b => b && (b.unlocked || b.earned)).length;
   };
 
+  const getModuleName = (moduleId) => {
+    if (!moduleId) return null;
+    const mod = curriculumModules.find(m => m.id === moduleId);
+    if (mod) return mod.title;
+    const cleanId = moduleId.replace(/-/g, ' ').replace(/module \d+/i, '').trim();
+    return cleanId.charAt(0).toUpperCase() + cleanId.slice(1) || moduleId;
+  };
+
+  const mapResponseKey = (key, moduleData, woundType) => {
+    const secondaryWoundMatch = key.match(/^secondary-wound-reflection-(\d+)$/);
+    if (secondaryWoundMatch) {
+      const idx = parseInt(secondaryWoundMatch[1]);
+      return `Secondary Wound Reflection ${idx + 1}`;
+    }
+    const woundMatch = key.match(/^wound-reflection-(\d+)$/);
+    if (woundMatch) {
+      const idx = parseInt(woundMatch[1]);
+      const wp = moduleData?.woundPersonalization?.[woundType];
+      return wp?.reflectionPrompts?.[idx] || `Wound Reflection ${idx + 1}`;
+    }
+    const reflectionMatch = key.match(/^reflection-(\d+)$/);
+    if (reflectionMatch) {
+      const idx = parseInt(reflectionMatch[1]);
+      const learnStep = moduleData?.steps?.find(s => s.type === 'learn');
+      return learnStep?.data?.reflectionPrompts?.[idx] || `Reflection ${idx + 1}`;
+    }
+    const questionMatch = key.match(/^question-(\d+)$/);
+    if (questionMatch) {
+      const idx = parseInt(questionMatch[1]);
+      const activityStep = moduleData?.steps?.find(s => s.type === 'activity');
+      return activityStep?.data?.questions?.[idx] || `Activity Question ${idx + 1}`;
+    }
+    return key;
+  };
+
+  const getResponseBadge = (key) => {
+    if (key.startsWith('secondary-wound-reflection-')) return { label: 'Secondary Wound', color: 'bg-purple-100 text-purple-700' };
+    if (key.startsWith('wound-reflection-')) return { label: 'Wound', color: 'bg-amber-100 text-amber-700' };
+    if (key.startsWith('reflection-')) return { label: 'Reflection', color: 'bg-blue-100 text-blue-700' };
+    if (key.startsWith('question-')) return { label: 'Activity', color: 'bg-emerald-100 text-emerald-700' };
+    return { label: 'Response', color: 'bg-gray-100 text-gray-700' };
+  };
+
+  const getMoodColor = (mood) => {
+    if (mood >= 4) return 'bg-emerald-400';
+    if (mood >= 3) return 'bg-yellow-400';
+    if (mood >= 2) return 'bg-orange-400';
+    return 'bg-red-400';
+  };
+
+  const getRelativeTime = (dateStr) => {
+    if (!dateStr) return 'Never';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    if (days < 30) return `${Math.floor(days / 7)}w ago`;
+    return `${Math.floor(days / 30)}mo ago`;
+  };
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -1217,109 +1312,159 @@ const TherapistDashboard = () => {
             </div>
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filteredClients.map(client => {
               const wound = woundColorMap[client.primaryWound] || woundColorMap.abandonment;
+              const secondaryWoundColors = client.secondaryWound ? (woundColorMap[client.secondaryWound] || null) : null;
               const risk = riskColors[client.riskLevel];
-              const inactive = daysSince(client.lastActive);
               const earnedBadges = getBadgeCount(client.badges);
+              const currentModuleName = getModuleName(client.currentModuleId);
+              const moduleProgressPct = TOTAL_MODULES > 0 ? Math.round((client.modulesCompleted / TOTAL_MODULES) * 100) : 0;
               return (
-                <div key={client.id} className={`${cardBg} rounded-2xl border ${getWoundGlow(client.primaryWound)} p-5 transition-all duration-300 hover:scale-[1.005] hover:shadow-xl`}>
-                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="relative flex-shrink-0">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg">
-                          {client.name.charAt(0)}
-                        </div>
-                        {client.level > 1 && (
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-white shadow">
-                            {client.level}
-                          </div>
-                        )}
+                <div key={client.id} className={`${cardBg} rounded-2xl border ${getWoundGlow(client.primaryWound)} p-5 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl flex flex-col`}>
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="relative flex-shrink-0">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-emerald-500 flex items-center justify-center text-white font-extrabold text-lg shadow-lg">
+                        {client.name.charAt(0)}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className={`font-bold text-lg ${textPrimary} tracking-tight`}>{client.name}</h3>
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${risk.bg} ${risk.text}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${risk.dot}`}></span>
-                            {risk.label}
-                          </span>
+                      {client.level > 1 && (
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-[9px] font-bold border-2 border-white shadow">
+                          {client.level}
                         </div>
-                        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold ${wound.bg} ${wound.text}`}>
-                            <Heart className="w-3 h-3" />
-                            {client.primaryWound}
-                          </span>
-                          <span className={`text-xs ${textMuted} flex items-center gap-1`}>
-                            <Clock className="w-3 h-3" />
-                            {inactive === 0 ? 'Active today' : inactive >= 999 ? 'Never active' : `${inactive}d ago`}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-4 mt-3 flex-wrap">
-                          <div className="flex items-center gap-1.5">
-                            <Zap className="w-3.5 h-3.5 text-amber-500" />
-                            <span className={`text-xs font-semibold ${textPrimary}`}>{client.xp.toLocaleString()} XP</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Crown className="w-3.5 h-3.5 text-purple-500" />
-                            <span className={`text-xs font-semibold ${textPrimary}`}>Lv.{client.level}</span>
-                          </div>
-                          {client.streak > 0 && (
-                            <div className="flex items-center gap-1.5">
-                              <Flame className="w-3.5 h-3.5 text-orange-500" />
-                              <span className={`text-xs font-semibold ${textPrimary}`}>{client.streak}d streak</span>
-                            </div>
-                          )}
-                          {earnedBadges > 0 && (
-                            <div className="flex items-center gap-1.5">
-                              <Award className="w-3.5 h-3.5 text-emerald-500" />
-                              <span className={`text-xs font-semibold ${textPrimary}`}>{earnedBadges} badges</span>
-                            </div>
-                          )}
-                          {client.therapyActivities > 0 && (
-                            <div className="flex items-center gap-1.5">
-                              <Activity className="w-3.5 h-3.5 text-blue-500" />
-                              <span className={`text-xs font-semibold ${textPrimary}`}>{client.therapyActivities} activities</span>
-                            </div>
-                          )}
-                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className={`font-bold text-base ${textPrimary} tracking-tight truncate`}>{client.name}</h3>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${risk.bg} ${risk.text}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${risk.dot}`}></span>
+                          {risk.label}
+                        </span>
+                      </div>
+                      <div className={`text-xs ${textMuted} flex items-center gap-1 mt-0.5`}>
+                        <Clock className="w-3 h-3" />
+                        {getRelativeTime(client.lastActive)}
                       </div>
                     </div>
+                  </div>
 
-                    <div className="flex flex-col items-end gap-3">
+                  <div className="flex items-center gap-2 flex-wrap mb-3">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold ${wound.bg} ${wound.text}`}>
+                      <Heart className="w-3 h-3" />
+                      {client.primaryWound}
+                    </span>
+                    {client.secondaryWound && secondaryWoundColors && (
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold ${secondaryWoundColors.bg} ${secondaryWoundColors.text}`}>
+                        <Shield className="w-3 h-3" />
+                        {client.secondaryWound}
+                      </span>
+                    )}
+                  </div>
+
+                  {currentModuleName && (
+                    <div className={`mb-3 p-2 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <BookOpen className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                        <span className={`text-[11px] font-medium ${textSecondary} truncate`}>{currentModuleName}</span>
+                      </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-28 sm:w-36 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full transition-all duration-500 ${
-                              client.progress >= 70 ? 'bg-gradient-to-r from-green-400 to-emerald-500' : client.progress >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-red-400 to-red-500'
+                              moduleProgressPct >= 70 ? 'bg-gradient-to-r from-green-400 to-emerald-500' : moduleProgressPct >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-blue-400 to-blue-500'
+                            }`}
+                            style={{ width: `${moduleProgressPct}%` }}
+                          />
+                        </div>
+                        <span className={`text-[10px] font-bold ${textPrimary}`}>{client.modulesCompleted}/{TOTAL_MODULES}</span>
+                      </div>
+                    </div>
+                  )}
+                  {!currentModuleName && (
+                    <div className={`mb-3 p-2 rounded-lg ${isDark ? 'bg-slate-700/50' : 'bg-gray-50'}`}>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-500 ${
+                              client.progress >= 70 ? 'bg-gradient-to-r from-green-400 to-emerald-500' : client.progress >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-500' : 'bg-gradient-to-r from-blue-400 to-blue-500'
                             }`}
                             style={{ width: `${client.progress}%` }}
                           />
                         </div>
-                        <span className={`text-sm font-bold ${textPrimary} w-10 text-right`}>{client.progress}%</span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => { setSelectedInsightClient(client.id); setActiveTab('insights'); }}
-                          className={`p-2 rounded-xl ${hoverBg} ${textSecondary} transition-all hover:text-amber-500`}
-                          title="View Insights"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => { setActiveTab('notes'); setNoteForm(f => ({ ...f, clientId: client.id })); }}
-                          className={`p-2 rounded-xl ${hoverBg} ${textSecondary} transition-all hover:text-blue-500`}
-                          title="Add Note"
-                        >
-                          <FileText className="w-4 h-4" />
-                        </button>
-                        <button className={`p-2 rounded-xl ${hoverBg} ${textSecondary} transition-all hover:text-emerald-500`} title="Schedule">
-                          <Calendar className="w-4 h-4" />
-                        </button>
+                        <span className={`text-[10px] font-bold ${textPrimary}`}>{client.progress}%</span>
                       </div>
                     </div>
+                  )}
+
+                  <div className="flex items-center gap-3 flex-wrap mb-3">
+                    <div className="flex items-center gap-1" title={`${client.xp.toLocaleString()} XP`}>
+                      <Zap className="w-3.5 h-3.5 text-amber-500" />
+                      <span className={`text-[11px] font-semibold ${textPrimary}`}>{client.xp >= 1000 ? `${(client.xp / 1000).toFixed(1)}k` : client.xp}</span>
+                    </div>
+                    <div className="flex items-center gap-1" title={`Level ${client.level}`}>
+                      <Crown className="w-3.5 h-3.5 text-purple-500" />
+                      <span className={`text-[11px] font-semibold ${textPrimary}`}>Lv.{client.level}</span>
+                    </div>
+                    {client.streak > 0 && (
+                      <div className="flex items-center gap-1" title={`${client.streak} day streak`}>
+                        <Flame className="w-3.5 h-3.5 text-orange-500" />
+                        <span className={`text-[11px] font-semibold ${textPrimary}`}>{client.streak}d</span>
+                      </div>
+                    )}
+                    {earnedBadges > 0 && (
+                      <div className="flex items-center gap-1" title={`${earnedBadges} badges earned`}>
+                        <Award className="w-3.5 h-3.5 text-emerald-500" />
+                        <span className={`text-[11px] font-semibold ${textPrimary}`}>{earnedBadges}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-1.5">
+                      <Activity className="w-3.5 h-3.5 text-blue-500" />
+                      <span className={`text-[11px] ${textSecondary}`}>
+                        {client.therapyActivities}/{client.totalActivities} activities
+                      </span>
+                    </div>
+                    {client.recentMoods && client.recentMoods.length > 0 && (
+                      <div className="flex items-center gap-1" title="Recent mood trend">
+                        <span className={`text-[10px] ${textMuted} mr-0.5`}>Mood</span>
+                        {client.recentMoods.slice().reverse().map((m, i) => (
+                          <div
+                            key={i}
+                            className={`w-2.5 h-2.5 rounded-full ${getMoodColor(m.mood)} transition-all`}
+                            title={`${m.date}: mood ${m.mood}/5${m.energy ? `, energy ${m.energy}/5` : ''}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1 mt-auto pt-2 border-t border-gray-100 dark:border-slate-700">
+                    <button
+                      onClick={() => { setSelectedInsightClient(client.id); setActiveTab('insights'); }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium ${hoverBg} ${textSecondary} transition-all hover:text-amber-500`}
+                      title="View Insights"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      Insights
+                    </button>
+                    <button
+                      onClick={() => { setActiveTab('notes'); setNoteForm(f => ({ ...f, clientId: client.id })); }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium ${hoverBg} ${textSecondary} transition-all hover:text-blue-500`}
+                      title="Session Note"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Note
+                    </button>
+                    <button
+                      onClick={() => navigate('/therapist/messages')}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium ${hoverBg} ${textSecondary} transition-all hover:text-emerald-500`}
+                      title="Message"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      Message
+                    </button>
                   </div>
                 </div>
               );
@@ -3324,25 +3469,80 @@ const TherapistDashboard = () => {
 
                 <div className={`${cardBg} rounded-2xl border ${glowStyles.blue} p-5`}>
                   <h3 className={`text-lg font-bold ${textPrimary} mb-4 flex items-center gap-2 tracking-tight`}>
-                    <MessageCircle className="w-5 h-5 text-blue-500" />
-                    Recent Module Answers
+                    <BookOpen className="w-5 h-5 text-blue-500" />
+                    Module Responses
                   </h3>
-                  {clientInsights.recentAnswers.length === 0 ? (
+                  {!clientInsights.moduleResponses || Object.keys(clientInsights.moduleResponses).length === 0 ? (
                     <div className="text-center py-6">
                       <MessageSquare className={`w-8 h-8 mx-auto mb-2 ${textMuted}`} />
-                      <p className={`text-sm ${textSecondary}`}>No module answers recorded yet</p>
+                      <p className={`text-sm ${textSecondary}`}>No module responses recorded yet</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      {clientInsights.recentAnswers.map((item, i) => (
-                        <div key={i} className={`p-4 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{item.module}</span>
-                          </div>
-                          <p className={`text-sm font-medium ${textPrimary} mb-2`}>{item.question}</p>
-                          <p className={`text-sm ${textSecondary} italic leading-relaxed`}>"{item.answer}"</p>
-                        </div>
-                      ))}
+                    <div className="space-y-2">
+                      {Object.entries(clientInsights.moduleResponses)
+                        .sort((a, b) => {
+                          const modA = curriculumModules.find(m => m.id === a[0]);
+                          const modB = curriculumModules.find(m => m.id === b[0]);
+                          return (modA?.order || 999) - (modB?.order || 999);
+                        })
+                        .map(([moduleId, responses]) => {
+                          const moduleData = curriculumModules.find(m => m.id === moduleId);
+                          const moduleName = moduleData?.title || getModuleName(moduleId) || moduleId;
+                          const isExpanded = expandedResponseModules[moduleId];
+                          const totalResponses = responses.reduce((sum, r) => sum + Object.keys(r.answers || {}).filter(k => {
+                            const v = r.answers[k];
+                            return typeof v === 'string' && v.trim().length > 0;
+                          }).length, 0);
+                          const completedModules = clientInsights.moduleProgress?.filter(p => p.completed && p.module_id === moduleId);
+                          const isCompleted = completedModules && completedModules.length > 0;
+                          const clientWound = clientInsights.assessment?.primary_wound || client?.primaryWound || 'abandonment';
+
+                          return (
+                            <div key={moduleId} className={`rounded-lg border ${cardBorder} overflow-hidden`}>
+                              <button
+                                onClick={() => setExpandedResponseModules(prev => ({ ...prev, [moduleId]: !prev[moduleId] }))}
+                                className={`w-full flex items-center justify-between p-3 ${hoverBg} transition-colors`}
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <BookOpen className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                  <span className={`text-sm font-medium ${textPrimary} truncate`}>{moduleName}</span>
+                                  {isCompleted && (
+                                    <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex-shrink-0">Completed</span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <span className={`text-xs ${textMuted}`}>{totalResponses} response{totalResponses !== 1 ? 's' : ''}</span>
+                                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </div>
+                              </button>
+                              {isExpanded && (
+                                <div className={`p-3 pt-0 space-y-3`}>
+                                  {totalResponses === 0 ? (
+                                    <p className={`text-sm ${textMuted} text-center py-3`}>No responses yet</p>
+                                  ) : (
+                                    responses.map((resp, ri) =>
+                                      Object.entries(resp.answers || {})
+                                        .filter(([, v]) => typeof v === 'string' && v.trim().length > 0)
+                                        .map(([key, value], qi) => {
+                                          const questionText = mapResponseKey(key, moduleData, clientWound);
+                                          const badge = getResponseBadge(key);
+                                          return (
+                                            <div key={`${ri}-${qi}`} className={`p-3 rounded-lg border ${cardBorder} ${isDark ? 'bg-slate-700/30' : 'bg-gray-50'}`}>
+                                              <div className="flex items-center gap-2 mb-2">
+                                                <span className={`text-xs px-2 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+                                              </div>
+                                              <p className={`text-sm ${textMuted} mb-1.5`}>{questionText}</p>
+                                              <p className={`text-sm ${textPrimary} leading-relaxed`}>"{value}"</p>
+                                            </div>
+                                          );
+                                        })
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                     </div>
                   )}
                 </div>
