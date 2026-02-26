@@ -376,13 +376,14 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
       completeModule();
     } else {
       setCurrentStepIndex(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // Navigate to previous step
   const previousStep = () => {
     if (!isFirstStep) {
       setCurrentStepIndex(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
