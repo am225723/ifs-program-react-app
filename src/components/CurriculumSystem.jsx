@@ -155,6 +155,10 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
     { id: 'protocols', title: 'Healing Protocols', icon: Target, color: 'from-orange-500 to-orange-600' },
     { id: 'unburdening', title: 'Deep Healing', icon: Lightbulb, color: 'from-emerald-500 to-emerald-600' },
     { id: 'exercises', title: 'Exercises & Integration', icon: Zap, color: 'from-green-500 to-green-600' },
+    { id: 'reparenting', title: 'Reparenting', icon: Heart, color: 'from-pink-500 to-rose-600' },
+    { id: 'somatic', title: 'Somatic Healing', icon: Brain, color: 'from-teal-500 to-teal-600' },
+    { id: 'relationships', title: 'Relationships & Attachment', icon: Users, color: 'from-indigo-500 to-indigo-600' },
+    { id: 'protectors', title: 'Inner Critic', icon: Shield, color: 'from-violet-500 to-violet-600' },
   ];
 
   const getModuleStatus = (module) => {
