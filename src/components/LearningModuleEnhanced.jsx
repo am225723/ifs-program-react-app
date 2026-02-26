@@ -174,6 +174,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
     getModuleProgress, 
     saveInteractiveData, 
     getInteractiveData,
+    saveModuleAnswers,
     awardXP
   } = useData();
 
@@ -237,8 +238,16 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
     try {
       await saveModuleProgress(module.id, progress);
       await saveInteractiveData(module.id, interactiveData);
+
+      if (activityResponses && Object.keys(activityResponses).length > 0) {
+        const stepId = currentStep?.data?.id || `step-${currentStepIndex}`;
+        try {
+          await saveModuleAnswers(module.id, stepId, activityResponses);
+        } catch (e) {
+          // non-critical
+        }
+      }
       
-      // Notify parent component
       if (typeof window !== 'undefined' && window.onModuleProgress) {
         window.onModuleProgress(module.id, progress);
       }

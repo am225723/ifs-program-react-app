@@ -528,7 +528,7 @@ const TherapistDashboard = () => {
           .from('ifs_interactive_data')
           .select('*')
           .eq('client_id', clientId)
-          .in('module_id', ['assessment_wounds', 'assessment_parts', 'assessment_self-energy']),
+          .in('module_id', ['assessment_wounds', 'assessment_parts', 'assessment_self-energy', 'assessment_attachment']),
         supabase
           .from('ifs_journal_entries')
           .select('*')
@@ -556,6 +556,7 @@ const TherapistDashboard = () => {
 
       const recentAnswers = [];
       const moduleResponses = {};
+
       (moduleAnswers || []).forEach(ma => {
         const answers = ma.answers || {};
         const modId = ma.module_id || 'unknown';
@@ -563,19 +564,38 @@ const TherapistDashboard = () => {
         moduleResponses[modId].push({ step_id: ma.step_id, answers });
         Object.entries(answers).forEach(([question, answer]) => {
           if (typeof answer === 'string' && answer.trim().length > 0) {
-            recentAnswers.push({
-              question: question,
-              answer: answer,
-              module: modId,
-              stepId: ma.step_id
-            });
+            recentAnswers.push({ question, answer, module: modId, stepId: ma.step_id });
           }
         });
+      });
+
+      (progressData || []).forEach(p => {
+        const responses = p.responses || {};
+        if (Object.keys(responses).length === 0) return;
+        const modId = p.module_id;
+        if (!moduleResponses[modId]) moduleResponses[modId] = [];
+        const alreadyHas = moduleResponses[modId].some(existing => {
+          const existingKeys = Object.keys(existing.answers || {});
+          const newKeys = Object.keys(responses);
+          return existingKeys.length > 0 && newKeys.every(k => existingKeys.includes(k));
+        });
+        if (!alreadyHas) {
+          moduleResponses[modId].push({ step_id: 'progress', answers: responses });
+          Object.entries(responses).forEach(([question, answer]) => {
+            if (typeof answer === 'string' && answer.trim().length > 0) {
+              const exists = recentAnswers.some(ra => ra.module === modId && ra.question === question);
+              if (!exists) {
+                recentAnswers.push({ question, answer, module: modId, stepId: 'progress' });
+              }
+            }
+          });
+        }
       });
 
       const woundsEntry = (interactiveData || []).find(d => d.module_id === 'assessment_wounds');
       const partsEntry = (interactiveData || []).find(d => d.module_id === 'assessment_parts');
       const selfEnergyEntry = (interactiveData || []).find(d => d.module_id === 'assessment_self-energy');
+      const attachmentEntry = (interactiveData || []).find(d => d.module_id === 'assessment_attachment');
 
       let finalAssessment = assessmentData || null;
       if (!finalAssessment && woundsEntry?.data) {
@@ -631,6 +651,7 @@ const TherapistDashboard = () => {
         personalization: personalizedCurriculum || null,
         partsAssessment: partsEntry?.data || null,
         selfEnergyAssessment: selfEnergyEntry?.data || null,
+        attachmentAssessment: attachmentEntry?.data || null,
         customAssessments: customAssessmentResults,
         journalEntries: journalEntries || [],
         moduleProgress: progressData || [],
@@ -3007,6 +3028,59 @@ const TherapistDashboard = () => {
                                   </div>
                                 ))}
                               </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+
+                    {clientInsights.attachmentAssessment && (
+                      <div className="mb-6">
+                        <h4 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                          <Users className="w-4 h-4 text-indigo-500" />
+                          Attachment Style Assessment
+                        </h4>
+                        {(() => {
+                          const attData = clientInsights.attachmentAssessment;
+                          const style = attData.primaryStyle || attData.style || 'Unknown';
+                          const secondaryStyle = attData.secondaryStyle || null;
+                          const styleColors = {
+                            secure: { bg: isDark ? 'bg-emerald-900/20' : 'bg-emerald-50', border: isDark ? 'border-emerald-800' : 'border-emerald-200', text: isDark ? 'text-emerald-300' : 'text-emerald-700' },
+                            anxious: { bg: isDark ? 'bg-amber-900/20' : 'bg-amber-50', border: isDark ? 'border-amber-800' : 'border-amber-200', text: isDark ? 'text-amber-300' : 'text-amber-700' },
+                            avoidant: { bg: isDark ? 'bg-blue-900/20' : 'bg-blue-50', border: isDark ? 'border-blue-800' : 'border-blue-200', text: isDark ? 'text-blue-300' : 'text-blue-700' },
+                            disorganized: { bg: isDark ? 'bg-red-900/20' : 'bg-red-50', border: isDark ? 'border-red-800' : 'border-red-200', text: isDark ? 'text-red-300' : 'text-red-700' }
+                          };
+                          const sc = styleColors[style.toLowerCase()] || styleColors.secure;
+                          const scores = attData.scores || {};
+                          return (
+                            <div>
+                              <div className={`p-4 rounded-lg border ${sc.border} ${sc.bg} mb-3`}>
+                                <p className={`text-xs font-semibold uppercase tracking-wider ${sc.text} mb-1`}>Primary Attachment Style</p>
+                                <p className={`text-2xl font-extrabold ${sc.text} capitalize`}>{style}</p>
+                                {secondaryStyle && (
+                                  <p className={`text-xs ${textMuted} mt-1`}>Secondary: <span className="capitalize font-medium">{secondaryStyle}</span></p>
+                                )}
+                              </div>
+                              {Object.keys(scores).length > 0 && (
+                                <div className="grid grid-cols-2 gap-3">
+                                  {Object.entries(scores).map(([key, val]) => {
+                                    const sVal = typeof val === 'number' ? val : (val?.total || val?.score || 0);
+                                    const pct = Math.min(100, Math.round((sVal / 25) * 100));
+                                    const ksc = styleColors[key.toLowerCase()] || styleColors.secure;
+                                    return (
+                                      <div key={key} className={`p-3 rounded-lg border ${ksc.border} ${ksc.bg}`}>
+                                        <div className="flex items-center justify-between mb-1">
+                                          <span className={`text-xs font-bold capitalize ${ksc.text}`}>{key}</span>
+                                          <span className={`text-sm font-bold ${textPrimary}`}>{sVal}</span>
+                                        </div>
+                                        <div className="h-2 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                                          <div className={`h-full rounded-full ${key.toLowerCase() === style.toLowerCase() ? 'bg-indigo-500' : 'bg-gray-400'}`} style={{ width: `${pct}%` }} />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
                           );
                         })()}
