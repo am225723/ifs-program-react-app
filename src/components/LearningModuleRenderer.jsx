@@ -73,7 +73,7 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
 
       if (clientId) {
         try {
-          const [curriculumRes, interactiveRes, partsRes] = await Promise.all([
+          const [curriculumRes, interactiveRes, partsRes, selfEnergyRes] = await Promise.all([
             supabaseHelpers.getPersonalizedCurriculum(clientId),
             supabase.from('ifs_interactive_data')
               .select('data')
@@ -84,6 +84,11 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
               .select('data')
               .eq('client_id', clientId)
               .eq('module_id', 'assessment_parts')
+              .maybeSingle(),
+            supabase.from('ifs_interactive_data')
+              .select('data')
+              .eq('client_id', clientId)
+              .eq('module_id', 'assessment_self-energy')
               .maybeSingle()
           ]);
 
@@ -131,19 +136,22 @@ const LearningModuleRenderer = ({ userProgress = {} }) => {
             activeParts.sort((a, b) => b.score - a.score);
           }
 
+          const selfEnergyData = selfEnergyRes.data?.data || null;
+          const clientName = client?.name?.split(' ')[0] || null;
+
           if (primaryWound && WOUND_MODULE_PRIORITIES[primaryWound]) {
             const priority = getWoundPriority(primaryWound, moduleId);
-            if (priority && priority.level !== 'standard') {
-              setWoundContext({
-                primary: primaryWound,
-                secondary: secondaryWound,
-                scores: woundScores,
-                config: WOUND_MODULE_PRIORITIES[primaryWound],
-                secondaryConfig: secondaryWound ? WOUND_MODULE_PRIORITIES[secondaryWound] : null,
-                priority,
-                activeParts
-              });
-            }
+            setWoundContext({
+              primary: primaryWound,
+              secondary: secondaryWound,
+              scores: woundScores,
+              config: WOUND_MODULE_PRIORITIES[primaryWound],
+              secondaryConfig: secondaryWound ? WOUND_MODULE_PRIORITIES[secondaryWound] : null,
+              priority: priority || { level: 'standard', badge: null, message: null },
+              activeParts,
+              selfEnergy: selfEnergyData,
+              clientName
+            });
           }
         } catch (err) {
           console.error('Error loading personalization:', err);

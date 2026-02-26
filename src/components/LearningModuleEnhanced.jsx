@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { progressTracker } from '../lib/supabasePersonalization';
+import { generatePersonalizedLesson } from '../lib/dynamicLessonContent';
 
 const VoiceRecorder = ({ onRecordingComplete, label }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -518,44 +519,146 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
     const woundPersonalization = module?.woundPersonalization?.[woundContext?.primary];
     const isSixFsLearn = data.id?.includes('six-fs');
     
+    const dynamicLesson = generatePersonalizedLesson(module?.id, woundContext, woundPersonalization);
+
+    const woundColor = woundContext?.config;
+    const partTypeBadge = (type) => {
+      const colors = { manager: 'bg-blue-100 text-blue-800', firefighter: 'bg-amber-100 text-amber-800', exile: 'bg-rose-100 text-rose-800' };
+      const labels = { manager: 'Manager', firefighter: 'Firefighter', exile: 'Exile' };
+      return <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${colors[type] || 'bg-gray-100 text-gray-700'}`}>{labels[type] || type}</span>;
+    };
+
+    const renderPartsList = (section, borderColor) => {
+      if (!section) return null;
+      return (
+        <div className={`rounded-xl p-5 bg-white border-l-4 ${borderColor} shadow-sm`}>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">{section.title}</h3>
+          <p className="text-sm text-gray-600 mb-4">{section.intro}</p>
+          <div className="space-y-3">
+            {section.parts.map((part, i) => (
+              <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="flex-shrink-0 mt-0.5">{partTypeBadge(part.type)}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-gray-900 text-sm">{part.name}</span>
+                    <span className="text-xs text-gray-400">({part.score.toFixed(1)})</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${part.score >= 5 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                      {part.intensity}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1 leading-relaxed">{part.strategy || part.connection}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const renderSelfEnergySection = (seSection) => {
+      if (!seSection) return null;
+      return (
+        <div className="rounded-xl p-5 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200 shadow-sm">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">{seSection.title}</h3>
+          <div className="space-y-3">
+            {seSection.sections.map((s, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${s.type === 'strengths' ? 'bg-emerald-500' : s.type === 'developing' ? 'bg-amber-400' : 'bg-violet-400'}`} />
+                <div>
+                  <span className={`text-xs font-bold uppercase tracking-wider ${s.type === 'strengths' ? 'text-emerald-700' : s.type === 'developing' ? 'text-amber-700' : 'text-violet-700'}`}>
+                    {s.label}
+                  </span>
+                  <p className="text-sm text-gray-700 leading-relaxed mt-0.5">{s.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
     return (
       <div className="space-y-6">
         <div className="flex items-center space-x-3 mb-6">
-          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-amber-500 rounded-lg flex items-center justify-center">
+          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${dynamicLesson && woundColor ? `bg-gradient-to-r ${woundColor.gradient}` : 'bg-gradient-to-r from-blue-500 to-amber-500'}`}>
             <BookOpen className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{data.title}</h2>
-            <p className="text-gray-600">Educational Content</p>
+            <h2 className="text-2xl font-bold text-gray-900">{dynamicLesson ? dynamicLesson.sectionTitle : data.title}</h2>
+            {dynamicLesson && (
+              <p className="text-sm text-gray-500 flex items-center gap-1.5">
+                <Heart className="w-3.5 h-3.5 text-rose-400" />
+                Personalized for your {dynamicLesson.childName}
+              </p>
+            )}
+            {!dynamicLesson && <p className="text-gray-600">Educational Content</p>}
           </div>
         </div>
 
-        {woundPersonalization && (
-          <div className="bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-5 border-2 border-amber-200 mb-2">
-            <div className="flex items-center gap-2 mb-2">
-              <Heart className="w-5 h-5 text-rose-500" />
-              <p className="font-semibold text-gray-900">Personalized for Your {woundPersonalization.childName}</p>
+        {dynamicLesson ? (
+          <>
+            <div className={`rounded-xl p-5 border-l-4 bg-gradient-to-r from-stone-50 to-white ${
+              woundColor?.color === 'blue' ? 'border-l-blue-400' :
+              woundColor?.color === 'purple' ? 'border-l-purple-400' :
+              woundColor?.color === 'amber' ? 'border-l-amber-400' :
+              woundColor?.color === 'red' ? 'border-l-red-400' :
+              woundColor?.color === 'green' ? 'border-l-green-400' : 'border-l-amber-400'
+            }`}>
+              <p className="text-lg text-gray-800 leading-relaxed">{dynamicLesson.intro}</p>
             </div>
-            <p className="text-sm text-gray-700 leading-relaxed mb-3">{woundPersonalization.moduleIntro}</p>
-            {woundPersonalization.selfCsIntegration && (
-              <div className="p-3 bg-white/80 rounded-lg border border-amber-100">
-                <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-1">How the 8 C's of Self Support Your Practice</p>
-                <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.selfCsIntegration}</p>
+
+            {renderPartsList(dynamicLesson.managerSection, 'border-l-blue-400')}
+            {renderPartsList(dynamicLesson.firefighterSection, 'border-l-amber-400')}
+            {renderPartsList(dynamicLesson.exileSection, 'border-l-rose-400')}
+            {renderSelfEnergySection(dynamicLesson.selfEnergySection)}
+
+            {dynamicLesson.closingMessages.length > 0 && (
+              <div className="rounded-xl p-5 bg-gradient-to-r from-amber-50 to-emerald-50 border border-amber-200 shadow-sm">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">The Path Forward: A Message to Your Parts</h3>
+                <div className="space-y-3">
+                  {dynamicLesson.closingMessages.map((msg, i) => (
+                    <div key={i} className="pl-4 border-l-2 border-amber-300">
+                      <p className="text-sm font-semibold text-gray-800 mb-0.5">To {msg.to}:</p>
+                      <p className="text-sm text-gray-700 italic leading-relaxed">{msg.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed mt-4 pt-3 border-t border-amber-200">
+                  {dynamicLesson.closingNarrative}
+                </p>
               </div>
             )}
-          </div>
+          </>
+        ) : (
+          <>
+            {woundPersonalization && (
+              <div className="bg-gradient-to-r from-amber-50 to-stone-50 rounded-xl p-5 border-2 border-amber-200 mb-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Heart className="w-5 h-5 text-rose-500" />
+                  <p className="font-semibold text-gray-900">Personalized for Your {woundPersonalization.childName}</p>
+                </div>
+                <p className="text-sm text-gray-700 leading-relaxed mb-3">{woundPersonalization.moduleIntro}</p>
+                {woundPersonalization.selfCsIntegration && (
+                  <div className="p-3 bg-white/80 rounded-lg border border-amber-100">
+                    <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider mb-1">How the 8 C's of Self Support Your Practice</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">{woundPersonalization.selfCsIntegration}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {renderActivePartsPanel()}
+            {renderDualWoundPanel()}
+
+            <div className="prose max-w-none">
+              {data.content.map((paragraph, index) => (
+                <p key={index} className="text-lg text-gray-700 leading-relaxed mb-4">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+          </>
         )}
-
-        {renderActivePartsPanel()}
-        {renderDualWoundPanel()}
-
-        <div className="prose max-w-none">
-          {data.content.map((paragraph, index) => (
-            <p key={index} className="text-lg text-gray-700 leading-relaxed mb-4">
-              {paragraph}
-            </p>
-          ))}
-        </div>
 
         {data.bullets && data.bullets.length > 0 && (
           <div className="bg-blue-50 rounded-lg p-6 border border-blue-100">
@@ -573,7 +676,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
 
         {data.keyTakeaways && data.keyTakeaways.length > 0 && (
           <div className="bg-gradient-to-r from-amber-50 to-emerald-50 rounded-lg p-6 border border-amber-100">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">🧠 Key Takeaways:</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Takeaways:</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {data.keyTakeaways.map((takeaway, index) => (
                 <div key={index} className="flex items-start space-x-3">
