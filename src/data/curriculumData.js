@@ -1812,6 +1812,113 @@ const coreModules = [
     estimatedMinutes: 90,
     prerequisites: ['module-2-inner-child-wounds'],
     innerChildFocus: true,
+    woundPersonalization: {
+      abandonment: {
+        childName: 'Lonely Child',
+        moduleIntro: 'These advanced exercises are personalized for your abandonment wound. Each practice — letter writing, safe place visualization, reparenting dialogue, and body-based connection — is adapted to directly address your Lonely Child\'s fear of being left and its deep longing for consistent, reliable love. These exercises build the internal secure attachment your Lonely Child needs.',
+        selfCsIntegration: 'Compassion and Connectedness infuse every exercise for your Lonely Child. The letter becomes a permanent record of your Self\'s commitment to stay. The safe place becomes a sanctuary where your Lonely Child is never alone. The reparenting dialogue lets your Self say the words your child needed to hear. The body-based practice anchors connection in physical sensation.',
+        guidedSteps: [
+          'Letter Writing: Write a letter from your adult Self to your Lonely Child. Begin with: "Dear little one, I know you have been waiting for someone who stays. I am that someone." Tell this child specifically what you understand about its fear. Name the moments of abandonment. Promise consistent, daily presence — not perfection, but reliability.',
+          'Safe Place Visualization: Create an internal sanctuary specifically designed for your Lonely Child. Include elements that represent security and permanence — perhaps a cozy room with a door that locks from the inside, a warm fireplace that never goes out, a rocking chair where your Self holds your Lonely Child. The key detail: this place cannot be taken away.',
+          'Reparenting Dialogue: Let your Lonely Child speak first. Ask: "What did you need to hear when you were left?" Then respond as the ideal parent: "I am here. I will always come back. You are not too much. You are not the reason people left. You deserve love that stays."',
+          'Body-Based Connection: Place both hands on your chest. Feel your heartbeat — the rhythm of a body that has never left you. Your heart has been beating for your Lonely Child since the very beginning, without ever stopping. Let your child feel this constant, physical proof of Self-presence.',
+          'Daily Practice — Morning Anchor: Each morning, before checking your phone or starting your day, place a hand on your heart and say: "Good morning, little one. I am here. We will face this day together." This 30-second ritual builds the reliable presence your Lonely Child craves.',
+          'Daily Practice — Evening Return: Each evening, before sleep, close your eyes and say: "I came back. I stayed through today. I will be here when you wake up." This bookend of morning and evening check-ins creates the consistent rhythm of a secure attachment figure.',
+          'Integration: Write three things your Lonely Child can count on from your Self — not big promises, but small, sustainable commitments. Post them where you can see them. These become your Lonely Child\'s evidence that someone finally stays.'
+        ],
+        reflectionPrompts: [
+          'What did you discover writing the letter to your Lonely Child? What emotions arose as you made the commitment to stay?',
+          'Describe your safe place. What elements did your Lonely Child most need? What makes this place feel permanent and secure?',
+          'What words did your Lonely Child need to hear most during the reparenting dialogue? What was it like to provide them?',
+          'How did the body-based practice — feeling your own heartbeat — affect your Lonely Child? Did it create a sense of physical safety?',
+          'Which daily practice (morning anchor or evening return) feels most important for your healing? How will you sustain it?'
+        ]
+      },
+      shame: {
+        childName: 'Unworthy Child',
+        moduleIntro: 'These advanced exercises are personalized for your shame wound. Each practice is adapted to directly address your Unworthy Child\'s belief that it is fundamentally flawed, broken, or defective. The letter becomes a testament of your inherent worth. The safe place becomes a space free from judgment. The reparenting dialogue rewrites the toxic messages. The body-based practice reclaims your body from shame\'s grip.',
+        selfCsIntegration: 'Compassion and Courage power every exercise for your Unworthy Child. The letter requires Courage to say what the Critic forbids: "You are enough." The safe place requires Creativity to imagine a space without judgment. The reparenting dialogue requires Compassion to offer what shame says you don\'t deserve. The body-based practice requires Calm to feel a body that shame has made you want to escape.',
+        guidedSteps: [
+          'Letter Writing: Write a letter from your adult Self to your Unworthy Child. Begin with: "Dear little one, I have something important to tell you. There is nothing wrong with you. There never was." Name the specific shame messages this child absorbed. Then systematically contradict each one with truth and Compassion.',
+          'Safe Place Visualization: Create an internal sanctuary that is completely free of judgment. No one evaluates, grades, or measures here. In this place, your Unworthy Child exists without needing to perform, prove, or earn anything. Imagine warm light that sees every part of you and radiates acceptance. The Inner Critic has no access here.',
+          'Reparenting Dialogue: Let your Unworthy Child express what it believes about itself — the ugly, shameful beliefs it carries. Then respond as the ideal parent: "I hear you. I know you believe you are broken. But I see you completely — all of you — and what I see is worthy, lovable, and whole. What happened to you was wrong. You are not wrong."',
+          'Body-Based Connection: Shame lives in the body — the flushed face, the desire to hide, the urge to shrink. Place your hands on whatever part of your body holds the most shame. Instead of pulling away, stay. Breathe into that area and say: "This body is worthy. It does not need to hide. I accept you completely." This is radical for a shame system.',
+          'Daily Practice — Mirror Compassion: Once daily, look at yourself in a mirror and say one genuinely kind thing — not about performance or appearance, but about your being: "You are enough today." Notice the Critic\'s response without obeying it.',
+          'Daily Practice — Shame Catch: When you catch yourself in a shame spiral (self-criticism, hiding, performing), pause and name it: "Shame is here." Then consciously shift to Compassion: "What would I say to a friend in this moment?" Apply that Compassion to yourself.',
+          'Integration: Write a "truth statement" for each core shame belief your Unworthy Child carries. Example: Shame says "I am broken" → Truth says "I was wounded by what happened to me, but my core Self was never damaged." Carry these truths with you.'
+        ],
+        reflectionPrompts: [
+          'What core shame messages did you contradict in your letter? How did your Inner Critic react to being challenged?',
+          'What was your judgment-free safe place like? How did your Unworthy Child respond to a space without evaluation?',
+          'What was the hardest thing to say to your Unworthy Child during the reparenting dialogue? What made it hard?',
+          'How did it feel to place your hands on the part of your body that holds the most shame? What arose when you stayed instead of pulling away?',
+          'Which truth statement is most important for your Unworthy Child to hear daily?'
+        ]
+      },
+      neglect: {
+        childName: 'Lost Child',
+        moduleIntro: 'These advanced exercises are personalized for your neglect wound. Each practice is adapted to directly address your Lost Child\'s experience of being unseen, unheard, and unattended to. The letter becomes proof that someone finally noticed. The safe place becomes a space where your needs are the priority. The reparenting dialogue gives voice to needs that were never spoken. The body-based practice reconnects you with a body whose signals were chronically ignored.',
+        selfCsIntegration: 'Curiosity and Calm infuse every exercise for your Lost Child. The letter requires Curiosity to discover what your child actually needs. The safe place requires Calm patience to create a space of unhurried attention. The reparenting dialogue requires genuine interest in your child\'s inner world. The body-based practice requires slowing down enough to feel what your body has been trying to tell you.',
+        guidedSteps: [
+          'Letter Writing: Write a letter from your adult Self to your Lost Child. Begin with: "Dear little one, I see you. I know you learned to become invisible, and I understand why. But I am looking for you now, and I will not stop." Ask this child what it needed but never received. Let the letter be an act of dedicated attention.',
+          'Safe Place Visualization: Create an internal sanctuary where your Lost Child is the sole focus. Unlike the real world where attention was scarce, this place is devoted entirely to your child. Imagine a warm, softly lit room where someone sits and waits patiently, ready to listen whenever your Lost Child is ready to speak. No distractions. No divided attention.',
+          'Reparenting Dialogue: Ask your Lost Child: "What did you stop asking for because no one was listening?" Wait patiently — this part may take time to answer because it is not used to being asked. When it speaks, respond with genuine attunement: "I hear you. Your need for _____ makes complete sense. I am going to learn how to meet that need."',
+          'Body-Based Connection: Your body was neglected too — its hunger, tiredness, pain, and comfort needs were likely minimized. Place your hands on your belly. Ask: "What does my body need right now?" Then actually respond: rest if tired, eat if hungry, move if restless. This attunement to physical needs mirrors the emotional attunement your Lost Child was denied.',
+          'Daily Practice — Need Check-In: Three times daily, pause and ask: "What do I need right now? What am I feeling?" If "I don\'t know" or "Nothing" arises, stay with the question. Your Lost Child is learning that its needs will be met, not ignored.',
+          'Daily Practice — Self-Attunement: Choose one need you have been suppressing and meet it today. It could be rest, play, solitude, connection, creative expression, or physical nourishment. Meeting your own needs is the most direct form of reparenting for neglect wounds.',
+          'Integration: Write a list of 5 needs you have been minimizing or ignoring. Next to each, write how you will begin honoring that need. This becomes your Lost Child\'s care plan — the attentive parenting blueprint you never received.'
+        ],
+        reflectionPrompts: [
+          'What needs did your Lost Child reveal during the letter writing? Were there needs you didn\'t know you had?',
+          'How did it feel to create a space devoted entirely to your Lost Child\'s attention? What was your child\'s reaction to being the sole focus?',
+          'What did your Lost Child stop asking for? What was it like to hear those suppressed needs spoken aloud?',
+          'How connected are you to your body\'s signals? Did the body-based practice reveal needs you have been ignoring?',
+          'Which suppressed need feels most urgent to begin honoring? What has it cost you to minimize it?'
+        ]
+      },
+      betrayal: {
+        childName: 'Terrified Child',
+        moduleIntro: 'These advanced exercises are personalized for your betrayal wound. Each practice is adapted to directly address your Terrified Child\'s violated trust and its need for safety, predictability, and transparency. The letter becomes a covenant of trustworthy behavior. The safe place becomes a fortress with your Terrified Child in control of access. The reparenting dialogue earns trust through honesty. The body-based practice releases the chronic tension of hypervigilance.',
+        selfCsIntegration: 'Calm and Clarity power every exercise for your Terrified Child. The letter requires Calm honesty about what happened. The safe place requires Clarity about boundaries and safety. The reparenting dialogue requires transparency — no hidden agendas. The body-based practice requires Calm enough to let the hypervigilant body begin to release its chronic bracing.',
+        guidedSteps: [
+          'Letter Writing: Write a letter from your adult Self to your Terrified Child. Begin with: "Dear little one, what happened to you was real. Your trust was violated by someone who should have been safe. That was not your fault." Name what happened without forcing details. Promise earned trust through consistent behavior, not empty reassurance.',
+          'Safe Place Visualization: Create an internal sanctuary where your Terrified Child has complete control. The door locks from the inside. There are windows to see who approaches. No one enters without explicit permission. Your Self waits outside patiently until invited in. This place is about your child\'s autonomy and control — the opposite of the powerlessness of betrayal.',
+          'Reparenting Dialogue: Approach your Terrified Child slowly and with full transparency. Say: "I am your Self. I have no hidden agenda. I am exactly what I appear to be. I will not ask you to trust me today. I will simply show up, consistently, and let you decide." Let the child ask questions. Answer them honestly.',
+          'Body-Based Connection: Betrayal locks the body in hypervigilance — tight shoulders, clenched jaw, scanning eyes, shallow breathing. Place your hands on the area of greatest tension and say: "You can soften here. Right now, in this moment, you are safe." Don\'t force relaxation. Simply offer permission and let the body decide its own pace.',
+          'Daily Practice — Safety Scan: Once daily, pause and let your body assess: "Am I safe right now?" Not "Am I safe forever" — just right now. If the answer is yes, let your body register that data. Your Terrified Child collects evidence of safety, one moment at a time.',
+          'Daily Practice — Transparency Journal: Write one honest thing about how you\'re feeling each day. Not performed, not filtered — just truth. This builds internal trust by proving your Self is transparent and honest. Your Terrified Child watches for deception; give it honesty instead.',
+          'Integration: Create a "trust evidence file" — a list of moments where your Self showed up reliably, kept a commitment, or was honest even when it was uncomfortable. Your Terrified Child needs concrete evidence, not promises. Update this file weekly.'
+        ],
+        reflectionPrompts: [
+          'What happened when you named the betrayal in your letter? How did your Terrified Child respond to being believed and validated?',
+          'Describe your safe place. What features gave your Terrified Child the most sense of control and security?',
+          'How did your Terrified Child respond to a Self that approaches slowly, transparently, and without demanding trust?',
+          'Where does hypervigilance live in your body? What happened when you offered permission to soften without forcing it?',
+          'What evidence of trustworthiness has your Self already demonstrated that your Terrified Child may not have noticed?'
+        ]
+      },
+      helplessness: {
+        childName: 'Powerless Child',
+        moduleIntro: 'These advanced exercises are personalized for your helplessness wound. Each practice is adapted to directly address your Powerless Child\'s belief that effort is futile and that it has no agency to change anything. The letter becomes a declaration of capability. The safe place becomes a space where your child\'s choices matter. The reparenting dialogue restores voice and power. The body-based practice reconnects with physical strength and vitality.',
+        selfCsIntegration: 'Confidence and Courage power every exercise for your Powerless Child. The letter requires Confidence to declare "You are capable." The safe place requires Creativity to imagine a space where your child has real power. The reparenting dialogue requires Courage to challenge the deeply embedded "why bother" narrative. The body-based practice requires connecting with your body\'s inherent strength and agency.',
+        guidedSteps: [
+          'Letter Writing: Write a letter from your adult Self to your Powerless Child. Begin with: "Dear little one, you learned that trying doesn\'t work and that your voice doesn\'t matter. That was true then — you were in a situation where a child truly had no power. But you are not there anymore." Name what overwhelmed this child. Then list evidence of your current capability.',
+          'Safe Place Visualization: Create an internal sanctuary where your Powerless Child has agency and choices. Everything in this space responds to your child\'s decisions — the lighting adjusts, the temperature shifts, doors open and close at your child\'s command. This place is about proving that actions have consequences and choices matter.',
+          'Reparenting Dialogue: Ask your Powerless Child: "What did you give up trying to change?" Listen for the areas where hope was abandoned. Then respond: "I hear you. In that situation, you truly couldn\'t change anything. But your Self is here now, and together we have capabilities that a child alone never had. What would you like to try?"',
+          'Body-Based Connection: Helplessness often manifests as physical collapse — slumped posture, low energy, heaviness. Stand up. Feel your feet pressing into the ground. Push your palms against a wall and feel your own strength. Clench your fists and feel your muscles engage. Your body is not helpless — let your Powerless Child feel this physical power.',
+          'Daily Practice — One Choice: Each day, make one deliberate choice and notice its impact. It can be small: choosing what to eat, saying no to something, rearranging your space. The point is to prove to your Powerless Child: "My actions create change in the world."',
+          'Daily Practice — Strength Anchor: Once daily, do something that makes you feel physically strong — push-ups, a brisk walk, lifting something heavy, standing tall. Physical empowerment translates directly to psychological empowerment for helplessness wounds.',
+          'Integration: Create an "agency log" — a daily list of choices you made and their outcomes. Even small entries ("I chose to rest and felt better" or "I spoke up and was heard") accumulate into undeniable evidence that your Powerless Child is not powerless anymore.'
+        ],
+        reflectionPrompts: [
+          'What evidence of current capability were you able to name in your letter? Did this surprise your Powerless Child?',
+          'How did your Powerless Child respond to a safe place where its choices had real impact? What did it choose?',
+          'What areas of your life did your Powerless Child give up trying to change? Are any of those areas actually within your current power?',
+          'How did it feel to connect with your body\'s physical strength? Did this challenge the helplessness narrative?',
+          'What will you include in your first agency log entries? How will you sustain this practice?'
+        ]
+      }
+    },
     steps: [
       {
         type: 'activity',

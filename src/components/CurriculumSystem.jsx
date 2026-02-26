@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   BookOpen, Lock, CheckCircle, Circle, Play, Clock, Award, Target,
   Heart, Users, Lightbulb, Zap, ChevronRight, Star, TrendingUp,
-  Brain, Sparkles, Shield, Flag
+  Brain, Sparkles, Shield, Flag, RotateCcw, Filter
 } from 'lucide-react';
 import { 
   curriculumModules, getModuleById, checkPrerequisites,
@@ -22,6 +22,8 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   const [isPersonalized, setIsPersonalized] = useState(false);
   const [clientWound, setClientWound] = useState(null);
   const [loadingWound, setLoadingWound] = useState(true);
+  const [woundFocus, setWoundFocus] = useState('primary');
+  const [restartingModule, setRestartingModule] = useState(null);
 
   useEffect(() => {
     if (userProgress.completedModules) {
@@ -66,24 +68,69 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   }, [userProgress]);
 
   const woundConfig = clientWound ? WOUND_MODULE_PRIORITIES[clientWound.primary] : null;
+  const secondaryWoundConfig = clientWound?.secondary ? WOUND_MODULE_PRIORITIES[clientWound.secondary] : null;
 
-  // Get module priority level for the client's wound
   const getModulePriority = (moduleId) => {
     if (!woundConfig) return null;
     return woundConfig.modules[moduleId] || { level: 'standard', badge: null, message: null };
   };
 
-  // Sort modules so core/high priority ones appear first within their category
+  const getSecondaryPriority = (moduleId) => {
+    if (!secondaryWoundConfig) return null;
+    return secondaryWoundConfig.modules[moduleId] || { level: 'standard', badge: null, message: null };
+  };
+
+  const activeWoundConfig = woundFocus === 'secondary' && secondaryWoundConfig ? secondaryWoundConfig : woundConfig;
+
   const enrichAndSort = (modules) => {
     return [...modules]
-      .map(m => ({ ...m, _priority: getModulePriority(m.id) }))
+      .map(m => ({
+        ...m,
+        _priority: getModulePriority(m.id),
+        _secondaryPriority: getSecondaryPriority(m.id)
+      }))
       .sort((a, b) => {
         if (!woundConfig) return a.order - b.order;
-        const la = LEVEL_ORDER[a._priority?.level || 'standard'];
-        const lb = LEVEL_ORDER[b._priority?.level || 'standard'];
+        const getLevel = (mod) => {
+          if (woundFocus === 'secondary' && secondaryWoundConfig) {
+            return LEVEL_ORDER[mod._secondaryPriority?.level || 'standard'];
+          }
+          return LEVEL_ORDER[mod._priority?.level || 'standard'];
+        };
+        const la = getLevel(a);
+        const lb = getLevel(b);
         if (la !== lb) return la - lb;
         return a.order - b.order;
       });
+  };
+
+  const handleRestartModule = async (module) => {
+    const confirmed = window.confirm(`Restart "${module.title}"? Your previous responses will be cleared.`);
+    if (!confirmed) return;
+
+    setRestartingModule(module.id);
+    try {
+      const client = clientAuth.getCurrentClient();
+      if (!client?.id) return;
+
+      await Promise.all([
+        supabase.from('ifs_client_progress')
+          .update({ current_step: 0, completed: false })
+          .eq('client_id', client.id)
+          .eq('module_id', module.id),
+        supabase.from('ifs_interactive_data')
+          .delete()
+          .eq('client_id', client.id)
+          .like('module_id', `${module.id}%`)
+      ]);
+
+      setCompletedModules(prev => prev.filter(id => id !== module.id));
+    } catch (error) {
+      console.error('Error restarting module:', error);
+      alert('Failed to restart module. Please try again.');
+    } finally {
+      setRestartingModule(null);
+    }
   };
 
   const nextModule = getNextModule(completedModules);
@@ -139,14 +186,17 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
     }
   };
 
-  // Priority modules for the "Your Healing Focus" section
-  const priorityModules = woundConfig
-    ? curriculumModules
-        .map(m => ({ ...m, _priority: getModulePriority(m.id) }))
-        .filter(m => m._priority?.level === 'core' || m._priority?.level === 'high')
-        .sort((a, b) => LEVEL_ORDER[a._priority.level] - LEVEL_ORDER[b._priority.level])
-        .slice(0, 4)
-    : [];
+  const getPriorityModules = (config, getPriorityFn) => {
+    if (!config) return [];
+    return curriculumModules
+      .map(m => ({ ...m, _priority: getPriorityFn(m.id) }))
+      .filter(m => m._priority?.level === 'core' || m._priority?.level === 'high')
+      .sort((a, b) => LEVEL_ORDER[a._priority.level] - LEVEL_ORDER[b._priority.level])
+      .slice(0, 4);
+  };
+
+  const primaryPriorityModules = getPriorityModules(woundConfig, getModulePriority);
+  const secondaryPriorityModules = getPriorityModules(secondaryWoundConfig, getSecondaryPriority);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-emerald-50 to-blue-50">
@@ -162,7 +212,8 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                 {woundConfig ? (
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-amber-600" />
-                    Personalized for your <strong>{woundConfig.childName}</strong> — {woundConfig.tagline}
+                    Personalized for your <strong>{woundConfig.childName}</strong>
+                    {secondaryWoundConfig && <> &amp; <strong>{secondaryWoundConfig.childName}</strong></>}
                   </span>
                 ) : (
                   'A comprehensive IFS curriculum for healing your Inner Child wounds'
@@ -185,66 +236,128 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-        {/* === YOUR HEALING FOCUS (only shown when wound is known) === */}
-        {woundConfig && priorityModules.length > 0 && (
-          <div className={`rounded-2xl border-2 p-6 ${woundConfig.lightBg}`}>
-            <div className="flex items-center gap-3 mb-5">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${woundConfig.gradient} flex items-center justify-center shadow-md`}>
-                <Flag className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h2 className={`text-lg font-bold ${woundConfig.textColor}`}>
-                  Your Healing Focus: {woundConfig.childName}
-                </h2>
-                <p className="text-sm text-gray-600">{woundConfig.tagline}</p>
-              </div>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {priorityModules.map(mod => {
-                const status = getModuleStatus(mod);
-                const p = mod._priority;
-                return (
-                  <Link
-                    key={mod.id}
-                    to={status !== 'locked' ? `/curriculum/module/${mod.id}` : '#'}
-                    onClick={() => status !== 'locked' && handleModuleSelect(mod)}
-                    className={`block rounded-xl border bg-white p-4 transition-all hover:shadow-md group ${status === 'locked' ? 'opacity-60 cursor-not-allowed' : 'hover:border-current'}`}
-                    style={{ borderColor: status !== 'locked' ? undefined : undefined }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${woundConfig.gradient} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                        {status === 'completed'
-                          ? <CheckCircle className="w-4 h-4 text-white" />
-                          : status === 'locked'
-                          ? <Lock className="w-4 h-4 text-white" />
-                          : <Play className="w-4 h-4 text-white" />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-1">
-                          {p?.badge && (
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${woundConfig.darkBg} ${woundConfig.textColor}`}>
-                              {p.badge}
-                            </span>
-                          )}
-                          {status === 'completed' && (
-                            <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">✓ Completed</span>
-                          )}
-                        </div>
-                        <h4 className="font-semibold text-gray-900 text-sm leading-tight">{mod.title}</h4>
-                        {p?.message && <p className="text-xs text-gray-500 mt-1 leading-snug">{p.message}</p>}
-                      </div>
-                      {status === 'available' && (
-                        <ChevronRight className={`w-4 h-4 text-gray-400 group-hover:${woundConfig.textColor} flex-shrink-0 mt-1 transition-colors`} />
-                      )}
+        {/* === YOUR HEALING FOCUS (dual-wound display) === */}
+        {woundConfig && primaryPriorityModules.length > 0 && (
+          <div className="space-y-4">
+            <div className={`grid ${secondaryWoundConfig ? 'md:grid-cols-5' : 'grid-cols-1'} gap-4`}>
+              {/* Primary Wound Card */}
+              <div className={`rounded-2xl border-2 p-6 ${woundConfig.lightBg} ${secondaryWoundConfig ? 'md:col-span-3' : ''}`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${woundConfig.gradient} flex items-center justify-center shadow-md`}>
+                    <Flag className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className={`text-lg font-bold ${woundConfig.textColor}`}>
+                        {woundConfig.childName}
+                      </h2>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${woundConfig.darkBg} ${woundConfig.textColor}`}>Primary</span>
                     </div>
-                  </Link>
-                );
-              })}
+                    <p className="text-sm text-gray-600">{woundConfig.tagline}</p>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {primaryPriorityModules.map(mod => {
+                    const status = getModuleStatus(mod);
+                    const p = mod._priority;
+                    return (
+                      <Link
+                        key={mod.id}
+                        to={status !== 'locked' ? `/curriculum/module/${mod.id}` : '#'}
+                        onClick={() => status !== 'locked' && handleModuleSelect(mod)}
+                        className={`block rounded-xl border bg-white p-3 transition-all hover:shadow-md group ${status === 'locked' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${woundConfig.gradient} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                            {status === 'completed'
+                              ? <CheckCircle className="w-3.5 h-3.5 text-white" />
+                              : status === 'locked'
+                              ? <Lock className="w-3.5 h-3.5 text-white" />
+                              : <Play className="w-3.5 h-3.5 text-white" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-gray-900 text-xs leading-tight">{mod.title}</h4>
+                            {p?.badge && <span className={`text-[10px] font-bold ${woundConfig.textColor}`}>{p.badge}</span>}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Secondary Wound Card */}
+              {secondaryWoundConfig && (
+                <div className={`rounded-2xl border-2 p-6 ${secondaryWoundConfig.lightBg} md:col-span-2`}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${secondaryWoundConfig.gradient} flex items-center justify-center shadow-md`}>
+                      <Shield className="w-4 h-4 text-white" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className={`text-base font-bold ${secondaryWoundConfig.textColor}`}>
+                          {secondaryWoundConfig.childName}
+                        </h2>
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${secondaryWoundConfig.darkBg} ${secondaryWoundConfig.textColor}`}>Secondary</span>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-0.5">{secondaryWoundConfig.tagline}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {secondaryPriorityModules.slice(0, 3).map(mod => {
+                      const status = getModuleStatus(mod);
+                      return (
+                        <Link
+                          key={mod.id}
+                          to={status !== 'locked' ? `/curriculum/module/${mod.id}` : '#'}
+                          onClick={() => status !== 'locked' && handleModuleSelect(mod)}
+                          className={`block rounded-lg border bg-white p-2.5 transition-all hover:shadow-sm text-xs ${status === 'locked' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className={`w-6 h-6 rounded-md bg-gradient-to-br ${secondaryWoundConfig.gradient} flex items-center justify-center flex-shrink-0`}>
+                              {status === 'completed'
+                                ? <CheckCircle className="w-3 h-3 text-white" />
+                                : <Play className="w-3 h-3 text-white" />}
+                            </div>
+                            <span className="font-medium text-gray-800 leading-tight">{mod.title}</span>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-            {clientWound.secondary && WOUND_MODULE_PRIORITIES[clientWound.secondary] && (
-              <p className="text-xs text-gray-500 mt-3">
-                Secondary wound: <span className="font-medium">{WOUND_MODULE_PRIORITIES[clientWound.secondary].childName}</span> ({clientWound.secondary}) — modules throughout the curriculum also address this pattern.
-              </p>
+
+            {/* Wound Focus Toggle */}
+            {secondaryWoundConfig && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Filter className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-600 font-medium mr-1">Sort by:</span>
+                <button
+                  onClick={() => setWoundFocus('primary')}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    woundFocus === 'primary'
+                      ? `bg-gradient-to-r ${woundConfig.gradient} text-white shadow-sm`
+                      : `${woundConfig.lightBg} ${woundConfig.textColor} hover:opacity-80`
+                  }`}
+                >
+                  {woundConfig.childName}
+                </button>
+                <button
+                  onClick={() => setWoundFocus('secondary')}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    woundFocus === 'secondary'
+                      ? `bg-gradient-to-r ${secondaryWoundConfig.gradient} text-white shadow-sm`
+                      : `${secondaryWoundConfig.lightBg} ${secondaryWoundConfig.textColor} hover:opacity-80`
+                  }`}
+                >
+                  {secondaryWoundConfig.childName}
+                </button>
+                {woundFocus === 'secondary' && (
+                  <span className="text-xs text-gray-500 ml-1">Modules sorted for secondary wound</span>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -411,6 +524,11 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                                         {priority.badge}
                                       </span>
                                     )}
+                                    {module._secondaryPriority && secondaryWoundConfig && (module._secondaryPriority.level === 'core' || module._secondaryPriority.level === 'high') && (
+                                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${secondaryWoundConfig.darkBg} ${secondaryWoundConfig.textColor}`}>
+                                        {module._secondaryPriority.level === 'core' ? `Also core for ${secondaryWoundConfig.childName}` : secondaryWoundConfig.childName}
+                                      </span>
+                                    )}
                                   </div>
                                   <p className="text-sm text-gray-600">{module.description}</p>
 
@@ -467,9 +585,19 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                                 </Link>
                               )}
                               {status === 'completed' && (
-                                <div className="flex items-center space-x-1 text-green-600">
-                                  <CheckCircle className="w-5 h-5" />
-                                  <span className="text-sm font-medium">Done</span>
+                                <div className="flex flex-col items-end gap-1.5">
+                                  <div className="flex items-center space-x-1 text-green-600">
+                                    <CheckCircle className="w-5 h-5" />
+                                    <span className="text-sm font-medium">Done</span>
+                                  </div>
+                                  <button
+                                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleRestartModule(module); }}
+                                    disabled={restartingModule === module.id}
+                                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-amber-600 transition-colors disabled:opacity-50"
+                                  >
+                                    <RotateCcw className={`w-3.5 h-3.5 ${restartingModule === module.id ? 'animate-spin' : ''}`} />
+                                    <span>{restartingModule === module.id ? 'Restarting...' : 'Restart'}</span>
+                                  </button>
                                 </div>
                               )}
                             </div>

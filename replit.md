@@ -43,10 +43,10 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **Theme & Animation Customization**: User preferences for visual and motion accessibility.
 
 **Curriculum Modules (11 total):**
-- Modules 1-4: Foundations, Wounds Deep Dive, Protective System, Self Leadership (core, no wound personalization yet)
+- Modules 1-4: Foundations, Wounds Deep Dive, Protective System, Self Leadership (fully wound-personalized for all 5 wound types)
 - Module 5: 6 F's Protocol Mastery — fully wound-personalized (abandonment/shame/neglect/betrayal/helplessness) with adapted guided steps, 8 C's integration, and reflection prompts
 - Module 6: Inner Child Unburdening & Integration — fully wound-personalized unburdening ceremonies per wound type
-- Module 5 Bonus: Advanced Healing Exercises & Daily Practices
+- Module 5 Bonus: Advanced Healing Exercises & Daily Practices — fully wound-personalized exercises (letter writing, safe place, reparenting dialogue, body-based) per wound type
 - Module 7: Reparenting Your Inner Child (`src/data/advancedModules.js`) — wound-personalized reparenting approaches (secure attachment for abandonment, unconditional regard for shame, attunement for neglect, earned trust for betrayal, agency for helplessness)
 - Module 8: Somatic Healing & Body Wisdom — wound-specific body patterns, somatic interventions, and nervous system regulation
 - Module 9: Relationships & Attachment Patterns — how each wound creates relationship cycles and Self-led alternatives
@@ -60,6 +60,7 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - `getStepRequirements` validates wound-specific reflection prompts for step completion
 - **Active Parts Integration**: `LearningModuleRenderer.jsx` fetches `assessment_parts` data, computes active parts (managers, firefighters, exiles above threshold), passes them via `woundContext.activeParts`. `renderActivePartsPanel()` in `LearningModuleEnhanced.jsx` displays active parts with type badges and intensity indicators in learn/activity sections.
 - **Dual-Wound Support (Module 6)**: `renderDualWoundPanel()` renders secondary wound unburdening steps and reflections as an expandable section within Module 6, allowing clients to address both primary and secondary wounds.
+- **Dual-Wound Curriculum Display**: `CurriculumSystem.jsx` shows primary and secondary wounds side-by-side in the "Your Healing Focus" section, with wound focus toggle to sort modules by either wound. Module cards display secondary wound badges. Completed modules have a "Restart" button that clears progress after confirmation.
 - **Attachment Style Assessment**: 20-question assessment (5 per style: secure, anxious, avoidant, disorganized) in `Assessments.jsx`. Saves to `ifs_interactive_data` with `module_id='assessment_attachment'`. Results displayed on Profile page with violet/indigo color scheme. Feeds into Module 9 (Relationships & Attachment Patterns).
 
 ## External Dependencies
