@@ -58,6 +58,113 @@ const coreModules = [
     category: 'introduction',
     estimatedMinutes: 45,
     innerChildFocus: true,
+    woundPersonalization: {
+      abandonment: {
+        childName: 'Lonely Child',
+        moduleIntro: 'As you begin learning about IFS, know that this framework was designed for exactly what your Lonely Child has been waiting for — a reliable, loving internal relationship that will never abandon you. Your Lonely Child carries the fear of being left, forgotten, or not enough to keep people close. IFS reveals that this fear lives in a young part of you, not in your core Self. Your Self has the capacity for Connectedness and Compassion that your Lonely Child has been seeking from others. This module will help you understand why your Lonely Child developed, how your protective parts have been trying to prevent further abandonment, and how your Self can become the constant, reliable presence this child has always needed.',
+        selfCsIntegration: 'For your abandonment wound, Connectedness and Compassion are your most essential Self qualities. Connectedness directly heals the core abandonment belief — "I am alone" — by showing your Lonely Child that connection exists within you, not only through others. Compassion provides the warm, unconditional presence your Lonely Child feared it would never receive. As you learn the IFS foundations, notice how these qualities naturally arise when you turn toward your parts with genuine interest.',
+        guidedSteps: [
+          'Begin by taking a few slow breaths. As you settle, notice if there is a part of you that feels anxious about starting something new — perhaps worried about being disappointed or left behind again. This is your Lonely Child\'s protectors at work. Acknowledge them gently: "I see you watching out for us."',
+          'Reflect on the idea that your mind contains many parts. For your Lonely Child, the most important insight is this: your Self — your core essence — cannot leave you. Unlike people who may have come and gone, your Self is permanently present. Let that land for a moment.',
+          'Consider your Lonely Child. When did this part first learn that people leave? What age does this part feel? You don\'t need to go deeply into the memory — just notice the felt sense of a young part that learned to fear abandonment.',
+          'Now identify one or two protective parts that guard your Lonely Child. Perhaps a People Pleaser that works hard to keep others happy so they won\'t leave? Or a Clingy part that grips tightly to relationships? Thank these protectors for their tireless work.',
+          'Bring Curiosity — one of Self\'s 8 C\'s — toward your Lonely Child. Instead of trying to fix the loneliness, simply ask: "What is it like to be you?" This Curiosity, without agenda, is itself an act of connection that your Lonely Child craves.',
+          'Practice the Connectedness quality of Self. Place one hand on your heart and say internally: "I am here with you. I am not going anywhere." Notice what happens in your body when you offer this consistent presence to your own inner child.',
+          'Close by setting an intention for this IFS journey that honors your Lonely Child: "I am learning IFS so that I can become the reliable, loving presence my Lonely Child has always deserved. My Self will be the one who stays."'
+        ],
+        reflectionPrompts: [
+          'When you learned that your Self cannot leave you, what reaction did your Lonely Child have? Relief, disbelief, or something else?',
+          'Which protective parts did you notice guarding your Lonely Child from further abandonment? How have they been trying to help?',
+          'What does Connectedness feel like in your body when you direct it toward your Lonely Child?',
+          'How has the fear of abandonment shaped which parts run your daily life? Can you name specific situations?',
+          'What would change in your life if your Lonely Child truly believed that your Self would never leave?'
+        ]
+      },
+      shame: {
+        childName: 'Unworthy Child',
+        moduleIntro: 'As you begin learning about IFS, this framework offers something revolutionary for your Unworthy Child — the radical idea that there is nothing fundamentally wrong with you. Your Unworthy Child carries the belief "I am flawed, broken, or defective," and your protective system has worked overtime to hide this part from the world. IFS reveals that shame is a burden your Unworthy Child was forced to carry — it was never your truth. Your Self possesses natural Compassion and Courage that can begin to challenge the Inner Critic\'s toxic messages. This module will help you understand how shame became embedded in your system, why your protectors hide your vulnerability, and how Self-leadership can gradually replace self-judgment with self-acceptance.',
+        selfCsIntegration: 'For your shame wound, Compassion and Courage are your most transformative Self qualities. Compassion directly contradicts the shame message — every time you bring Compassion to your Unworthy Child, you are saying "You deserve kindness," which is the opposite of what shame taught. Courage is essential because approaching shame takes bravery; the Inner Critic will fight hard to keep you away from this vulnerable part. As you learn the IFS model, notice that your Self\'s natural response to suffering is warmth, not judgment.',
+        guidedSteps: [
+          'Begin by noticing your current internal state. Is there a part of you that feels nervous about exploring yourself — perhaps worried about what you\'ll find? This is often the Inner Critic standing guard over your Unworthy Child. Acknowledge it: "I notice a part that is watchful about this process."',
+          'As you learn that IFS sees all parts as having positive intentions, let this sink in for your shame: the Inner Critic that judges you harshly actually believes it is protecting you. It developed its harsh strategy to prevent you from being criticized by others first. Even your most judgmental part has love underneath.',
+          'Gently consider your Unworthy Child. This is the part that believes it is fundamentally flawed. When did this belief take root? Who first made you feel that something was wrong with you? You don\'t need to go deep — just notice that a young part carries this burden.',
+          'Identify the protectors that guard your Unworthy Child. Perhaps a Perfectionist that demands flawless performance to hide the "flaw"? Or a People Pleaser that earns love through doing rather than being? These parts are working to keep your shame hidden.',
+          'Practice bringing Compassion — Self\'s most healing quality for shame — toward your inner experience right now. Not fixing, not judging, not analyzing. Just warmth. Notice how foreign or uncomfortable this may feel. That discomfort is a protector, not your Self.',
+          'The 8 C\'s of Self include Curiosity, which is the antidote to the Critic\'s judgment. Instead of "What\'s wrong with me?" try "I wonder what this part needs." This simple shift moves you from shame into Self-energy.',
+          'Close by setting an intention that honors your Unworthy Child: "I am learning IFS to discover that I was never broken. My Self sees me with Compassion, not judgment. I am worthy exactly as I am, without earning it."'
+        ],
+        reflectionPrompts: [
+          'When you considered that even your Inner Critic has a positive intention, how did your system react? What parts were activated?',
+          'How does your Unworthy Child typically make itself known? What situations trigger the feeling of being fundamentally flawed?',
+          'What happened when you tried to bring Compassion to yourself? Did a part resist or redirect? What did that part say?',
+          'Which protectors are working hardest to hide your Unworthy Child? How are they affecting your daily life?',
+          'What would be different if you could approach yourself with Curiosity instead of judgment? What fears arise at that possibility?'
+        ]
+      },
+      neglect: {
+        childName: 'Lost Child',
+        moduleIntro: 'As you begin learning about IFS, this framework holds a special gift for your Lost Child — the experience of being truly seen and attended to for perhaps the first time. Your Lost Child learned to disappear, to minimize needs, and to take up as little space as possible because no one was paying attention. IFS invites you to turn your attention inward with genuine Curiosity and Calm — offering your Lost Child exactly what was missing. Your Self has the natural capacity to notice, attune, and respond to your inner world. This module will help you understand why your Lost Child learned to become invisible, how your protective parts keep needs hidden, and how Self-attention can begin to heal the wound of being overlooked.',
+        selfCsIntegration: 'For your neglect wound, Curiosity and Calm are your most healing Self qualities. Curiosity says "I want to know you" — the direct opposite of being ignored. When you bring Curiosity to your Lost Child, you are giving it what no one gave: genuine interest in its inner world. Calm provides the steady, unhurried presence your Lost Child never received. Your Lost Child doesn\'t need intensity; it needs someone who has time and patience. As you learn the IFS foundations, notice how your Self naturally wants to attend to your parts.',
+        guidedSteps: [
+          'Begin by simply checking in with yourself. This act alone — asking "How am I right now?" — may feel unusual or unnecessary. A part of you may say "I\'m fine" or "It doesn\'t matter." That minimizing voice is a protector of your Lost Child. Notice it without arguing.',
+          'As you learn that IFS recognizes all parts of you, consider this: your Lost Child exists even if it\'s hard to locate. It became expert at hiding because visibility was never rewarded. The fact that you may feel "nothing" or "blank" when looking inside is actually information — it tells you how thoroughly your Lost Child learned to disappear.',
+          'Try to sense your Lost Child. It may not come with strong emotions — more like an absence, a quiet emptiness, or a vague sense of longing you can\'t quite name. This subtlety is not a sign of weakness; it\'s a sign of how deeply the neglect pattern runs.',
+          'Identify the protectors that keep your Lost Child invisible. Perhaps a Self-Sufficient part that insists "I don\'t need anything"? Or a Caretaker that focuses entirely on others\' needs to avoid feeling its own? These parts learned that having needs was pointless.',
+          'Practice Curiosity toward your inner world. Ask yourself: "What do I actually want right now? What do I need?" If "I don\'t know" comes up, that\'s okay — the question itself is healing. Your Lost Child is not used to being asked.',
+          'Bring Calm, unhurried attention to whatever you find inside. Your Lost Child doesn\'t need a dramatic rescue — it needs steady, patient presence. Imagine sitting quietly beside this part, letting it know: "I have time for you. You don\'t need to perform or justify yourself."',
+          'Close with an intention that honors your Lost Child: "I am learning IFS to become the attentive, attuned presence my Lost Child always deserved. I will learn to see myself, hear myself, and respond to my own needs. I matter."'
+        ],
+        reflectionPrompts: [
+          'When you asked "How am I right now?", what came up? Was it easy or difficult to connect with your internal experience?',
+          'Did you notice a minimizing part that said your feelings don\'t matter or that you\'re making too much of this? What was that like?',
+          'What needs have you been ignoring or suppressing? Were you able to identify any, or did "I don\'t know" arise?',
+          'How has your Lost Child\'s invisibility affected your relationships, work, or daily life? Where do you disappear?',
+          'What would it feel like to believe that your needs genuinely matter? What parts resist that idea?'
+        ]
+      },
+      betrayal: {
+        childName: 'Terrified Child',
+        moduleIntro: 'As you begin learning about IFS, this framework offers something your Terrified Child desperately needs but fears — a trustworthy internal relationship. Your Terrified Child experienced violated trust, broken promises, or boundary violations that taught it the world is fundamentally unsafe. IFS provides a structured, predictable approach to inner work — no surprises, no hidden agendas, no manipulation. Your Self possesses Calm and Clarity that can gradually build internal trust. This module will help you understand why your Terrified Child\'s hypervigilance made perfect sense, how your protective parts stand guard against further betrayal, and how Self-leadership can become a safe, reliable foundation.',
+        selfCsIntegration: 'For your betrayal wound, Calm and Clarity are your most essential Self qualities. Calm soothes your Terrified Child\'s activated nervous system — its hypervigilance, scanning, and bracing for danger. Clarity helps distinguish past betrayal from present safety, allowing your Terrified Child to gradually learn that not every relationship is dangerous. Confidence builds slowly as your Self proves itself to be trustworthy through consistent, predictable behavior. As you learn IFS, notice that this approach never forces or tricks you — it proceeds at your pace.',
+        guidedSteps: [
+          'Begin by noticing your body. Is there tension, bracing, or a feeling of alertness? These are your Terrified Child\'s protectors doing their job — scanning for danger. Before learning anything, acknowledge them: "I notice parts of me that are on guard. Thank you for keeping watch."',
+          'As you learn about IFS, notice that this model is transparent and predictable. There are no hidden tricks, no manipulation. Everything is explained openly. Let your hypervigilant parts take note of this — a system that does not require you to drop your defenses to proceed.',
+          'Gently consider your Terrified Child. This part learned that trust is dangerous, that safety is an illusion, or that people who should protect you can become the source of harm. You don\'t need to revisit the details — just acknowledge that a young part carries this heavy knowledge.',
+          'Identify the protectors guarding your Terrified Child. Perhaps a Controller that needs to manage every situation? A Hypervigilant part that constantly scans for threats? A Wall-Builder that keeps everyone at arm\'s length? These parts are brilliant strategists working overtime.',
+          'Practice bringing Calm to your nervous system. Slow your breathing. Let your body know: "Right now, in this moment, I am safe." Your Terrified Child may not believe this yet — that\'s okay. Calm presence, repeated consistently, is how trust is rebuilt.',
+          'Consider that in IFS, you set the pace. No part is forced to reveal anything. No one rushes you. Your Self respects your protectors\' boundaries. This is the opposite of what betrayal taught — someone is finally honoring your limits.',
+          'Close with an intention that honors your Terrified Child: "I am learning IFS at my own pace. My Self is becoming a trustworthy, predictable leader. I will earn my own inner trust through consistency, not grand gestures. Safety is being rebuilt, one step at a time."'
+        ],
+        reflectionPrompts: [
+          'What did your body do as you began this module? Did you notice tension, scanning, or bracing? Where does hypervigilance live in your body?',
+          'How did it feel to encounter a framework that proceeds at your pace and doesn\'t force anything? Did your protectors notice?',
+          'Which protectors are most active in guarding your Terrified Child? How do they show up in your daily life?',
+          'What would "internal trust" look like for you? What would need to happen for your Terrified Child to begin feeling safe with your Self?',
+          'How has the betrayal wound affected your ability to be vulnerable, open, or trusting? What has it cost you?'
+        ]
+      },
+      helplessness: {
+        childName: 'Powerless Child',
+        moduleIntro: 'As you begin learning about IFS, this framework offers something transformative for your Powerless Child — the discovery that you have an internal leader (your Self) who is capable, wise, and strong. Your Powerless Child learned that effort is futile, that nothing it does matters, and that it has no agency to change its circumstances. IFS reveals that this learned helplessness is a burden carried by a young part, not the truth about your actual capabilities. Your Self possesses Confidence and Courage that have been obscured by your protectors. This module will help you understand why your Powerless Child gave up, how your protective parts maintain the freeze, and how Self-leadership can gradually restore your sense of agency and personal power.',
+        selfCsIntegration: 'For your helplessness wound, Confidence and Courage are your most empowering Self qualities. Confidence directly heals the core helplessness belief — "I can\'t do anything" — by revealing that your Self is inherently capable, even when parts feel paralyzed. Courage gives you the willingness to try again, even when past attempts were met with futility. As you learn the IFS model, notice something powerful: you are already taking action by being here. Your Powerless Child may not see it yet, but choosing to engage with this material is itself an act of agency.',
+        guidedSteps: [
+          'Begin by acknowledging that you are here, choosing to learn. This is not passive — it is an active decision. A part of you may dismiss this: "It won\'t make a difference." Notice that voice without arguing with it. It is a protector of your Powerless Child.',
+          'As you learn that IFS sees you as having a capable Self at your core, let this idea sit with you: the helplessness you feel is real, but it belongs to a part of you — it is not all of you. Your Self has never been helpless, even when your Powerless Child felt trapped.',
+          'Gently consider your Powerless Child. When did this part learn that trying was futile? Who or what taught it that its actions don\'t matter? Perhaps it was overwhelmed by circumstances too big for a child to change. Acknowledge: "You learned to give up because fighting felt impossible."',
+          'Identify the protectors that maintain the helplessness. Perhaps a Freeze part that shuts down when things feel overwhelming? A Passive Compliance part that goes along with whatever happens to avoid more failure? An Apathy part that says "why bother?" These parts prevent disappointment by preventing hope.',
+          'Practice Confidence — not the loud, performative kind, but the quiet, embodied knowing that your Self is capable. Place your feet firmly on the ground. Feel your own strength. Say: "I have a Self that can handle this." Notice any parts that scoff or dismiss this.',
+          'Consider that each step you complete in this module is evidence of agency. You are making choices. You are engaging. You are not helpless right now. Let your Powerless Child see this evidence, even if it\'s small.',
+          'Close with an intention that honors your Powerless Child: "I am learning IFS to reclaim my agency. My Self is capable and strong. Each small step I take is proof that I am not powerless. I am rebuilding my personal power, one choice at a time."'
+        ],
+        reflectionPrompts: [
+          'When you read that your Self is inherently capable, what parts reacted? Did you notice dismissal, disbelief, or a flicker of hope?',
+          'How does your Powerless Child show up in your daily life? Where do you give up, go passive, or feel like trying is futile?',
+          'Which protectors maintain the learned helplessness? How do they "help" by preventing you from hoping or trying?',
+          'What small acts of agency have you taken recently that you haven\'t given yourself credit for?',
+          'What would change if your Powerless Child could trust that your Self is strong enough to lead? What would you attempt?'
+        ]
+      }
+    },
     steps: [
       {
         type: 'learn',
@@ -244,6 +351,113 @@ const coreModules = [
     estimatedMinutes: 60,
     prerequisites: ['module-1-intro-ifs'],
     innerChildFocus: true,
+    woundPersonalization: {
+      abandonment: {
+        childName: 'Lonely Child',
+        moduleIntro: 'This deep dive into wounds is uniquely focused on your abandonment pattern. While we explore wounds broadly, your Lonely Child\'s experience will be at the center — the fear of being left, the desperate clinging, the belief that you are not enough to make someone stay. Understanding the formation and mechanics of your specific wound is the key to unlocking its grip. Your Lonely Child formed its beliefs in moments when connection was severed, and those beliefs have been running your relationships ever since.',
+        selfCsIntegration: 'As you explore wound formation, Connectedness helps you understand that your abandonment wound was about broken connection, not about your worth. Clarity reveals that the beliefs your Lonely Child formed — "Everyone leaves," "I\'m too much/not enough" — were a child\'s interpretation, not the whole truth. Compassion holds you gently as you look at these painful origins.',
+        guidedSteps: [
+          'Begin by turning your attention to your Lonely Child. As you prepare to explore wounds deeply, let this part know: "I am going to learn about what happened to you. I will stay with you through this process." Notice if this promise creates relief or skepticism.',
+          'Consider the formation of your abandonment wound. What were the key moments? Was it a sudden departure, a gradual emotional withdrawal, or an inconsistent presence that kept your child self guessing? Name the shape of your abandonment — it is unique to you.',
+          'Explore the core beliefs your Lonely Child formed. "I will always be alone." "If I were better, they would have stayed." "Love always ends." "I have to earn connection or I\'ll lose it." Which of these resonate? What specific belief does your Lonely Child carry?',
+          'Examine how this wound affects your adult life. Do you cling to relationships past their expiration? Push people away before they can leave? Stay hypervigilant for signs of withdrawal? Over-give to prevent abandonment? Your wound created survival strategies that may no longer serve you.',
+          'Identify the antidote experiences your Lonely Child needs. For abandonment, the antidote is consistent, reliable presence — someone who stays, who returns, who chooses you without conditions. As your Self, you can begin to provide this internally.',
+          'Map how your protectors formed around this wound. The People Pleaser ensures you\'re needed. The Clingy part holds tight. The Wall-Builder prevents attachment so leaving can\'t hurt. Each protector carries the message: "Never let this pain happen again."',
+          'Create a personal wound healing intention: "I understand how my Lonely Child was formed. I commit to providing the consistent presence this child needs. My Self is learning to be the one who stays, so my Lonely Child can finally rest."'
+        ],
+        reflectionPrompts: [
+          'What specific moments or patterns formed your abandonment wound? What did your Lonely Child conclude about itself and the world?',
+          'Which core abandonment belief has the strongest grip on your daily life? How does it show up in your relationships?',
+          'What antidote experiences has your Lonely Child been seeking from others that your Self could begin to provide?',
+          'How have your protectors shaped your relationship patterns? Are you a clinger, a wall-builder, a people-pleaser, or a combination?',
+          'What was it like to look directly at your abandonment wound? What parts activated as you explored?'
+        ]
+      },
+      shame: {
+        childName: 'Unworthy Child',
+        moduleIntro: 'This deep dive into wounds brings your shame pattern into clear focus. While we explore wounds broadly, your Unworthy Child\'s experience is central — the toxic belief of being fundamentally flawed, broken, or defective. Shame is often called the "master emotion" because it hides beneath other wounds, silently poisoning your self-concept. Understanding how shame was installed in your system — by whom, through what experiences — begins to loosen its grip. Your Unworthy Child did not choose to feel broken; this burden was placed upon it.',
+        selfCsIntegration: 'As you explore wound formation, Courage is essential — shame resists being seen. It takes bravery to look at the origins of "I am flawed." Compassion is the direct antidote to shame\'s toxic message — every act of self-compassion challenges the belief that you don\'t deserve kindness. Clarity helps you see that shame was installed externally; it was never your original nature.',
+        guidedSteps: [
+          'Before diving in, check for the Inner Critic\'s presence. Shame exploration often activates the Critic, which may say "You deserve to feel bad" or "Don\'t look too closely at this." Acknowledge the Critic\'s protective intent and ask it to observe without interfering.',
+          'Trace the origins of your shame wound. Who first made you feel that something was fundamentally wrong with you? Was it explicit shaming (criticism, ridicule, punishment) or implicit (being ignored, compared, conditionally loved)? Name the sources without blame — they likely carried their own shame.',
+          'Identify your Unworthy Child\'s core belief. "I am broken." "I am disgusting." "I am too much." "I am not enough." "If people knew the real me, they would reject me." Shame beliefs are absolute — they don\'t say "I made a mistake," they say "I AM the mistake." Which version does your Unworthy Child carry?',
+          'Examine how shame operates in your adult life. Do you hide your true self? Overachieve to compensate? Avoid vulnerability at all costs? Replay embarrassing moments obsessively? Shame is the wound that creates the most elaborate cover-up system.',
+          'Identify the antidote experiences for shame. Your Unworthy Child needs unconditional positive regard — being seen fully and accepted without conditions. Not "I love you when you perform well" but "I love you because you exist." Your Self can begin offering this.',
+          'Map how your protectors organized around shame. The Perfectionist hides the "flaw" through flawless performance. The Inner Critic shames you first so others\' criticism stings less. The Avoider stays away from situations where shame could be triggered. Each carries the message: "Never let anyone see the real you."',
+          'Create a wound healing intention: "I understand that shame was placed upon my Unworthy Child — it was never my truth. I commit to seeing myself with Compassion rather than judgment. My Self knows: I was never broken. What happened was wrong, but I am not wrong."'
+        ],
+        reflectionPrompts: [
+          'What were the earliest experiences that installed shame in your system? What message did your Unworthy Child absorb?',
+          'How does your shame specifically manifest? Is it about your body, your intelligence, your emotions, your needs, or something else?',
+          'What would happen if you stopped hiding the parts of yourself you\'re most ashamed of? What do you fear?',
+          'How has your Inner Critic been "protecting" you through self-judgment? What would it fear if it stopped criticizing?',
+          'What did it feel like to name your shame wound directly? What parts were activated or resistant?'
+        ]
+      },
+      neglect: {
+        childName: 'Lost Child',
+        moduleIntro: 'This deep dive into wounds focuses on your neglect pattern — perhaps the most invisible of all wounds because neglect is about what didn\'t happen rather than what did. Your Lost Child learned to minimize, disappear, and stop expecting attention because no one was reliably there to provide it. Neglect doesn\'t leave visible scars, which makes it easy to dismiss: "My childhood wasn\'t that bad." But the absence of attuned care creates a profound wound of invisibility. Understanding this pattern helps your Lost Child finally name what was missing.',
+        selfCsIntegration: 'As you explore wound formation, Curiosity is your most important tool — it counters neglect by saying "Your experience matters and I want to understand it." Calm provides the patient attention your Lost Child was never given. Compassion helps you grieve what was missing without minimizing it. Notice that even reading about your wound is an act of attention your Lost Child has been waiting for.',
+        guidedSteps: [
+          'Begin by noticing if a part of you is minimizing this process. "Other people had it worse." "Nothing really happened to me." "I\'m making something out of nothing." This minimizing voice IS the neglect wound in action — it learned that your experiences don\'t matter enough to examine.',
+          'Explore the shape of your neglect. Was it emotional neglect (your feelings were ignored)? Physical neglect (basic needs went unmet)? Attunement neglect (your caregivers were present but not emotionally available)? Or invisible child neglect (you were simply not seen)? Neglect has many forms.',
+          'Identify what your Lost Child needed but didn\'t receive. "Someone to notice when I was sad." "Someone to ask how my day was and really listen." "Someone to celebrate my achievements." "Someone to hold me when I was scared." Name the specific absences.',
+          'Examine how neglect shaped your adult patterns. Do you struggle to identify your own needs? Take care of everyone else first? Feel uncomfortable receiving attention? Believe your needs will burden others? These patterns began as adaptations to neglect.',
+          'The antidote for neglect is attunement — being seen, heard, and responded to with care. Your Self can become the attentive parent your Lost Child never had. This means regularly asking yourself: "What do I need right now?" and actually responding.',
+          'Map your protectors. The Self-Sufficient part says "I don\'t need anyone." The Caretaker focuses on others\' needs to avoid feeling its own emptiness. The Invisible part keeps you small and unnoticed. Each protector prevents the pain of reaching out and being ignored again.',
+          'Create a wound healing intention: "I understand that my Lost Child learned to disappear because no one was looking. I commit to becoming the attentive, attuned presence my Lost Child deserves. My needs matter. I am allowed to take up space."'
+        ],
+        reflectionPrompts: [
+          'Did you notice a minimizing part that tried to dismiss your neglect experience? What did it say?',
+          'What specific forms of neglect did you experience? What was absent from your childhood that should have been present?',
+          'How does neglect show up in your adult relationships? Do you disappear, over-give, or struggle to receive?',
+          'What needs have you been suppressing because you learned they wouldn\'t be met? Can you name them now?',
+          'What was it like to spend focused attention on your own wound? Did your Lost Child respond to being seen?'
+        ]
+      },
+      betrayal: {
+        childName: 'Terrified Child',
+        moduleIntro: 'This deep dive into wounds centers your betrayal pattern — the experience of trust being violated by someone who should have been safe. Your Terrified Child learned that the world is dangerous, that closeness leads to harm, and that safety requires constant vigilance. Betrayal wounds are particularly complex because they corrupt the very mechanism (trust) that healing requires. Understanding exactly how your trust was broken — and the beliefs that formed as a result — is the first step toward rebuilding a foundation of safety within yourself.',
+        selfCsIntegration: 'As you explore wound formation, Calm is essential — betrayal exploration activates the nervous system intensely. Your Terrified Child may go into hypervigilance just from looking at these patterns. Clarity helps you see that the betrayal revealed something about the betrayer, not about your worthiness of trust. Courage allows you to examine what happened without being overwhelmed.',
+        guidedSteps: [
+          'Before beginning, check your nervous system. Betrayal work can activate fight, flight, or freeze responses. If you feel your body bracing, slow down. Place your feet on the ground. This exploration proceeds at your pace — no one is forcing you to look at anything you\'re not ready for.',
+          'Trace the origins of your betrayal wound. What trust was violated? Was it a caregiver who should have protected you? A promise that was broken? Boundaries that were crossed? Someone who used your vulnerability against you? Name the betrayal without forcing details.',
+          'Identify the core beliefs your Terrified Child formed. "No one can be trusted." "Love is a trap." "If I let my guard down, I will be hurt." "Safety is an illusion." "I can only rely on myself." Which beliefs does your Terrified Child hold most tightly?',
+          'Examine how betrayal runs your adult life. Do you test people before trusting them? Keep relationships surface-level? Need total control of your environment? Expect the worst from people? Push away anyone who gets too close? Your hypervigilance is your Terrified Child\'s alarm system.',
+          'The antidote for betrayal is earned trust — trust that is built slowly, through consistent behavior over time, not through promises. Your Self can begin to earn your Terrified Child\'s trust by being predictable, honest, and never forcing vulnerability.',
+          'Map your protectors. The Controller manages every situation to prevent surprise. The Hypervigilant part scans for danger constantly. The Wall-Builder keeps everyone at arm\'s length. The Prosecutor interrogates others\' motives. Each carries the message: "Never let this happen again."',
+          'Create a wound healing intention: "I understand how my Terrified Child learned that trust is dangerous. I will not rush trust — not with others, and not with myself. My Self will earn my inner trust through consistency, predictability, and honoring my boundaries. Safety is being rebuilt."'
+        ],
+        reflectionPrompts: [
+          'What happened to your nervous system as you explored your betrayal wound? Did you notice activation, bracing, or shutdown?',
+          'How does your Terrified Child\'s alarm system show up in your current relationships? What triggers the hypervigilance?',
+          'What core belief from the betrayal has the strongest hold on your life? How has it shaped your choices?',
+          'How do your protectors prevent you from experiencing the connection you actually want?',
+          'What would "earned trust" look like between you and your own Self? What small, consistent actions could begin that process?'
+        ]
+      },
+      helplessness: {
+        childName: 'Powerless Child',
+        moduleIntro: 'This deep dive into wounds examines your helplessness pattern — the experience of being overwhelmed by circumstances you could not change, control, or escape. Your Powerless Child learned that effort is futile, that speaking up doesn\'t matter, and that the safest option is to give up, comply, or freeze. Learned helplessness is particularly insidious because it disguises itself as reality: "Things can\'t change" feels like a fact, not a wound. Understanding how this pattern was installed helps your Powerless Child begin to see that helplessness was a survival strategy, not an unchangeable truth.',
+        selfCsIntegration: 'As you explore wound formation, Confidence is your key Self quality — it directly challenges the "I can\'t" message. Not false confidence, but the quiet knowing that your Self has capabilities that your Powerless Child cannot yet see. Courage gives you the willingness to try, even when past trying led to futility. Clarity helps you distinguish between "I was powerless as a child" and "I am powerless now."',
+        guidedSteps: [
+          'Notice if a part of you is already saying "This won\'t help" or "Why bother looking at this." That voice is the helplessness wound itself — it prevents hope to prevent disappointment. Acknowledge it without arguing: "I hear a part that doubts this will make a difference."',
+          'Trace the origins of your helplessness. What situations overwhelmed your Powerless Child? Was it an environment where your voice was silenced? Where fighting back was punished? Where no matter what you did, the outcome was the same? Where were you trapped?',
+          'Identify the core beliefs your Powerless Child formed. "Nothing I do matters." "I can\'t change anything." "I\'m trapped." "Trying only leads to more failure." "Other people have the power, not me." "I should just go along with things." Which beliefs run your life?',
+          'Examine how helplessness shows up in your adult patterns. Do you avoid making decisions? Defer to others? Give up at the first sign of difficulty? Stay in situations you know aren\'t good for you because leaving feels impossible? Comply to avoid conflict?',
+          'The antidote for helplessness is agency — the experience of making a choice and having it matter. Start small. Your Self can prove to your Powerless Child that actions have consequences by taking micro-steps and celebrating their impact.',
+          'Map your protectors. The Freeze part shuts down to prevent further failure. The Compliant part goes along with others to avoid conflict. The Apathetic part says "I don\'t care" to prevent the pain of caring and failing. The Escapist checks out entirely. Each protector prevents the risk of hoping and being crushed.',
+          'Create a wound healing intention: "I understand how my Powerless Child learned that effort is futile. I commit to proving — one small step at a time — that I have agency. My Self is strong enough to lead. I am not trapped. Each choice I make, no matter how small, is evidence of my power."'
+        ],
+        reflectionPrompts: [
+          'Did you notice a "why bother" response as you began this exercise? What was that part trying to protect you from?',
+          'What specific situations taught your Powerless Child that trying was futile? What was the original helplessness?',
+          'Where does learned helplessness still run your adult life? What situations do you avoid, comply with, or give up on?',
+          'What small act of agency could you take this week to show your Powerless Child that actions can matter?',
+          'How do your protectors keep you stuck in helplessness patterns? What would they fear if you started asserting yourself?'
+        ]
+      }
+    },
     steps: [
       {
         type: 'learn',
@@ -446,6 +660,113 @@ const coreModules = [
     estimatedMinutes: 50,
     prerequisites: ['module-2-inner-child-wounds'],
     innerChildFocus: true,
+    woundPersonalization: {
+      abandonment: {
+        childName: 'Lonely Child',
+        moduleIntro: 'Your protective system is organized around one central mission: prevent your Lonely Child from being abandoned again. Every Manager and Firefighter part in your system developed its strategy to ensure connection is maintained at all costs. Understanding your abandonment-specific protectors — the People Pleaser, the Clingy part, the Wall-Builder, the Over-Giver — reveals the brilliant but exhausting lengths your system goes to prevent the pain of being left.',
+        selfCsIntegration: 'Connectedness helps you appreciate that your protectors\' ultimate goal is connection — they just use extreme methods. Compassion allows you to thank these parts for their tireless work rather than judging them. Curiosity helps you ask each protector: "What would happen if you stopped doing your job?" — their answer always points back to the Lonely Child.',
+        guidedSteps: [
+          'Begin by mapping your abandonment-specific Managers. These are the proactive protectors that try to prevent abandonment before it happens. The People Pleaser ensures you\'re indispensable. The Caretaker makes you needed. The Performer earns love through achievement. The Accommodator sacrifices your needs so others stay. Which of these are most active in you?',
+          'Now identify your abandonment-specific Firefighters. These reactive protectors activate when abandonment threatens. The Clingy part grasps desperately. The Jealous part monitors and controls. The Rage part punishes those who pull away. The Numbing part checks out when rejection stings. Which firefighters do you recognize?',
+          'Approach one of your most active abandonment protectors with Curiosity. Ask: "When did you start this job? How old was I when you first had to protect my Lonely Child?" Listen for the story — there is always an origin moment when this protector was recruited.',
+          'Ask this protector: "What are you afraid would happen to my Lonely Child if you stopped?" The answer reveals the exile\'s core fear. For abandonment protectors, it is usually: "You would be completely alone and it would destroy you." Thank this protector for carrying that burden.',
+          'Notice how your protectors interact with each other. In abandonment systems, there is often a push-pull: the People Pleaser brings people close, but the Wall-Builder pushes them away when vulnerability gets too intense. This internal conflict IS the abandonment wound in action.',
+          'Practice telling one protector: "I see how hard you work to keep us from being abandoned. You have been doing this since I was very young. I want you to know that my Self is learning to handle connection and separation. You don\'t have to work so hard."',
+          'Close by appreciating your entire protective system\'s loyalty to your Lonely Child: "Every strategy you developed was an act of love. You were trying to ensure I was never left alone again. I honor your work, and I am learning to share the burden."'
+        ],
+        reflectionPrompts: [
+          'Which abandonment-specific Manager is most dominant in your system? How does it affect your daily relationships?',
+          'What Firefighter activates when you sense someone pulling away? What does it do, and what is it protecting?',
+          'What did your most active protector reveal about when it started its job? How old were you?',
+          'How do your protectors create the push-pull dynamic that may actually contribute to the abandonment you fear?',
+          'What shifted when you thanked a protector rather than trying to eliminate it?'
+        ]
+      },
+      shame: {
+        childName: 'Unworthy Child',
+        moduleIntro: 'Your protective system is organized around one central mission: prevent your Unworthy Child from being exposed. The Inner Critic, the Perfectionist, the Performer, and the Hider all work in concert to ensure that no one discovers the "flaw" your Unworthy Child believes it carries. Understanding your shame-specific protectors reveals why you are so hard on yourself — your Critic genuinely believes that harsh self-judgment protects you from even harsher external judgment.',
+        selfCsIntegration: 'Compassion is revolutionary for shame protectors — they have never been thanked, only fought. Courage allows you to approach the Inner Critic (the most feared protector in shame systems) with openness rather than avoidance. Curiosity helps you discover that even the Critic has a positive intention — it believes it is keeping you safe.',
+        guidedSteps: [
+          'Map your shame-specific Managers. The Inner Critic pre-judges you before others can. The Perfectionist demands flawless performance to hide the "flaw." The Performer earns worth through achievement. The Hider avoids situations where shame could be triggered. The Comparer measures you against others to assess danger. Which are most active?',
+          'Identify your shame-specific Firefighters. The Rage part explodes when shame is triggered. The Numbing part deadens all feeling when shame gets too intense. The Self-Destructive part agrees with the shame ("I deserve to suffer"). The Escapist flees situations where exposure might occur. Which do you recognize?',
+          'Approach your Inner Critic — the cornerstone of shame protection — with Curiosity rather than hostility. Ask: "Critic, what are you trying to protect me from?" Listen. The Critic almost always says: "I am trying to prevent you from being judged, rejected, or exposed. If I criticize you first, it won\'t hurt as much when others do it."',
+          'Ask your Inner Critic: "What do you fear would happen to my Unworthy Child if you stopped judging?" The answer reveals the exile\'s core terror. For shame: "Everyone would see how broken you really are, and you would be utterly rejected." This is the burden, not the truth.',
+          'Notice the exhausting cycle: the Critic judges → you feel shame → the Perfectionist tries harder → inevitable failure → the Critic judges again. This cycle IS the shame wound running your system. Name it: "This is my shame cycle. It is a loop, not reality."',
+          'Practice thanking your Inner Critic: "I know you believe harsh judgment keeps me safe. You have been working since I was very young. I want you to know that I am building a different kind of safety — one based on Compassion, not criticism. You can rest."',
+          'Close by addressing your entire shame protective system: "You developed elaborate strategies to hide what my Unworthy Child believes is broken. I honor your creativity and loyalty. As my Self grows stronger, you will not need to work so hard. Nothing needs to be hidden."'
+        ],
+        reflectionPrompts: [
+          'What did your Inner Critic reveal about its protective purpose? Were you surprised by its answer?',
+          'Which shame protector is most exhausting in your daily life? How much energy does it consume?',
+          'Can you trace the shame cycle (Critic → shame → Perfectionist → failure → Critic) in your own experience?',
+          'What happened when you thanked the Critic rather than fighting it? How did it respond?',
+          'How has your protective system\'s strategy of hiding actually kept you isolated from the connection you need to heal?'
+        ]
+      },
+      neglect: {
+        childName: 'Lost Child',
+        moduleIntro: 'Your protective system has an unusual organization for neglect: rather than loud, dramatic protectors, your parts learned to be quiet, invisible, and self-sufficient. The Self-Sufficient part, the Caretaker, the Invisible part, and the Emotional Flatline all work to ensure your Lost Child never has to experience the pain of reaching out and being ignored again. Understanding your neglect-specific protectors reveals why you struggle to ask for help, receive attention, or even identify what you need.',
+        selfCsIntegration: 'Curiosity is essential for neglect protectors because they are masters of disguise — they don\'t look like protectors at all. "I don\'t need anything" feels like strength, not defense. Calm provides the patient attention these quiet protectors have never received. Compassion helps you recognize that self-sufficiency born from neglect is not the same as genuine independence.',
+        guidedSteps: [
+          'Map your neglect-specific Managers. These are unusually quiet protectors. The Self-Sufficient part says "I don\'t need anyone." The Caretaker focuses on others\' needs to avoid feeling its own. The Invisible part keeps you small and unremarkable. The Minimizer says "It\'s not that bad." The Achiever proves worth through doing rather than being. Which are active in you?',
+          'Identify your neglect-specific Firefighters. The Emotional Flatline numbs all feeling to avoid the pain of unmet needs. The Dissociator checks out of present experience. The Overconsumer (food, media, substances) fills the empty space inside. The Isolator withdraws completely when the loneliness gets too intense. Which do you recognize?',
+          'Approach your Self-Sufficient part with gentle Curiosity. Ask: "When did you first learn that we couldn\'t rely on others?" This protector likely has a very early origin story — perhaps before language. Listen to what it shows you about the absence that shaped it.',
+          'Ask this protector: "What do you fear would happen to my Lost Child if we let ourselves need someone?" The answer for neglect is often: "We would reach out, and no one would be there. Again. The emptiness would be unbearable." This fear is what keeps the entire self-sufficient system running.',
+          'Notice something important: your neglect protectors are so good at their jobs that you may not even recognize them as protectors. "I\'m just independent" or "I prefer being alone" may feel like personality traits, not defenses. With Curiosity, ask: "Is this truly who I am, or is this who I had to become?"',
+          'Practice telling your Self-Sufficient part: "I know you learned that needing others leads to emptiness. You have kept us safe by asking for nothing. But there is a Lost Child behind your strategy who is desperately lonely. My Self is here now, and I am ready to meet those needs."',
+          'Close by honoring your quiet protectors: "You learned to be invisible, to need nothing, to make no demands. This was brilliant survival. I see the love behind your strategy. As I learn to attend to my Lost Child, you can gradually let these needs be seen."'
+        ],
+        reflectionPrompts: [
+          'Were any of your neglect protectors hard to recognize because they felt like "just who you are"? Which ones?',
+          'How does your Self-Sufficient part affect your ability to receive help, attention, or care from others?',
+          'What did your protector reveal about the early neglect experience? What was the original absence?',
+          'How has your Caretaker part focused you on others\' needs at the expense of your own? What has this cost you?',
+          'What happened when you acknowledged that self-sufficiency might be a defense rather than a choice?'
+        ]
+      },
+      betrayal: {
+        childName: 'Terrified Child',
+        moduleIntro: 'Your protective system is organized around one central mission: prevent your Terrified Child from ever being betrayed again. Your protectors are among the most vigilant and sophisticated in the IFS framework — the Controller, the Hypervigilant Scanner, the Wall-Builder, and the Prosecutor all work in concert to ensure trust is never given freely. Understanding your betrayal-specific protectors reveals why intimacy feels dangerous, why you need control, and why letting your guard down triggers intense anxiety.',
+        selfCsIntegration: 'Calm is essential because betrayal protectors run on a hyperactivated nervous system — they need your steady presence to begin relaxing. Clarity helps you appreciate that these protectors learned their strategies from real danger, not irrational fear. Courage allows you to approach the most guarded protectors without being deterred by their intensity.',
+        guidedSteps: [
+          'Map your betrayal-specific Managers. The Controller needs to manage every variable. The Hypervigilant Scanner watches for signs of deception. The Prosecutor questions everyone\'s motives. The Boundary Fortress builds impenetrable walls. The Test-Giver creates loyalty tests for others. Which are most active in you?',
+          'Identify your betrayal-specific Firefighters. The Rage part attacks when trust is threatened. The Shutdown part goes completely cold when vulnerability surfaces. The Saboteur destroys relationships before they can betray you. The Dissociator disconnects from reality when danger signals fire. Which do you recognize?',
+          'Approach your Hypervigilant Scanner with respect. This part never rests — it is always watching, always assessing threats. Ask gently: "How long have you been on duty? When were you first recruited to stand guard?" Let it show you the original betrayal that activated it.',
+          'Ask this protector: "What would happen to my Terrified Child if you let your guard down?" The answer for betrayal is usually: "We would trust someone, and they would hurt us again — maybe worse this time. I cannot allow that." This fear is what powers the relentless vigilance.',
+          'Notice the cost of your protective system. The same walls that keep danger out also keep connection out. The Controller that prevents betrayal also prevents intimacy. The Prosecutor that screens for deception also screens out genuine love. Name this paradox without trying to solve it yet.',
+          'Practice telling your Scanner: "I know you were activated by real danger. Someone who should have been trustworthy was not. Your vigilance makes complete sense. I want you to know that my Self is learning to assess safety — you don\'t have to carry this alone."',
+          'Close by honoring your fierce protectors: "You formed during a time of real danger. Your strategies were not overreactions — they were proportional to the threat. I honor your courage and vigilance. As my Self builds internal safety, you can gradually shift from combat mode to advisor mode."'
+        ],
+        reflectionPrompts: [
+          'Which betrayal protector is most dominant in your system? How much energy does its vigilance consume daily?',
+          'What did your Hypervigilant Scanner reveal about the original betrayal? What was the threat it was recruited to guard against?',
+          'How do your protectors prevent the very connection and intimacy that could help heal the betrayal wound?',
+          'What would your Terrified Child need to begin trusting your Self as a reliable inner leader?',
+          'What shifted when you honored your protectors\' strategies as proportional to real danger rather than irrational?'
+        ]
+      },
+      helplessness: {
+        childName: 'Powerless Child',
+        moduleIntro: 'Your protective system is organized around one central strategy: prevent your Powerless Child from experiencing the pain of trying and failing again. The Freeze part, the Compliant part, the Apathetic part, and the Escapist all work to avoid situations where helplessness might be re-experienced. Understanding your helplessness-specific protectors reveals why you procrastinate, give up quickly, defer to others, or avoid taking initiative — these are not character flaws but brilliant survival strategies developed when agency felt impossible.',
+        selfCsIntegration: 'Confidence is transformative for helplessness protectors because they have never experienced internal strength — they assumed your Self was as powerless as your Powerless Child. Courage provides the willingness to let protectors experiment with stepping back. Compassion honors the fact that these parts gave up because trying was genuinely dangerous or futile in the original context.',
+        guidedSteps: [
+          'Map your helplessness-specific Managers. The Compliant part goes along with everything to avoid conflict. The Procrastinator delays action to delay potential failure. The Over-Planner plans endlessly but never executes. The Deferrer lets others make all decisions. The Self-Doubter questions every capability. Which are most active in you?',
+          'Identify your helplessness-specific Firefighters. The Freeze part shuts down completely when overwhelm hits. The Escapist flees into fantasy, media, or substances. The Apathetic part says "I don\'t care" to prevent caring and failing. The Collapse part crumbles under pressure. Which do you recognize?',
+          'Approach your Freeze part with warmth. This part learned to shut down because fighting was dangerous or useless. Ask: "When were you first activated? What was happening when you learned that freezing was safer than acting?" Listen for the origin story of your helplessness.',
+          'Ask the Freeze part: "What would happen to my Powerless Child if you let me take action?" The answer for helplessness is often: "You would try, and fail, and the shame of failing again would be worse than not trying at all." This reveals the protective logic: preventing hope prevents despair.',
+          'Notice the cruel irony: your protectors prevent helplessness by creating more helplessness. The Freeze part that protects you from failure also prevents success. The Compliant part that avoids conflict also erases your voice. Name this paradox.',
+          'Practice telling your Freeze part: "I understand why you shut us down. In the past, taking action led to more pain. But my Self is here now, and I am choosing to take one small step. You don\'t have to shut us down. We can try something small and see what happens."',
+          'Close by honoring your helplessness protectors: "You learned to protect my Powerless Child by preventing hope. This made sense when hope was dangerous. I honor your strategy. As my Self proves it can handle both success and setbacks, you can gradually allow more agency."'
+        ],
+        reflectionPrompts: [
+          'Which helplessness protector runs your daily life most strongly? Where do you freeze, comply, or give up?',
+          'What did your Freeze part reveal about when it was first activated? What overwhelmed your Powerless Child?',
+          'How do your protectors create a self-fulfilling prophecy — preventing action, which confirms helplessness?',
+          'What small step could you take this week to prove to your Powerless Child that trying doesn\'t always lead to failure?',
+          'What happened when you acknowledged your protectors\' strategy rather than criticizing yourself for "being lazy" or "not trying"?'
+        ]
+      }
+    },
     steps: [
       {
         type: 'learn',
@@ -630,6 +951,113 @@ const coreModules = [
     estimatedMinutes: 40,
     prerequisites: ['module-3-protectors-unlocked'],
     innerChildFocus: true,
+    woundPersonalization: {
+      abandonment: {
+        childName: 'Lonely Child',
+        moduleIntro: 'Self Leadership takes on special meaning for your Lonely Child — your Self becomes the constant, reliable parent figure this child has always been seeking from external relationships. The most transformative insight for abandonment healing is this: your Self cannot leave you. Unlike every person who has come and gone, your Self is permanently, irrevocably present. As you cultivate the 8 C\'s, you are building the internal secure attachment that makes your Lonely Child\'s desperate seeking of external connection less frantic and more grounded.',
+        selfCsIntegration: 'For abandonment, Compassion and Connectedness are your primary healing C\'s. Compassion says "I see your pain and I care" — the warm response your Lonely Child was missing. Connectedness is the direct antidote to abandonment: it proves that connection exists within you, independent of others. Calm provides the steady, predictable presence that makes your Lonely Child feel safe. Together, these C\'s create an internal secure base.',
+        guidedSteps: [
+          'Begin by grounding in Self-energy. Take three deep breaths and feel your feet on the ground. As you settle, invite your Lonely Child to notice: "My Self is here right now. It arrived without being asked, without conditions, and it will not leave when things get hard." This reliability IS the healing.',
+          'Cultivate Compassion specifically for your Lonely Child. Place your hand on your heart and imagine directing warm, unconditional care toward the part of you that fears being alone. Notice what happens when you actively choose to be tender with your own vulnerability. This is the Compassion your Lonely Child has been seeking from others.',
+          'Practice Connectedness from Self. With your eyes closed, feel the thread of connection between your adult Self and your Lonely Child. Say internally: "We are always connected. This bond cannot be broken by distance, time, or other people\'s choices." Feel the truth of this — your inner connection is unbreakable.',
+          'Bring Calm to your system. Your Lonely Child\'s nervous system runs on anxiety about separation. Slow your breathing. Feel the steadiness of your body in this chair. Let your Calm say: "There is no emergency right now. No one is leaving. We are together." Practice Calm as the antidote to abandonment panic.',
+          'Explore how Clarity serves your Lonely Child. With Clarity, you can see: "The people who left were following their own path — it was not a reflection of my worth. My Lonely Child made it mean \'I am not enough,\' but that was a child\'s interpretation, not the truth."',
+          'Practice Self Leadership by making a specific commitment to your Lonely Child. Choose one daily practice: a morning check-in, a hand on the heart before sleep, a written note of reassurance. Small, consistent acts build the trust your Lonely Child needs. Your Self proves its reliability through action, not promises.',
+          'Close by embodying the Self-led parent your Lonely Child has always wanted: "I am here. I am staying. I choose you — not because you earned it, but because you are mine and I am yours. This is the relationship that cannot be abandoned, because we are one."'
+        ],
+        reflectionPrompts: [
+          'What happened when you offered your Lonely Child the experience of a Self that cannot leave? Did relief, disbelief, or grief arise?',
+          'Which of the 8 C\'s felt most natural to bring to your abandonment wound? Which felt most difficult or blocked?',
+          'How has seeking connection externally been a substitute for developing Self-connection? What patterns do you notice?',
+          'What daily practice will you commit to that proves your Self\'s reliability to your Lonely Child?',
+          'How would your relationships change if your Lonely Child felt securely attached to your Self rather than desperately seeking attachment from others?'
+        ]
+      },
+      shame: {
+        childName: 'Unworthy Child',
+        moduleIntro: 'Self Leadership is perhaps the most transformative module for your shame wound, because the 8 C\'s of Self are the direct antidote to every message shame has ever delivered. Shame says "You are broken"; Self says "You are whole." Shame demands perfection; Self offers acceptance. Shame hides in darkness; Self brings Curiosity and light. As you develop Self Leadership, you are literally building an internal voice that contradicts your Inner Critic — not by fighting it, but by offering your Unworthy Child something the Critic never could: unconditional regard.',
+        selfCsIntegration: 'For shame, Compassion and Courage are your breakthrough C\'s. Compassion is revolutionary because it directly contradicts the shame message — every moment of self-compassion says "You deserve kindness," which the Unworthy Child has never believed. Courage is essential because leading from Self requires approaching the parts of yourself you most want to hide. Creativity helps you reimagine your self-concept beyond shame\'s narrow definition.',
+        guidedSteps: [
+          'Begin by checking for the Inner Critic\'s presence. Self Leadership work often activates the Critic, which may say: "Self-compassion is weakness," "You don\'t deserve this," or "Stop being so self-indulgent." Notice the Critic without obeying it. Ask: "Can you let me practice leading from Self?"',
+          'Cultivate Compassion — the most healing C for shame. Imagine looking at your Unworthy Child with the eyes of the most loving parent imaginable — someone who sees you completely and says: "I see everything you\'re ashamed of, and I love you more, not less." Let yourself feel this even if the Critic protests.',
+          'Practice Courage — the C that makes shame healing possible. Say to yourself: "I am willing to look at the parts I have been hiding. I have the Courage to see myself fully." Courage does not mean fearlessness; it means being afraid and approaching anyway.',
+          'Bring Curiosity to replace judgment. The Critic\'s weapon is judgment; Self\'s response is Curiosity. Instead of "What\'s wrong with me?", practice "I wonder what this part needs." Instead of "I\'m so pathetic," try "I\'m curious about why I react this way." Feel the shift in your body when Curiosity replaces judgment.',
+          'Explore Confidence — not the performance-based kind your Perfectionist produces, but the quiet Self-Confidence that says: "I am enough without proving anything." This Confidence is not earned through achievement; it is your birthright as a being with a Self.',
+          'Practice leading from Self in a moment that typically triggers shame. Recall a recent situation where you felt exposed, judged, or "not enough." Now reimagine your response from Self: What would Compassion say? What would Clarity see? How would Courage respond? This is Self Leadership in action.',
+          'Close with a Self-led declaration to your Unworthy Child: "I lead this system now — not the Critic, not the Perfectionist, not shame. My Self sees you with Compassion, approaches you with Courage, and knows with unshakable Clarity: you were never broken. You are whole."'
+        ],
+        reflectionPrompts: [
+          'How did your Inner Critic respond to Self Leadership practice? What tactics did it use to maintain control?',
+          'What was it like to experience Compassion directed at the parts you\'re most ashamed of? What arose?',
+          'Which C felt most foreign or uncomfortable for your shame wound? What does that tell you about where healing is needed?',
+          'How is Self-Confidence different from performance-based confidence in your experience? Can you feel the distinction?',
+          'What would daily life look like if your Self — rather than your Inner Critic — was leading your system?'
+        ]
+      },
+      neglect: {
+        childName: 'Lost Child',
+        moduleIntro: 'Self Leadership has a unique significance for your Lost Child — you are learning to become the attentive, responsive parent that was absent during your formative years. The 8 C\'s of Self are essentially the qualities of an attuned caregiver: Curiosity (genuine interest in your inner world), Calm (steady, unhurried presence), Compassion (caring response to your needs). For your Lost Child, developing Self Leadership is not abstract — it is literally learning to parent yourself with the attunement you never received.',
+        selfCsIntegration: 'For neglect, Curiosity and Calm are your primary healing C\'s. Curiosity says "I want to know you" — the opposite of being ignored. Each time you turn Curiosity inward, you give your Lost Child what no one gave: genuine attention. Calm provides the steady, patient presence that neglect stole. Your Lost Child doesn\'t need intensity; it needs someone who stays and pays attention. Compassion responds to needs once they\'re finally seen.',
+        guidedSteps: [
+          'Begin by doing something radical for someone with neglect wounds: stop everything and ask yourself, "How am I actually feeling right now?" Not what you should feel, not "I\'m fine" — but a genuine check-in. Your Lost Child may not answer immediately. It\'s not used to being asked. Wait patiently.',
+          'Cultivate Curiosity about your own inner world. For neglect survivors, this can feel strange or selfish. It is neither. Explore: "What am I feeling in my body? What do I want right now? What do I need?" If "I don\'t know" arises, stay with it. "I don\'t know" is your Lost Child saying "No one ever helped me learn this."',
+          'Practice Calm attunement. Slow everything down. Place your attention on your inner experience the way a devoted parent watches their child — not controlling, not fixing, just noticing. "I see that you are feeling something. I am not in a rush. I have time for you." This unhurried attention IS the medicine.',
+          'Bring Compassion to whatever you discover inside. If you find sadness, let it be held. If you find emptiness, let it be acknowledged. If you find anger at not being seen, let it be honored. Self-Compassion says: "Your feelings make sense. You needed more than you received, and that matters."',
+          'Explore Connectedness from Self. Your Lost Child may believe that connection is something earned or something you provide for others but never receive. Practice receiving from your Self: "I am connected to you. You are not invisible. I see you and I choose to stay."',
+          'Practice Self Leadership by building a daily attunement ritual. Ask yourself three questions each morning: "What am I feeling? What do I need? How can I provide that?" Then actually respond. This is active reparenting — giving your Lost Child the responsive care it was denied.',
+          'Close with a Self-led commitment to your Lost Child: "I am becoming the attentive parent you never had. My Curiosity says \'I want to know you.\' My Calm says \'I have time for you.\' My Compassion says \'You matter.\' I will practice seeing you, hearing you, and responding to you every day."'
+        ],
+        reflectionPrompts: [
+          'What happened when you stopped and genuinely asked yourself how you\'re feeling? Was it easy or did a part resist?',
+          'How does it feel to bring Curiosity to your own inner world? Does it feel selfish, strange, or perhaps healing?',
+          'Which of the 8 C\'s feels most urgently needed by your Lost Child? Which is most foreign?',
+          'What daily attunement practice will you commit to? How will you ensure you actually respond to what you discover inside?',
+          'What would change if you treated your own inner experience with the same genuine interest you give to others?'
+        ]
+      },
+      betrayal: {
+        childName: 'Terrified Child',
+        moduleIntro: 'Self Leadership for your Terrified Child is about building something profoundly important: internal trust. Your Terrified Child learned that trusted figures betray — so why would it trust your Self? The answer is earned trust, built through consistent, predictable, transparent Self-leadership. The 8 C\'s of Self become your trustworthiness credentials: Calm proves you won\'t be reactive. Clarity proves you won\'t be deceptive. Courage proves you won\'t abandon the hard conversations. Your Terrified Child is watching your Self for evidence — and Self Leadership provides that evidence daily.',
+        selfCsIntegration: 'For betrayal, Calm and Clarity are your primary trust-building C\'s. Calm soothes your Terrified Child\'s hyperactivated nervous system — it proves that your Self is steady and will not react unpredictably. Clarity demonstrates transparency and honesty — the opposite of the deception that characterized the original betrayal. Confidence builds slowly as your Self proves itself reliable. No C forces vulnerability; each one earns trust gradually.',
+        guidedSteps: [
+          'Begin by acknowledging the paradox: your Terrified Child is being asked to trust your Self, and trust itself was the weapon used against it. Do not force this. Say to your Terrified Child: "I know trust is dangerous. I will not ask you to trust me today. I will simply be here, consistently, and let you decide in your own time."',
+          'Cultivate Calm as evidence of safety. Your Terrified Child\'s nervous system is always scanning for danger. Slow your breathing. Feel your body grounding. Let your Calm say: "I am not erratic. I am not unpredictable. I am steady." Calm is not about suppressing vigilance — it\'s about proving that your Self is a predictable, reliable presence.',
+          'Practice Clarity as evidence of honesty. With Clarity, be transparent with yourself: "What am I actually feeling right now? What is true?" Your Terrified Child needs a leader who tells the truth, even when it\'s uncomfortable. Clarity says: "I will not deceive you, not even with comforting lies."',
+          'Bring Courage — not reckless bravery, but the willingness to face difficult truths without flinching. Your Terrified Child needs to see that your Self can handle hard things. "I have the Courage to look at what happened and stay present. I will not collapse or run."',
+          'Explore Confidence carefully. For betrayal wounds, Confidence must be earned, not assumed. Your Self builds Confidence by following through: making small commitments and keeping them. "I said I would check in with my Terrified Child daily, and I did." Reliability is the foundation of earned trust.',
+          'Practice Self Leadership by creating a "trust-building protocol" with your Terrified Child. Ask: "What would you need to see from me — consistently, over time — before you would begin to trust me?" Listen. The answers are your roadmap: predictability, honesty, no forced vulnerability, respected boundaries.',
+          'Close with a Self-led commitment: "I will earn your trust, not demand it. My Self is Calm, Clear, and Courageous. I will prove myself through consistency, not promises. You get to set the pace. I will be here, unchanged, whenever you are ready."'
+        ],
+        reflectionPrompts: [
+          'How did your Terrified Child respond to the idea of trusting your Self? What concerns or conditions did it express?',
+          'Which of the 8 C\'s felt most critical for your Terrified Child\'s sense of safety? Which felt premature?',
+          'What specific evidence of trustworthiness would your Terrified Child need to see from your Self before beginning to relax?',
+          'How is the earned-trust model of Self Leadership different from how trust has worked in your external relationships?',
+          'What small, consistent act of Self Leadership will you practice daily to build your Terrified Child\'s trust?'
+        ]
+      },
+      helplessness: {
+        childName: 'Powerless Child',
+        moduleIntro: 'Self Leadership is the most empowering module for your Powerless Child — because it reveals something your helplessness wound has obscured: you have a Self that is inherently strong, capable, and effective. Your Powerless Child believes it cannot lead, cannot change things, cannot make a difference. Self Leadership proves otherwise — not through dramatic heroics, but through the quiet, daily practice of choosing, deciding, and acting from your core. The 8 C\'s of Self are not qualities you need to earn or build from scratch; they are qualities that emerge when you access your natural center.',
+        selfCsIntegration: 'For helplessness, Confidence and Courage are your breakthrough C\'s. Confidence is not arrogance or performance — it is the quiet knowing that your Self is capable. This directly contradicts the helplessness message "I can\'t do anything." Courage gives you the willingness to try again even when past efforts felt futile. Creativity provides alternative approaches when the old ways failed. Together, these C\'s restore the agency your Powerless Child lost.',
+        guidedSteps: [
+          'Begin by recognizing that you are already leading from Self by choosing to engage with this material. A part of you may dismiss this: "Anyone could do this." Counter with Clarity: "My Powerless Child says I have no agency, but here I am, actively choosing to heal. That IS agency."',
+          'Cultivate Confidence — not the loud kind, but embodied Self-Confidence. Feel your body\'s strength: your feet on the ground, your spine holding you upright, your breath sustaining you without effort. Your body has been capable this whole time. Let your Powerless Child see this physical evidence of capability.',
+          'Practice Courage through a micro-challenge. Choose one small thing your Powerless Child typically avoids or gives up on. It could be as simple as expressing a preference, making a small decision, or stating a boundary. Do it now. Notice: you did not collapse. You chose, and the world did not end.',
+          'Bring Clarity to the helplessness narrative. Your Powerless Child says "Nothing I do matters." With Clarity, examine: Is this universally true, or was it true in a specific past situation? Your Self can distinguish between "I was powerless as a child in that context" and "I am powerless in all contexts forever."',
+          'Explore Creativity as an agent of change. When helplessness says "There\'s only one way, and it doesn\'t work," Creativity says "What if we tried something different?" Generate three alternative approaches to a current challenge. Even generating options is an act of agency that your Powerless Child can witness.',
+          'Practice Self Leadership by making a decision and following through. Choose something within your control today — not a huge life change, but a specific, achievable action. Complete it. Then tell your Powerless Child: "We chose, we acted, and something happened because of us. This is power."',
+          'Close with a Self-led declaration to your Powerless Child: "I am strong enough to lead. My Confidence is quiet but real. My Courage is willing to try. My Clarity sees that helplessness was learned, not inherent. I am reclaiming my agency, one choice at a time. You are not powerless anymore."'
+        ],
+        reflectionPrompts: [
+          'What evidence of agency and capability did you discover during this practice that your Powerless Child typically overlooks?',
+          'How does embodied Confidence feel different from the helplessness your Powerless Child carries? Where do you feel each in your body?',
+          'What happened when you completed the micro-challenge? How did your Powerless Child respond to evidence of your capability?',
+          'Which of the 8 C\'s felt most foreign or difficult for your helplessness wound? What does that reveal about where healing is needed?',
+          'What would your life look like if you led from Self-Confidence and Courage rather than from your Powerless Child\'s "why bother" stance?'
+        ]
+      }
+    },
     steps: [
       {
         type: 'learn',
