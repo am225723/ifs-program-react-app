@@ -1,6 +1,6 @@
 # The Luminous Self - IFS Program React App
 
-A comprehensive web application for Internal Family Systems (IFS) therapy, designed to help users understand and heal their inner world through interactive tools, guided exercises, and educational resources.
+A comprehensive web application for Internal Family Systems (IFS) therapy, designed to help users understand and heal their inner world through interactive tools, guided exercises, and educational resource1s.
 
 ## 📱 React Native Mobile App (Expo)
 
