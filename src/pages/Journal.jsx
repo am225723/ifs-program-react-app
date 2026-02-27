@@ -25,12 +25,15 @@ import {
   Moon,
   Sun,
   Mic,
-  MicOff
+  MicOff,
+  Users,
+  ChevronDown
 } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 import { useTheme } from '../contexts/ThemeContext';
+import { useParts } from '../contexts/PartsContext';
 
 const CONCERNING_KEYWORDS = [
   'suicide', 'suicidal', 'kill myself', 'end my life', 'want to die', 'better off dead',
@@ -55,14 +58,14 @@ async function createTherapistAlert(clientId, clientName, journalTitle, matchedK
     const { data: advisors } = await supabase
       .from('ifs_clients')
       .select('id')
-      .eq('user_role', 'advisor')
+      .eq('user_role', 'therapist')
       .eq('status', 'active');
 
     if (!advisors || advisors.length === 0) return;
 
     const alertMessage = `Journal entry from ${clientName} contains concerning language: "${matchedKeywords.slice(0, 3).join('", "')}"${matchedKeywords.length > 3 ? ` (+${matchedKeywords.length - 3} more)` : ''}. Entry title: "${journalTitle}"`;
 
-    for (const therapist of therapists) {
+    for (const therapist of advisors) {
       await supabase
         .from('ifs_messages')
         .insert({
@@ -122,6 +125,44 @@ const calculateAverageMood = (entries) => {
   return '😄';
 };
 
+const PARTS_PROMPTS = {
+  manager: [
+    'What are you trying to protect me from right now?',
+    'What would happen if you relaxed your guard?',
+    'How long have you been carrying this responsibility?',
+    'What do you need me to understand about your role?',
+    'If you could trust Self to handle things, what would you do instead?'
+  ],
+  firefighter: [
+    'What pain are you trying to escape right now?',
+    'What feelings are so overwhelming that you need to act?',
+    'What would happen if we sat with the pain together?',
+    'How did you learn this way of coping?',
+    'Can Self hold space for the feelings you\'re trying to avoid?'
+  ],
+  exile: [
+    'What do you need me to know about your pain?',
+    'How long have you been waiting to be heard?',
+    'What happened to you that still hurts?',
+    'What do you need from Self right now?',
+    'If you could say anything without fear, what would it be?'
+  ],
+  self: [
+    'What does my inner wisdom want to share today?',
+    'How can I lead my internal system with more compassion?',
+    'What part needs my attention most right now?',
+    'What clarity am I finding in this moment?',
+    'How can I hold space for all my parts today?'
+  ]
+};
+
+const PART_TYPE_CONFIG = {
+  manager: { color: 'blue', textClass: 'text-blue-500', bgClass: 'bg-blue-100', icon: Shield, label: 'Manager' },
+  firefighter: { color: 'red', textClass: 'text-red-500', bgClass: 'bg-red-100', icon: Sparkles, label: 'Firefighter' },
+  exile: { color: 'purple', textClass: 'text-purple-500', bgClass: 'bg-purple-100', icon: Heart, label: 'Exile' },
+  self: { color: 'emerald', textClass: 'text-emerald-500', bgClass: 'bg-emerald-100', icon: Star, label: 'Self' }
+};
+
 const Journal = () => {
   const [entries, setEntries] = useState([]);
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -139,6 +180,12 @@ const Journal = () => {
   const [isDictating, setIsDictating] = useState(false);
   const recognitionRef = useRef(null);
   const speechSupported = typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  const [journalMode, setJournalMode] = useState('regular');
+  const [selectedPart, setSelectedPart] = useState(null);
+  const [filterPart, setFilterPart] = useState('all');
+  const [showPartSelector, setShowPartSelector] = useState(false);
+  const { parts } = useParts();
 
   const stopDictation = useCallback(() => {
     if (recognitionRef.current) {
@@ -274,7 +321,10 @@ const Journal = () => {
               tags: row.tags || [],
               mood: row.mood || 'neutral',
               date: row.created_at,
-              wordCount: row.content?.split(' ').length || 0
+              wordCount: row.content?.split(' ').length || 0,
+              partName: row.parts_identified?.[0] || null,
+              partType: row.parts_dialogue?.partType || null,
+              isPartsJournal: !!row.parts_dialogue?.isPartsJournal
             }));
             setEntries(mapped);
             return;
@@ -301,29 +351,43 @@ const Journal = () => {
       return;
     }
 
+    const isPartsEntry = journalMode === 'parts' && selectedPart;
     const newEntry = {
       id: Date.now(),
       title: entryTitle,
       content: entryContent,
-      tags: entryTags,
+      tags: isPartsEntry ? [...entryTags, `part:${selectedPart.name}`] : entryTags,
       mood: entryMood,
       date: new Date().toISOString(),
-      wordCount: entryContent.split(' ').length
+      wordCount: entryContent.split(' ').length,
+      partName: isPartsEntry ? selectedPart.name : null,
+      partType: isPartsEntry ? selectedPart.type : null,
+      isPartsJournal: isPartsEntry
     };
 
     try {
       const client = clientAuth.getCurrentClientValidated();
       if (client) {
+        const insertData = {
+          client_id: client.id,
+          title: entryTitle,
+          content: entryContent,
+          mood: entryMood,
+          tags: isPartsEntry ? [...entryTags, `part:${selectedPart.name}`] : entryTags,
+          created_at: new Date().toISOString()
+        };
+        if (isPartsEntry) {
+          insertData.parts_identified = [selectedPart.name];
+          insertData.parts_dialogue = {
+            isPartsJournal: true,
+            partName: selectedPart.name,
+            partType: selectedPart.type,
+            partRole: selectedPart.role || ''
+          };
+        }
         const { data, error } = await supabase
           .from('ifs_journal_entries')
-          .insert({
-            client_id: client.id,
-            title: entryTitle,
-            content: entryContent,
-            mood: entryMood,
-            tags: entryTags,
-            created_at: new Date().toISOString()
-          })
+          .insert(insertData)
           .select()
           .single();
 
@@ -350,6 +414,7 @@ const Journal = () => {
     setEntryTags([]);
     setEntryMood('neutral');
     setSelectedPrompt(null);
+    setSelectedPart(null);
     setIsWriting(false);
   };
 
@@ -382,7 +447,9 @@ const Journal = () => {
     const matchesSearch = entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          entry.content.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesMood = selectedMood === 'all' || entry.mood === selectedMood;
-    return matchesSearch && matchesMood;
+    const matchesMode = journalMode === 'regular' ? true : entry.isPartsJournal;
+    const matchesPart = filterPart === 'all' || entry.partName === filterPart;
+    return matchesSearch && matchesMood && matchesMode && matchesPart;
   });
 
   const getMoodEmoji = (mood) => {
@@ -410,13 +477,21 @@ const Journal = () => {
   const promptBg = theme.isDark ? 'bg-slate-700' : 'bg-gray-50';
   const promptHover = theme.isDark ? 'hover:bg-slate-600' : 'hover:bg-amber-50';
 
+  const availableParts = parts.filter(p => p.type !== 'self' || p.name !== 'Self');
+  const uniquePartNames = [...new Set(entries.filter(e => e.partName).map(e => e.partName))];
+
+  const getPartsPrompts = () => {
+    if (!selectedPart) return [];
+    return PARTS_PROMPTS[selectedPart.type] || PARTS_PROMPTS.self;
+  };
+
   if (isWriting) {
     return (
       <div className="min-h-screen">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between mb-8">
             <button
-              onClick={() => setIsWriting(false)}
+              onClick={() => { setIsWriting(false); setSelectedPart(null); }}
               className={`flex items-center ${textSecondary} hover:${textPrimary} transition-colors`}
             >
               ← Back to Journal
@@ -436,13 +511,75 @@ const Journal = () => {
             </div>
           </div>
 
+          {journalMode === 'parts' && (
+            <div className={`${cardBg} rounded-2xl shadow-lg p-5 mb-6`}>
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="w-5 h-5 text-purple-500" />
+                <h3 className={`font-bold ${textPrimary}`}>Writing to a Part</h3>
+              </div>
+              {selectedPart ? (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      selectedPart.type === 'manager' ? 'bg-blue-100 text-blue-600' :
+                      selectedPart.type === 'firefighter' ? 'bg-red-100 text-red-600' :
+                      selectedPart.type === 'exile' ? 'bg-purple-100 text-purple-600' :
+                      'bg-emerald-100 text-emerald-600'
+                    }`}>
+                      {(() => { const Ico = PART_TYPE_CONFIG[selectedPart.type]?.icon || Brain; return <Ico className="w-5 h-5" />; })()}
+                    </div>
+                    <div>
+                      <p className={`font-semibold ${textPrimary}`}>{selectedPart.name}</p>
+                      <p className={`text-xs ${textSecondary}`}>{PART_TYPE_CONFIG[selectedPart.type]?.label || selectedPart.type}{selectedPart.role ? ` · ${selectedPart.role}` : ''}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowPartSelector(true)}
+                    className={`text-sm ${theme.isDark ? 'text-purple-400 hover:text-purple-300' : 'text-purple-600 hover:text-purple-700'}`}
+                  >
+                    Change Part
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowPartSelector(true)}
+                  className={`w-full p-4 rounded-xl border-2 border-dashed ${theme.isDark ? 'border-slate-600 hover:border-purple-500' : 'border-gray-300 hover:border-purple-400'} transition-colors flex items-center justify-center gap-2 ${textSecondary}`}
+                >
+                  <Plus className="w-5 h-5" />
+                  Select a Part to Write To
+                </button>
+              )}
+
+              {selectedPart && (
+                <div className="mt-4">
+                  <p className={`text-xs font-medium ${textSecondary} mb-2`}>Prompts for {selectedPart.name}:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {getPartsPrompts().map((prompt, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setEntryContent(prev => prev ? prev + '\n\n' + prompt : prompt);
+                          if (!entryTitle) setEntryTitle(`Letter to ${selectedPart.name}`);
+                          textAreaRef.current?.focus();
+                        }}
+                        className={`text-xs px-3 py-1.5 rounded-full ${theme.isDark ? 'bg-slate-700 text-slate-300 hover:bg-purple-900/40 hover:text-purple-300' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'} transition-colors`}
+                      >
+                        {prompt.length > 50 ? prompt.substring(0, 50) + '...' : prompt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className={`${cardBg} rounded-3xl shadow-xl p-8`}>
             <div className="mb-6">
               <input
                 type="text"
                 value={entryTitle}
                 onChange={(e) => setEntryTitle(e.target.value)}
-                placeholder="Entry title..."
+                placeholder={journalMode === 'parts' && selectedPart ? `Letter to ${selectedPart.name}...` : "Entry title..."}
                 className={`w-full text-3xl font-bold ${inputText} border-none outline-none mb-4 bg-transparent`}
               />
               
@@ -596,6 +733,81 @@ const Journal = () => {
               </div>
             </div>
           )}
+
+          {showPartSelector && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className={`${modalBg} rounded-3xl max-w-lg w-full max-h-[80vh] overflow-y-auto p-8`}>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className={`text-2xl font-bold ${textPrimary}`}>Select a Part</h3>
+                  <button
+                    onClick={() => setShowPartSelector(false)}
+                    className={`${textTertiary} hover:${textSecondary} text-2xl`}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {availableParts.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className={`w-12 h-12 mx-auto mb-3 ${textTertiary}`} />
+                    <p className={`${textSecondary} mb-2`}>No parts mapped yet</p>
+                    <p className={`text-sm ${textTertiary}`}>Visit Parts Mapping to identify your parts first, or write to a default part type below.</p>
+                    <div className="flex flex-wrap gap-2 justify-center mt-4">
+                      {[
+                        { name: 'My Manager', type: 'manager' },
+                        { name: 'My Firefighter', type: 'firefighter' },
+                        { name: 'My Exile', type: 'exile' }
+                      ].map(defaultPart => {
+                        const cfg = PART_TYPE_CONFIG[defaultPart.type];
+                        const Ico = cfg.icon;
+                        return (
+                          <button
+                            key={defaultPart.type}
+                            onClick={() => { setSelectedPart(defaultPart); setShowPartSelector(false); }}
+                            className={`flex items-center gap-2 px-4 py-3 rounded-xl border ${theme.isDark ? 'border-slate-600 hover:border-purple-500 bg-slate-700' : 'border-gray-200 hover:border-purple-400 bg-gray-50'} transition-colors`}
+                          >
+                            <Ico className={`w-4 h-4 ${cfg.textClass}`} />
+                            <span className={`text-sm font-medium ${textPrimary}`}>{defaultPart.name}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {availableParts.map(part => {
+                      const cfg = PART_TYPE_CONFIG[part.type] || PART_TYPE_CONFIG.self;
+                      const Ico = cfg.icon;
+                      return (
+                        <button
+                          key={part.id}
+                          onClick={() => { setSelectedPart(part); setShowPartSelector(false); }}
+                          className={`w-full flex items-center gap-3 p-4 rounded-xl border ${
+                            selectedPart?.id === part.id
+                              ? theme.isDark ? 'border-purple-500 bg-purple-900/20' : 'border-purple-400 bg-purple-50'
+                              : theme.isDark ? 'border-slate-600 hover:border-slate-500 bg-slate-700/50' : 'border-gray-200 hover:border-gray-300 bg-gray-50'
+                          } transition-all`}
+                        >
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            part.type === 'manager' ? 'bg-blue-100 text-blue-600' :
+                            part.type === 'firefighter' ? 'bg-red-100 text-red-600' :
+                            part.type === 'exile' ? 'bg-purple-100 text-purple-600' :
+                            'bg-emerald-100 text-emerald-600'
+                          }`}>
+                            <Ico className="w-5 h-5" />
+                          </div>
+                          <div className="text-left flex-1">
+                            <p className={`font-semibold ${textPrimary}`}>{part.name}</p>
+                            <p className={`text-xs ${textSecondary}`}>{cfg.label}{part.role ? ` · ${part.role}` : ''}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -626,6 +838,18 @@ const Journal = () => {
             <div className="mb-6">
               <h1 className={`text-3xl font-bold ${textPrimary} mb-4`}>{selectedEntry.title}</h1>
               
+              {selectedEntry.partName && (
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4 ${
+                  selectedEntry.partType === 'manager' ? 'bg-blue-100 text-blue-700' :
+                  selectedEntry.partType === 'firefighter' ? 'bg-red-100 text-red-700' :
+                  selectedEntry.partType === 'exile' ? 'bg-purple-100 text-purple-700' :
+                  'bg-emerald-100 text-emerald-700'
+                }`}>
+                  {(() => { const Ico = PART_TYPE_CONFIG[selectedEntry.partType]?.icon || Brain; return <Ico className="w-3.5 h-3.5" />; })()}
+                  <span className="text-sm font-medium">{selectedEntry.partName}</span>
+                </div>
+              )}
+
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-4">
                   <span className="text-2xl">{getMoodEmoji(selectedEntry.mood)}</span>
@@ -729,10 +953,37 @@ const Journal = () => {
           </div>
         </div>
 
+        <div className={`${cardBg} rounded-2xl shadow-lg p-2 mb-6`}>
+          <div className="flex">
+            <button
+              onClick={() => { setJournalMode('regular'); setFilterPart('all'); }}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                journalMode === 'regular'
+                  ? 'bg-gradient-to-r from-amber-500 to-emerald-500 text-white shadow-md'
+                  : `${textSecondary} ${subtleBgHover}`
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              Healing Journal
+            </button>
+            <button
+              onClick={() => setJournalMode('parts')}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all ${
+                journalMode === 'parts'
+                  ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md'
+                  : `${textSecondary} ${subtleBgHover}`
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              Parts Journal
+            </button>
+          </div>
+        </div>
+
         <div className={`${cardBg} rounded-2xl shadow-lg p-6 mb-8`}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="relative flex-1">
+            <div className="flex items-center space-x-4 flex-wrap gap-y-2">
+              <div className="relative flex-1 min-w-[200px]">
                 <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${textTertiary} w-5 h-5`} />
                 <input
                   type="text"
@@ -755,14 +1006,27 @@ const Journal = () => {
                   </option>
                 ))}
               </select>
+
+              {journalMode === 'parts' && uniquePartNames.length > 0 && (
+                <select
+                  value={filterPart}
+                  onChange={(e) => setFilterPart(e.target.value)}
+                  className={`px-4 py-2 border ${inputBg} rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                >
+                  <option value="all">All Parts</option>
+                  {uniquePartNames.map(name => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <button
               onClick={() => setIsWriting(true)}
-              className="bg-gradient-to-r from-amber-600 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl flex items-center"
+              className={`${journalMode === 'parts' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700' : 'bg-gradient-to-r from-amber-600 to-emerald-600 hover:from-amber-700 hover:to-emerald-700'} text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center`}
             >
               <Plus className="w-5 h-5 mr-2" />
-              New Entry
+              {journalMode === 'parts' ? 'Write to Part' : 'New Entry'}
             </button>
           </div>
         </div>
@@ -800,7 +1064,19 @@ const Journal = () => {
                   className={`${cardBg} rounded-2xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-all duration-300 group`}
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <span className="text-2xl">{getMoodEmoji(entry.mood)}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{getMoodEmoji(entry.mood)}</span>
+                      {entry.partName && (
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                          entry.partType === 'manager' ? 'bg-blue-100 text-blue-700' :
+                          entry.partType === 'firefighter' ? 'bg-red-100 text-red-700' :
+                          entry.partType === 'exile' ? 'bg-purple-100 text-purple-700' :
+                          'bg-emerald-100 text-emerald-700'
+                        }`}>
+                          {entry.partName}
+                        </span>
+                      )}
+                    </div>
                     <Eye className={`w-5 h-5 ${textTertiary} group-hover:text-amber-600 transition-colors`} />
                   </div>
                   

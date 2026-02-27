@@ -27,7 +27,8 @@ import {
   BarChart3,
   Smile,
   Share2,
-  Feather
+  Feather,
+  Library
 } from 'lucide-react';
 import { supabaseHelpers, supabase } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
@@ -444,6 +445,34 @@ const Home = ({ clientId, client }) => {
                 <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Meditations</span>
                 <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Guided practice</span>
               </Link>
+              <Link to="/milestones" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
+                <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mb-2 group-hover:bg-amber-200 transition-colors">
+                  <Trophy className="w-6 h-6 text-amber-600" />
+                </div>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Milestones</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Achievements</span>
+              </Link>
+              <Link to="/weekly-reflection" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
+                <div className="w-12 h-12 rounded-xl bg-sky-100 flex items-center justify-center mb-2 group-hover:bg-sky-200 transition-colors">
+                  <BarChart3 className="w-6 h-6 text-sky-600" />
+                </div>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Weekly Review</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Reflection</span>
+              </Link>
+              <Link to="/healing-tracker" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
+                <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center mb-2 group-hover:bg-rose-200 transition-colors">
+                  <Compass className="w-6 h-6 text-rose-600" />
+                </div>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Healing Map</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Journey tracker</span>
+              </Link>
+              <Link to="/resource-library" className={`flex flex-col items-center p-4 rounded-xl ${theme.isDark ? 'bg-slate-800/60' : 'bg-white/60'} hover:bg-white transition-colors group`}>
+                <div className="w-12 h-12 rounded-xl bg-cyan-100 flex items-center justify-center mb-2 group-hover:bg-cyan-200 transition-colors">
+                  <Library className="w-6 h-6 text-cyan-600" />
+                </div>
+                <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-200' : 'text-gray-700'}`}>Library</span>
+                <span className={`text-xs ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>Healing resources</span>
+              </Link>
             </div>
           </div>
 
@@ -665,6 +694,23 @@ const Home = ({ clientId, client }) => {
               </p>
               <div className="flex items-center text-amber-700 font-semibold">
                 <span>Start Dialogue</span>
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </div>
+            </Link>
+
+            <Link
+              to="/parts-cards"
+              className={`${theme.isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 group`}
+            >
+              <div className="w-16 h-16 bg-gradient-to-r from-rose-400 to-pink-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+              <h3 className={`text-2xl font-bold ${theme.isDark ? 'text-slate-100' : 'text-gray-900'} mb-3`}>Parts Check-In Cards</h3>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'} mb-4 leading-relaxed`}>
+                Draw a daily card featuring one of your parts with a reflective prompt
+              </p>
+              <div className="flex items-center text-rose-600 font-semibold">
+                <span>Draw a Card</span>
                 <ArrowRight className="ml-2 w-5 h-5" />
               </div>
             </Link>

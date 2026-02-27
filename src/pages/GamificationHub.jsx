@@ -382,6 +382,19 @@ export default function GamificationHub() {
         </div>
       </div>
 
+      <Link
+        to="/milestones"
+        className={`block rounded-2xl p-6 text-center transition-all hover:shadow-lg ${isDark ? 'bg-slate-800/60 border border-amber-500/30 hover:border-amber-500/50' : 'bg-gradient-to-br from-amber-50 to-emerald-50 border border-amber-200 hover:border-amber-300'}`}
+      >
+        <Trophy className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-amber-400' : 'text-amber-600'}`} />
+        <p className={`text-sm font-semibold ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>
+          View Your Milestones
+        </p>
+        <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+          Track achievements and celebrate your progress
+        </p>
+      </Link>
+
       <div className={`rounded-2xl p-6 text-center ${isDark ? 'bg-slate-800/60 border border-slate-700/40' : 'bg-gradient-to-br from-rose-50 to-amber-50 border border-amber-200'}`}>
         <Heart className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-emerald-400' : 'text-emerald-500'}`} />
         <p className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-gray-700'}`}>

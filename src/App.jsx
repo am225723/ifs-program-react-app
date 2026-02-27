@@ -25,7 +25,6 @@ import PartsStudio from './pages/PartsStudio';
 import MicroLearning from './pages/MicroLearning';
 import Affirmations from './pages/Affirmations';
 import TherapyIntegration from './pages/TherapyIntegration';
-import AdminDashboardEnhanced from './pages/AdminDashboardEnhanced';
 import TherapistDashboard from './pages/TherapistDashboard';
 import CoTherapySession from './pages/CoTherapySession';
 import ProgressTimeline from './pages/ProgressTimeline';
@@ -44,6 +43,12 @@ import CustomAssessment from './pages/CustomAssessment';
 import GuidedMeditation from './pages/GuidedMeditation';
 import DailyCheckin from './pages/DailyCheckin';
 import MoodAnalytics from './pages/MoodAnalytics';
+import Milestones from './pages/Milestones';
+import WeeklyReflection from './pages/WeeklyReflection';
+import LetterWriting from './pages/LetterWriting';
+import PartsCards from './pages/PartsCards';
+import HealingTracker from './pages/HealingTracker';
+import ResourceLibrary from './pages/ResourceLibrary';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
 import { DataProvider } from './contexts/DataContext';
@@ -221,22 +226,13 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                     </Link>
                     <div className="flex items-center gap-1">
                       {currentClient?.user_role === 'therapist' && (
-                        <>
-                          <Link
-                            to="/admin"
-                            className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
-                            title="Admin Dashboard"
-                          >
-                            <ClipboardList className="w-5 h-5" />
-                          </Link>
-                          <Link
-                            to="/therapist-dashboard"
-                            className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
-                            title="Advisor Dashboard"
-                          >
-                            <BookOpen className="w-5 h-5" />
-                          </Link>
-                        </>
+                        <Link
+                          to="/therapist-dashboard"
+                          className={`p-2 rounded-lg transition-all ${theme.isDark ? 'text-slate-400 hover:text-amber-400 hover:bg-slate-800' : 'text-gray-500 hover:text-amber-700 hover:bg-amber-50'}`}
+                          title="Advisor Dashboard"
+                        >
+                          <ClipboardList className="w-5 h-5" />
+                        </Link>
                       )}
                       <Link
                         to={currentClient?.user_role === 'therapist' ? '/advisor-messages' : '/inbox'}
@@ -290,6 +286,7 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/assessment" element={<Assessment />} />
                 <Route path="/assessments" element={<Assessments />} />
                 <Route path="/resources" element={<Resources />} />
+                <Route path="/resource-library" element={<ResourceLibrary />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/profile" element={<Profile client={currentClient} />} />
                 <Route path="/settings" element={<Settings />} />
@@ -299,7 +296,7 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/therapy" element={<TherapyIntegration />} />
                 <Route path="/admin" element={
                   currentClient?.user_role === 'therapist' 
-                    ? <AdminDashboardEnhanced /> 
+                    ? <TherapistDashboard /> 
                     : <Home clientId={currentClient?.id} client={currentClient} />
                 } />
                 <Route path="/therapist-dashboard" element={
@@ -344,6 +341,11 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/meditation" element={<GuidedMeditation />} />
                 <Route path="/daily-checkin" element={<DailyCheckin />} />
                 <Route path="/mood-analytics" element={<MoodAnalytics />} />
+                <Route path="/milestones" element={<Milestones />} />
+                <Route path="/weekly-reflection" element={<WeeklyReflection />} />
+                <Route path="/letters" element={<LetterWriting />} />
+                <Route path="/parts-cards" element={<PartsCards />} />
+                <Route path="/healing-tracker" element={<HealingTracker />} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
                 <Route path="/auth-debug" element={<AuthDebug />} />

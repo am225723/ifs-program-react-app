@@ -22,7 +22,7 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 **Core Features:**
 - **Assessment Suite**: IFS Wound, Protective Parts, Self-Energy, and Attachment Style assessments.
 - **Parts Visualization Studio**: Drag-and-drop interface for mapping and visualizing internal parts.
-- **Advisor Dashboard**: Client management, session notes, progress tracking, client insights (assessments, journal entries, module progress, gamification, module response viewer with question text mapping from curriculum), quick actions (create PIN, send reminders, reports), and alerts. Lesson plans are editable and wound-specific. Caseload Overview Cards show secondary wound badges, mini mood trend dots, and current module name with progress bar.
+- **Unified Advisor Super Dashboard**: Merged admin + therapist dashboard with full client management (create/edit clients, PIN generation/display, status toggle, CSV export), session notes with templates (Initial Intake, Parts Work, Unburdening, Crisis, Check-In), progress tracking, client insights with activity timeline and smart recommendations engine, risk dashboard with intervention alerts, exportable PDF reports, lesson plans (editable, wound-specific), caseload overview cards (secondary wound badges, mood trend dots, module progress). Routes: `/therapist-dashboard` and `/admin` both point to the unified dashboard.
 - **Advisor-Client Messaging**: Two-way secure messaging with read receipts and quick message templates.
 - **Homework Assignment System**: Advisors assign categorized homework with priorities and due dates; clients complete assignments with reflection notes.
 - **Progress Reports**: Comprehensive report generation with assessment scores, module completion, mood/energy trends, and gamification stats.
@@ -38,6 +38,13 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **Daily Check-In**: Structured 3-step IFS check-in (Self-energy slider, active parts selector, daily intention/reflection) with low-energy alerts to advisors.
 - **Mood & Parts Analytics**: SVG-based dashboard with custom charts, heatmaps, and trend analysis for mood and parts, with an advisor insights panel.
 - **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generation.
+- **Progress Milestones & Celebrations**: Visual milestone cards with confetti celebrations for achievements (first module, streaks, assessments, journal entries, etc.). Route: `/milestones`.
+- **Parts Journal**: Dedicated journal mode for writing to/from specific inner parts with type-specific prompts, part tagging, and filtering. Integrated into the existing Journal page.
+- **Resource Library**: Curated IFS resources (books, articles, exercises, meditations) organized by wound type and healing stage with personalized recommendations. Route: `/resource-library`.
+- **Weekly Reflection Summary**: Auto-generated weekly digest with mood trends, parts activity, module progress, and Self-energy metrics with SVG mini charts. Route: `/weekly-reflection`.
+- **Inner Child Letter Writing**: Guided letter-writing tool with two modes (to/from inner child), wound-specific prompts, guided structure, favorites, and letter history. Route: `/letters`.
+- **Parts Check-In Cards**: Daily card draws featuring parts from the user's map with type-specific reflective prompts and saved reflections. Route: `/parts-cards`.
+- **Wound Healing Progress Tracker**: Visual journey map with 6 healing stages, progress markers, module tracking, and before/after assessment comparison. Route: `/healing-tracker`.
 
 **Curriculum Modules (11 total):**
 - **Wound-Personalized Modules**: Modules 1-4 (Foundations, Wounds Deep Dive, Protective System, Self Leadership), Module 5 (6 F's Protocol Mastery), Module 6 (Inner Child Unburdening & Integration), Module 5 Bonus (Advanced Healing Exercises), Module 7 (Reparenting Your Inner Child), Module 8 (Somatic Healing & Body Wisdom), Module 9 (Relationships & Attachment Patterns), Module 10 (Transforming the Inner Critic). All these modules are deeply personalized based on the user's identified wound type.
