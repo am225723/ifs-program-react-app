@@ -2091,38 +2091,52 @@ const TherapistDashboard = () => {
     return cleanId.charAt(0).toUpperCase() + cleanId.slice(1) || moduleId;
   };
 
+  const stripStepPrefix = (key) => {
+    return key.replace(/^s\d+-/, '');
+  };
+
+  const extractStepIndex = (key) => {
+    const m = key.match(/^s(\d+)-/);
+    return m ? parseInt(m[1]) : null;
+  };
+
   const mapResponseKey = (key, moduleData, woundType) => {
-    const secondaryWoundMatch = key.match(/^secondary-wound-reflection-(\d+)$/);
+    const bare = stripStepPrefix(key);
+    const stepIdx = extractStepIndex(key);
+    const stepLabel = stepIdx !== null ? ` (Step ${stepIdx + 1})` : '';
+
+    const secondaryWoundMatch = bare.match(/^secondary-wound-reflection-(\d+)$/);
     if (secondaryWoundMatch) {
       const idx = parseInt(secondaryWoundMatch[1]);
-      return `Secondary Wound Reflection ${idx + 1}`;
+      return `Secondary Wound Reflection ${idx + 1}${stepLabel}`;
     }
-    const woundMatch = key.match(/^wound-reflection-(\d+)$/);
+    const woundMatch = bare.match(/^wound-reflection-(\d+)$/);
     if (woundMatch) {
       const idx = parseInt(woundMatch[1]);
       const wp = moduleData?.woundPersonalization?.[woundType];
-      return wp?.reflectionPrompts?.[idx] || `Wound Reflection ${idx + 1}`;
+      return wp?.reflectionPrompts?.[idx] || `Wound Reflection ${idx + 1}${stepLabel}`;
     }
-    const reflectionMatch = key.match(/^reflection-(\d+)$/);
+    const reflectionMatch = bare.match(/^reflection-(\d+)$/);
     if (reflectionMatch) {
       const idx = parseInt(reflectionMatch[1]);
-      const learnStep = moduleData?.steps?.find(s => s.type === 'learn');
-      return learnStep?.data?.reflectionPrompts?.[idx] || `Reflection ${idx + 1}`;
+      const targetStep = stepIdx !== null ? moduleData?.steps?.[stepIdx] : moduleData?.steps?.find(s => s.type === 'learn');
+      return targetStep?.data?.reflectionPrompts?.[idx] || `Reflection ${idx + 1}${stepLabel}`;
     }
-    const questionMatch = key.match(/^question-(\d+)$/);
+    const questionMatch = bare.match(/^question-(\d+)$/);
     if (questionMatch) {
       const idx = parseInt(questionMatch[1]);
-      const activityStep = moduleData?.steps?.find(s => s.type === 'activity');
-      return activityStep?.data?.questions?.[idx] || `Activity Question ${idx + 1}`;
+      const targetStep = stepIdx !== null ? moduleData?.steps?.[stepIdx] : moduleData?.steps?.find(s => s.type === 'activity');
+      return targetStep?.data?.questions?.[idx] || `Activity Question ${idx + 1}${stepLabel}`;
     }
     return key;
   };
 
   const getResponseBadge = (key) => {
-    if (key.startsWith('secondary-wound-reflection-')) return { label: 'Secondary Wound', color: 'bg-purple-100 text-purple-700' };
-    if (key.startsWith('wound-reflection-')) return { label: 'Wound', color: 'bg-amber-100 text-amber-700' };
-    if (key.startsWith('reflection-')) return { label: 'Reflection', color: 'bg-blue-100 text-blue-700' };
-    if (key.startsWith('question-')) return { label: 'Activity', color: 'bg-emerald-100 text-emerald-700' };
+    const bare = stripStepPrefix(key);
+    if (bare.startsWith('secondary-wound-reflection-')) return { label: 'Secondary Wound', color: 'bg-purple-100 text-purple-700' };
+    if (bare.startsWith('wound-reflection-')) return { label: 'Wound', color: 'bg-amber-100 text-amber-700' };
+    if (bare.startsWith('reflection-')) return { label: 'Reflection', color: 'bg-blue-100 text-blue-700' };
+    if (bare.startsWith('question-')) return { label: 'Activity', color: 'bg-emerald-100 text-emerald-700' };
     return { label: 'Response', color: 'bg-gray-100 text-gray-700' };
   };
 

@@ -183,7 +183,42 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
   const isLastStep = currentStepIndex === steps.length - 1;
   const isFirstStep = currentStepIndex === 0;
 
-  // Load saved progress from Supabase
+  const migrateResponseKeys = (responses, moduleSteps) => {
+    if (!responses || Object.keys(responses).length === 0) return responses;
+    const hasStepPrefix = Object.keys(responses).some(k => /^s\d+-/.test(k));
+    if (hasStepPrefix) return responses;
+
+    const migrated = {};
+    const stepsByType = {};
+    moduleSteps.forEach((step, idx) => {
+      const t = step.type || 'unknown';
+      if (!stepsByType[t]) stepsByType[t] = [];
+      stepsByType[t].push(idx);
+    });
+
+    const learnSteps = stepsByType['learn'] || [];
+    const activitySteps = stepsByType['activity'] || [];
+
+    Object.entries(responses).forEach(([key, val]) => {
+      if (key.startsWith('reflection-')) {
+        const targetStep = learnSteps[0] ?? 0;
+        migrated[`s${targetStep}-${key}`] = val;
+      } else if (key.startsWith('question-')) {
+        const targetStep = activitySteps[0] ?? 0;
+        migrated[`s${targetStep}-${key}`] = val;
+      } else if (key.startsWith('wound-reflection-')) {
+        const targetStep = activitySteps[0] ?? 0;
+        migrated[`s${targetStep}-${key}`] = val;
+      } else if (key.startsWith('secondary-wound-reflection-')) {
+        const targetStep = learnSteps[0] ?? 0;
+        migrated[`s${targetStep}-${key}`] = val;
+      } else {
+        migrated[key] = val;
+      }
+    });
+    return migrated;
+  };
+
   useEffect(() => {
     const loadProgress = async () => {
       if (!userId) return;
@@ -195,7 +230,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
         
         if (progress) {
           setCurrentStepIndex(progress.current_step || 0);
-          setActivityResponses(progress.responses || {});
+          const migrated = migrateResponseKeys(progress.responses || {}, steps);
+          setActivityResponses(migrated);
           setCompletedSteps(progress.completed_steps || []);
           setIsCompleted(progress.completed || progress.is_completed || false);
         }
@@ -205,10 +241,9 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
         }
       } catch (error) {
         console.error('Error loading progress:', error);
-        // Fallback to userProgress prop
         if (userProgress[module.id]) {
           const savedStep = userProgress[module.id].currentStep || 0;
-          const savedResponses = userProgress[module.id].responses || {};
+          const savedResponses = migrateResponseKeys(userProgress[module.id].responses || {}, steps);
           const savedCompletedSteps = userProgress[module.id].completedSteps || [];
           
           setCurrentStepIndex(savedStep);
@@ -317,12 +352,13 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
     }));
   };
 
-  const getStepRequirements = useCallback((step) => {
+  const getStepRequirements = useCallback((step, stepIdx) => {
     if (!step) return [];
     const missing = [];
     const data = step.data;
     const woundPersonalization = module?.woundPersonalization?.[woundContext?.primary];
     const isSixFs = data.id?.includes('six-fs');
+    const prefix = `s${stepIdx}-`;
 
     if (step.type === 'learn') {
       const prompts = (isSixFs && woundPersonalization?.reflectionPrompts)
@@ -330,7 +366,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
         : data.reflectionPrompts;
       if (prompts) {
         prompts.forEach((prompt, index) => {
-          const val = activityResponses[`reflection-${index}`];
+          const val = activityResponses[`${prefix}reflection-${index}`];
           if (!val || val.trim().length === 0) {
             missing.push(`Reflection question ${index + 1}`);
           }
@@ -344,7 +380,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
       const activeQuestions = dynActivity?.questions || data.questions;
       if (activeQuestions) {
         activeQuestions.forEach((q, index) => {
-          const val = activityResponses[`question-${index}`];
+          const val = activityResponses[`${prefix}question-${index}`];
           if (!val || val.trim().length === 0) {
             missing.push(`Question ${index + 1}`);
           }
@@ -352,7 +388,7 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
       }
       if (isSixFs && woundPersonalization?.reflectionPrompts) {
         woundPersonalization.reflectionPrompts.forEach((prompt, index) => {
-          const val = activityResponses[`wound-reflection-${index}`];
+          const val = activityResponses[`${prefix}wound-reflection-${index}`];
           if (!val || val.trim().length === 0) {
             missing.push(`Wound reflection ${index + 1}`);
           }
@@ -366,12 +402,12 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
   const isCurrentStepComplete = useCallback(() => {
     if (!currentStep) return true;
     if (currentStep.type === 'result') return true;
-    return getStepRequirements(currentStep).length === 0;
-  }, [currentStep, getStepRequirements]);
+    return getStepRequirements(currentStep, currentStepIndex).length === 0;
+  }, [currentStep, currentStepIndex, getStepRequirements]);
 
   // Navigate to next step
   const nextStep = () => {
-    const missing = getStepRequirements(currentStep);
+    const missing = getStepRequirements(currentStep, currentStepIndex);
     if (missing.length > 0) {
       setIncompleteItems(missing);
       setShowIncompleteWarning(true);
@@ -512,8 +548,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
                 <div key={i} className="space-y-1">
                   <p className="text-sm text-gray-700 italic">Q{i + 1}. {prompt}</p>
                   <textarea
-                    value={activityResponses[`secondary-wound-reflection-${i}`] || ''}
-                    onChange={(e) => handleActivityResponse(`secondary-wound-reflection-${i}`, e.target.value)}
+                    value={activityResponses[`s${currentStepIndex}-secondary-wound-reflection-${i}`] || ''}
+                    onChange={(e) => handleActivityResponse(`s${currentStepIndex}-secondary-wound-reflection-${i}`, e.target.value)}
                     placeholder={`Reflect on your ${secondaryWP.childName}...`}
                     className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-400 focus:border-transparent bg-white/80"
                     rows={2}
@@ -715,8 +751,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
                     <p className="text-gray-700 italic">{prompt}</p>
                   </div>
                   <textarea
-                    value={activityResponses[`reflection-${index}`] || ''}
-                    onChange={(e) => handleActivityResponse(`reflection-${index}`, e.target.value)}
+                    value={activityResponses[`s${currentStepIndex}-reflection-${index}`] || ''}
+                    onChange={(e) => handleActivityResponse(`s${currentStepIndex}-reflection-${index}`, e.target.value)}
                     placeholder={isSixFsLearn && woundPersonalization ? `Reflect on your ${woundPersonalization.childName} experience...` : "Write your reflection here..."}
                     className="w-full px-4 py-3 border border-yellow-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white/80 text-gray-700"
                     rows={3}
@@ -821,8 +857,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
                 </label>
                 <p className="text-gray-900 mb-3">{question}</p>
                 <textarea
-                  value={activityResponses[`question-${index}`] || ''}
-                  onChange={(e) => handleActivityResponse(`question-${index}`, e.target.value)}
+                  value={activityResponses[`s${currentStepIndex}-question-${index}`] || ''}
+                  onChange={(e) => handleActivityResponse(`s${currentStepIndex}-question-${index}`, e.target.value)}
                   placeholder={isPersonalized ? `Reflect on your ${childName} experience...` : 'Share your thoughts and reflections here...'}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   rows={4}
@@ -877,8 +913,8 @@ const LearningModuleEnhanced = ({ module, onComplete, onBack, userProgress = {},
                     <p className="text-gray-700 italic">{prompt}</p>
                   </div>
                   <textarea
-                    value={activityResponses[`wound-reflection-${index}`] || ''}
-                    onChange={(e) => handleActivityResponse(`wound-reflection-${index}`, e.target.value)}
+                    value={activityResponses[`s${currentStepIndex}-wound-reflection-${index}`] || ''}
+                    onChange={(e) => handleActivityResponse(`s${currentStepIndex}-wound-reflection-${index}`, e.target.value)}
                     placeholder={`Reflect on your ${woundPers.childName} experience...`}
                     className="w-full px-4 py-3 border border-yellow-200 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent bg-white/80 text-gray-700"
                     rows={3}
