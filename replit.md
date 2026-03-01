@@ -34,7 +34,7 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **Assessment Builder**: Therapists can create custom assessments for clients.
 - **Journal Voice Dictation**: Continuous speech-to-text for journal entries, with therapist visibility and automatic keyword scanning for concerning content (sending alerts to therapists).
 - **Profile Assessment Display**: Shows all assessment results on the user profile.
-- **Guided Meditations**: IFS-focused guided meditations with timed guidance and voice reflection recording.
+- **Guided Meditations**: IFS-focused guided meditations (12 total across Foundation, Parts Work, and Grounding categories) with timed guidance, browser text-to-speech voice narration (toggleable, with speed control), and voice reflection recording.
 - **Daily Check-In**: Structured 3-step IFS check-in (Self-energy slider, active parts selector, daily intention/reflection) with low-energy alerts to advisors.
 - **Mood & Parts Analytics**: SVG-based dashboard with custom charts, heatmaps, and trend analysis for mood and parts, with an advisor insights panel.
 - **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generation.

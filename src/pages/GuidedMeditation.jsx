@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
-  Play, Pause, RotateCcw, Timer, Mic, MicOff, Volume2,
+  Play, Pause, RotateCcw, Timer, Mic, MicOff, Volume2, VolumeX,
   Heart, Wind, Eye, Sun, Moon, Waves, Sparkles, ChevronRight,
   ChevronLeft, Download, Trash2, Clock, CheckCircle
 } from 'lucide-react';
@@ -126,6 +126,121 @@ const MEDITATIONS = [
       { time: 140, text: "Feel the warmth under your hands. Your body is responding to your own kindness. This is Self energy.", duration: 25 },
       { time: 165, text: "Take one final deep breath of compassion. Carry this warmth with you into the rest of your day.", duration: 15 },
     ]
+  },
+  {
+    id: 'exile-healing',
+    title: 'Healing Your Exile',
+    duration: 360,
+    icon: Heart,
+    color: 'pink',
+    category: 'parts-work',
+    steps: [
+      { time: 0, text: "Find a quiet, comfortable space. Close your eyes and take several slow breaths. Let your body settle and your mind grow still.", duration: 30 },
+      { time: 30, text: "From your Self — that calm, wise center within you — gently turn your attention inward. You are looking for a younger part, an exile, who carries old pain.", duration: 35 },
+      { time: 65, text: "You may sense this part as a child version of yourself, or as a feeling, an image, or a memory. Let it come to you naturally.", duration: 30 },
+      { time: 95, text: "Notice where this part lives in your body. Perhaps your chest, your stomach, or your throat. Breathe warmth toward that area.", duration: 30 },
+      { time: 125, text: "Let this young part know you see it. Say gently: 'I'm here now. I see you. You are not alone anymore.'", duration: 35 },
+      { time: 160, text: "Ask this part: 'What happened to you? What do you want me to know?' Listen with your heart, not your head.", duration: 40 },
+      { time: 200, text: "Whatever this part shares — sadness, fear, loneliness — receive it with compassion. You don't need to fix it. Just witness it.", duration: 35 },
+      { time: 235, text: "Ask: 'What do you need from me right now?' It might need comfort, safety, to be held, or simply to be believed.", duration: 35 },
+      { time: 270, text: "Offer this part exactly what it needs. Imagine yourself holding, comforting, or protecting this young one.", duration: 35 },
+      { time: 305, text: "Let this part know: 'You don't have to carry this alone anymore. I am here. I am strong enough now.'", duration: 30 },
+      { time: 335, text: "Take a few deep breaths. Thank this exile for trusting you. Slowly return your awareness to the room.", duration: 25 },
+    ]
+  },
+  {
+    id: 'grounding-anchor',
+    title: 'Grounding Anchor',
+    duration: 180,
+    icon: Waves,
+    color: 'teal',
+    category: 'grounding',
+    steps: [
+      { time: 0, text: "Press your feet firmly into the floor. Feel the solid ground beneath you. You are here. You are safe. You are present.", duration: 25 },
+      { time: 25, text: "Name five things you can see. Look around slowly. Notice colors, shapes, light. Let each observation anchor you here.", duration: 25 },
+      { time: 50, text: "Name four things you can touch. Feel the texture of your clothing, the chair beneath you, the air on your skin.", duration: 25 },
+      { time: 75, text: "Name three things you can hear. Perhaps distant sounds, your own breathing, the hum of the room.", duration: 25 },
+      { time: 100, text: "Name two things you can smell. Breathe deeply. Notice whatever scents are present, even subtle ones.", duration: 20 },
+      { time: 120, text: "Name one thing you can taste. Notice the taste in your mouth right now, whatever it may be.", duration: 20 },
+      { time: 140, text: "Place both hands on your chest. Feel your heartbeat. This rhythm has been with you since before you were born. It is your anchor.", duration: 25 },
+      { time: 165, text: "Take three final breaths. You are grounded. You are present. You are safe. Carry this groundedness with you.", duration: 15 },
+    ]
+  },
+  {
+    id: 'inner-child-play',
+    title: 'Inner Child Reconnection',
+    duration: 300,
+    icon: Sparkles,
+    color: 'yellow',
+    category: 'parts-work',
+    steps: [
+      { time: 0, text: "Close your eyes and smile gently. Today, you are going to reconnect with the playful, joyful part of your younger self.", duration: 25 },
+      { time: 25, text: "Imagine yourself walking into a beautiful garden. The sun is warm, flowers are blooming, and you feel light and free.", duration: 30 },
+      { time: 55, text: "In this garden, you see a child — your inner child. Notice how old they are, what they look like, what they're doing.", duration: 30 },
+      { time: 85, text: "Walk toward them slowly. Kneel down so you're at their eye level. Let them see your face — kind, warm, loving.", duration: 30 },
+      { time: 115, text: "Ask your inner child: 'What would you like to do together?' Maybe they want to play, draw, run, dance, or just sit together.", duration: 35 },
+      { time: 150, text: "Join them in whatever they choose. Let yourself feel the joy of play, the freedom of being a child with no responsibilities.", duration: 40 },
+      { time: 190, text: "As you play together, tell your inner child: 'I love spending time with you. You matter to me. Your joy matters.'", duration: 30 },
+      { time: 220, text: "Ask: 'What else do you need from me?' Listen to what comes up — perhaps more play, more attention, more laughter in daily life.", duration: 35 },
+      { time: 255, text: "Give your inner child a warm hug. Promise to visit this garden again soon. This connection is always available to you.", duration: 30 },
+      { time: 285, text: "Slowly bring your awareness back to the present. Carry the warmth of this connection into your day.", duration: 15 },
+    ]
+  },
+  {
+    id: 'release-tension',
+    title: 'Tension Release & Letting Go',
+    duration: 240,
+    icon: Wind,
+    color: 'sky',
+    category: 'grounding',
+    steps: [
+      { time: 0, text: "Sit or lie down comfortably. Take a deep breath and let out a long, slow sigh. Give yourself permission to release.", duration: 25 },
+      { time: 25, text: "Squeeze your fists tightly for five seconds. Feel the tension build. Now release. Notice the relief as your hands soften.", duration: 25 },
+      { time: 50, text: "Lift your shoulders up to your ears. Hold the tension. Now drop them. Feel the weight fall away.", duration: 25 },
+      { time: 75, text: "Clench your jaw tightly. Hold for a moment. Now let it go. Let your mouth fall slightly open. Feel the release.", duration: 25 },
+      { time: 100, text: "Tighten your whole face — scrunch everything up. Hold. Now release completely. Feel your face smooth and soft.", duration: 25 },
+      { time: 125, text: "Tense your whole body — every muscle. Hold for five seconds. And release everything at once. Feel the wave of relaxation.", duration: 30 },
+      { time: 155, text: "Now scan your body for any remaining tension. Wherever you find it, breathe into that area and imagine it melting away.", duration: 30 },
+      { time: 185, text: "Ask yourself: 'What emotional weight am I carrying today?' Name it silently. Then imagine setting it down beside you.", duration: 30 },
+      { time: 215, text: "Take three cleansing breaths. You have released what you can. What remains, you can carry more lightly. Open your eyes gently.", duration: 25 },
+    ]
+  },
+  {
+    id: 'self-forgiveness',
+    title: 'Self-Forgiveness Practice',
+    duration: 300,
+    icon: Sun,
+    color: 'orange',
+    category: 'foundation',
+    steps: [
+      { time: 0, text: "Settle into a comfortable position. Close your eyes. Place a hand over your heart and feel its steady rhythm.", duration: 25 },
+      { time: 25, text: "Think of something you've been holding against yourself — a mistake, a regret, a way you feel you've fallen short.", duration: 30 },
+      { time: 55, text: "Notice the part of you that carries guilt or shame about this. Where does it live in your body? Acknowledge it gently.", duration: 30 },
+      { time: 85, text: "Recognize that this part has been trying to make you better by holding onto this pain. Thank it for its intention.", duration: 30 },
+      { time: 115, text: "Now, from your Self, speak to this part: 'You were doing the best you could with what you knew at the time.'", duration: 30 },
+      { time: 145, text: "Repeat silently: 'I forgive myself for being human. I forgive myself for not knowing then what I know now.'", duration: 30 },
+      { time: 175, text: "Imagine the guilt or shame as a heavy stone you've been carrying. Set it down. You don't need it to grow.", duration: 30 },
+      { time: 205, text: "Feel the lightness as you release this weight. Breathe into the space that opens up. Fill it with compassion.", duration: 35 },
+      { time: 240, text: "Tell yourself: 'I am worthy of forgiveness. I am learning. I am growing. That is enough.'", duration: 30 },
+      { time: 270, text: "Take three deep breaths of self-compassion. Open your eyes when ready, carrying this forgiveness forward.", duration: 30 },
+    ]
+  },
+  {
+    id: 'morning-intention',
+    title: 'Morning Intention Setting',
+    duration: 180,
+    icon: Sparkles,
+    color: 'amber',
+    category: 'foundation',
+    steps: [
+      { time: 0, text: "Good morning. Before the day carries you away, take this moment to arrive fully. Three deep breaths.", duration: 20 },
+      { time: 20, text: "Check in with your system. How are you feeling right now? What parts are already active this morning?", duration: 25 },
+      { time: 45, text: "Acknowledge whatever is present without judgment. 'I notice I'm feeling...' Just observe.", duration: 25 },
+      { time: 70, text: "Now, set an intention for today. Not a task — an intention. How do you want to show up? What quality do you want to lead with?", duration: 30 },
+      { time: 100, text: "Perhaps today your intention is patience, or courage, or presence, or gentleness with yourself.", duration: 25 },
+      { time: 125, text: "Speak your intention silently: 'Today, I choose to lead with...' Let it settle into your body.", duration: 25 },
+      { time: 150, text: "Take one final breath. Carry your intention like a compass guiding you through whatever this day brings. You are ready.", duration: 30 },
+    ]
   }
 ];
 
@@ -157,6 +272,13 @@ export default function GuidedMeditation() {
   const intervalRef = useRef(null);
   const timerIntervalRef = useRef(null);
 
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceRate, setVoiceRate] = useState(0.85);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const synthRef = useRef(null);
+  const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+  const lastSpokenStepRef = useRef(-1);
+
   const [completedMeditations, setCompletedMeditations] = useState([]);
 
   useEffect(() => {
@@ -170,6 +292,43 @@ export default function GuidedMeditation() {
     };
     loadCompleted();
   }, []);
+
+  useEffect(() => {
+    if (ttsSupported) {
+      synthRef.current = window.speechSynthesis;
+    }
+    return () => {
+      if (synthRef.current) synthRef.current.cancel();
+    };
+  }, []);
+
+  const speakText = useCallback((text) => {
+    if (!voiceEnabled || !synthRef.current || !ttsSupported) return;
+    synthRef.current.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = voiceRate;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    const voices = synthRef.current.getVoices();
+    const preferred = voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('female'))
+      || voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('samantha'))
+      || voices.find(v => v.lang.startsWith('en-US'))
+      || voices.find(v => v.lang.startsWith('en'));
+    if (preferred) utterance.voice = preferred;
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    synthRef.current.speak(utterance);
+  }, [voiceEnabled, voiceRate]);
+
+  useEffect(() => {
+    if (!isPlaying || !selectedMeditation || !voiceEnabled) return;
+    if (currentStepIdx !== lastSpokenStepRef.current) {
+      lastSpokenStepRef.current = currentStepIdx;
+      const step = selectedMeditation.steps[currentStepIdx];
+      if (step) speakText(step.text);
+    }
+  }, [currentStepIdx, isPlaying, selectedMeditation, voiceEnabled, speakText]);
 
   const saveCompletion = useCallback(async (medId) => {
     const client = clientAuth.getCurrentClient();
@@ -231,6 +390,7 @@ export default function GuidedMeditation() {
     setCompleted(false);
     setIsPlaying(true);
     setView('meditation');
+    lastSpokenStepRef.current = -1;
   };
 
   const togglePlay = () => {
@@ -239,7 +399,9 @@ export default function GuidedMeditation() {
       setCurrentStepIdx(0);
       setCompleted(false);
       setIsPlaying(true);
+      lastSpokenStepRef.current = -1;
     } else {
+      if (isPlaying && synthRef.current) synthRef.current.cancel();
       setIsPlaying(!isPlaying);
     }
   };
@@ -249,6 +411,8 @@ export default function GuidedMeditation() {
     setCurrentStepIdx(0);
     setCompleted(false);
     setIsPlaying(false);
+    lastSpokenStepRef.current = -1;
+    if (synthRef.current) synthRef.current.cancel();
   };
 
   const startRecording = async () => {
@@ -312,7 +476,7 @@ export default function GuidedMeditation() {
 
     return (
       <div className={`max-w-2xl mx-auto px-4 py-6 ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>
-        <button onClick={() => { setView('list'); setIsPlaying(false); clearInterval(intervalRef.current); }}
+        <button onClick={() => { setView('list'); setIsPlaying(false); clearInterval(intervalRef.current); if (synthRef.current) synthRef.current.cancel(); }}
           className={`flex items-center gap-1 text-sm mb-4 ${isDark ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'}`}>
           <ChevronLeft className="w-4 h-4" /> Back to Meditations
         </button>
@@ -358,7 +522,46 @@ export default function GuidedMeditation() {
               className="p-4 rounded-full bg-amber-600 text-white hover:bg-amber-700 shadow-lg shadow-amber-600/30 transition-all">
               {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
             </button>
+            {ttsSupported && (
+              <button
+                onClick={() => {
+                  setVoiceEnabled(v => !v);
+                  if (voiceEnabled && synthRef.current) synthRef.current.cancel();
+                }}
+                className={`p-3 rounded-full transition-all ${
+                  voiceEnabled
+                    ? (isDark ? 'bg-amber-700 hover:bg-amber-600 text-amber-200' : 'bg-amber-100 hover:bg-amber-200 text-amber-700')
+                    : (isDark ? 'bg-slate-700 hover:bg-slate-600 text-slate-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-400')
+                } ${isSpeaking ? 'ring-2 ring-amber-400 ring-opacity-60' : ''}`}
+                title={voiceEnabled ? 'Mute voice guidance' : 'Enable voice guidance'}
+              >
+                {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              </button>
+            )}
           </div>
+
+          {ttsSupported && voiceEnabled && (
+            <div className={`flex items-center justify-center gap-3 mt-3 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+              <span className="text-xs">Speed:</span>
+              {[
+                { label: 'Slow', value: 0.7 },
+                { label: 'Normal', value: 0.85 },
+                { label: 'Fast', value: 1.0 }
+              ].map(opt => (
+                <button
+                  key={opt.label}
+                  onClick={() => setVoiceRate(opt.value)}
+                  className={`text-xs px-2 py-1 rounded-full transition-all ${
+                    voiceRate === opt.value
+                      ? (isDark ? 'bg-amber-700 text-amber-200' : 'bg-amber-100 text-amber-700')
+                      : (isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-100')
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="mt-4 flex justify-center gap-1">
             {selectedMeditation.steps.map((_, i) => (
