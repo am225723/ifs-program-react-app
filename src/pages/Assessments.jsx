@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   CheckCircle, Circle, ArrowRight, ArrowLeft, RotateCcw, 
   Heart, Shield, Sparkles, AlertTriangle, Clock, TrendingUp,
-  Award, Eye, Brain, Star, Flame, Users, Activity, Plus, MapPin
+  Award, Eye, Brain, Star, Flame, Users, Activity, Plus, MapPin,
+  Play, Pause, Volume2, VolumeX
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useParts } from '../contexts/PartsContext';
@@ -197,6 +198,64 @@ const scaleLabels = {
   4: 'Agree',
   5: 'Strongly Agree'
 };
+
+const ASSESSMENT_AUDIO = {
+  attachment: '/audio/assessments/attachment-assessment-intro.mp3',
+};
+
+function AudioIntroPlayer({ src, isDark }) {
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    audio.oncanplaythrough = () => setLoaded(true);
+    audio.onerror = () => setError(true);
+    audio.onended = () => { setPlaying(false); setProgress(0); };
+    audio.ontimeupdate = () => {
+      if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
+    };
+    audioRef.current = audio;
+    return () => { audio.pause(); audio.src = ''; };
+  }, [src]);
+
+  if (error || !loaded) return null;
+
+  const toggle = () => {
+    if (!audioRef.current) return;
+    if (playing) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => {});
+    }
+    setPlaying(!playing);
+  };
+
+  return (
+    <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-amber-50/50 border-amber-100'}`}>
+      <button onClick={toggle} className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+        playing
+          ? (isDark ? 'bg-amber-600 text-white' : 'bg-amber-500 text-white')
+          : (isDark ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-white text-amber-600 hover:bg-amber-100 shadow-sm')
+      }`}>
+        {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className={`text-xs font-medium ${isDark ? 'text-slate-300' : 'text-gray-700'}`}>
+          Listen to the introduction
+        </p>
+        <div className={`mt-1.5 h-1 rounded-full overflow-hidden ${isDark ? 'bg-slate-700' : 'bg-amber-100'}`}>
+          <div className="h-full rounded-full bg-amber-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+        </div>
+      </div>
+      <Volume2 className={`w-4 h-4 flex-shrink-0 ${playing ? (isDark ? 'text-amber-400' : 'text-amber-500') : (isDark ? 'text-slate-500' : 'text-gray-400')}`} />
+    </div>
+  );
+}
 
 function getIdentifiedParts(results) {
   if (!results?.answers) return [];
@@ -778,6 +837,11 @@ export default function Assessments() {
 
           <div className={`${theme.cardBg} rounded-2xl p-6 mb-6 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} text-sm ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
             <p>Rate each statement based on how true it feels for you. Answer honestly — there are no right or wrong answers. This is about understanding yourself better.</p>
+            {ASSESSMENT_AUDIO[activeAssessment] && (
+              <div className="mt-4">
+                <AudioIntroPlayer src={ASSESSMENT_AUDIO[activeAssessment]} isDark={theme.isDark} />
+              </div>
+            )}
           </div>
 
           <div className="space-y-4 mb-8">
