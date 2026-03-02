@@ -17,6 +17,7 @@ const MEDITATIONS = [
     icon: Sun,
     color: 'amber',
     category: 'foundation',
+    audioSrc: '/audio/meditations/cultivating-self-energy.mp3',
     steps: [
       { time: 0, text: "Find a comfortable position. Close your eyes if that feels safe. Take three deep breaths, letting each exhale be longer than the inhale.", duration: 30 },
       { time: 30, text: "Begin to notice your body. Feel the weight of your body being supported. There's nothing you need to do right now except be present.", duration: 30 },
@@ -279,6 +280,12 @@ export default function GuidedMeditation() {
   const ttsSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
   const lastSpokenStepRef = useRef(-1);
 
+  const audioRef = useRef(null);
+  const [audioLoaded, setAudioLoaded] = useState(false);
+  const [audioError, setAudioError] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(1.0);
+  const hasAudio = selectedMeditation?.audioSrc && audioLoaded && !audioError;
+
   const [completedMeditations, setCompletedMeditations] = useState([]);
 
   useEffect(() => {
@@ -323,12 +330,45 @@ export default function GuidedMeditation() {
 
   useEffect(() => {
     if (!isPlaying || !selectedMeditation || !voiceEnabled) return;
+    if (hasAudio) return;
     if (currentStepIdx !== lastSpokenStepRef.current) {
       lastSpokenStepRef.current = currentStepIdx;
       const step = selectedMeditation.steps[currentStepIdx];
       if (step) speakText(step.text);
     }
-  }, [currentStepIdx, isPlaying, selectedMeditation, voiceEnabled, speakText]);
+  }, [currentStepIdx, isPlaying, selectedMeditation, voiceEnabled, speakText, hasAudio]);
+
+  useEffect(() => {
+    if (!selectedMeditation?.audioSrc) {
+      setAudioLoaded(false);
+      setAudioError(false);
+      return;
+    }
+    setAudioLoaded(false);
+    setAudioError(false);
+    const audio = new Audio(selectedMeditation.audioSrc);
+    audio.preload = 'auto';
+    audio.volume = audioVolume;
+    audio.oncanplaythrough = () => setAudioLoaded(true);
+    audio.onerror = () => setAudioError(true);
+    audio.onended = () => {
+      setIsPlaying(false);
+      setCompleted(true);
+      saveCompletion(selectedMeditation.id);
+    };
+    audioRef.current = audio;
+    return () => {
+      audio.pause();
+      audio.src = '';
+      audioRef.current = null;
+    };
+  }, [selectedMeditation?.id, selectedMeditation?.audioSrc]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = audioVolume;
+    }
+  }, [audioVolume]);
 
   const saveCompletion = useCallback(async (medId) => {
     const client = clientAuth.getCurrentClient();
@@ -348,9 +388,16 @@ export default function GuidedMeditation() {
   useEffect(() => {
     if (!isPlaying || !selectedMeditation) return;
     intervalRef.current = setInterval(() => {
+      let currentTime;
+      if (hasAudio && audioRef.current) {
+        currentTime = Math.floor(audioRef.current.currentTime);
+      } else {
+        currentTime = null;
+      }
+
       setElapsed(prev => {
-        const next = prev + 1;
-        if (next >= selectedMeditation.duration) {
+        const next = currentTime !== null ? currentTime : prev + 1;
+        if (!hasAudio && next >= selectedMeditation.duration) {
           clearInterval(intervalRef.current);
           setIsPlaying(false);
           setCompleted(true);
@@ -366,7 +413,7 @@ export default function GuidedMeditation() {
       });
     }, 1000);
     return () => clearInterval(intervalRef.current);
-  }, [isPlaying, selectedMeditation, saveCompletion]);
+  }, [isPlaying, selectedMeditation, saveCompletion, hasAudio]);
 
   useEffect(() => {
     if (!timerPlaying) return;
@@ -388,9 +435,15 @@ export default function GuidedMeditation() {
     setElapsed(0);
     setCurrentStepIdx(0);
     setCompleted(false);
-    setIsPlaying(true);
     setView('meditation');
     lastSpokenStepRef.current = -1;
+    setTimeout(() => {
+      setIsPlaying(true);
+      if (audioRef.current && med.audioSrc) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
+    }, 100);
   };
 
   const togglePlay = () => {
@@ -400,8 +453,19 @@ export default function GuidedMeditation() {
       setCompleted(false);
       setIsPlaying(true);
       lastSpokenStepRef.current = -1;
+      if (audioRef.current && selectedMeditation?.audioSrc) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
     } else {
-      if (isPlaying && synthRef.current) synthRef.current.cancel();
+      if (isPlaying) {
+        if (synthRef.current) synthRef.current.cancel();
+        if (audioRef.current) audioRef.current.pause();
+      } else {
+        if (audioRef.current && selectedMeditation?.audioSrc) {
+          audioRef.current.play().catch(() => {});
+        }
+      }
       setIsPlaying(!isPlaying);
     }
   };
@@ -413,6 +477,10 @@ export default function GuidedMeditation() {
     setIsPlaying(false);
     lastSpokenStepRef.current = -1;
     if (synthRef.current) synthRef.current.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
   };
 
   const startRecording = async () => {
@@ -476,7 +544,7 @@ export default function GuidedMeditation() {
 
     return (
       <div className={`max-w-2xl mx-auto px-4 py-6 ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>
-        <button onClick={() => { setView('list'); setIsPlaying(false); clearInterval(intervalRef.current); if (synthRef.current) synthRef.current.cancel(); }}
+        <button onClick={() => { setView('list'); setIsPlaying(false); clearInterval(intervalRef.current); if (synthRef.current) synthRef.current.cancel(); if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; } }}
           className={`flex items-center gap-1 text-sm mb-4 ${isDark ? 'text-slate-400 hover:text-slate-200' : 'text-gray-500 hover:text-gray-700'}`}>
           <ChevronLeft className="w-4 h-4" /> Back to Meditations
         </button>
@@ -514,6 +582,13 @@ export default function GuidedMeditation() {
             </div>
           )}
 
+          {hasAudio && (
+            <div className={`flex items-center justify-center gap-2 mb-3 ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>
+              <Volume2 className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Playing recorded narration</span>
+            </div>
+          )}
+
           <div className="flex items-center justify-center gap-4">
             <button onClick={resetMeditation} className={`p-3 rounded-full ${isDark ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}>
               <RotateCcw className="w-5 h-5" />
@@ -522,7 +597,22 @@ export default function GuidedMeditation() {
               className="p-4 rounded-full bg-amber-600 text-white hover:bg-amber-700 shadow-lg shadow-amber-600/30 transition-all">
               {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
             </button>
-            {ttsSupported && (
+            {hasAudio ? (
+              <button
+                onClick={() => {
+                  const newVol = audioVolume > 0 ? 0 : 1.0;
+                  setAudioVolume(newVol);
+                }}
+                className={`p-3 rounded-full transition-all ${
+                  audioVolume > 0
+                    ? (isDark ? 'bg-amber-700 hover:bg-amber-600 text-amber-200' : 'bg-amber-100 hover:bg-amber-200 text-amber-700')
+                    : (isDark ? 'bg-slate-700 hover:bg-slate-600 text-slate-400' : 'bg-gray-100 hover:bg-gray-200 text-gray-400')
+                }`}
+                title={audioVolume > 0 ? 'Mute audio' : 'Unmute audio'}
+              >
+                {audioVolume > 0 ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+              </button>
+            ) : ttsSupported ? (
               <button
                 onClick={() => {
                   setVoiceEnabled(v => !v);
@@ -537,10 +627,24 @@ export default function GuidedMeditation() {
               >
                 {voiceEnabled ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
               </button>
-            )}
+            ) : null}
           </div>
 
-          {ttsSupported && voiceEnabled && (
+          {hasAudio ? (
+            <div className={`flex items-center justify-center gap-3 mt-3 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+              <VolumeX className="w-3.5 h-3.5" />
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={audioVolume}
+                onChange={(e) => setAudioVolume(parseFloat(e.target.value))}
+                className="w-32 h-1.5 rounded-full appearance-none cursor-pointer accent-amber-500"
+              />
+              <Volume2 className="w-3.5 h-3.5" />
+            </div>
+          ) : ttsSupported && voiceEnabled ? (
             <div className={`flex items-center justify-center gap-3 mt-3 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
               <span className="text-xs">Speed:</span>
               {[
@@ -561,7 +665,7 @@ export default function GuidedMeditation() {
                 </button>
               ))}
             </div>
-          )}
+          ) : null}
 
           <div className="mt-4 flex justify-center gap-1">
             {selectedMeditation.steps.map((_, i) => (
