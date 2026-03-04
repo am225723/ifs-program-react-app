@@ -29,8 +29,12 @@ const Exercises = () => {
   const [breathingPhase, setBreathingPhase] = useState('inhale');
   const [breathingCount, setBreathingCount] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [audioLoaded, setAudioLoaded] = useState(false);
+  const [audioError, setAudioError] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(1);
   const audioRef = useRef(null);
   const intervalRef = useRef(null);
+  const hasAudio = selectedExercise && audioLoaded && !audioError;
 
   const exerciseCategories = [
     {
@@ -48,7 +52,7 @@ const Exercises = () => {
           difficulty: 'Beginner',
           description: 'A guided meditation to connect with your core Self energy',
           transcript: `Welcome to this meditation to meet your Self... Begin by finding a comfortable position... Notice your breath...`,
-          audioUrl: '/audio/meeting-self.mp3',
+          audioUrl: '/audio/exercises/meeting-self.mp3',
           benefits: ['Deeper Self-awareness', 'Increased clarity', 'Emotional balance']
         },
         {
@@ -59,7 +63,7 @@ const Exercises = () => {
           difficulty: 'Intermediate',
           description: 'Practice embodying the 8 C\'s of Self: curiosity, calmness, compassion, confidence, courage, creativity, clarity, and connectedness',
           transcript: `Today we\'ll explore the qualities of your Self... Each quality is already within you...`,
-          audioUrl: '/audio/self-qualities.mp3',
+          audioUrl: '/audio/exercises/self-qualities.mp3',
           benefits: ['Self-leadership', 'Emotional regulation', 'Inner wisdom']
         }
       ]
@@ -79,7 +83,7 @@ const Exercises = () => {
           difficulty: 'Beginner',
           description: 'Safely meet and connect with your inner child part',
           transcript: `Create a safe space in your mind... Call forth your inner child... Notice how they appear...`,
-          audioUrl: '/audio/meeting-inner-child.mp3',
+          audioUrl: '/audio/exercises/meeting-inner-child.mp3',
           benefits: ['Inner connection', 'Emotional healing', 'Self-compassion']
         },
         {
@@ -90,7 +94,7 @@ const Exercises = () => {
           difficulty: 'Intermediate',
           description: 'Learn to parent your inner child with love and care',
           transcript: `Imagine holding your inner child... What do they need to hear from you?... Offer the love they missed...`,
-          audioUrl: '/audio/reparenting.mp3',
+          audioUrl: '/audio/exercises/reparenting.mp3',
           benefits: ['Healing neglect wounds', 'Self-nurturing', 'Emotional security']
         },
         {
@@ -101,7 +105,7 @@ const Exercises = () => {
           difficulty: 'Beginner',
           description: 'A playful exercise to reconnect with your inner child\'s joy',
           transcript: `Remember what brought you joy as a child... Let yourself play freely...`,
-          audioUrl: '/audio/child-play.mp3',
+          audioUrl: '/audio/exercises/child-play.mp3',
           benefits: ['Joy and creativity', 'Stress relief', 'Authentic expression']
         }
       ]
@@ -121,7 +125,7 @@ const Exercises = () => {
           difficulty: 'Intermediate',
           description: 'Learn to separate from parts when you\'re blended',
           transcript: `Notice which part is present... Ask it to give you some space... Feel the difference...`,
-          audioUrl: '/audio/unblending.mp3',
+          audioUrl: '/audio/exercises/unblending.mp3',
           benefits: ['Clear perspective', 'Self leadership', 'Emotional freedom']
         },
         {
@@ -132,7 +136,7 @@ const Exercises = () => {
           difficulty: 'Advanced',
           description: 'Facilitate a meeting between your parts from Self energy',
           transcript: `Gather your parts in a council... Each part gets to speak... You listen with compassion...`,
-          audioUrl: '/audio/parts-council.mp3',
+          audioUrl: '/audio/exercises/parts-council.mp3',
           benefits: ['Internal harmony', 'Conflict resolution', 'System integration']
         },
         {
@@ -143,7 +147,7 @@ const Exercises = () => {
           difficulty: 'Intermediate',
           description: 'Learn to work with parts that act impulsively',
           transcript: `Acknowledge your firefighter parts... Thank them for protecting you... Find what they need...`,
-          audioUrl: '/audio/firefighter-work.mp3',
+          audioUrl: '/audio/exercises/firefighter-work.mp3',
           benefits: ['Impulse control', 'Understanding triggers', 'Self-protection']
         }
       ]
@@ -163,7 +167,7 @@ const Exercises = () => {
           difficulty: 'Beginner',
           description: 'Calm your nervous system with this simple 4-4-4-4 breathing pattern',
           transcript: `Inhale for 4... Hold for 4... Exhale for 4... Hold for 4... Repeat...`,
-          audioUrl: '/audio/box-breathing.mp3',
+          audioUrl: '/audio/exercises/box-breathing.mp3',
           benefits: ['Stress reduction', 'Focus', 'Anxiety relief']
         },
         {
@@ -174,7 +178,7 @@ const Exercises = () => {
           difficulty: 'Intermediate',
           description: 'Powerful breathing technique for deep relaxation',
           transcript: `Inhale for 4... Hold for 7... Exhale for 8... Feel the relaxation...`,
-          audioUrl: '/audio/4-7-8-breathing.mp3',
+          audioUrl: '/audio/exercises/4-7-8-breathing.mp3',
           benefits: ['Deep relaxation', 'Sleep preparation', 'Tension release']
         }
       ]
@@ -204,28 +208,72 @@ const Exercises = () => {
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     };
   }, []);
 
+  useEffect(() => {
+    if (!selectedExercise?.audioUrl) {
+      setAudioLoaded(false);
+      setAudioError(false);
+      return;
+    }
+    setAudioLoaded(false);
+    setAudioError(false);
+    const audio = new Audio(selectedExercise.audioUrl);
+    audio.preload = 'auto';
+    audio.addEventListener('loadedmetadata', () => {
+      setAudioLoaded(true);
+      setDuration(Math.floor(audio.duration));
+    });
+    audio.addEventListener('error', () => setAudioError(true));
+    audio.addEventListener('ended', () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    });
+    audioRef.current = audio;
+    return () => { audio.pause(); audio.src = ''; audioRef.current = null; };
+  }, [selectedExercise?.id, selectedExercise?.audioUrl]);
+
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = isMuted ? 0 : audioVolume;
+  }, [audioVolume, isMuted]);
+
+  useEffect(() => {
+    if (!hasAudio || !isPlaying) return;
+    const id = setInterval(() => {
+      if (audioRef.current) setCurrentTime(Math.floor(audioRef.current.currentTime));
+    }, 250);
+    return () => clearInterval(id);
+  }, [hasAudio, isPlaying]);
+
   const handleExerciseSelect = (exercise) => {
+    if (audioRef.current) { audioRef.current.pause(); }
+    if (intervalRef.current) clearInterval(intervalRef.current);
     setSelectedExercise(exercise);
     setIsPlaying(false);
     setCurrentTime(0);
     setShowTranscript(false);
-    
-    // Simulate audio duration
-    const durationMinutes = parseInt(exercise.duration);
-    setDuration(durationMinutes * 60);
+    if (!exercise.audioUrl) {
+      const durationMinutes = parseInt(exercise.duration);
+      setDuration(durationMinutes * 60);
+    }
   };
 
   const togglePlayPause = () => {
+    if (hasAudio) {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        audioRef.current.play().catch(() => {});
+        setIsPlaying(true);
+      }
+      return;
+    }
     setIsPlaying(!isPlaying);
-    
     if (!isPlaying) {
-      // Start playing
       intervalRef.current = setInterval(() => {
         setCurrentTime(prev => {
           if (prev >= duration - 1) {
@@ -236,18 +284,17 @@ const Exercises = () => {
         });
       }, 1000);
     } else {
-      // Pause
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     }
   };
 
   const handleReset = () => {
     setIsPlaying(false);
     setCurrentTime(0);
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (hasAudio && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
   };
 
@@ -488,6 +535,20 @@ const Exercises = () => {
                       )}
                     </button>
                   </div>
+                  {hasAudio && (
+                    <div className="flex items-center justify-center gap-3 mt-4">
+                      <Volume2 className="w-4 h-4 text-gray-500" />
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={isMuted ? 0 : audioVolume}
+                        onChange={(e) => { setAudioVolume(parseFloat(e.target.value)); setIsMuted(false); }}
+                        className="w-32 accent-amber-600"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Benefits */}
