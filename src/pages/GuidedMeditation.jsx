@@ -38,6 +38,7 @@ const MEDITATIONS = [
     icon: Heart,
     color: 'rose',
     category: 'parts-work',
+    audioSrc: '/audio/meditations/parts-check-in.mp3',
     steps: [
       { time: 0, text: "Settle into stillness. Take three slow breaths. With each exhale, release any tension you're holding.", duration: 25 },
       { time: 25, text: "Turn your attention inward. Gently ask: 'Who's here right now? Which parts of me want to be noticed?'", duration: 30 },
@@ -56,6 +57,7 @@ const MEDITATIONS = [
     icon: Waves,
     color: 'cyan',
     category: 'grounding',
+    audioSrc: '/audio/meditations/inner-safe-place.mp3',
     steps: [
       { time: 0, text: "Close your eyes and take five deep, slow breaths. With each breath, let yourself sink deeper into relaxation.", duration: 30 },
       { time: 30, text: "Imagine yourself walking along a peaceful path. The air is warm and gentle. You feel safe.", duration: 30 },
@@ -77,6 +79,7 @@ const MEDITATIONS = [
     icon: Eye,
     color: 'purple',
     category: 'parts-work',
+    audioSrc: '/audio/meditations/protector-appreciation.mp3',
     steps: [
       { time: 0, text: "Get comfortable and take several calming breaths. Let yourself settle into a quiet, receptive state.", duration: 25 },
       { time: 25, text: "Think about a protector part — a part that works hard to keep you safe, even if it sometimes causes problems.", duration: 30 },
@@ -97,6 +100,7 @@ const MEDITATIONS = [
     icon: Wind,
     color: 'emerald',
     category: 'grounding',
+    audioSrc: '/audio/meditations/ifs-body-scan.mp3',
     steps: [
       { time: 0, text: "Lie down or sit comfortably. Close your eyes. Take three deep breaths to center yourself.", duration: 25 },
       { time: 25, text: "Bring your attention to the top of your head. Notice any sensations — tingling, warmth, pressure, or nothing at all.", duration: 30 },
@@ -118,6 +122,7 @@ const MEDITATIONS = [
     icon: Moon,
     color: 'indigo',
     category: 'foundation',
+    audioSrc: '/audio/meditations/compassion-breathing.mp3',
     steps: [
       { time: 0, text: "Sit quietly. Place one hand on your heart and one on your belly. Feel the warmth of your own touch.", duration: 20 },
       { time: 20, text: "Breathe in slowly for 4 counts. Hold for 4 counts. Breathe out for 6 counts. Repeat this pattern.", duration: 30 },
@@ -135,6 +140,7 @@ const MEDITATIONS = [
     icon: Heart,
     color: 'pink',
     category: 'parts-work',
+    audioSrc: '/audio/meditations/exile-healing.mp3',
     steps: [
       { time: 0, text: "Find a quiet, comfortable space. Close your eyes and take several slow breaths. Let your body settle and your mind grow still.", duration: 30 },
       { time: 30, text: "From your Self — that calm, wise center within you — gently turn your attention inward. You are looking for a younger part, an exile, who carries old pain.", duration: 35 },
@@ -156,6 +162,7 @@ const MEDITATIONS = [
     icon: Waves,
     color: 'teal',
     category: 'grounding',
+    audioSrc: '/audio/meditations/grounding-anchor.mp3',
     steps: [
       { time: 0, text: "Press your feet firmly into the floor. Feel the solid ground beneath you. You are here. You are safe. You are present.", duration: 25 },
       { time: 25, text: "Name five things you can see. Look around slowly. Notice colors, shapes, light. Let each observation anchor you here.", duration: 25 },
@@ -174,6 +181,7 @@ const MEDITATIONS = [
     icon: Sparkles,
     color: 'yellow',
     category: 'parts-work',
+    audioSrc: '/audio/meditations/inner-child-reconnection.mp3',
     steps: [
       { time: 0, text: "Close your eyes and smile gently. Today, you are going to reconnect with the playful, joyful part of your younger self.", duration: 25 },
       { time: 25, text: "Imagine yourself walking into a beautiful garden. The sun is warm, flowers are blooming, and you feel light and free.", duration: 30 },
@@ -194,6 +202,7 @@ const MEDITATIONS = [
     icon: Wind,
     color: 'sky',
     category: 'grounding',
+    audioSrc: '/audio/meditations/tension-release.mp3',
     steps: [
       { time: 0, text: "Sit or lie down comfortably. Take a deep breath and let out a long, slow sigh. Give yourself permission to release.", duration: 25 },
       { time: 25, text: "Squeeze your fists tightly for five seconds. Feel the tension build. Now release. Notice the relief as your hands soften.", duration: 25 },
@@ -213,6 +222,7 @@ const MEDITATIONS = [
     icon: Sun,
     color: 'orange',
     category: 'foundation',
+    audioSrc: '/audio/meditations/self-forgiveness.mp3',
     steps: [
       { time: 0, text: "Settle into a comfortable position. Close your eyes. Place a hand over your heart and feel its steady rhythm.", duration: 25 },
       { time: 25, text: "Think of something you've been holding against yourself — a mistake, a regret, a way you feel you've fallen short.", duration: 30 },
@@ -233,6 +243,7 @@ const MEDITATIONS = [
     icon: Sparkles,
     color: 'amber',
     category: 'foundation',
+    audioSrc: '/audio/meditations/morning-intention.mp3',
     steps: [
       { time: 0, text: "Good morning. Before the day carries you away, take this moment to arrive fully. Three deep breaths.", duration: 20 },
       { time: 20, text: "Check in with your system. How are you feeling right now? What parts are already active this morning?", duration: 25 },

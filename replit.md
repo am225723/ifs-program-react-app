@@ -34,7 +34,7 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **Assessment Builder**: Therapists can create custom assessments for clients.
 - **Journal Voice Dictation**: Continuous speech-to-text for journal entries, with therapist visibility and automatic keyword scanning for concerning content (sending alerts to therapists).
 - **Profile Assessment Display**: Shows all assessment results on the user profile.
-- **Guided Meditations**: IFS-focused guided meditations (12 total across Foundation, Parts Work, and Grounding categories) with timed guidance, browser text-to-speech voice narration (toggleable, with speed control), and voice reflection recording.
+- **Guided Meditations**: IFS-focused guided meditations (12 total across Foundation, Parts Work, and Grounding categories) with timed guidance, browser text-to-speech voice narration (toggleable, with speed control), voice reflection recording, and recorded MP3 audio support (plays recording when available, falls back to TTS).
 - **Daily Check-In**: Structured 3-step IFS check-in (Self-energy slider, active parts selector, daily intention/reflection) with low-energy alerts to advisors.
 - **Mood & Parts Analytics**: SVG-based dashboard with custom charts, heatmaps, and trend analysis for mood and parts, with an advisor insights panel.
 - **Micro-Learning & Affirmations**: Short guided exercises and personalized affirmation generation.
@@ -55,6 +55,12 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - Dynamic content engines (`dynamicLessonContent.js`, `dynamicActivityContent.js`) generate personalized narratives and activity prompts by integrating user assessment data (parts, Self-Energy scores, wound type).
 - **Dual-Wound Support**: The system supports addressing both primary and secondary wounds, including dual-wound unburdening steps and curriculum display options.
 - **Attachment Style Assessment Integration**: Results from the attachment style assessment feed into relevant curriculum modules.
+
+**Audio Recording Setup (drop-in MP3 files):**
+- `public/audio/meditations/` — 12 meditation recordings. Filenames: `cultivating-self-energy.mp3` (done), `parts-check-in.mp3`, `inner-safe-place.mp3`, `protector-appreciation.mp3`, `ifs-body-scan.mp3`, `compassion-breathing.mp3`, `exile-healing.mp3`, `grounding-anchor.mp3`, `inner-child-reconnection.mp3`, `tension-release.mp3`, `self-forgiveness.mp3`, `morning-intention.mp3`
+- `public/audio/assessments/` — 4 assessment intros. Filenames: `wound-assessment-intro.mp3`, `parts-assessment-intro.mp3`, `self-energy-assessment-intro.mp3`, `attachment-assessment-intro.mp3` (done)
+- `public/audio/exercises/` — 10 exercise recordings. Filenames: `meeting-self.mp3` (done), `self-qualities.mp3`, `meeting-inner-child.mp3`, `reparenting.mp3`, `child-play.mp3`, `unblending.mp3`, `parts-council.mp3`, `firefighter-work.mp3`, `box-breathing.mp3`, `4-7-8-breathing.mp3`
+- Scripts for recording are in `docs/meditation-recording-scripts.md`, `docs/assessment-recording-scripts.md`, `docs/exercise-recording-scripts.md`
 
 ## External Dependencies
 - **Supabase**: Primary backend for database, authentication, and edge functions.

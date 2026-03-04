@@ -200,6 +200,9 @@ const scaleLabels = {
 };
 
 const ASSESSMENT_AUDIO = {
+  wounds: '/audio/assessments/wound-assessment-intro.mp3',
+  parts: '/audio/assessments/parts-assessment-intro.mp3',
+  'self-energy': '/audio/assessments/self-energy-assessment-intro.mp3',
   attachment: '/audio/assessments/attachment-assessment-intro.mp3',
 };
 
