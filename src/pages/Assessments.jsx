@@ -209,14 +209,12 @@ const ASSESSMENT_AUDIO = {
 function AudioIntroPlayer({ src, isDark }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const audio = new Audio(src);
-    audio.preload = 'auto';
-    audio.oncanplaythrough = () => setLoaded(true);
+    audio.preload = 'metadata';
     audio.onerror = () => setError(true);
     audio.onended = () => { setPlaying(false); setProgress(0); };
     audio.ontimeupdate = () => {
@@ -226,7 +224,7 @@ function AudioIntroPlayer({ src, isDark }) {
     return () => { audio.pause(); audio.src = ''; };
   }, [src]);
 
-  if (error || !loaded) return null;
+  if (error) return null;
 
   const toggle = () => {
     if (!audioRef.current) return;
@@ -263,18 +261,15 @@ function AudioIntroPlayer({ src, isDark }) {
 function AudioIntroSection({ src, isDark }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    setLoaded(false);
     setError(false);
     setPlaying(false);
     setProgress(0);
     const audio = new Audio(src);
-    audio.preload = 'auto';
-    audio.oncanplaythrough = () => setLoaded(true);
+    audio.preload = 'metadata';
     audio.onerror = () => setError(true);
     audio.onended = () => { setPlaying(false); setProgress(0); };
     audio.ontimeupdate = () => {
@@ -284,7 +279,7 @@ function AudioIntroSection({ src, isDark }) {
     return () => { audio.pause(); audio.src = ''; };
   }, [src]);
 
-  if (error || !loaded) return null;
+  if (error) return null;
 
   const toggle = () => {
     if (!audioRef.current) return;
