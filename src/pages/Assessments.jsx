@@ -260,6 +260,69 @@ function AudioIntroPlayer({ src, isDark }) {
   );
 }
 
+function AudioIntroSection({ src, isDark }) {
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    setLoaded(false);
+    setError(false);
+    setPlaying(false);
+    setProgress(0);
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    audio.oncanplaythrough = () => setLoaded(true);
+    audio.onerror = () => setError(true);
+    audio.onended = () => { setPlaying(false); setProgress(0); };
+    audio.ontimeupdate = () => {
+      if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
+    };
+    audioRef.current = audio;
+    return () => { audio.pause(); audio.src = ''; };
+  }, [src]);
+
+  if (error || !loaded) return null;
+
+  const toggle = () => {
+    if (!audioRef.current) return;
+    if (playing) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => {});
+    }
+    setPlaying(!playing);
+  };
+
+  return (
+    <div className="mb-6">
+      <p className={`text-xs font-medium mb-3 ${isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+        Listen to a guided introduction before you begin
+      </p>
+      <div className={`flex items-center gap-3 p-4 rounded-xl border ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-amber-50/50 border-amber-100'}`}>
+        <button onClick={toggle} className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+          playing
+            ? (isDark ? 'bg-amber-600 text-white' : 'bg-amber-500 text-white')
+            : (isDark ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-white text-amber-600 hover:bg-amber-100 shadow-sm')
+        }`}>
+          {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+        </button>
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>
+            {playing ? 'Playing introduction...' : 'Tap to listen'}
+          </p>
+          <div className={`mt-2 h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-slate-700' : 'bg-amber-100'}`}>
+            <div className="h-full rounded-full bg-amber-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+        <Volume2 className={`w-5 h-5 flex-shrink-0 ${playing ? (isDark ? 'text-amber-400' : 'text-amber-500') : (isDark ? 'text-slate-500' : 'text-gray-400')}`} />
+      </div>
+    </div>
+  );
+}
+
 function getIdentifiedParts(results) {
   if (!results?.answers) return [];
   const identified = [];
@@ -290,6 +353,7 @@ export default function Assessments() {
   const [activeAssessment, setActiveAssessment] = useState(null);
   const [answers, setAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   const [savedResults, setSavedResults] = useState({});
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -448,6 +512,7 @@ export default function Assessments() {
     setAnswers({});
     setProtectorAnswers({});
     setShowResults(false);
+    setShowIntro(true);
   };
 
   const getScoreLevel = (average, assessmentId) => {
@@ -511,6 +576,63 @@ export default function Assessments() {
     return (
       <div className={`min-h-screen flex items-center justify-center`}>
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+      </div>
+    );
+  }
+
+  if (activeAssessment && showIntro && !showResults) {
+    const assessment = assessmentDefinitions.find(a => a.id === activeAssessment);
+    const hasAudio = !!ASSESSMENT_AUDIO[activeAssessment];
+    const isRetake = !!savedResults[activeAssessment];
+
+    return (
+      <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
+        <div className="max-w-2xl mx-auto px-4 py-8">
+          <button
+            onClick={() => { setActiveAssessment(null); setShowIntro(false); }}
+            className={`inline-flex items-center gap-2 mb-6 ${theme.isDark ? 'text-slate-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Assessments
+          </button>
+
+          <div className={`${theme.cardBg} rounded-2xl shadow-lg p-8 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} text-center`}>
+            <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${assessment.gradient} flex items-center justify-center mx-auto mb-5`}>
+              <assessment.icon className="w-8 h-8 text-white" />
+            </div>
+            <h1 className={`text-2xl font-bold mb-2 ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+              {assessment.title}
+            </h1>
+            <p className={`text-sm mb-1 ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+              {assessment.subtitle}
+            </p>
+            {isRetake && (
+              <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${theme.isDark ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>
+                Retaking Assessment
+              </span>
+            )}
+
+            <div className={`my-6 p-5 rounded-xl border ${theme.isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-gray-50 border-gray-200'} text-left`}>
+              <p className={`text-sm leading-relaxed ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                {assessment.id === 'wounds' && 'This assessment helps you discover which inner child wounds may be affecting your life today. You\'ll rate 25 statements based on how strongly they resonate with you. There are no right or wrong answers — this is about understanding your inner world with curiosity and compassion.'}
+                {assessment.id === 'parts' && 'This assessment helps you identify which protective parts are most active in your inner system — Managers, Firefighters, and Exiles. You\'ll rate 15 statements about your common experiences and reactions.'}
+                {assessment.id === 'self-energy' && 'This assessment evaluates your current connection to the eight qualities of Self — Calmness, Curiosity, Compassion, Confidence, Courage, Clarity, Creativity, and Connectedness. Your results will show where your Self-energy is strongest.'}
+                {assessment.id === 'attachment' && 'This assessment explores your attachment patterns in close relationships. Understanding your attachment style helps illuminate how your inner child wounds show up in your connections with others.'}
+              </p>
+            </div>
+
+            {hasAudio && (
+              <AudioIntroSection src={ASSESSMENT_AUDIO[activeAssessment]} isDark={theme.isDark} />
+            )}
+
+            <button
+              onClick={() => setShowIntro(false)}
+              className={`w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-to-r ${assessment.gradient} hover:opacity-90 transition-all text-base`}
+            >
+              {isRetake ? 'Begin Retake' : 'Begin Assessment'}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1019,6 +1141,7 @@ export default function Assessments() {
                         setActiveAssessment(assessment.id);
                         setAnswers({});
                         setShowResults(false);
+                        setShowIntro(true);
                       }}
                       className={`flex-1 py-2.5 rounded-xl font-medium text-sm bg-gradient-to-r ${assessment.gradient} text-white hover:opacity-90 ${getAnimationClass('transition')}`}
                     >
