@@ -209,32 +209,46 @@ const ASSESSMENT_AUDIO = {
 function AudioIntroPlayer({ src, isDark }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [error, setError] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [playError, setPlayError] = useState(false);
 
   useEffect(() => {
-    const audio = new Audio(src);
-    audio.preload = 'metadata';
-    audio.onerror = () => setError(true);
-    audio.onended = () => { setPlaying(false); setProgress(0); };
-    audio.ontimeupdate = () => {
-      if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
     };
-    audioRef.current = audio;
-    return () => { audio.pause(); audio.src = ''; };
   }, [src]);
 
-  if (error) return null;
-
   const toggle = () => {
-    if (!audioRef.current) return;
-    if (playing) {
+    if (playing && audioRef.current) {
       audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(() => {});
+      setPlaying(false);
+      return;
     }
-    setPlaying(!playing);
+
+    if (!audioRef.current) {
+      const audio = new Audio(src);
+      audio.onended = () => { setPlaying(false); setProgress(0); };
+      audio.ontimeupdate = () => {
+        if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
+      };
+      audio.onerror = () => { setPlaying(false); setPlayError(true); };
+      audioRef.current = audio;
+    }
+
+    setPlayError(false);
+    audioRef.current.play().then(() => {
+      setPlaying(true);
+    }).catch(() => {
+      setPlayError(true);
+      setPlaying(false);
+    });
   };
+
+  if (playError) return null;
 
   return (
     <div className={`flex items-center gap-3 p-3 rounded-xl border ${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-amber-50/50 border-amber-100'}`}>
@@ -261,34 +275,43 @@ function AudioIntroPlayer({ src, isDark }) {
 function AudioIntroSection({ src, isDark }) {
   const audioRef = useRef(null);
   const [playing, setPlaying] = useState(false);
-  const [error, setError] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [playError, setPlayError] = useState(false);
 
   useEffect(() => {
-    setError(false);
-    setPlaying(false);
-    setProgress(0);
-    const audio = new Audio(src);
-    audio.preload = 'metadata';
-    audio.onerror = () => setError(true);
-    audio.onended = () => { setPlaying(false); setProgress(0); };
-    audio.ontimeupdate = () => {
-      if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
     };
-    audioRef.current = audio;
-    return () => { audio.pause(); audio.src = ''; };
   }, [src]);
 
-  if (error) return null;
-
   const toggle = () => {
-    if (!audioRef.current) return;
-    if (playing) {
+    if (playing && audioRef.current) {
       audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(() => {});
+      setPlaying(false);
+      return;
     }
-    setPlaying(!playing);
+
+    if (!audioRef.current) {
+      const audio = new Audio(src);
+      audio.onended = () => { setPlaying(false); setProgress(0); };
+      audio.ontimeupdate = () => {
+        if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
+      };
+      audio.onerror = () => { setPlaying(false); setPlayError(true); };
+      audioRef.current = audio;
+    }
+
+    setPlayError(false);
+    audioRef.current.play().then(() => {
+      setPlaying(true);
+    }).catch(() => {
+      setPlayError(true);
+      setPlaying(false);
+    });
   };
 
   return (
@@ -306,7 +329,7 @@ function AudioIntroSection({ src, isDark }) {
         </button>
         <div className="flex-1 min-w-0">
           <p className={`text-sm font-medium ${isDark ? 'text-slate-200' : 'text-gray-800'}`}>
-            {playing ? 'Playing introduction...' : 'Tap to listen'}
+            {playError ? 'Audio unavailable' : playing ? 'Playing introduction...' : 'Tap to listen'}
           </p>
           <div className={`mt-2 h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-slate-700' : 'bg-amber-100'}`}>
             <div className="h-full rounded-full bg-amber-500 transition-all duration-300" style={{ width: `${progress}%` }} />
@@ -577,7 +600,7 @@ export default function Assessments() {
 
   if (activeAssessment && showIntro && !showResults) {
     const assessment = assessmentDefinitions.find(a => a.id === activeAssessment);
-    const hasAudio = !!ASSESSMENT_AUDIO[activeAssessment];
+    const audioSrc = ASSESSMENT_AUDIO[activeAssessment];
     const isRetake = !!savedResults[activeAssessment];
 
     return (
@@ -616,8 +639,8 @@ export default function Assessments() {
               </p>
             </div>
 
-            {hasAudio && (
-              <AudioIntroSection src={ASSESSMENT_AUDIO[activeAssessment]} isDark={theme.isDark} />
+            {audioSrc && (
+              <AudioIntroSection src={audioSrc} isDark={theme.isDark} />
             )}
 
             <button
