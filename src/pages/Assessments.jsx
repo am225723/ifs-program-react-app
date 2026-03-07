@@ -4,7 +4,7 @@ import {
   CheckCircle, Circle, ArrowRight, ArrowLeft, RotateCcw, 
   Heart, Shield, Sparkles, AlertTriangle, Clock, TrendingUp,
   Award, Eye, Brain, Star, Flame, Users, Activity, Plus, MapPin,
-  Play, Pause, Volume2, VolumeX
+  Play, Pause, Volume2, VolumeX, Lock
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useParts } from '../contexts/PartsContext';
@@ -12,6 +12,7 @@ import { useData } from '../contexts/DataContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
+import { canAccessAssessment } from '../lib/accessControl';
 
 const protectivePartsDefinitions = {
   manager: [
@@ -1116,11 +1117,12 @@ export default function Assessments() {
           {assessmentDefinitions.map(assessment => {
             const Icon = assessment.icon;
             const hasResults = savedResults[assessment.id];
+            const isRestricted = !canAccessAssessment(assessment.id);
 
             return (
               <div
                 key={assessment.id}
-                className={`${theme.cardBg} rounded-2xl shadow-lg border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} overflow-hidden ${getAnimationClass('transition')} hover:shadow-xl`}
+                className={`${theme.cardBg} rounded-2xl shadow-lg border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} overflow-hidden ${getAnimationClass('transition')} ${isRestricted ? 'opacity-60' : 'hover:shadow-xl'}`}
               >
                 <div className={`bg-gradient-to-br ${assessment.gradient} p-6`}>
                   <Icon className="w-10 h-10 text-white mb-3" />
@@ -1128,55 +1130,66 @@ export default function Assessments() {
                   <p className="text-white/80 text-sm mt-1">{assessment.subtitle}</p>
                 </div>
                 <div className="p-6">
-                  <div className={`flex items-center gap-2 mb-4 text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
-                    <Clock className="w-4 h-4" />
-                    <span>{assessment.questions.length} questions{assessment.protectorQuestions ? ` + ${assessment.protectorQuestions.length} optional` : ''} · ~{assessment.questions.length > 20 ? '8' : '5'} min</span>
-                  </div>
-
-                  {hasResults && (
-                    <div className={`mb-4 p-3 rounded-xl ${theme.isDark ? 'bg-slate-800' : 'bg-gray-50'}`}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Award className="w-4 h-4 text-green-500" />
-                        <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-300' : 'text-gray-700'}`}>
-                          Completed {new Date(hasResults.completedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                      {hasResults.ranked?.slice(0, 2).map(([catId, data]) => {
-                        const cat = assessment.categories[catId];
-                        return (
-                          <div key={catId} className="flex items-center justify-between text-sm mb-1">
-                            <span className={theme.isDark ? 'text-slate-400' : 'text-gray-600'}>{cat?.label}</span>
-                            <span className="font-medium" style={{ color: cat?.color }}>{data.average.toFixed(1)}/5</span>
-                          </div>
-                        );
-                      })}
+                  {isRestricted ? (
+                    <div className={`text-center py-4`}>
+                      <Lock className={`w-8 h-8 mx-auto mb-2 ${theme.isDark ? 'text-slate-500' : 'text-gray-400'}`} />
+                      <p className={`text-sm font-medium ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                        Contact your advisor to unlock this assessment
+                      </p>
                     </div>
-                  )}
+                  ) : (
+                    <>
+                      <div className={`flex items-center gap-2 mb-4 text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+                        <Clock className="w-4 h-4" />
+                        <span>{assessment.questions.length} questions{assessment.protectorQuestions ? ` + ${assessment.protectorQuestions.length} optional` : ''} · ~{assessment.questions.length > 20 ? '8' : '5'} min</span>
+                      </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setActiveAssessment(assessment.id);
-                        setAnswers({});
-                        setShowResults(false);
-                        setShowIntro(true);
-                      }}
-                      className={`flex-1 py-2.5 rounded-xl font-medium text-sm bg-gradient-to-r ${assessment.gradient} text-white hover:opacity-90 ${getAnimationClass('transition')}`}
-                    >
-                      {hasResults ? 'Retake' : 'Start'}
-                    </button>
-                    {hasResults && (
-                      <button
-                        onClick={() => {
-                          setActiveAssessment(assessment.id);
-                          setShowResults(true);
-                        }}
-                        className={`flex-1 py-2.5 rounded-xl font-medium text-sm ${theme.isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} ${getAnimationClass('transition')}`}
-                      >
-                        View Results
-                      </button>
-                    )}
-                  </div>
+                      {hasResults && (
+                        <div className={`mb-4 p-3 rounded-xl ${theme.isDark ? 'bg-slate-800' : 'bg-gray-50'}`}>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Award className="w-4 h-4 text-green-500" />
+                            <span className={`text-sm font-medium ${theme.isDark ? 'text-slate-300' : 'text-gray-700'}`}>
+                              Completed {new Date(hasResults.completedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {hasResults.ranked?.slice(0, 2).map(([catId, data]) => {
+                            const cat = assessment.categories[catId];
+                            return (
+                              <div key={catId} className="flex items-center justify-between text-sm mb-1">
+                                <span className={theme.isDark ? 'text-slate-400' : 'text-gray-600'}>{cat?.label}</span>
+                                <span className="font-medium" style={{ color: cat?.color }}>{data.average.toFixed(1)}/5</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setActiveAssessment(assessment.id);
+                            setAnswers({});
+                            setShowResults(false);
+                            setShowIntro(true);
+                          }}
+                          className={`flex-1 py-2.5 rounded-xl font-medium text-sm bg-gradient-to-r ${assessment.gradient} text-white hover:opacity-90 ${getAnimationClass('transition')}`}
+                        >
+                          {hasResults ? 'Retake' : 'Start'}
+                        </button>
+                        {hasResults && (
+                          <button
+                            onClick={() => {
+                              setActiveAssessment(assessment.id);
+                              setShowResults(true);
+                            }}
+                            className={`flex-1 py-2.5 rounded-xl font-medium text-sm ${theme.isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} ${getAnimationClass('transition')}`}
+                          >
+                            View Results
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             );

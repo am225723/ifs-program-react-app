@@ -6,13 +6,37 @@ import { useData } from '../contexts/DataContext';
 import { supabaseHelpers, supabase } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 import { WOUND_MODULE_PRIORITIES, getWoundPriority } from '../lib/woundModulePriorities';
+import { canAccessModule } from '../lib/accessControl';
+import { useTheme } from '../contexts/ThemeContext';
 
 const LearningModuleRenderer = ({ userProgress = {} }) => {
   const { moduleId } = useParams();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [module, setModule] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [woundContext, setWoundContext] = useState(null);
+
+  if (moduleId && !canAccessModule(moduleId)) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme?.isDark ? 'text-slate-100' : ''}`}>
+        <div className="text-center px-6 max-w-md">
+          <div className={`w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center ${theme?.isDark ? 'bg-slate-800' : 'bg-gray-100'}`}>
+            <ChevronLeft className={`w-8 h-8 ${theme?.isDark ? 'text-slate-500' : 'text-gray-400'}`} />
+          </div>
+          <h2 className={`text-xl font-bold mb-2 ${theme?.isDark ? 'text-white' : 'text-gray-900'}`}>
+            Module Not Available
+          </h2>
+          <p className={`text-sm mb-4 ${theme?.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+            This module is not yet available for your account. Contact your advisor to request access.
+          </p>
+          <button onClick={() => navigate('/curriculum')} className="text-amber-600 hover:text-amber-700 font-medium text-sm">
+            Back to Curriculum
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const generateDefaultStepsForPersonalizedModule = (mod) => {
     const baseSteps = [];

@@ -55,6 +55,30 @@ import { DataProvider } from './contexts/DataContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { PartsProvider } from './contexts/PartsContext';
 import { clientAuth } from './lib/supabasePersonalization';
+import { canAccessFeature } from './lib/accessControl';
+import { Lock } from 'lucide-react';
+
+function FeatureGate({ feature, children }) {
+  const { theme } = useTheme();
+  if (!canAccessFeature(feature)) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme.isDark ? 'text-slate-100' : ''}`}>
+        <div className="text-center px-6 max-w-md">
+          <div className={`w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center ${theme.isDark ? 'bg-slate-800' : 'bg-gray-100'}`}>
+            <Lock className={`w-8 h-8 ${theme.isDark ? 'text-slate-500' : 'text-gray-400'}`} />
+          </div>
+          <h2 className={`text-xl font-bold mb-2 ${theme.isDark ? 'text-white' : 'text-gray-900'}`}>
+            Feature Not Available
+          </h2>
+          <p className={`text-sm ${theme.isDark ? 'text-slate-400' : 'text-gray-500'}`}>
+            This feature is not yet available for your account. Contact your advisor to request access.
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return children;
+}
 
 function BottomNav() {
   const location = useLocation();
@@ -282,15 +306,15 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/wounds" element={<Wounds />} />
                 <Route path="/qualities" element={<Qualities />} />
                 <Route path="/parts-mapping" element={<PartsMapping />} />
-                <Route path="/exercises" element={<Exercises />} />
+                <Route path="/exercises" element={<FeatureGate feature="exercises"><Exercises /></FeatureGate>} />
                 <Route path="/assessment" element={<Assessment />} />
                 <Route path="/assessments" element={<Assessments />} />
                 <Route path="/resources" element={<Resources />} />
-                <Route path="/resource-library" element={<ResourceLibrary />} />
-                <Route path="/journal" element={<Journal />} />
+                <Route path="/resource-library" element={<FeatureGate feature="resourceLibrary"><ResourceLibrary /></FeatureGate>} />
+                <Route path="/journal" element={<FeatureGate feature="journal"><Journal /></FeatureGate>} />
                 <Route path="/profile" element={<Profile client={currentClient} />} />
                 <Route path="/settings" element={<Settings />} />
-                <Route path="/parts-studio" element={<PartsStudio />} />
+                <Route path="/parts-studio" element={<FeatureGate feature="partsStudio"><PartsStudio /></FeatureGate>} />
                 <Route path="/micro-learning" element={<MicroLearning />} />
                 <Route path="/affirmations" element={<Affirmations />} />
                 <Route path="/therapy" element={<TherapyIntegration />} />
@@ -333,19 +357,19 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
                 <Route path="/progress-timeline" element={<ProgressTimeline />} />
                 <Route path="/mood-tracker" element={<MoodTracker />} />
                 <Route path="/gamification" element={<GamificationHub />} />
-                <Route path="/parts-dialogue" element={<PartsDialogue />} />
+                <Route path="/parts-dialogue" element={<FeatureGate feature="partsDialogue"><PartsDialogue /></FeatureGate>} />
                 <Route path="/parts-relationships" element={<PartsRelationshipMap />} />
-                <Route path="/unburdening" element={<UnburdeningProtocol />} />
+                <Route path="/unburdening" element={<FeatureGate feature="unburdening"><UnburdeningProtocol /></FeatureGate>} />
                 <Route path="/assessment-builder" element={<AssessmentBuilder />} />
                 <Route path="/custom-assessment/:assessmentId" element={<CustomAssessment />} />
-                <Route path="/meditation" element={<GuidedMeditation />} />
-                <Route path="/daily-checkin" element={<DailyCheckin />} />
-                <Route path="/mood-analytics" element={<MoodAnalytics />} />
-                <Route path="/milestones" element={<Milestones />} />
-                <Route path="/weekly-reflection" element={<WeeklyReflection />} />
-                <Route path="/letters" element={<LetterWriting />} />
-                <Route path="/parts-cards" element={<PartsCards />} />
-                <Route path="/healing-tracker" element={<HealingTracker />} />
+                <Route path="/meditation" element={<FeatureGate feature="meditations"><GuidedMeditation /></FeatureGate>} />
+                <Route path="/daily-checkin" element={<FeatureGate feature="dailyCheckin"><DailyCheckin /></FeatureGate>} />
+                <Route path="/mood-analytics" element={<FeatureGate feature="moodAnalytics"><MoodAnalytics /></FeatureGate>} />
+                <Route path="/milestones" element={<FeatureGate feature="milestones"><Milestones /></FeatureGate>} />
+                <Route path="/weekly-reflection" element={<FeatureGate feature="weeklyReflection"><WeeklyReflection /></FeatureGate>} />
+                <Route path="/letters" element={<FeatureGate feature="letters"><LetterWriting /></FeatureGate>} />
+                <Route path="/parts-cards" element={<FeatureGate feature="partsCards"><PartsCards /></FeatureGate>} />
+                <Route path="/healing-tracker" element={<FeatureGate feature="healingTracker"><HealingTracker /></FeatureGate>} />
                 <Route path="/test-client" element={<TestClientCreator />} />
                 <Route path="/diagnostic" element={<PINAuthDiagnostic />} />
                 <Route path="/auth-debug" element={<AuthDebug />} />

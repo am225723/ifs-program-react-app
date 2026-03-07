@@ -13,6 +13,7 @@ import { supabaseHelpers } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
 import { supabase } from '../lib/supabase';
 import { WOUND_MODULE_PRIORITIES, LEVEL_ORDER } from '../lib/woundModulePriorities';
+import { canAccessModule } from '../lib/accessControl';
 
 const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   const [completedModules, setCompletedModules] = useState([]);
@@ -162,6 +163,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
   ];
 
   const getModuleStatus = (module) => {
+    if (!canAccessModule(module.id)) return 'restricted';
     if (completedModules.includes(module.id)) return 'completed';
     if (module.prerequisites?.length && !checkPrerequisites(module.id, completedModules)) return 'locked';
     return 'available';
@@ -169,7 +171,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
 
   const getStatusIcon = (status) => {
     if (status === 'completed') return <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />;
-    if (status === 'locked') return <Lock className="w-6 h-6 text-gray-400 flex-shrink-0" />;
+    if (status === 'locked' || status === 'restricted') return <Lock className="w-6 h-6 text-gray-400 flex-shrink-0" />;
     return <Circle className="w-6 h-6 text-blue-500 flex-shrink-0" />;
   };
 
@@ -280,15 +282,16 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                     return (
                       <Link
                         key={mod.id}
-                        to={status !== 'locked' ? `/curriculum/module/${mod.id}` : '#'}
-                        onClick={() => status !== 'locked' && handleModuleSelect(mod)}
-                        className={`block rounded-xl border bg-white p-3 transition-all hover:shadow-md group ${status === 'locked' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        to={status !== 'locked' && status !== 'restricted' ? `/curriculum/module/${mod.id}` : '#'}
+                        onClick={() => status !== 'locked' && status !== 'restricted' && handleModuleSelect(mod)}
+                        className={`block rounded-xl border bg-white p-3 transition-all hover:shadow-md group ${status === 'locked' || status === 'restricted' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        title={status === 'restricted' ? 'Contact your advisor to unlock this module' : undefined}
                       >
                         <div className="flex items-start gap-2">
                           <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${woundConfig.gradient} flex items-center justify-center flex-shrink-0 mt-0.5`}>
                             {status === 'completed'
                               ? <CheckCircle className="w-3.5 h-3.5 text-white" />
-                              : status === 'locked'
+                              : status === 'locked' || status === 'restricted'
                               ? <Lock className="w-3.5 h-3.5 text-white" />
                               : <Play className="w-3.5 h-3.5 text-white" />}
                           </div>
@@ -326,9 +329,10 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                       return (
                         <Link
                           key={mod.id}
-                          to={status !== 'locked' ? `/curriculum/module/${mod.id}` : '#'}
-                          onClick={() => status !== 'locked' && handleModuleSelect(mod)}
-                          className={`block rounded-lg border bg-white p-2.5 transition-all hover:shadow-sm text-xs ${status === 'locked' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                          to={status !== 'locked' && status !== 'restricted' ? `/curriculum/module/${mod.id}` : '#'}
+                          onClick={() => status !== 'locked' && status !== 'restricted' && handleModuleSelect(mod)}
+                          className={`block rounded-lg border bg-white p-2.5 transition-all hover:shadow-sm text-xs ${status === 'locked' || status === 'restricted' ? 'opacity-60 cursor-not-allowed' : ''}`}
+                          title={status === 'restricted' ? 'Contact your advisor to unlock this module' : undefined}
                         >
                           <div className="flex items-center gap-2">
                             <div className={`w-6 h-6 rounded-md bg-gradient-to-br ${secondaryWoundConfig.gradient} flex items-center justify-center flex-shrink-0`}>
@@ -517,7 +521,7 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                         <div
                           key={module.id}
                           className={`px-6 py-4 border-b border-gray-50 last:border-b-0 transition-colors
-                            ${status === 'locked' ? 'opacity-60' : 'hover:bg-gray-50'}
+                            ${status === 'locked' || status === 'restricted' ? 'opacity-60' : 'hover:bg-gray-50'}
                             ${isCore && woundConfig ? 'bg-gradient-to-r from-white to-amber-50/50' : ''}
                           `}
                         >
@@ -526,9 +530,10 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                               {getStatusIcon(status)}
                               <div className="flex-1 min-w-0">
                                 <Link
-                                  to={status !== 'locked' ? `/curriculum/module/${module.id}` : '#'}
-                                  onClick={() => handleModuleSelect(module)}
-                                  className={`block ${status !== 'locked' ? 'hover:text-amber-600 transition-colors' : 'cursor-not-allowed pointer-events-none'}`}
+                                  to={status !== 'locked' && status !== 'restricted' ? `/curriculum/module/${module.id}` : '#'}
+                                  onClick={() => (status !== 'locked' && status !== 'restricted') && handleModuleSelect(module)}
+                                  className={`block ${status !== 'locked' && status !== 'restricted' ? 'hover:text-amber-600 transition-colors' : 'cursor-not-allowed pointer-events-none'}`}
+                                  title={status === 'restricted' ? 'Contact your advisor to unlock this module' : undefined}
                                 >
                                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                                     <h4 className="font-semibold text-gray-900">{module.title}</h4>
@@ -548,6 +553,12 @@ const CurriculumSystem = ({ onModuleSelect, userProgress = {}, clientId }) => {
                                     )}
                                   </div>
                                   <p className="text-sm text-gray-600">{module.description}</p>
+
+                                  {status === 'restricted' && (
+                                    <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                                      <Lock className="w-3 h-3" /> Contact your advisor to unlock this module
+                                    </p>
+                                  )}
 
                                   {priority?.message && woundConfig && (
                                     <div className={`mt-2 p-2.5 rounded-lg border text-xs ${

@@ -76,6 +76,11 @@ export const clientAuth = {
       localStorage.setItem('client_pin', pin);
       localStorage.setItem('client_name', client.name);
       localStorage.setItem('client_user_role', client.user_role || 'client');
+      if (client.access_restrictions) {
+        localStorage.setItem('client_access_restrictions', JSON.stringify(client.access_restrictions));
+      } else {
+        localStorage.removeItem('client_access_restrictions');
+      }
 
       console.log('✅ Authentication successful!');
       return { success: true, client };
@@ -100,11 +105,18 @@ export const clientAuth = {
 
     if (!clientId) return null;
 
+    const rawRestrictions = localStorage.getItem('client_access_restrictions');
+    let accessRestrictions = null;
+    if (rawRestrictions) {
+      try { accessRestrictions = JSON.parse(rawRestrictions); } catch (e) { /* ignore */ }
+    }
+
     return {
       id: clientId,
       name: clientName,
       pin: clientPin,
-      user_role: userRole || 'client'
+      user_role: userRole || 'client',
+      access_restrictions: accessRestrictions
     };
   },
 
@@ -116,6 +128,7 @@ export const clientAuth = {
     localStorage.removeItem('client_pin');
     localStorage.removeItem('client_name');
     localStorage.removeItem('client_user_role');
+    localStorage.removeItem('client_access_restrictions');
   },
 
   /**
@@ -153,6 +166,11 @@ export const clientAuth = {
       localStorage.setItem('client_name', clientData.name || '');
       localStorage.setItem('client_pin', clientData.pin || '');
       localStorage.setItem('client_user_role', clientData.user_role || 'client');
+      if (clientData.access_restrictions) {
+        localStorage.setItem('client_access_restrictions', JSON.stringify(clientData.access_restrictions));
+      } else {
+        localStorage.removeItem('client_access_restrictions');
+      }
       
       tokenAuth.cleanTokenFromURL();
 

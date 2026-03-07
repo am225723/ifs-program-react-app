@@ -8,7 +8,7 @@ import {
   Play, Target, X, Copy, Download, ArrowLeft, RefreshCw,
   Award, Flame, Star, Zap, Trophy, Crown, Gem, Edit2, Save,
   Key, ToggleLeft, ToggleRight, UserX, UserCheck, Loader2,
-  List, Smile, PenTool, ClipboardCheck, Home as HomeIcon
+  List, Smile, PenTool, ClipboardCheck, Home as HomeIcon, Lock, Unlock
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
@@ -525,6 +525,14 @@ const TherapistDashboard = () => {
   const [addingModuleId, setAddingModuleId] = useState(null);
   const [addModuleResult, setAddModuleResult] = useState(null);
 
+  const [accessControlClient, setAccessControlClient] = useState(null);
+  const [accessControlForm, setAccessControlForm] = useState(null);
+  const [accessControlSaving, setAccessControlSaving] = useState(false);
+  const [accessControlFullAccess, setAccessControlFullAccess] = useState(true);
+  const [deletingClient, setDeletingClient] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const WOUND_TYPES = ['abandonment', 'shame', 'neglect', 'betrayal', 'helplessness'];
 
   const SESSION_NOTE_TEMPLATES = {
@@ -646,7 +654,7 @@ const TherapistDashboard = () => {
     try {
       const { data: clientRows, error: clientErr } = await supabase
         .from('ifs_clients')
-        .select('id, name, pin, email, phone, status, last_active, created_at, user_role')
+        .select('id, name, pin, email, phone, status, last_active, created_at, user_role, access_restrictions')
         .eq('user_role', 'client');
 
       if (clientErr) {
@@ -821,7 +829,8 @@ const TherapistDashboard = () => {
           streakLongest: gamData?.streak_longest || 0,
           badges: gamData?.badges || {},
           currentModuleId,
-          recentMoods
+          recentMoods,
+          accessRestrictions: c.access_restrictions || null
         };
       });
 
@@ -1464,6 +1473,48 @@ const TherapistDashboard = () => {
     }
   };
 
+  const handleDeleteClient = async () => {
+    if (!deletingClient || deleteConfirmText !== 'DELETE') return;
+    setDeleteLoading(true);
+    try {
+      const clientId = deletingClient.id;
+      const relatedTables = [
+        'ifs_assessment_results',
+        'ifs_client_progress',
+        'ifs_journal_entries',
+        'ifs_gamification',
+        'ifs_mood_entries',
+        'ifs_therapist_notes',
+        'ifs_personalized_curriculum',
+        'ifs_interactive_data',
+        'ifs_module_answers',
+        'ifs_messages',
+        'ifs_therapy_homework',
+        'ifs_parts',
+        'ifs_exercise_progress',
+        'ifs_milestones',
+        'ifs_therapy_sessions',
+        'ifs_parts_dialogue',
+        'ifs_therapy_activity_progress',
+        'ifs_client_preferences',
+        'ifs_therapist_feedback'
+      ];
+      for (const table of relatedTables) {
+        const { error } = await supabase.from(table).delete().eq('client_id', clientId);
+        if (error) console.warn(`Error deleting from ${table}:`, error.message);
+      }
+      const { error: clientError } = await supabase.from('ifs_clients').delete().eq('id', clientId);
+      if (clientError) throw clientError;
+      setDeletingClient(null);
+      setDeleteConfirmText('');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      alert('Failed to delete client: ' + error.message);
+    }
+    setDeleteLoading(false);
+  };
+
   const handleEditClientSave = async () => {
     if (!editingClient || !editClientForm.name.trim()) return;
     setEditClientSaving(true);
@@ -1483,6 +1534,111 @@ const TherapistDashboard = () => {
       console.error('Error updating client:', error);
     }
     setEditClientSaving(false);
+  };
+
+  const DEFAULT_ACCESS_FORM = {
+    modules: MODULE_SEQUENCE.map(m => m.id),
+    assessments: ['wounds', 'parts', 'attachment', 'self-energy'],
+    features: {
+      exercises: true,
+      meditations: true,
+      letters: true,
+      partsCards: true,
+      partsStudio: true,
+      journal: true,
+      resourceLibrary: true,
+      weeklyReflection: true,
+      healingTracker: true,
+      milestones: true,
+      dailyCheckin: true,
+      partsDialogue: true,
+      unburdening: true,
+      moodAnalytics: true
+    }
+  };
+
+  const FEATURE_LABELS = {
+    exercises: 'Exercises',
+    meditations: 'Guided Meditations',
+    letters: 'Letter Writing',
+    partsCards: 'Parts Cards',
+    partsStudio: 'Parts Studio',
+    journal: 'Journal',
+    resourceLibrary: 'Resource Library',
+    weeklyReflection: 'Weekly Reflection',
+    healingTracker: 'Healing Tracker',
+    milestones: 'Milestones',
+    dailyCheckin: 'Daily Check-In',
+    partsDialogue: 'Parts Dialogue',
+    unburdening: 'Unburdening Protocol',
+    moodAnalytics: 'Mood Analytics'
+  };
+
+  const ASSESSMENT_LABELS = {
+    wounds: 'Wound Assessment',
+    parts: 'Parts Assessment',
+    attachment: 'Attachment Assessment',
+    'self-energy': 'Self-Energy Assessment'
+  };
+
+  const openAccessControls = (client) => {
+    const existing = client.accessRestrictions;
+    if (existing) {
+      setAccessControlFullAccess(false);
+      setAccessControlForm({
+        modules: existing.modules || [],
+        assessments: existing.assessments || [],
+        features: { ...DEFAULT_ACCESS_FORM.features, ...(existing.features || {}) }
+      });
+    } else {
+      setAccessControlFullAccess(true);
+      setAccessControlForm({ ...DEFAULT_ACCESS_FORM });
+    }
+    setAccessControlClient(client);
+  };
+
+  const handleAccessControlSave = async () => {
+    if (!accessControlClient) return;
+    setAccessControlSaving(true);
+    try {
+      const value = accessControlFullAccess ? null : accessControlForm;
+      const { error } = await supabase
+        .from('ifs_clients')
+        .update({ access_restrictions: value })
+        .eq('id', accessControlClient.id);
+      if (error) throw error;
+      setAccessControlClient(null);
+      setAccessControlForm(null);
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Error saving access controls:', error);
+    }
+    setAccessControlSaving(false);
+  };
+
+  const toggleAccessModule = (moduleId) => {
+    setAccessControlForm(prev => {
+      const modules = prev.modules.includes(moduleId)
+        ? prev.modules.filter(m => m !== moduleId)
+        : [...prev.modules, moduleId];
+      return { ...prev, modules };
+    });
+  };
+
+  const toggleAccessAssessment = (assessmentId) => {
+    setAccessControlForm(prev => {
+      const assessments = prev.assessments.includes(assessmentId)
+        ? prev.assessments.filter(a => a !== assessmentId)
+        : [...prev.assessments, assessmentId];
+      return { ...prev, assessments };
+    });
+  };
+
+  const toggleAccessFeature = (featureKey) => {
+    setAccessControlForm(prev => ({
+      ...prev,
+      features: { ...prev.features, [featureKey]: !prev.features[featureKey] }
+    }));
   };
 
   const handleExportCSV = () => {
@@ -2496,6 +2652,26 @@ const TherapistDashboard = () => {
                       >
                         {client.status === 'active' ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
                         {client.status === 'active' ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button
+                        onClick={() => { setDeletingClient(client); setDeleteConfirmText(''); }}
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium ${hoverBg} transition-all text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20`}
+                        title="Delete Client"
+                      >
+                        <UserX className="w-3.5 h-3.5" />
+                        Delete
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => openAccessControls(client)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium ${hoverBg} transition-all ${
+                          client.accessRestrictions ? 'text-red-500 hover:text-red-600' : `${textSecondary} hover:text-indigo-500`
+                        }`}
+                        title="Access Controls"
+                      >
+                        {client.accessRestrictions ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                        {client.accessRestrictions ? 'Restricted' : 'Full Access'}
                       </button>
                     </div>
                     {showPinClient === client.id && (
@@ -5208,6 +5384,59 @@ const TherapistDashboard = () => {
           </div>
         </div>
       )}
+      {deletingClient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className={`${isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl max-w-md w-full p-8`}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-red-600">Delete Client</h2>
+              <button onClick={() => { setDeletingClient(null); setDeleteConfirmText(''); }} className={`${textMuted} hover:${textPrimary} transition-colors`}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className={`p-4 rounded-lg ${isDark ? 'bg-red-900/20 border border-red-800/50' : 'bg-red-50 border border-red-200'}`}>
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className={`text-sm font-semibold ${isDark ? 'text-red-400' : 'text-red-700'}`}>This action is permanent and cannot be undone.</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-red-300/80' : 'text-red-600/80'}`}>
+                      All data for <strong>{deletingClient.name}</strong> will be permanently deleted, including assessments, progress, journal entries, parts, messages, homework, and curriculum.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className={`block text-sm font-medium ${textSecondary} mb-2`}>
+                  Type <span className="font-mono font-bold text-red-500">DELETE</span> to confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type DELETE here"
+                  className={`w-full px-4 py-3 rounded-lg border ${inputBg} focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none`}
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => { setDeletingClient(null); setDeleteConfirmText(''); }}
+                  className={`flex-1 px-6 py-3 ${isDark ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} rounded-lg font-semibold transition-colors`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteClient}
+                  disabled={deleteLoading || deleteConfirmText !== 'DELETE'}
+                  className="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {deleteLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><UserX className="w-4 h-4 mr-2" /> Delete Permanently</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {editingClient && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className={`${isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl max-w-md w-full p-8`}>
@@ -5272,6 +5501,122 @@ const TherapistDashboard = () => {
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-amber-700 hover:to-emerald-700 transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
                 >
                   {editClientSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Save Changes</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {accessControlClient && accessControlForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className={`${isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto`}>
+            <div className="sticky top-0 z-10 p-6 pb-4 border-b border-gray-200 dark:border-slate-600" style={{ backgroundColor: isDark ? '#1e293b' : '#fff' }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className={`text-xl font-bold ${textPrimary} flex items-center gap-2`}>
+                    <Shield className="w-5 h-5 text-indigo-500" />
+                    Access Controls
+                  </h2>
+                  <p className={`text-sm ${textMuted} mt-1`}>{accessControlClient.name}</p>
+                </div>
+                <button onClick={() => { setAccessControlClient(null); setAccessControlForm(null); }} className={`${textMuted} hover:${textPrimary} transition-colors`}>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex items-center justify-between mt-4 p-3 rounded-lg border border-gray-200 dark:border-slate-600">
+                <div>
+                  <p className={`text-sm font-semibold ${textPrimary}`}>Full Access</p>
+                  <p className={`text-xs ${textMuted}`}>{accessControlFullAccess ? 'Client can access all content' : 'Custom restrictions applied'}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    const next = !accessControlFullAccess;
+                    setAccessControlFullAccess(next);
+                    if (next) setAccessControlForm({ ...DEFAULT_ACCESS_FORM });
+                  }}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${accessControlFullAccess ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-slate-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${accessControlFullAccess ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
+            </div>
+            {!accessControlFullAccess && (
+              <div className="p-6 space-y-6">
+                <div>
+                  <h3 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                    <BookOpen className="w-4 h-4 text-blue-500" />
+                    Modules ({accessControlForm.modules.length}/{MODULE_SEQUENCE.length})
+                  </h3>
+                  <div className="space-y-1.5">
+                    {MODULE_SEQUENCE.map(m => (
+                      <label key={m.id} className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer ${hoverBg} transition-colors`}>
+                        <input
+                          type="checkbox"
+                          checked={accessControlForm.modules.includes(m.id)}
+                          onChange={() => toggleAccessModule(m.id)}
+                          className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className={`text-sm ${textSecondary}`}>
+                          <span className={`font-medium ${textPrimary}`}>Module {m.order}:</span> {m.title}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                    <ClipboardCheck className="w-4 h-4 text-emerald-500" />
+                    Assessments ({accessControlForm.assessments.length}/4)
+                  </h3>
+                  <div className="space-y-1.5">
+                    {Object.entries(ASSESSMENT_LABELS).map(([key, label]) => (
+                      <label key={key} className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer ${hoverBg} transition-colors`}>
+                        <input
+                          type="checkbox"
+                          checked={accessControlForm.assessments.includes(key)}
+                          onChange={() => toggleAccessAssessment(key)}
+                          className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className={`text-sm ${textSecondary}`}>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className={`text-sm font-semibold ${textPrimary} mb-3 flex items-center gap-2`}>
+                    <Zap className="w-4 h-4 text-amber-500" />
+                    Features ({Object.values(accessControlForm.features).filter(Boolean).length}/14)
+                  </h3>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {Object.entries(FEATURE_LABELS).map(([key, label]) => (
+                      <label key={key} className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer ${hoverBg} transition-colors`}>
+                        <input
+                          type="checkbox"
+                          checked={accessControlForm.features[key]}
+                          onChange={() => toggleAccessFeature(key)}
+                          className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className={`text-xs ${textSecondary}`}>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="sticky bottom-0 p-6 pt-4 border-t border-gray-200 dark:border-slate-600" style={{ backgroundColor: isDark ? '#1e293b' : '#fff' }}>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setAccessControlClient(null); setAccessControlForm(null); }}
+                  className={`flex-1 px-6 py-3 ${isDark ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} rounded-lg font-semibold transition-colors`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAccessControlSave}
+                  disabled={accessControlSaving}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+                >
+                  {accessControlSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Save Access Controls</>}
                 </button>
               </div>
             </div>
