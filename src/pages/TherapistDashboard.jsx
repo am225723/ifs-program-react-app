@@ -1639,7 +1639,7 @@ const TherapistDashboard = () => {
     setEmailSending(false);
     setEmailLoading(true);
     try {
-      const appLink = window.location.origin;
+      const appLink = 'https://ifs.aleix.help';
       const nameParts = (client.name || '').trim().split(/\s+/);
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
@@ -1663,7 +1663,7 @@ const TherapistDashboard = () => {
     setEmailSent(false);
     setEmailLoading(true);
     try {
-      const appLink = window.location.origin;
+      const appLink = 'https://ifs.aleix.help';
       const nameParts = (emailClient?.name || '').trim().split(/\s+/);
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
