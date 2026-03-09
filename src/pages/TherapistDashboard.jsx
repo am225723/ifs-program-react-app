@@ -1640,8 +1640,12 @@ const TherapistDashboard = () => {
     setEmailLoading(true);
     try {
       const appLink = window.location.origin;
+      const nameParts = (client.name || '').trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
       const { subject, html } = await getRenderedEmail('welcome', {
-        name: client.name,
+        first_name: firstName,
+        last_name: lastName,
         pin: client.pin,
         app_link: appLink,
       });
@@ -1660,8 +1664,12 @@ const TherapistDashboard = () => {
     setEmailLoading(true);
     try {
       const appLink = window.location.origin;
+      const nameParts = (emailClient?.name || '').trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
       const { subject, html } = await getRenderedEmail(templateId, {
-        name: emailClient?.name || '',
+        first_name: firstName,
+        last_name: lastName,
         pin: emailClient?.pin || '',
         app_link: appLink,
       });

@@ -4,21 +4,21 @@ const EMAIL_TEMPLATES = {
     file: '/email-templates/welcome.html',
     subject: 'Welcome to Intrinsic Therapeutic Solutions',
     description: 'Introduces the client to the program with their name, PIN, and app link.',
-    variables: ['name', 'pin', 'app_link'],
+    variables: ['first_name', 'last_name', 'pin', 'app_link'],
   },
   pin_reset: {
     label: 'PIN Reset',
     file: '/email-templates/pin-reset.html',
     subject: 'Your PIN Has Been Updated',
     description: 'Notifies the client that their PIN has been changed.',
-    variables: ['name', 'pin', 'app_link'],
+    variables: ['first_name', 'last_name', 'pin', 'app_link'],
   },
   reengagement: {
     label: 'Re-engagement',
     file: '/email-templates/reengagement.html',
     subject: 'We Miss You — Continue Your Healing Journey',
     description: 'Encourages inactive clients to return to the program.',
-    variables: ['name', 'app_link'],
+    variables: ['first_name', 'last_name', 'app_link'],
   },
 };
 
