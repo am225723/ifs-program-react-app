@@ -8,7 +8,7 @@ import {
   Play, Target, X, Copy, Download, ArrowLeft, RefreshCw,
   Award, Flame, Star, Zap, Trophy, Crown, Gem, Edit2, Save,
   Key, ToggleLeft, ToggleRight, UserX, UserCheck, Loader2,
-  List, Smile, PenTool, ClipboardCheck, Home as HomeIcon, Lock, Unlock
+  List, Smile, PenTool, ClipboardCheck, Home as HomeIcon, Lock, Unlock, Mail
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase, supabaseHelpers } from '../lib/supabase';
@@ -16,6 +16,8 @@ import { clientAuth } from '../lib/supabasePersonalization';
 import { aiCurriculumPersonalizer } from '../lib/aiCurriculumPersonalizer';
 import { WOUND_LESSON_PLANS, WOUND_DISPLAY } from '../lib/woundLessonPlans';
 import { curriculumModules } from '../data/curriculumData';
+import { getAvailableTemplates, getRenderedEmail } from '../lib/emailTemplates';
+import { sendEmail } from '../lib/onesignalEmail';
 
 const woundColorMap = {
   abandonment: { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' },
@@ -532,6 +534,14 @@ const TherapistDashboard = () => {
   const [deletingClient, setDeletingClient] = useState(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [emailClient, setEmailClient] = useState(null);
+  const [emailTemplateId, setEmailTemplateId] = useState('welcome');
+  const [emailPreviewHtml, setEmailPreviewHtml] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
 
   const WOUND_TYPES = ['abandonment', 'shame', 'neglect', 'betrayal', 'helplessness'];
 
@@ -1616,6 +1626,72 @@ const TherapistDashboard = () => {
     setAccessControlSaving(false);
   };
 
+  const openEmailModal = async (client) => {
+    if (!client.email) {
+      setEmailError('This client does not have an email address. Edit the client to add one.');
+      setEmailClient(client);
+      return;
+    }
+    setEmailClient(client);
+    setEmailTemplateId('welcome');
+    setEmailSent(false);
+    setEmailError('');
+    setEmailSending(false);
+    setEmailLoading(true);
+    try {
+      const appLink = window.location.origin;
+      const { subject, html } = await getRenderedEmail('welcome', {
+        name: client.name,
+        pin: client.pin,
+        app_link: appLink,
+      });
+      setEmailSubject(subject);
+      setEmailPreviewHtml(html);
+    } catch (err) {
+      setEmailError('Failed to load email template: ' + err.message);
+    }
+    setEmailLoading(false);
+  };
+
+  const handleEmailTemplateChange = async (templateId) => {
+    setEmailTemplateId(templateId);
+    setEmailError('');
+    setEmailSent(false);
+    setEmailLoading(true);
+    try {
+      const appLink = window.location.origin;
+      const { subject, html } = await getRenderedEmail(templateId, {
+        name: emailClient?.name || '',
+        pin: emailClient?.pin || '',
+        app_link: appLink,
+      });
+      setEmailSubject(subject);
+      setEmailPreviewHtml(html);
+    } catch (err) {
+      setEmailError('Template not found. Please upload the HTML file to /email-templates/');
+      setEmailPreviewHtml('');
+      setEmailSubject('');
+    }
+    setEmailLoading(false);
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailClient?.email || !emailPreviewHtml || !emailSubject) return;
+    setEmailSending(true);
+    setEmailError('');
+    try {
+      await sendEmail({
+        toEmail: emailClient.email,
+        subject: emailSubject,
+        htmlBody: emailPreviewHtml,
+      });
+      setEmailSent(true);
+    } catch (err) {
+      setEmailError('Failed to send: ' + err.message);
+    }
+    setEmailSending(false);
+  };
+
   const toggleAccessModule = (moduleId) => {
     setAccessControlForm(prev => {
       const modules = prev.modules.includes(moduleId)
@@ -2672,6 +2748,16 @@ const TherapistDashboard = () => {
                       >
                         {client.accessRestrictions ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
                         {client.accessRestrictions ? 'Restricted' : 'Full Access'}
+                      </button>
+                      <button
+                        onClick={() => openEmailModal(client)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium ${hoverBg} transition-all ${
+                          client.email ? `${textSecondary} hover:text-blue-500` : `${textMuted} cursor-not-allowed`
+                        }`}
+                        title={client.email ? 'Send Email' : 'No email address'}
+                      >
+                        <Mail className="w-3.5 h-3.5" />
+                        Email
                       </button>
                     </div>
                     {showPinClient === client.id && (
@@ -5620,6 +5706,127 @@ const TherapistDashboard = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {emailClient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className={`${isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto`}>
+            <div className="sticky top-0 z-10 p-6 pb-4 border-b border-gray-200 dark:border-slate-600" style={{ backgroundColor: isDark ? '#1e293b' : '#fff' }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className={`text-xl font-bold ${textPrimary} flex items-center gap-2`}>
+                    <Mail className="w-5 h-5 text-blue-500" />
+                    Send Email
+                  </h2>
+                  <p className={`text-sm ${textMuted} mt-1`}>To: {emailClient.name} {emailClient.email ? `(${emailClient.email})` : ''}</p>
+                </div>
+                <button onClick={() => { setEmailClient(null); setEmailError(''); setEmailSent(false); setEmailPreviewHtml(''); }} className={`${textMuted} hover:${textPrimary} transition-colors`}>
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {!emailClient.email ? (
+                <div className={`p-4 rounded-xl ${isDark ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border`}>
+                  <p className={`text-sm ${isDark ? 'text-red-300' : 'text-red-700'}`}>
+                    This client does not have an email address. Please edit the client profile to add one before sending emails.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setEmailClient(null);
+                      setEditingClient(emailClient);
+                      setEditClientForm({ name: emailClient.name, email: emailClient.email || '', phone: emailClient.phone || '' });
+                    }}
+                    className="mt-3 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-purple-700 hover:to-indigo-700"
+                  >
+                    <Edit2 className="w-3.5 h-3.5 inline mr-1.5" />
+                    Edit Client
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Email Template</label>
+                    <select
+                      value={emailTemplateId}
+                      onChange={(e) => handleEmailTemplateChange(e.target.value)}
+                      className={`w-full px-4 py-2.5 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    >
+                      {getAvailableTemplates().map(t => (
+                        <option key={t.id} value={t.id}>{t.label} — {t.description}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Subject</label>
+                    <input
+                      type="text"
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                      className={`w-full px-4 py-2.5 rounded-lg border ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    />
+                  </div>
+
+                  {emailLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                    </div>
+                  ) : emailPreviewHtml ? (
+                    <div>
+                      <label className={`block text-sm font-medium ${textSecondary} mb-1.5`}>Preview</label>
+                      <div className={`border ${isDark ? 'border-slate-600' : 'border-gray-200'} rounded-lg overflow-hidden`}>
+                        <iframe
+                          srcDoc={emailPreviewHtml}
+                          title="Email Preview"
+                          className="w-full bg-white"
+                          style={{ height: '360px', border: 'none' }}
+                          sandbox="allow-same-origin"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {emailError && (
+                    <div className={`p-3 rounded-lg ${isDark ? 'bg-red-900/20 text-red-300' : 'bg-red-50 text-red-700'} text-sm`}>
+                      {emailError}
+                    </div>
+                  )}
+
+                  {emailSent && (
+                    <div className={`p-3 rounded-lg ${isDark ? 'bg-green-900/20 text-green-300' : 'bg-green-50 text-green-700'} text-sm flex items-center gap-2`}>
+                      <CheckCircle className="w-4 h-4" />
+                      Email sent successfully to {emailClient.email}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {emailClient.email && (
+              <div className="sticky bottom-0 p-6 pt-4 border-t border-gray-200 dark:border-slate-600" style={{ backgroundColor: isDark ? '#1e293b' : '#fff' }}>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setEmailClient(null); setEmailError(''); setEmailSent(false); setEmailPreviewHtml(''); }}
+                    className={`flex-1 px-6 py-3 ${isDark ? 'bg-slate-700 text-gray-300 hover:bg-slate-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} rounded-lg font-semibold transition-colors`}
+                  >
+                    {emailSent ? 'Close' : 'Cancel'}
+                  </button>
+                  {!emailSent && (
+                    <button
+                      onClick={handleSendEmail}
+                      disabled={emailSending || !emailPreviewHtml || !emailSubject || emailLoading}
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 flex items-center justify-center"
+                    >
+                      {emailSending ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Mail className="w-4 h-4 mr-2" /> Send Email</>}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
