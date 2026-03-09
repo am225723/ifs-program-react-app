@@ -659,7 +659,30 @@ export default function Assessments() {
   if (activeAssessment && showResults) {
     const assessment = assessmentDefinitions.find(a => a.id === activeAssessment);
     const results = savedResults[activeAssessment];
-    if (!results) return null;
+    if (!results) {
+      return (
+        <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <button
+              onClick={() => { setActiveAssessment(null); setShowResults(false); setAnswers({}); }}
+              className={`inline-flex items-center gap-2 mb-6 ${theme.isDark ? 'text-slate-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Assessments
+            </button>
+            <div className={`${theme.cardBg} rounded-2xl shadow-lg p-8 border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} text-center`}>
+              <p className={`${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>Results are loading or not yet available. Please try retaking the assessment.</p>
+              <button
+                onClick={() => { setShowResults(false); setShowIntro(true); setAnswers({}); }}
+                className="mt-4 px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-medium hover:from-amber-700 hover:to-emerald-700"
+              >
+                Retake Assessment
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className={`min-h-screen ${theme.isDark ? 'text-slate-100' : ''}`}>
@@ -785,6 +808,14 @@ export default function Assessments() {
                 <p>The 8 C's represent the qualities of Self energy in IFS. Higher scores indicate areas where you naturally access Self, while lower scores show where parts may be blending with you.</p>
                 <p>Your strongest qualities are resources you can draw upon. Your growing edges are areas where daily practice can strengthen your connection to Self.</p>
                 <p>Self energy is always present — it can't be damaged or lost. Parts just sometimes block access to it. As you do IFS work, these qualities naturally become more available.</p>
+              </div>
+            )}
+            {activeAssessment === 'attachment' && (
+              <div className={`space-y-3 ${theme.isDark ? 'text-slate-300' : 'text-gray-600'}`}>
+                <p>Your results reveal your dominant attachment patterns — the ways you learned to relate to others based on your earliest experiences with caregivers. These patterns often operate outside of conscious awareness.</p>
+                <p>Your <strong>primary attachment style</strong> ({assessment.categories[results.primary]?.label}) reflects the relational strategies your inner child developed to feel safe. Higher scores indicate stronger presence of that pattern in your relationships.</p>
+                <p><strong>Secure</strong> attachment reflects comfort with closeness and independence. <strong>Anxious</strong> attachment involves craving reassurance and fearing abandonment. <strong>Avoidant</strong> attachment prioritizes self-reliance and discomfort with vulnerability. <strong>Fearful-Avoidant</strong> attachment involves conflicting desires for both closeness and distance.</p>
+                <p>In IFS, attachment patterns are maintained by protective parts that learned these strategies in childhood. As you build a relationship with these parts and unburden the exiles they protect, your capacity for secure connection naturally grows.</p>
               </div>
             )}
           </div>
