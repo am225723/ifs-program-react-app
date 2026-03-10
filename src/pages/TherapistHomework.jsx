@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   ClipboardList, Plus, Search, CheckCircle, Clock, AlertTriangle,
   Calendar, User, ChevronDown, ChevronUp, X, RefreshCw, BookOpen,
-  Flag, Edit3, Trash2, MessageSquare
+  Flag, Edit3, Trash2, MessageSquare, Sparkles, Wand2, Loader2, Layers, ArrowRight
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { supabase } from '../lib/supabase';
 import { clientAuth } from '../lib/supabasePersonalization';
+import { generateHomework, generateHomeworkBatch } from '../lib/homeworkAI';
 
 const categories = [
   { value: 'general', label: 'General', color: 'bg-gray-100 text-gray-700' },
@@ -41,6 +42,14 @@ const TherapistHomework = () => {
     clientId: '', title: '', description: '', category: 'general',
     priority: 'normal', dueDate: ''
   });
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiGuidance, setAiGuidance] = useState('');
+  const [aiCategory, setAiCategory] = useState('');
+  const [aiBatchResults, setAiBatchResults] = useState([]);
+  const [showBatchResults, setShowBatchResults] = useState(false);
+  const [clientWounds, setClientWounds] = useState({});
 
   const textPrimary = isDark ? 'text-white' : 'text-gray-900';
   const textSecondary = isDark ? 'text-slate-300' : 'text-gray-600';
@@ -64,6 +73,93 @@ const TherapistHomework = () => {
   }, [therapist?.id]);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  const loadClientWound = useCallback(async (clientId) => {
+    if (!clientId || clientWounds[clientId]) return clientWounds[clientId] || null;
+    const { data } = await supabase
+      .from('ifs_interactive_data')
+      .select('data')
+      .eq('client_id', clientId)
+      .eq('module_id', 'assessment_wounds')
+      .maybeSingle();
+    const wound = data?.data?.primaryWound?.name || data?.data?.primaryWound?.id || null;
+    const secondary = data?.data?.secondaryWound?.name || data?.data?.secondaryWound?.id || null;
+    setClientWounds(prev => ({ ...prev, [clientId]: { primary: wound, secondary } }));
+    return { primary: wound, secondary };
+  }, [clientWounds]);
+
+  const getSelectedClientWound = () => {
+    const cid = form.clientId;
+    return clientWounds[cid] || null;
+  };
+
+  useEffect(() => {
+    if (form.clientId) loadClientWound(form.clientId);
+  }, [form.clientId, loadClientWound]);
+
+  const handleAIGenerate = async () => {
+    if (!form.clientId) { setAiError('Please select a client first.'); return; }
+    setAiGenerating(true);
+    setAiError('');
+    try {
+      const wounds = await loadClientWound(form.clientId);
+      const result = await generateHomework({
+        woundType: wounds?.primary || '',
+        secondaryWound: wounds?.secondary || '',
+        category: aiCategory || '',
+        guidance: aiGuidance,
+        clientName: getClientName(form.clientId),
+      });
+      setForm(prev => ({
+        ...prev,
+        title: result.title,
+        description: result.description,
+        category: result.category || prev.category,
+        priority: result.priority || prev.priority,
+      }));
+      setShowAIPanel(false);
+      setAiGuidance('');
+      setAiCategory('');
+    } catch (err) {
+      setAiError(err.message);
+    }
+    setAiGenerating(false);
+  };
+
+  const handleAIBatchGenerate = async () => {
+    if (!form.clientId) { setAiError('Please select a client first.'); return; }
+    setAiGenerating(true);
+    setAiError('');
+    try {
+      const wounds = await loadClientWound(form.clientId);
+      const results = await generateHomeworkBatch({
+        woundType: wounds?.primary || '',
+        secondaryWound: wounds?.secondary || '',
+        guidance: aiGuidance,
+        clientName: getClientName(form.clientId),
+        count: 4,
+      });
+      setAiBatchResults(results);
+      setShowBatchResults(true);
+      setShowAIPanel(false);
+    } catch (err) {
+      setAiError(err.message);
+    }
+    setAiGenerating(false);
+  };
+
+  const handleUseBatchItem = (item) => {
+    setForm(prev => ({
+      ...prev,
+      title: item.title,
+      description: item.description,
+      category: item.category || prev.category,
+      priority: item.priority || prev.priority,
+    }));
+    setShowBatchResults(false);
+    setAiBatchResults([]);
+    if (!showForm) setShowForm(true);
+  };
 
   const handleSubmit = async () => {
     if (!form.clientId || !form.title.trim()) return;
@@ -162,13 +258,26 @@ const TherapistHomework = () => {
             <p className={`text-sm ${textMuted}`}>Create and track client homework</p>
           </div>
         </div>
-        <button
-          onClick={() => { resetForm(); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl text-sm font-medium hover:from-amber-600 hover:to-amber-700 transition-all"
-        >
-          <Plus className="w-4 h-4" />
-          Assign Homework
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setShowAIPanel(!showAIPanel); setAiError(''); setShowBatchResults(false); if (!showForm) { resetForm(); setShowForm(true); } }}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              isDark
+                ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30'
+                : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            AI Generate
+          </button>
+          <button
+            onClick={() => { resetForm(); setShowForm(true); setShowAIPanel(false); setShowBatchResults(false); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl text-sm font-medium hover:from-amber-600 hover:to-amber-700 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Assign Homework
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -184,6 +293,129 @@ const TherapistHomework = () => {
           </div>
         ))}
       </div>
+
+      {showAIPanel && showForm && (
+        <div className={`${cardBg} rounded-2xl border ${isDark ? 'border-purple-500/30' : 'border-purple-200'} p-5 mb-4`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-purple-600/20' : 'bg-purple-100'}`}>
+                <Wand2 className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+              </div>
+              <div>
+                <h3 className={`text-sm font-semibold ${textPrimary}`}>AI Homework Generator</h3>
+                <p className={`text-xs ${textMuted}`}>
+                  {form.clientId
+                    ? <>For: {getClientName(form.clientId)}{getSelectedClientWound()?.primary ? <> &middot; Wound: <span className={isDark ? 'text-amber-400' : 'text-amber-600'}>{getSelectedClientWound().primary}</span></> : ''}</>
+                    : 'Select a client in the form below first'}
+                </p>
+              </div>
+            </div>
+            <button onClick={() => setShowAIPanel(false)} className={`p-1 rounded-lg ${isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-100'}`}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+            <div>
+              <label className={`block text-xs font-medium ${textMuted} mb-1`}>Category focus (optional)</label>
+              <select
+                value={aiCategory}
+                onChange={e => setAiCategory(e.target.value)}
+                className={`w-full px-3 py-2 rounded-lg border text-sm ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+              >
+                <option value="">Any category</option>
+                {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className={`block text-xs font-medium ${textMuted} mb-1`}>Additional guidance (optional)</label>
+              <input
+                type="text"
+                value={aiGuidance}
+                onChange={e => setAiGuidance(e.target.value)}
+                placeholder="e.g., focus on inner critic, something gentle..."
+                className={`w-full px-3 py-2 rounded-lg border text-sm ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+              />
+            </div>
+          </div>
+
+          {aiError && (
+            <div className={`text-xs px-3 py-2 rounded-lg mb-3 ${isDark ? 'bg-red-900/20 text-red-400 border border-red-800/30' : 'bg-red-50 text-red-600 border border-red-200'}`}>
+              {aiError}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAIGenerate}
+              disabled={aiGenerating || !form.clientId}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 ${
+                isDark
+                  ? 'bg-purple-600 text-white hover:bg-purple-500'
+                  : 'bg-purple-600 text-white hover:bg-purple-700'
+              }`}
+            >
+              {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              Generate One
+            </button>
+            <button
+              onClick={handleAIBatchGenerate}
+              disabled={aiGenerating || !form.clientId}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 ${
+                isDark
+                  ? 'bg-slate-700 text-purple-300 border border-purple-500/30 hover:bg-slate-600'
+                  : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
+              }`}
+            >
+              {aiGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Layers className="w-4 h-4" />}
+              Generate Set of 4
+            </button>
+            {aiGenerating && <span className={`text-xs ${textMuted}`}>Generating personalized homework...</span>}
+          </div>
+        </div>
+      )}
+
+      {showBatchResults && aiBatchResults.length > 0 && (
+        <div className={`${cardBg} rounded-2xl border ${isDark ? 'border-purple-500/30' : 'border-purple-200'} p-5 mb-4`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Layers className={`w-5 h-5 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
+              <h3 className={`text-sm font-semibold ${textPrimary}`}>AI Suggestions — pick one to use</h3>
+            </div>
+            <button onClick={() => { setShowBatchResults(false); setAiBatchResults([]); }} className={`p-1 rounded-lg ${isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-100'}`}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {aiBatchResults.map((item, idx) => {
+              const catInfo = categories.find(c => c.value === item.category) || categories[0];
+              return (
+                <div
+                  key={idx}
+                  className={`rounded-xl border p-4 cursor-pointer transition-all hover:shadow-md ${
+                    isDark ? 'border-slate-700 hover:border-purple-500/50 bg-slate-800/40' : 'border-gray-200 hover:border-purple-300 bg-white'
+                  }`}
+                  onClick={() => handleUseBatchItem(item)}
+                >
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h4 className={`text-sm font-semibold ${textPrimary} leading-tight`}>{item.title}</h4>
+                    <ArrowRight className={`w-4 h-4 flex-shrink-0 mt-0.5 ${isDark ? 'text-purple-400' : 'text-purple-500'}`} />
+                  </div>
+                  <p className={`text-xs ${textSecondary} line-clamp-3 mb-2 leading-relaxed`}>{item.description}</p>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${catInfo.color}`}>{catInfo.label}</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                      item.priority === 'high' ? 'bg-red-100 text-red-700' :
+                      item.priority === 'low' ? 'bg-green-100 text-green-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>{item.priority}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className={`${cardBg} rounded-2xl border ${cardBorder} p-6 mb-6`}>
