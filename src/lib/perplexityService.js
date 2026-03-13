@@ -43,7 +43,7 @@ Keep the response warm, encouraging, and focused on hope and healing potential.`
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.1-sonar-small-128k-online',
+          model: 'sonar',
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }

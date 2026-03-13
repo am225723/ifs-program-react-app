@@ -47,6 +47,7 @@ const TherapistHomework = () => {
   const [aiError, setAiError] = useState('');
   const [aiGuidance, setAiGuidance] = useState('');
   const [aiCategory, setAiCategory] = useState('');
+  const [aiClientId, setAiClientId] = useState('');
   const [aiBatchResults, setAiBatchResults] = useState([]);
   const [showBatchResults, setShowBatchResults] = useState(false);
   const [clientWounds, setClientWounds] = useState({});
@@ -88,38 +89,35 @@ const TherapistHomework = () => {
     return { primary: wound, secondary };
   }, [clientWounds]);
 
-  const getSelectedClientWound = () => {
-    const cid = form.clientId;
-    return clientWounds[cid] || null;
-  };
+  const getAIClientWound = () => clientWounds[aiClientId] || null;
 
   useEffect(() => {
-    if (form.clientId) loadClientWound(form.clientId);
-  }, [form.clientId, loadClientWound]);
+    if (aiClientId) loadClientWound(aiClientId);
+  }, [aiClientId, loadClientWound]);
 
   const handleAIGenerate = async () => {
-    if (!form.clientId) { setAiError('Please select a client first.'); return; }
+    if (!aiClientId) { setAiError('Please select a client first.'); return; }
     setAiGenerating(true);
     setAiError('');
     try {
-      const wounds = await loadClientWound(form.clientId);
+      const wounds = await loadClientWound(aiClientId);
       const result = await generateHomework({
         woundType: wounds?.primary || '',
         secondaryWound: wounds?.secondary || '',
         category: aiCategory || '',
         guidance: aiGuidance,
-        clientName: getClientName(form.clientId),
+        clientName: getClientName(aiClientId),
       });
       setForm(prev => ({
         ...prev,
+        clientId: aiClientId,
         title: result.title,
         description: result.description,
         category: result.category || prev.category,
         priority: result.priority || prev.priority,
       }));
       setShowAIPanel(false);
-      setAiGuidance('');
-      setAiCategory('');
+      setShowForm(true);
     } catch (err) {
       setAiError(err.message);
     }
@@ -127,16 +125,16 @@ const TherapistHomework = () => {
   };
 
   const handleAIBatchGenerate = async () => {
-    if (!form.clientId) { setAiError('Please select a client first.'); return; }
+    if (!aiClientId) { setAiError('Please select a client first.'); return; }
     setAiGenerating(true);
     setAiError('');
     try {
-      const wounds = await loadClientWound(form.clientId);
+      const wounds = await loadClientWound(aiClientId);
       const results = await generateHomeworkBatch({
         woundType: wounds?.primary || '',
         secondaryWound: wounds?.secondary || '',
         guidance: aiGuidance,
-        clientName: getClientName(form.clientId),
+        clientName: getClientName(aiClientId),
         count: 4,
       });
       setAiBatchResults(results);
@@ -151,6 +149,7 @@ const TherapistHomework = () => {
   const handleUseBatchItem = (item) => {
     setForm(prev => ({
       ...prev,
+      clientId: aiClientId,
       title: item.title,
       description: item.description,
       category: item.category || prev.category,
@@ -158,7 +157,7 @@ const TherapistHomework = () => {
     }));
     setShowBatchResults(false);
     setAiBatchResults([]);
-    if (!showForm) setShowForm(true);
+    setShowForm(true);
   };
 
   const handleSubmit = async () => {
@@ -260,7 +259,7 @@ const TherapistHomework = () => {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => { setShowAIPanel(!showAIPanel); setAiError(''); setShowBatchResults(false); if (!showForm) { resetForm(); setShowForm(true); } }}
+            onClick={() => { setShowAIPanel(!showAIPanel); setAiError(''); setShowBatchResults(false); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
               isDark
                 ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600/30'
@@ -294,26 +293,48 @@ const TherapistHomework = () => {
         ))}
       </div>
 
-      {showAIPanel && showForm && (
+      {showAIPanel && (
         <div className={`${cardBg} rounded-2xl border ${isDark ? 'border-purple-500/30' : 'border-purple-200'} p-5 mb-4`}>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-purple-600/20' : 'bg-purple-100'}`}>
                 <Wand2 className={`w-4 h-4 ${isDark ? 'text-purple-400' : 'text-purple-600'}`} />
               </div>
               <div>
                 <h3 className={`text-sm font-semibold ${textPrimary}`}>AI Homework Generator</h3>
-                <p className={`text-xs ${textMuted}`}>
-                  {form.clientId
-                    ? <>For: {getClientName(form.clientId)}{getSelectedClientWound()?.primary ? <> &middot; Wound: <span className={isDark ? 'text-amber-400' : 'text-amber-600'}>{getSelectedClientWound().primary}</span></> : ''}</>
-                    : 'Select a client in the form below first'}
-                </p>
+                <p className={`text-xs ${textMuted}`}>Select a client, then generate personalized homework</p>
               </div>
             </div>
             <button onClick={() => setShowAIPanel(false)} className={`p-1 rounded-lg ${isDark ? 'hover:bg-slate-700' : 'hover:bg-gray-100'}`}>
               <X className="w-4 h-4" />
             </button>
           </div>
+
+          <div className="mb-3">
+            <label className={`block text-xs font-medium ${textMuted} mb-1`}>Client *</label>
+            <select
+              value={aiClientId}
+              onChange={e => setAiClientId(e.target.value)}
+              className={`w-full px-3 py-2.5 rounded-lg border text-sm ${inputBg} focus:ring-2 focus:ring-purple-500 outline-none`}
+            >
+              <option value="">Select a client...</option>
+              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+
+          {aiClientId && (
+            <div className={`text-xs px-3 py-2 rounded-lg mb-3 flex items-center gap-2 ${isDark ? 'bg-slate-700/50 text-slate-300' : 'bg-gray-50 text-gray-600'}`}>
+              <User className="w-3.5 h-3.5" />
+              <span className="font-medium">{getClientName(aiClientId)}</span>
+              {getAIClientWound()?.primary ? (
+                <span>&middot; Primary wound: <span className={`font-medium ${isDark ? 'text-amber-400' : 'text-amber-600'}`}>{getAIClientWound().primary}</span>
+                  {getAIClientWound()?.secondary && <span className={textMuted}> + {getAIClientWound().secondary}</span>}
+                </span>
+              ) : (
+                <span className={textMuted}>&middot; No wound assessment yet</span>
+              )}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <div>
@@ -345,10 +366,10 @@ const TherapistHomework = () => {
             </div>
           )}
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleAIGenerate}
-              disabled={aiGenerating || !form.clientId}
+              disabled={aiGenerating || !aiClientId}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 ${
                 isDark
                   ? 'bg-purple-600 text-white hover:bg-purple-500'
@@ -360,7 +381,7 @@ const TherapistHomework = () => {
             </button>
             <button
               onClick={handleAIBatchGenerate}
-              disabled={aiGenerating || !form.clientId}
+              disabled={aiGenerating || !aiClientId}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all disabled:opacity-50 ${
                 isDark
                   ? 'bg-slate-700 text-purple-300 border border-purple-500/30 hover:bg-slate-600'
