@@ -18,6 +18,7 @@ The application is built with React 19 and Vite 7, utilizing TailwindCSS 3 for s
 - **UI/UX Design**: Modern, theme-aware design (including dark mode) with amber/emerald/earthy color schemes and a glassmorphism header. Navigation uses a bottom bar for key sections and a top bar for branding/settings.
 - **Data Persistence**: All user and application data is stored in Supabase, with a schema covering assessments, personalized content, progress, journal entries, parts mapping, and gamification.
 - **PWA Support**: Includes manifest.json and service worker for installable mobile application capabilities.
+- **Native Mobile (Capacitor)**: Capacitor is configured for iOS and Android native builds. App ID: `com.intrinsictherapeutic.ifs`. Plugins: SplashScreen, StatusBar, Keyboard, Haptics, PushNotifications. Build workflow: `npm run cap:build` (builds web + syncs native), then open in Xcode (`npm run cap:open:ios`) or Android Studio (`npm run cap:open:android`). Native platform directories (`ios/`, `android/`) are gitignored — regenerated via `npx cap sync`.
 
 **Core Features:**
 - **Assessment Suite**: IFS Wound, Protective Parts, Self-Energy, and Attachment Style assessments.

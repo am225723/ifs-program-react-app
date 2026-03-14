@@ -108,5 +108,9 @@ temp/
 *.sln
 *.sw*
 
+# Capacitor native projects (generated — build locally with cap sync)
+ios/
+android/
+
 # Local environment files
 .env.local
