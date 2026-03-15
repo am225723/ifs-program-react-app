@@ -137,6 +137,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentClient, setCurrentClient] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -162,11 +163,42 @@ function App() {
 
   useEffect(() => {
     if (!isAuthenticated || !currentClient) return;
-    if (currentClient.user_role === 'therapist') return;
-    const onboardingDone = localStorage.getItem(`onboarding_completed_${currentClient.id}`) || localStorage.getItem('onboarding_completed');
-    if (!onboardingDone) {
-      setShowOnboarding(true);
+    if (currentClient.user_role === 'therapist') {
+      setOnboardingChecked(true);
+      return;
     }
+
+    const checkAssessments = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('ifs_interactive_data')
+          .select('module_id')
+          .eq('client_id', currentClient.id)
+          .in('module_id', ['assessment_wounds', 'assessment_parts', 'assessment_self-energy']);
+
+        if (error) {
+          console.error('Error checking assessment status:', error);
+          setShowOnboarding(true);
+          setOnboardingChecked(true);
+          return;
+        }
+
+        const completedIds = (data || []).map(r => r.module_id);
+        const allDone = ['assessment_wounds', 'assessment_parts', 'assessment_self-energy'].every(id => completedIds.includes(id));
+
+        if (!allDone) {
+          setShowOnboarding(true);
+        } else {
+          localStorage.setItem(`onboarding_completed_${currentClient.id}`, 'true');
+        }
+      } catch (err) {
+        console.error('Error checking assessment status:', err);
+        setShowOnboarding(true);
+      }
+      setOnboardingChecked(true);
+    };
+
+    checkAssessments();
   }, [isAuthenticated, currentClient]);
 
   const handleLogin = async (pin) => {
@@ -198,6 +230,7 @@ function App() {
           handleLogin={handleLogin}
           handleLogout={handleLogout}
           showOnboarding={showOnboarding}
+          onboardingChecked={onboardingChecked}
           onOnboardingComplete={() => setShowOnboarding(false)}
         />
       </Router>
@@ -207,7 +240,7 @@ function App() {
   );
 }
 
-function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout, showOnboarding, onOnboardingComplete }) {
+function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout, showOnboarding, onboardingChecked, onOnboardingComplete }) {
   const { theme } = useTheme();
   const location = useLocation();
   const bgClass = isAuthenticated ? `bg-gradient-to-br ${theme.primary}` : '';
@@ -252,12 +285,26 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout,
           <Route path="*" element={<ClientPINLogin onLogin={handleLogin} />} />
         </Routes>
         )
+      ) : (isAuthenticated && !onboardingChecked) ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-amber-500"></div>
+        </div>
       ) : showOnboarding ? (
-        <OnboardingFlow
-          onComplete={onOnboardingComplete}
-          clientName={currentClient?.name?.split(' ')[0]}
-          clientId={currentClient?.id}
-        />
+        location.pathname === '/assessments' ? (
+          <div className={`min-h-screen ${bgClass}`}>
+            <div className="pb-4">
+              <Routes>
+                <Route path="/assessments" element={<Assessments />} />
+              </Routes>
+            </div>
+          </div>
+        ) : (
+          <OnboardingFlow
+            onComplete={onOnboardingComplete}
+            clientName={currentClient?.name?.split(' ')[0]}
+            clientId={currentClient?.id}
+          />
+        )
       ) : (
         <>
           <header className={`sticky top-0 z-50 backdrop-blur-lg border-b shadow-sm ${theme.isDark ? 'bg-slate-900/80 border-slate-700/50' : 'bg-white/80 border-gray-200/50'}`}>

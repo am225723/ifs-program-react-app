@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   CheckCircle, Circle, ArrowRight, ArrowLeft, RotateCcw, 
   Heart, Shield, Sparkles, AlertTriangle, Clock, TrendingUp,
@@ -369,6 +369,8 @@ export default function Assessments() {
   const { theme, getAnimationClass } = useTheme();
   const { parts, addPart, saveToSupabase } = useParts();
   const { awardXP } = useData();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [activeAssessment, setActiveAssessment] = useState(null);
   const [answers, setAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
@@ -378,10 +380,25 @@ export default function Assessments() {
   const [loading, setLoading] = useState(true);
   const [addedParts, setAddedParts] = useState({});
   const [protectorAnswers, setProtectorAnswers] = useState({});
+  const [autoStartHandled, setAutoStartHandled] = useState(false);
 
   useEffect(() => {
     loadSavedResults();
   }, []);
+
+  useEffect(() => {
+    if (loading || autoStartHandled) return;
+    const startParam = searchParams.get('start');
+    if (startParam) {
+      const assessment = assessmentDefinitions.find(a => a.id === startParam);
+      if (assessment && !savedResults[startParam]) {
+        setActiveAssessment(startParam);
+        setShowIntro(true);
+        setSearchParams({}, { replace: true });
+      }
+      setAutoStartHandled(true);
+    }
+  }, [loading, searchParams, savedResults, autoStartHandled, setSearchParams]);
 
   const loadSavedResults = async () => {
     try {
@@ -946,20 +963,37 @@ export default function Assessments() {
             );
           })()}
 
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => handleRetake(activeAssessment)}
-              className={`px-6 py-3 rounded-xl font-medium ${theme.isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-white text-gray-700 hover:bg-gray-50'} border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'}`}
-            >
-              <RotateCcw className="w-4 h-4 inline mr-2" />
-              Retake Assessment
-            </button>
-            <button
-              onClick={() => { setActiveAssessment(null); setShowResults(false); setAnswers({}); }}
-              className="px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-medium hover:from-amber-700 hover:to-emerald-700"
-            >
-              View All Assessments
-            </button>
+          <div className="flex flex-col items-center gap-3">
+            {(() => {
+              const onboardingDone = localStorage.getItem(`onboarding_completed_${clientAuth.getCurrentClient()?.id}`);
+              if (!onboardingDone) {
+                return (
+                  <button
+                    onClick={() => navigate('/')}
+                    className="w-full max-w-md px-6 py-3.5 bg-gradient-to-r from-amber-500 to-emerald-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-emerald-600 transition-all flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    Continue Setup
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                );
+              }
+              return null;
+            })()}
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleRetake(activeAssessment)}
+                className={`px-6 py-3 rounded-xl font-medium ${theme.isDark ? 'bg-slate-700 text-white hover:bg-slate-600' : 'bg-white text-gray-700 hover:bg-gray-50'} border ${theme.isDark ? 'border-slate-600' : 'border-gray-200'}`}
+              >
+                <RotateCcw className="w-4 h-4 inline mr-2" />
+                Retake Assessment
+              </button>
+              <button
+                onClick={() => { setActiveAssessment(null); setShowResults(false); setAnswers({}); }}
+                className="px-6 py-3 bg-gradient-to-r from-amber-600 to-emerald-600 text-white rounded-xl font-medium hover:from-amber-700 hover:to-emerald-700"
+              >
+                View All Assessments
+              </button>
+            </div>
           </div>
         </div>
       </div>

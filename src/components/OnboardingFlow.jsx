@@ -1,55 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Heart, Shield, Users, Sparkles, ArrowRight, ArrowLeft,
-  BookOpen, Brain, Target, CheckCircle2, Star
+  Heart, Shield, Users, Sparkles, ArrowRight,
+  Brain, CheckCircle2, Star, Circle, RefreshCw, Eye, AlertTriangle
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { supabase } from '../lib/supabase';
 
-const STEPS = [
+const REQUIRED_ASSESSMENTS = [
   {
-    id: 'welcome',
+    id: 'wounds',
+    moduleId: 'assessment_wounds',
+    title: 'IFS Wound Assessment',
+    description: 'Identify your core inner child wounds — abandonment, shame, neglect, betrayal, or helplessness',
+    duration: '5-10 min',
     icon: Heart,
-    gradient: 'from-amber-500 to-orange-500',
-    title: 'Welcome to Your Healing Journey',
-    subtitle: "You've taken a brave first step",
-    body: "This app is your personal companion for Internal Family Systems (IFS) self-therapy. It's designed to help you explore your inner world at your own pace, in a safe and supportive space.",
-    tip: "Everything here is private and secure. Take your time — there's no rush.",
+    gradient: 'from-rose-500 to-pink-600',
   },
   {
-    id: 'what-is-ifs',
-    icon: Brain,
-    gradient: 'from-purple-500 to-indigo-500',
-    title: 'What is IFS?',
-    subtitle: 'Understanding your inner family',
-    body: "IFS is based on the idea that your mind is made up of different \"parts\" — like an inner family. Some parts protect you, some carry pain from the past, and at your core is your true Self — calm, compassionate, and wise.",
-    highlights: [
-      { icon: Shield, label: 'Protectors', desc: 'Parts that keep you safe (managers & firefighters)' },
-      { icon: Heart, label: 'Exiles', desc: 'Younger parts carrying wounds and emotions' },
-      { icon: Star, label: 'Self', desc: 'Your wise, compassionate core — the healer within' },
-    ],
-  },
-  {
-    id: 'how-it-works',
-    icon: Target,
-    gradient: 'from-emerald-500 to-teal-500',
-    title: 'How This App Helps You',
-    subtitle: 'Your personalized toolkit',
-    features: [
-      { icon: BookOpen, label: 'Personalized Curriculum', desc: 'Learning modules adapted to your unique wounds and healing needs' },
-      { icon: Users, label: 'Parts Exploration', desc: 'Map, visualize, and build relationships with your inner parts' },
-      { icon: Sparkles, label: 'Guided Exercises', desc: 'Meditations, journaling, daily check-ins, and healing activities' },
-      { icon: Shield, label: 'Advisor Support', desc: 'Your advisor can send messages, assignments, and track your progress' },
-    ],
-  },
-  {
-    id: 'get-started',
+    id: 'self-energy',
+    moduleId: 'assessment_self-energy',
+    title: 'Self-Energy Assessment (6 C\'s)',
+    description: 'Measure your connection to the 8 qualities of Self — Calmness, Curiosity, Compassion, Confidence, Courage, Clarity, Creativity, and Connectedness',
+    duration: '3-5 min',
     icon: Sparkles,
-    gradient: 'from-amber-500 to-emerald-500',
-    title: "Let's Get Started",
-    subtitle: 'Your first step: the Wound Assessment',
-    body: "We recommend starting with a short assessment that helps identify your primary inner child wound. This personalizes your entire experience — from curriculum content to exercise recommendations.",
-    reassurance: "The assessment takes about 5-10 minutes. There are no right or wrong answers — just honest reflection. You can always retake it later.",
+    gradient: 'from-emerald-500 to-teal-600',
+  },
+  {
+    id: 'parts',
+    moduleId: 'assessment_parts',
+    title: 'Protective Parts Assessment',
+    description: 'Discover which inner protector parts are most active — managers, firefighters, and exiles',
+    duration: '3-5 min',
+    icon: Users,
+    gradient: 'from-purple-500 to-indigo-600',
   },
 ];
 
@@ -57,12 +41,10 @@ export default function OnboardingFlow({ onComplete, clientName, clientId }) {
   const { theme } = useTheme();
   const isDark = theme.isDark;
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isExiting, setIsExiting] = useState(false);
-
-  const step = STEPS[currentStep];
-  const isLast = currentStep === STEPS.length - 1;
-  const isFirst = currentStep === 0;
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [completedAssessments, setCompletedAssessments] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [checkingReturn, setCheckingReturn] = useState(false);
 
   const textPrimary = isDark ? 'text-white' : 'text-gray-900';
   const textSecondary = isDark ? 'text-slate-300' : 'text-gray-600';
@@ -71,179 +53,235 @@ export default function OnboardingFlow({ onComplete, clientName, clientId }) {
   const cardBorder = isDark ? 'border-slate-700/50' : 'border-gray-200/50';
   const featureBg = isDark ? 'bg-slate-700/50' : 'bg-gray-50';
 
-  const handleNext = () => {
-    if (isLast) return;
-    setIsExiting(true);
-    setTimeout(() => {
-      setCurrentStep(prev => prev + 1);
-      setIsExiting(false);
-    }, 200);
-  };
+  const checkCompletedAssessments = useCallback(async () => {
+    if (!clientId) return;
+    try {
+      const { data } = await supabase
+        .from('ifs_interactive_data')
+        .select('module_id')
+        .eq('client_id', clientId)
+        .in('module_id', REQUIRED_ASSESSMENTS.map(a => a.moduleId));
 
-  const handleBack = () => {
-    if (isFirst) return;
-    setIsExiting(true);
-    setTimeout(() => {
-      setCurrentStep(prev => prev - 1);
-      setIsExiting(false);
-    }, 200);
-  };
+      const completed = {};
+      (data || []).forEach(row => {
+        completed[row.module_id] = true;
+      });
+      setCompletedAssessments(completed);
 
-  const handleFinish = (goToAssessment) => {
+      const allDone = REQUIRED_ASSESSMENTS.every(a => completed[a.moduleId]);
+      if (allDone) {
+        if (clientId) {
+          localStorage.setItem(`onboarding_completed_${clientId}`, 'true');
+        }
+        onComplete();
+      }
+    } catch (err) {
+      console.error('Error checking assessments:', err);
+    }
+    setLoading(false);
+  }, [clientId, onComplete]);
+
+  useEffect(() => {
+    checkCompletedAssessments();
+  }, [checkCompletedAssessments]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCheckingReturn(true);
+      checkCompletedAssessments().then(() => setCheckingReturn(false));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [checkCompletedAssessments]);
+
+  useEffect(() => {
+    const welcomeSeen = localStorage.getItem(`onboarding_welcome_${clientId}`);
+    if (welcomeSeen) {
+      setShowWelcome(false);
+    }
+  }, [clientId]);
+
+  const handleStartAssessments = () => {
     if (clientId) {
-      localStorage.setItem(`onboarding_completed_${clientId}`, 'true');
+      localStorage.setItem(`onboarding_welcome_${clientId}`, 'true');
     }
-    localStorage.setItem('onboarding_completed', 'true');
-    onComplete();
-    if (goToAssessment) {
-      navigate('/assessment');
-    }
+    setShowWelcome(false);
   };
 
-  const StepIcon = step.icon;
+  const handleStartAssessment = (assessmentId) => {
+    navigate(`/assessments?start=${assessmentId}`);
+  };
 
-  return (
-    <div className={`min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br ${isDark ? 'from-slate-900 via-slate-800 to-slate-900' : 'from-amber-50 via-white to-emerald-50'}`}>
-      <div className="w-full max-w-lg">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          {STEPS.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === currentStep
-                  ? `w-8 bg-gradient-to-r ${step.gradient}`
-                  : i < currentStep
-                    ? 'w-4 bg-amber-400'
-                    : isDark ? 'w-4 bg-slate-600' : 'w-4 bg-gray-300'
-              }`}
-            />
-          ))}
-        </div>
+  const completedCount = REQUIRED_ASSESSMENTS.filter(a => completedAssessments[a.moduleId]).length;
+  const totalCount = REQUIRED_ASSESSMENTS.length;
+  const progressPercent = (completedCount / totalCount) * 100;
 
-        <div className={`${cardBg} backdrop-blur-lg rounded-3xl border ${cardBorder} shadow-xl overflow-hidden transition-opacity duration-200 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
-          <div className={`bg-gradient-to-r ${step.gradient} p-6 text-center`}>
-            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4">
-              <StepIcon className="w-8 h-8 text-white" />
+  if (loading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br ${isDark ? 'from-slate-900 via-slate-800 to-slate-900' : 'from-amber-50 via-white to-emerald-50'}`}>
+        <RefreshCw className="w-8 h-8 animate-spin text-amber-500" />
+      </div>
+    );
+  }
+
+  if (showWelcome) {
+    return (
+      <div className={`min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br ${isDark ? 'from-slate-900 via-slate-800 to-slate-900' : 'from-amber-50 via-white to-emerald-50'}`}>
+        <div className="w-full max-w-lg">
+          <div className={`${cardBg} backdrop-blur-lg rounded-3xl border ${cardBorder} shadow-xl overflow-hidden`}>
+            <div className="bg-gradient-to-r from-amber-500 to-emerald-500 p-8 text-center">
+              <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-1">Welcome to Your Healing Journey</h2>
+              <p className="text-white/80 text-sm">You've taken a brave first step</p>
             </div>
-            <h2 className="text-2xl font-bold text-white mb-1">{step.title}</h2>
-            <p className="text-white/80 text-sm">{step.subtitle}</p>
-          </div>
 
-          <div className="p-6">
-            {step.id === 'welcome' && (
-              <>
-                {clientName && (
-                  <p className={`text-center text-lg font-medium ${textPrimary} mb-4`}>
-                    Hi {clientName}, welcome!
-                  </p>
-                )}
-                <p className={`${textSecondary} leading-relaxed mb-4`}>{step.body}</p>
-                <div className={`${featureBg} rounded-xl p-4 border ${cardBorder}`}>
-                  <p className={`text-sm ${textMuted} italic flex items-start gap-2`}>
-                    <Shield className="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" />
-                    {step.tip}
-                  </p>
-                </div>
-              </>
-            )}
+            <div className="p-6">
+              {clientName && (
+                <p className={`text-center text-lg font-medium ${textPrimary} mb-4`}>
+                  Hi {clientName}, welcome!
+                </p>
+              )}
 
-            {step.id === 'what-is-ifs' && (
-              <>
-                <p className={`${textSecondary} leading-relaxed mb-5`}>{step.body}</p>
-                <div className="space-y-3">
-                  {step.highlights.map((h, i) => {
-                    const HIcon = h.icon;
+              <p className={`${textSecondary} leading-relaxed mb-4`}>
+                Before you begin exploring, we need to personalize your experience. You'll complete three short assessments that help us understand your unique inner world.
+              </p>
+
+              <div className={`${featureBg} rounded-xl p-4 border ${cardBorder} mb-5`}>
+                <p className={`text-sm font-medium ${textPrimary} mb-3`}>Your 3 Getting-Started Assessments:</p>
+                <div className="space-y-2.5">
+                  {REQUIRED_ASSESSMENTS.map((a) => {
+                    const AIcon = a.icon;
                     return (
-                      <div key={i} className={`flex items-start gap-3 ${featureBg} rounded-xl p-3.5 border ${cardBorder}`}>
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${STEPS[1].gradient} flex items-center justify-center flex-shrink-0`}>
-                          <HIcon className="w-5 h-5 text-white" />
+                      <div key={a.id} className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${a.gradient} flex items-center justify-center flex-shrink-0`}>
+                          <AIcon className="w-4 h-4 text-white" />
                         </div>
-                        <div>
-                          <p className={`font-semibold text-sm ${textPrimary}`}>{h.label}</p>
-                          <p className={`text-xs ${textMuted}`}>{h.desc}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium ${textPrimary}`}>{a.title}</p>
+                          <p className={`text-xs ${textMuted}`}>{a.duration}</p>
                         </div>
                       </div>
                     );
                   })}
                 </div>
-              </>
-            )}
-
-            {step.id === 'how-it-works' && (
-              <div className="space-y-3">
-                {step.features.map((f, i) => {
-                  const FIcon = f.icon;
-                  return (
-                    <div key={i} className={`flex items-start gap-3 ${featureBg} rounded-xl p-3.5 border ${cardBorder}`}>
-                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${STEPS[2].gradient} flex items-center justify-center flex-shrink-0`}>
-                        <FIcon className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <p className={`font-semibold text-sm ${textPrimary}`}>{f.label}</p>
-                        <p className={`text-xs ${textMuted}`}>{f.desc}</p>
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
-            )}
 
-            {step.id === 'get-started' && (
-              <>
-                <p className={`${textSecondary} leading-relaxed mb-4`}>{step.body}</p>
-                <div className={`${featureBg} rounded-xl p-4 border ${cardBorder} mb-5`}>
-                  <p className={`text-sm ${textMuted} italic flex items-start gap-2`}>
-                    <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" />
-                    {step.reassurance}
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <button
-                    onClick={() => handleFinish(true)}
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 text-white font-semibold text-sm hover:from-amber-600 hover:to-emerald-600 transition-all flex items-center justify-center gap-2 shadow-lg"
-                  >
-                    <Sparkles className="w-5 h-5" />
-                    Take the Wound Assessment
-                  </button>
-                  <button
-                    onClick={() => handleFinish(false)}
-                    className={`w-full py-3 rounded-xl border ${cardBorder} ${textSecondary} text-sm font-medium hover:${isDark ? 'bg-slate-700' : 'bg-gray-50'} transition-all`}
-                  >
-                    I'll explore on my own first
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+              <div className={`${featureBg} rounded-xl p-4 border ${cardBorder} mb-5`}>
+                <p className={`text-sm ${textMuted} italic flex items-start gap-2`}>
+                  <Shield className="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-500" />
+                  There are no right or wrong answers — just honest reflection. Total time: about 15 minutes.
+                </p>
+              </div>
 
-          {!isLast && (
-            <div className={`px-6 pb-6 flex items-center ${isFirst ? 'justify-end' : 'justify-between'}`}>
-              {!isFirst && (
-                <button
-                  onClick={handleBack}
-                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium ${textSecondary} hover:${isDark ? 'bg-slate-700' : 'bg-gray-100'} transition-all`}
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Back
-                </button>
-              )}
               <button
-                onClick={handleNext}
-                className={`flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r ${step.gradient} text-white hover:opacity-90 transition-all shadow-md`}
+                onClick={handleStartAssessments}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 text-white font-semibold text-sm hover:from-amber-600 hover:to-emerald-600 transition-all flex items-center justify-center gap-2 shadow-lg"
               >
-                Next
+                <Sparkles className="w-5 h-5" />
+                Let's Begin
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
-          )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br ${isDark ? 'from-slate-900 via-slate-800 to-slate-900' : 'from-amber-50 via-white to-emerald-50'}`}>
+      <div className="w-full max-w-lg">
+        <div className="text-center mb-6">
+          <h1 className={`text-xl font-bold ${textPrimary} mb-1`}>Complete Your Assessments</h1>
+          <p className={`text-sm ${textMuted}`}>{completedCount} of {totalCount} completed</p>
         </div>
 
-        <button
-          onClick={() => handleFinish(false)}
-          className={`mt-4 w-full text-center text-xs ${textMuted} hover:underline`}
-        >
-          Skip onboarding
-        </button>
+        <div className="mb-6">
+          <div className={`h-2.5 rounded-full ${isDark ? 'bg-slate-700' : 'bg-gray-200'} overflow-hidden`}>
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all duration-500"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {REQUIRED_ASSESSMENTS.map((assessment, index) => {
+            const AIcon = assessment.icon;
+            const isCompleted = completedAssessments[assessment.moduleId];
+            const previousCompleted = index === 0 || completedAssessments[REQUIRED_ASSESSMENTS[index - 1].moduleId];
+            const isNext = !isCompleted && previousCompleted;
+
+            return (
+              <div
+                key={assessment.id}
+                className={`${cardBg} backdrop-blur-lg rounded-2xl border ${cardBorder} shadow-lg overflow-hidden transition-all duration-300 ${
+                  isCompleted ? 'opacity-80' : isNext ? 'ring-2 ring-amber-500/50' : 'opacity-60'
+                }`}
+              >
+                <div className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="relative flex-shrink-0">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${assessment.gradient} flex items-center justify-center ${isCompleted ? '' : isNext ? '' : 'grayscale opacity-50'}`}>
+                        <AIcon className="w-6 h-6 text-white" />
+                      </div>
+                      {isCompleted && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className={`font-semibold ${textPrimary}`}>{assessment.title}</h3>
+                      </div>
+                      <p className={`text-xs ${textMuted} mb-2 leading-relaxed`}>{assessment.description}</p>
+                      <div className="flex items-center gap-3">
+                        <span className={`text-xs ${textMuted}`}>{assessment.duration}</span>
+                        {isCompleted && (
+                          <span className="text-xs text-emerald-500 font-medium flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Complete
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {isNext && (
+                    <button
+                      onClick={() => handleStartAssessment(assessment.id)}
+                      className={`mt-4 w-full py-3 rounded-xl bg-gradient-to-r ${assessment.gradient} text-white font-semibold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-md`}
+                    >
+                      {completedCount === 0 ? 'Start' : 'Continue'} Assessment
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {!isCompleted && !isNext && (
+                    <div className={`mt-4 w-full py-3 rounded-xl border ${cardBorder} text-center`}>
+                      <span className={`text-xs ${textMuted}`}>Complete the previous assessment first</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {checkingReturn && (
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-500" />
+            <span className={`text-xs ${textMuted}`}>Checking progress...</span>
+          </div>
+        )}
+
+        <div className={`mt-6 ${featureBg} rounded-xl p-4 border ${cardBorder}`}>
+          <p className={`text-xs ${textMuted} italic text-center`}>
+            These assessments personalize your entire healing journey — curriculum, exercises, and recommendations are all tailored to your results.
+          </p>
+        </div>
       </div>
     </div>
   );
