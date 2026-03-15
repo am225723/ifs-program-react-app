@@ -147,7 +147,7 @@ const ClientInbox = () => {
     );
   }
 
-  if (advisors.length === 0) {
+  if (therapists.length === 0) {
     return (
       <div className="max-w-lg mx-auto px-4 py-12 text-center">
         <div className={`${cardBg} rounded-2xl border ${cardBorder} p-8`}>
@@ -175,9 +175,9 @@ const ClientInbox = () => {
         </div>
       </div>
 
-      {advisors.length > 1 && (
+      {therapists.length > 1 && (
         <div className="flex gap-2 mb-4 overflow-x-auto">
-          {advisors.map(t => (
+          {therapists.map(t => (
             <button
               key={t.id}
               onClick={() => setSelectedTherapist(t)}
