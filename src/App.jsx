@@ -48,6 +48,8 @@ import WeeklyReflection from './pages/WeeklyReflection';
 import LetterWriting from './pages/LetterWriting';
 import PartsCards from './pages/PartsCards';
 import HealingTracker from './pages/HealingTracker';
+import OnboardingFlow from './components/OnboardingFlow';
+import { initializePushNotifications } from './lib/pushNotifications';
 import ResourceLibrary from './pages/ResourceLibrary';
 import AuthDebug from './components/AuthDebug';
 import PINEntry from './components/PINEntry';
@@ -134,35 +136,45 @@ function BottomNav() {
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentClient, setCurrentClient] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    // Check for existing session and handle token authentication
     const initializeAuth = async () => {
-      // First check for token in URL
       const tokenResult = await clientAuth.handleTokenFromURL();
       
       if (tokenResult && tokenResult.success) {
         setIsAuthenticated(true);
         setCurrentClient(tokenResult.client);
+        initializePushNotifications(tokenResult.client);
         return;
       }
 
-      // Check for existing session
       const client = clientAuth.getCurrentClientValidated();
       if (client) {
         setIsAuthenticated(true);
         setCurrentClient(client);
+        initializePushNotifications(client);
       }
     };
 
     initializeAuth();
   }, []);
 
+  useEffect(() => {
+    if (!isAuthenticated || !currentClient) return;
+    if (currentClient.user_role === 'therapist') return;
+    const onboardingDone = localStorage.getItem(`onboarding_completed_${currentClient.id}`) || localStorage.getItem('onboarding_completed');
+    if (!onboardingDone) {
+      setShowOnboarding(true);
+    }
+  }, [isAuthenticated, currentClient]);
+
   const handleLogin = async (pin) => {
     const result = await clientAuth.authenticateWithPIN(pin);
     if (result.success) {
       setIsAuthenticated(true);
       setCurrentClient(result.client);
+      initializePushNotifications(result.client);
       return true;
     }
     return false;
@@ -172,6 +184,7 @@ function App() {
     clientAuth.logout();
     setIsAuthenticated(false);
     setCurrentClient(null);
+    setShowOnboarding(false);
   };
 
   return (
@@ -184,6 +197,8 @@ function App() {
           currentClient={currentClient}
           handleLogin={handleLogin}
           handleLogout={handleLogout}
+          showOnboarding={showOnboarding}
+          onOnboardingComplete={() => setShowOnboarding(false)}
         />
       </Router>
     </DataProvider>
@@ -192,7 +207,7 @@ function App() {
   );
 }
 
-function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout }) {
+function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout, showOnboarding, onOnboardingComplete }) {
   const { theme } = useTheme();
   const location = useLocation();
   const bgClass = isAuthenticated ? `bg-gradient-to-br ${theme.primary}` : '';
@@ -237,6 +252,12 @@ function AppContent({ isAuthenticated, currentClient, handleLogin, handleLogout 
           <Route path="*" element={<ClientPINLogin onLogin={handleLogin} />} />
         </Routes>
         )
+      ) : showOnboarding ? (
+        <OnboardingFlow
+          onComplete={onOnboardingComplete}
+          clientName={currentClient?.name?.split(' ')[0]}
+          clientId={currentClient?.id}
+        />
       ) : (
         <>
           <header className={`sticky top-0 z-50 backdrop-blur-lg border-b shadow-sm ${theme.isDark ? 'bg-slate-900/80 border-slate-700/50' : 'bg-white/80 border-gray-200/50'}`}>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Palette, Sparkles, Zap, Moon, Sun, Check, Play } from 'lucide-react';
 import { useTheme, themePresets } from '../contexts/ThemeContext';
+import NotificationSettings from '../components/NotificationSettings';
 
 export default function Settings() {
   const { 
@@ -144,6 +145,10 @@ export default function Settings() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="mb-8">
+          <NotificationSettings />
         </div>
 
         <div className={`${theme.cardBg} backdrop-blur-sm rounded-2xl shadow-lg border ${theme.isDark ? 'border-slate-700' : 'border-gray-100'} p-6 ${getAnimationClass('transition')}`}>
