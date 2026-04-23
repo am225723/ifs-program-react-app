@@ -8,7 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>IFS Healing</title>
 
-    <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#8B5CF6" />
     <meta name="description" content="IFS Self-Therapy Program - Personalized healing curriculum" />
 
@@ -17,14 +16,38 @@
     <meta name="apple-mobile-web-app-title" content="IFS Healing" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
 
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
     <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "e5dccda5-8644-424e-a0bd-f4144395e258",
-        });
-      });
+      (function initializeWebOnlyFeatures() {
+        const pushEnabledHosts = ['ifs.aleix.help'];
+        const pwaEnabledHosts = ['ifs.aleix.help'];
+        const hostname = window.location.hostname;
+
+        if (pwaEnabledHosts.includes(hostname)) {
+          const manifestLink = document.createElement('link');
+          manifestLink.rel = 'manifest';
+          manifestLink.href = '/manifest.json';
+          document.head.appendChild(manifestLink);
+        }
+
+        window.__IFS_ENABLE_PWA__ = pwaEnabledHosts.includes(hostname);
+        window.__IFS_ENABLE_ONESIGNAL__ = pushEnabledHosts.includes(hostname);
+
+        if (!window.__IFS_ENABLE_ONESIGNAL__) return;
+
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+        const oneSignalScript = document.createElement('script');
+        oneSignalScript.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+        oneSignalScript.defer = true;
+        oneSignalScript.onload = function () {
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+              appId: "e5dccda5-8644-424e-a0bd-f4144395e258",
+            });
+          });
+        };
+        document.head.appendChild(oneSignalScript);
+      })();
     </script>
 
     <script>
@@ -42,7 +65,7 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
-      if ('serviceWorker' in navigator) {
+      if (window.__IFS_ENABLE_PWA__ && 'serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js').catch(() => {});
         });

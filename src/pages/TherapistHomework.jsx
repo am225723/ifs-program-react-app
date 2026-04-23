@@ -62,13 +62,25 @@ const TherapistHomework = () => {
   const loadData = useCallback(async () => {
     if (!therapist?.id) return;
     setLoading(true);
-    const [clientRes, hwRes] = await Promise.all([
-      supabase.from('ifs_clients').select('id, name, user_role').eq('user_role', 'client').order('name'),
-      supabase.from('ifs_therapy_homework').select('*').eq('therapist_id', therapist.id).order('created_at', { ascending: false })
-    ]);
-    if (clientRes.error) console.error('Error loading clients:', clientRes.error);
+    const { data: clientData, error: clientError } = await supabase
+      .from('ifs_clients')
+      .select('id, name, user_role')
+      .eq('user_role', 'client')
+      .order('name');
+
+    if (clientError) console.error('Error loading clients:', clientError);
+    if (clientData) setClients(clientData);
+
+    let hwRes = { data: [], error: null };
+    const clientIds = (clientData || []).map(client => client.id).filter(Boolean);
+    if (clientIds.length > 0) {
+      hwRes = await supabase
+        .from('ifs_therapy_homework')
+        .select('*')
+        .in('client_id', clientIds)
+        .order('created_at', { ascending: false });
+    }
     if (hwRes.error) console.error('Error loading homework:', hwRes.error);
-    if (clientRes.data) setClients(clientRes.data);
     if (hwRes.data) setHomework(hwRes.data);
     setLoading(false);
   }, [therapist?.id]);
@@ -164,7 +176,6 @@ const TherapistHomework = () => {
     if (!form.clientId || !form.title.trim()) return;
     const payload = {
       client_id: form.clientId,
-      therapist_id: therapist?.id,
       title: form.title.trim(),
       description: form.description.trim() || null,
       category: form.category,
