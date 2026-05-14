@@ -1,11 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { ClerkProvider } from '@clerk/clerk-react'
 import { Capacitor } from '@capacitor/core'
 import { SplashScreen } from '@capacitor/splash-screen'
 import { StatusBar } from '@capacitor/status-bar'
 import { Keyboard } from '@capacitor/keyboard'
 import './index.css'
 import App from './App.jsx'
+
+const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 async function initNativeApp() {
   if (Capacitor.isNativePlatform()) {
@@ -26,10 +29,22 @@ async function initNativeApp() {
   }
 }
 
-createRoot(document.getElementById('root')).render(
+const app = (
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    {clerkPublishableKey ? (
+      <ClerkProvider publishableKey={clerkPublishableKey}>
+        <App />
+      </ClerkProvider>
+    ) : (
+      <App />
+    )}
+  </StrictMode>
+);
+
+if (!clerkPublishableKey) {
+  console.warn('VITE_CLERK_PUBLISHABLE_KEY is missing. Clerk UI will be disabled and API auth may require ALLOW_PIN_AUTH_WITHOUT_CLERK=true.');
+}
+
+createRoot(document.getElementById('root')).render(app)
 
 initNativeApp();
