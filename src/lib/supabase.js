@@ -1,15 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
+import { createNeonBackedSupabaseClient } from './neonClient.js';
 
-const supabaseUrl = 'https://froxodstewdswllgokmu.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyb3hvZHN0ZXdkc3dsbGdva211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzNjgyODUsImV4cCI6MjA3Njk0NDI4NX0.PUr1-cq71PZUFsudz7lzSs3IWMzSxomNqBwlxkCG02s';
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-    detectSessionInUrl: false,
-  },
-});
+// Backward-compatible client: existing app code can keep using
+// supabase.from(...), while data now flows through /api/db -> Neon.
+export const supabase = createNeonBackedSupabaseClient();
 
 export const supabaseHelpers = {
   async saveModuleProgress(userId, moduleId, progress) {
@@ -96,7 +89,7 @@ export const supabaseHelpers = {
       .eq('client_id', userId)
       .eq('module_id', moduleId)
       .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching interactive data:', error);
+    if (error) console.error('Error fetching interactive data:', error);
     return data?.data || {};
   },
 
@@ -259,7 +252,7 @@ export const supabaseHelpers = {
       .select('*')
       .eq('id', userId)
       .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching client data:', error);
+    if (error) console.error('Error fetching client data:', error);
     return data;
   },
 
@@ -301,7 +294,7 @@ export const supabaseHelpers = {
       .eq('module_id', moduleId)
       .eq('step_id', stepId)
       .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching module answers:', error);
+    if (error) console.error('Error fetching module answers:', error);
     return data?.answers || {};
   },
 
@@ -451,7 +444,7 @@ export const supabaseHelpers = {
       .eq('client_id', userId)
       .eq('part_id', partId)
       .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching parts dialogue:', error);
+    if (error) console.error('Error fetching parts dialogue:', error);
     return data?.messages || [];
   },
 
@@ -488,7 +481,7 @@ export const supabaseHelpers = {
       .select('*')
       .eq('client_id', userId)
       .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching gamification:', error);
+    if (error) console.error('Error fetching gamification:', error);
     return data;
   },
 
@@ -513,7 +506,7 @@ export const supabaseHelpers = {
       .select('*')
       .eq('client_id', userId)
       .single();
-    if (error && error.code !== 'PGRST116') console.error('Error fetching preferences:', error);
+    if (error) console.error('Error fetching preferences:', error);
     return data;
   },
 
@@ -546,13 +539,9 @@ export const supabaseHelpers = {
 
   async savePersonalizedCurriculum(userId, curriculumData) {
     const modules = curriculumData?.personalizedModules || curriculumData?.modules || [];
-    if (modules.length === 0) {
-      console.warn('savePersonalizedCurriculum: no modules to save — aborting to preserve existing data');
-      return null;
-    }
+    if (modules.length === 0) return null;
 
     const truncate = (val, max) => (val && val.length > max ? val.substring(0, max) : val);
-
     const rows = modules.map((m, i) => ({
       client_id: userId,
       module_id: m.id || m.moduleId || `module_${i + 1}`,
@@ -570,21 +559,12 @@ export const supabaseHelpers = {
       .from('ifs_personalized_curriculum')
       .delete()
       .eq('client_id', userId);
-
-    if (deleteError) {
-      console.error('Error deleting old curriculum:', deleteError);
-      throw new Error('Failed to clear existing curriculum: ' + deleteError.message);
-    }
+    if (deleteError) throw new Error('Failed to clear existing curriculum: ' + deleteError.message);
 
     const { data, error } = await supabase
       .from('ifs_personalized_curriculum')
       .insert(rows);
-
-    if (error) {
-      console.error('Error saving curriculum rows:', error);
-      throw new Error('Failed to save curriculum modules: ' + error.message);
-    }
-
+    if (error) throw new Error('Failed to save curriculum modules: ' + error.message);
     return data;
   },
 
