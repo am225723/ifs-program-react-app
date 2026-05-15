@@ -17,16 +17,32 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
 
     <script>
+<<<<<<< ours
+<<<<<<< ours
       (function initializeWebOnlyFeatures() {
         const pushEnabledHosts = ['ifs.aleix.help'];
         const pwaEnabledHosts = ['ifs.aleix.help'];
         const hostname = window.location.hostname;
 
         if (pwaEnabledHosts.includes(hostname)) {
+=======
+=======
+>>>>>>> theirs
+      (function setupPwaAndPush() {
+        const host = window.location.hostname;
+        const isAllowedDomain = host === 'ifs.aleix.help' || host === 'www.ifs.aleix.help' || host === 'localhost' || host === '127.0.0.1';
+
+        if (isAllowedDomain) {
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
           const manifestLink = document.createElement('link');
           manifestLink.rel = 'manifest';
           manifestLink.href = '/manifest.json';
           document.head.appendChild(manifestLink);
+<<<<<<< ours
+<<<<<<< ours
         }
 
         window.__IFS_ENABLE_PWA__ = pwaEnabledHosts.includes(hostname);
@@ -47,6 +63,26 @@
           });
         };
         document.head.appendChild(oneSignalScript);
+=======
+=======
+>>>>>>> theirs
+
+          const oneSignalScript = document.createElement('script');
+          oneSignalScript.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+          oneSignalScript.defer = true;
+          document.head.appendChild(oneSignalScript);
+
+          window.OneSignalDeferred = window.OneSignalDeferred || [];
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+              appId: 'e5dccda5-8644-424e-a0bd-f4144395e258',
+            });
+          });
+        }
+<<<<<<< ours
+>>>>>>> theirs
+=======
+>>>>>>> theirs
       })();
     </script>
 
